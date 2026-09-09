@@ -65,7 +65,7 @@ DEFAULT_SPEC: dict[str, object] = {
         "event_margin": 0.18,
     },
     "families": {
-        "constant_velocity": "100 unfamiliar episodes; both directions, four position bands, and four speed bands",
+        "constant_velocity": "100 unfamiliar episodes of 40 transitions; both directions, four position bands, and four speed bands using speed_min through speed_max",
         "bouncing": "100 episodes; both walls and fixed position/speed strata; 1200 transitions per episode",
         "speed_change": "100 episodes; unannounced increases/decreases at fixed randomized event streams; 50-transition response window",
         "dynamics_change": "100 paired episodes; stable second-order oscillator coefficients change at transition 600; unchanged controls branch from the same pre-event state",
@@ -371,7 +371,7 @@ def _evaluate_gates(results: dict[str, dict[str, object]], *, required_bounces: 
     speed_baseline = speed["predictors"]["constant_motion"]  # type: ignore[index]
     speed_pass = speed_candidate["post_change_window_mae"] is not None and speed_baseline["post_change_window_mae"] is not None and float(speed_candidate["post_change_window_mae"]) <= 1.10 * float(speed_baseline["post_change_window_mae"]) + 1e-5
     speed_ci = _paired_improvement_ci(speed, "adaptive_rls", "constant_motion", seed=305)
-    gates.append(_gate("speed_change_response", speed_candidate["post_change_window_mae"], "<= 1.10 * constant motion + 1e-5; first surprise included", speed_pass, details={"candidate_minus_baseline_ci95": speed_ci}))
+    gates.append(_gate("speed_change_response", speed_candidate["post_change_window_mae"], "<= 1.10 * constant motion + 1e-5; first surprise included", speed_pass, details={"improvement_ci95": speed_ci}))
     changed_online = dynamics["predictors"]["online"]  # type: ignore[index]
     changed_frozen = dynamics["predictors"]["frozen"]  # type: ignore[index]
     persistence = dynamics["predictors"]["persistence"]  # type: ignore[index]
@@ -427,7 +427,10 @@ def _run_regular_family(spec: dict[str, object], root: int, role: str, world: Wo
         for episode in range(episodes):
             seed = _trial_seed(root, role, family, replica, episode)
             if family == "constant_velocity":
-                straight_world = replace(world, steps_per_episode=180, speed_min=0.02, speed_max=0.06)
+                # Keep the declared confirmation speed range and shorten only
+                # this non-bouncing family so every sampled episode remains
+                # inside the configured interval.
+                straight_world = replace(world, steps_per_episode=40)
                 env: object = MovingDotEnvironment("straight", seed, straight_world)
             elif family == "bouncing":
                 env = MovingDotEnvironment("bouncing", seed, world)
