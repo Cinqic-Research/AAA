@@ -1,0 +1,15 @@
+{
+  "format_version": "aaa.linear_predictor.v1",
+  "name": "linear_online",
+  "learning_rate": 0.02,
+  "history_length": 4,
+  "target": "next_displacement",
+  "weights": [
+    0.005558728253075709,
+    -0.002011314441140074,
+    -0.001008794354614913,
+    1.393748471974937e-05,
+    0.001060199427416434
+  ],
+  "update_count": 8190
+}

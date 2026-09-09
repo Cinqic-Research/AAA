@@ -1,0 +1,42 @@
+{
+  "candidates": [
+    {
+      "learning_rate": 0.02,
+      "validation_mae_by_seed": {
+        "101": 0.004684373271167337,
+        "102": 0.005085119606496431,
+        "103": 0.002332900125585122
+      },
+      "validation_mae_mean": 0.004034131001082963
+    },
+    {
+      "learning_rate": 0.04,
+      "validation_mae_by_seed": {
+        "101": 0.005329369561976911,
+        "102": 0.00511496021315992,
+        "103": 0.002346878350275588
+      },
+      "validation_mae_mean": 0.00426373604180414
+    },
+    {
+      "learning_rate": 0.08,
+      "validation_mae_by_seed": {
+        "101": 0.005843684294598731,
+        "102": 0.005131930993990322,
+        "103": 0.002387233407219351
+      },
+      "validation_mae_mean": 0.004454282898602801
+    },
+    {
+      "learning_rate": 0.16,
+      "validation_mae_by_seed": {
+        "101": 0.006164373471873989,
+        "102": 0.005141057881848552,
+        "103": 0.0024019054682004356
+      },
+      "validation_mae_mean": 0.004569112273974325
+    }
+  ],
+  "selected_learning_rate": 0.02,
+  "selection_rule": "minimum mean validation MAE on development seeds; final seeds were not inspected"
+}
