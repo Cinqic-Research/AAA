@@ -1,0 +1,52 @@
+{
+  "spec_version": "aaa.benchmark.v2",
+  "status": "engineering-requirements",
+  "confirmation": {
+    "replicas": 5,
+    "episodes_per_family": 100,
+    "required_bounce_events": 500,
+    "required_eligible_change_events": 100,
+    "post_change_window": 50
+  },
+  "randomness": {
+    "root_seed": 20260909,
+    "streams": "numpy SeedSequence derived from role, family, replica, and episode; scheduling independent"
+  },
+  "world": {
+    "lower_bound": 0.0,
+    "upper_bound": 1.0,
+    "dt": 0.02,
+    "steps_per_episode": 1200,
+    "history_length": 4,
+    "speed_min": 0.08,
+    "speed_max": 0.2,
+    "change_step": 600,
+    "change_factor_low": 0.45,
+    "change_factor_high": 1.8,
+    "event_margin": 0.18
+  },
+  "candidate": {
+    "model": "OnlineRLSPredictor",
+    "features": ["1", "current displacement / (dt * speed_max)", "centered current position / interval width"],
+    "forgetting": 0.9,
+    "ridge": 0.0001,
+    "boundary_policy": "observation-only scalar reflection of the predicted position",
+    "training": "24 straight-motion episodes per replica; dynamics-change coefficients held out"
+  },
+  "families": {
+    "constant_velocity": "100 unfamiliar episodes; both directions, four position bands, and four speed bands",
+    "bouncing": "100 episodes; both walls and fixed position/speed strata; 1200 transitions per episode",
+    "speed_change": "100 episodes; unannounced increases/decreases at fixed randomized event streams; 50-transition response window",
+    "dynamics_change": "100 paired episodes; stable second-order oscillator coefficients change at transition 600; unchanged controls branch from the same pre-event state"
+  },
+  "primary_gates": {
+    "straight_mean_mae": "<= 1e-5 normalized units",
+    "straight_p95_absolute_error": "<= 1e-4 normalized units per direction/speed stratum",
+    "bounce_event_improvement": ">= 20 percent versus constant motion",
+    "speed_change_non_regression": "<= 1.10 * constant motion + 1e-5 normalized MAE",
+    "changed_law_adaptation": ">= 20 percent lower 50-transition cumulative error than frozen and persistence",
+    "recovery": ">= 90 percent of eligible events confirmed by 50 transitions",
+    "unchanged_control": "update mean error increase <= max(10 percent frozen, 1e-5)"
+  },
+  "resampling": "paired hierarchical bootstrap: sample training replicas, then episode summaries within each replica; 95 percent percentile intervals"
+}

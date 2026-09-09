@@ -1,0 +1,22 @@
+{
+  "aaa_version": "0.1.0",
+  "created_at_utc": "2026-09-09T19:18:45.396326+00:00",
+  "git": {
+    "commit": "82d23b8e0d4ed170a6805ff8ee9bb87641353f34",
+    "dirty": false,
+    "status": [],
+    "tree_hash": "54c9886a87e04bb9c3d6108e7ff2c51529c345185e0fe99d91a5ba61e1e81a45"
+  },
+  "hardware": {
+    "cpu_count": 16,
+    "gpu": "NVIDIA GeForce RTX 2060, 595.84, 6144 MiB",
+    "machine": "x86_64",
+    "os": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64"
+  },
+  "numpy": "2.5.3",
+  "python": "3.12.3",
+  "role": "confirmation_b",
+  "run_id": "confirmation-b-20260909-clean",
+  "spec_version": "aaa.benchmark.v2"
+}

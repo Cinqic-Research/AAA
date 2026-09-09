@@ -11,6 +11,8 @@ from .experiment import StepRecord
 
 def mean_absolute_error(errors: Iterable[float]) -> float | None:
     values = [float(value) for value in errors]
+    if any(not __import__("math").isfinite(value) for value in values):
+        raise ValueError("metrics cannot aggregate non-finite errors")
     return mean(values) if values else None
 
 
@@ -25,8 +27,16 @@ def rolling_mean(values: Sequence[float], window: int) -> list[float]:
     ]
 
 
+def complete_rolling_mean(values: Sequence[float], window: int) -> list[float]:
+    """Trailing means only after a complete window is available."""
+
+    if window <= 0:
+        raise ValueError("rolling window must be positive")
+    return [mean(values[index - window + 1 : index + 1]) for index in range(window - 1, len(values))]
+
+
 def _error_values(records: Sequence[StepRecord], predictor: str) -> list[float]:
-    return [record.predictions[predictor]["absolute_error"] for record in records]
+    return [record.predictions[predictor].get("normalized_absolute_error", record.predictions[predictor]["absolute_error"]) for record in records]
 
 
 def _event_slice(records: Sequence[StepRecord], event: str) -> list[StepRecord]:
@@ -47,6 +57,7 @@ def recovery_metric(
     tolerance_multiplier: float = 1.5,
     tolerance_floor: float = 0.01,
     meaningful_change_fraction: float = 0.25,
+    pre_change_errors: Sequence[float] | None = None,
 ) -> dict[str, object]:
     """Measure sustained post-change recovery using a pre-declared rule."""
 
@@ -55,10 +66,22 @@ def recovery_metric(
         return {"applicable": False, "reason": "no movement change in episode"}
     event_step = changed[0].step
     pre = [record for record in records if record.step < event_step]
+    if pre_change_errors is not None:
+        pre_mae = mean_absolute_error(pre_change_errors)
+    else:
+        pre_mae = mean_absolute_error(_error_values(pre, predictor))
     post = [record for record in records if record.step >= event_step]
-    pre_mae = mean_absolute_error(_error_values(pre, predictor))
     if pre_mae is None:
         return {"applicable": False, "reason": "no pre-change scored transitions"}
+    if len(post) < post_change_window:
+        return {
+            "applicable": False,
+            "status": "censored",
+            "reason": "insufficient post-change data for complete response window",
+            "event_step": event_step,
+            "post_observations": len(post),
+            "required_post_observations": post_change_window,
+        }
     post_window = post[:post_change_window]
     post_window_mae = mean_absolute_error(_error_values(post_window, predictor))
     tolerance = max(tolerance_multiplier * pre_mae, tolerance_floor)
@@ -74,12 +97,16 @@ def recovery_metric(
         }
 
     post_errors = _error_values(post, predictor)
-    rolling = rolling_mean(post_errors, rolling_window)
+    rolling = complete_rolling_mean(post_errors, rolling_window)
     recovery_steps: int | None = None
+    recovery_onset: int | None = None
+    recovery_confirmation: int | None = None
     if len(rolling) >= sustain_windows:
         for index in range(len(rolling) - sustain_windows + 1):
             if all(value <= tolerance for value in rolling[index : index + sustain_windows]):
-                recovery_steps = index + rolling_window
+                recovery_onset = index + 1
+                recovery_confirmation = index + rolling_window + sustain_windows - 1
+                recovery_steps = recovery_confirmation
                 break
     return {
         "applicable": True,
@@ -89,6 +116,8 @@ def recovery_metric(
         "tolerance": tolerance,
         "rolling_window": rolling_window,
         "sustain_windows": sustain_windows,
+        "recovery_onset_transition": recovery_onset,
+        "recovery_confirmation_transition": recovery_confirmation,
         "recovery_time_steps": recovery_steps,
         "recovery_status": (
             "recovered" if recovery_steps is not None else "not recovered within evaluation horizon"

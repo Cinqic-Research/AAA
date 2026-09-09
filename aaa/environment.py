@@ -9,8 +9,8 @@ import numpy as np
 
 from .config import WorldConfig
 
-Scenario = Literal["straight", "bouncing", "changed"]
-SCENARIOS: tuple[Scenario, ...] = ("straight", "bouncing", "changed")
+Scenario = Literal["straight", "bouncing", "changed", "dynamics_change"]
+SCENARIOS: tuple[Scenario, ...] = ("straight", "bouncing", "changed", "dynamics_change")
 
 
 @dataclass(frozen=True)
@@ -25,6 +25,7 @@ class EnvironmentStep:
     position: float
     bounced: bool
     changed: bool
+    bounce_wall: str | None = None
 
 
 class MovingDotEnvironment:
@@ -42,6 +43,8 @@ class MovingDotEnvironment:
     ) -> None:
         if scenario not in SCENARIOS:
             raise ValueError(f"Unknown scenario: {scenario}")
+        if scenario == "dynamics_change":
+            raise ValueError("use DampedOscillatorEnvironment for dynamics_change")
         self.scenario = scenario
         self.seed = int(seed)
         self.config = config or WorldConfig()
@@ -99,6 +102,7 @@ class MovingDotEnvironment:
 
         bounced = False
         next_position = self._position + self._velocity * self.config.dt
+        raw_next_position = next_position
         if self.scenario in ("bouncing", "changed"):
             next_position, self._velocity, bounced = self._reflect(
                 next_position,
@@ -116,6 +120,7 @@ class MovingDotEnvironment:
             position=self._position,
             bounced=bounced,
             changed=changed,
+            bounce_wall=("upper" if raw_next_position >= self.config.upper_bound and self._velocity < 0 else "lower" if raw_next_position <= self.config.lower_bound and self._velocity > 0 else None) if bounced else None,
         )
         self._step_index += 1
         return transition
@@ -128,8 +133,12 @@ class MovingDotEnvironment:
                 raise ValueError("initial_position is outside the configured interval")
             return float(self._initial_position), float(self._initial_velocity)
 
+        width = self.config.upper_bound - self.config.lower_bound
+        sample_margin = 0.08 * width
+        sample_low = self.config.lower_bound + sample_margin
+        sample_high = self.config.upper_bound - sample_margin
         for _ in range(10_000):
-            position = float(self._rng.uniform(0.08, 0.92))
+            position = float(self._rng.uniform(sample_low, sample_high))
             speed = float(self._rng.uniform(self.config.speed_min, self.config.speed_max))
             velocity = speed if self._rng.integers(0, 2) else -speed
             if self.scenario == "straight":
@@ -168,7 +177,7 @@ class MovingDotEnvironment:
         step = self._requested_change_step
         if step is None:
             step = self.config.change_step
-        if not 0 <= step < self.config.steps_per_episode:
+        if not 0 <= step <= self.config.steps_per_episode:
             raise ValueError("change_step must identify a transition inside the episode")
         return int(step)
 
@@ -186,11 +195,11 @@ class MovingDotEnvironment:
         # step, but the loop keeps the boundary operation correct for tests
         # and future configurations with larger steps.
         for _ in range(10_000):
-            if position > upper:
+            if position > upper or (position == upper and velocity > 0):
                 position = upper - (position - upper)
                 velocity = -abs(velocity)
                 bounced = True
-            elif position < lower:
+            elif position < lower or (position == lower and velocity < 0):
                 position = lower + (lower - position)
                 velocity = abs(velocity)
                 bounced = True
@@ -214,3 +223,119 @@ class MovingDotEnvironment:
             )
             bounced = bounced or this_bounced
         return position, velocity, bounced
+
+
+class DampedOscillatorEnvironment:
+    """Bounded second-order world used by benchmark v2.
+
+    The evaluator exposes only ``position`` through the common runner. The
+    oscillator is integrated with a semi-implicit Euler step around the
+    interval midpoint. At the configured change transition its natural
+    frequency and damping coefficient change without a learner notification.
+    """
+
+    def __init__(
+        self,
+        seed: int,
+        config: WorldConfig | None = None,
+        *,
+        omega: float = 1.5,
+        damping: float = 0.10,
+        changed_omega: float = 8.0,
+        changed_damping: float = 0.15,
+        initial_position: float | None = None,
+        initial_velocity: float | None = None,
+        change_step: int | None = None,
+    ) -> None:
+        self.scenario: Scenario = "dynamics_change"
+        self.seed = int(seed)
+        self.config = config or WorldConfig()
+        for name, value in {
+            "omega": omega,
+            "damping": damping,
+            "changed_omega": changed_omega,
+            "changed_damping": changed_damping,
+        }.items():
+            if not np.isfinite(value) or value <= 0:
+                raise ValueError(f"{name} must be finite and positive")
+        self.omega = float(omega)
+        self.damping = float(damping)
+        self.changed_omega = float(changed_omega)
+        self.changed_damping = float(changed_damping)
+        self._initial_position = initial_position
+        self._initial_velocity = initial_velocity
+        self._requested_change_step = change_step
+        self._rng = np.random.default_rng(self.seed)
+        self._position = 0.0
+        self._velocity = 0.0
+        self._step_index = 0
+        self._change_step: int | None = None
+        self.reset()
+
+    @property
+    def position(self) -> float:
+        return self._position
+
+    @property
+    def velocity(self) -> float:
+        return self._velocity
+
+    @property
+    def change_step(self) -> int:
+        assert self._change_step is not None
+        return self._change_step
+
+    def observe(self) -> float:
+        return float(self._position)
+
+    def reset(self) -> float:
+        self._rng = np.random.default_rng(self.seed)
+        self._step_index = 0
+        width = self.config.upper_bound - self.config.lower_bound
+        self._position = (
+            float(self._initial_position)
+            if self._initial_position is not None
+            else float(self.config.lower_bound + width * (0.35 + 0.3 * self._rng.random()))
+        )
+        self._velocity = (
+            float(self._initial_velocity)
+            if self._initial_velocity is not None
+            else float((self._rng.random() - 0.5) * width * 0.25)
+        )
+        if not self.config.lower_bound <= self._position <= self.config.upper_bound:
+            raise ValueError("initial_position is outside the configured interval")
+        if not np.isfinite(self._velocity):
+            raise ValueError("initial_velocity must be finite")
+        step = self._requested_change_step
+        if step is None:
+            step = self.config.change_step
+        if not 0 <= step <= self.config.steps_per_episode:
+            raise ValueError("change_step must identify a transition inside the episode")
+        self._change_step = int(step)
+        return self.observe()
+
+    def advance(self) -> EnvironmentStep:
+        changed = self._step_index == self.change_step
+        omega = self.changed_omega if self._step_index >= self.change_step else self.omega
+        damping = self.changed_damping if self._step_index >= self.change_step else self.damping
+        midpoint = (self.config.lower_bound + self.config.upper_bound) / 2
+        acceleration = -2.0 * damping * omega * self._velocity - omega * omega * (self._position - midpoint)
+        self._velocity += acceleration * self.config.dt
+        next_position = self._position + self._velocity * self.config.dt
+        raw_next_position = next_position
+        next_position, self._velocity, bounced = MovingDotEnvironment._reflect(
+            next_position,
+            self._velocity,
+            self.config.lower_bound,
+            self.config.upper_bound,
+        )
+        self._position = float(next_position)
+        transition = EnvironmentStep(
+            step_index=self._step_index,
+            position=self._position,
+            bounced=bounced,
+            changed=changed,
+            bounce_wall=("upper" if raw_next_position >= self.config.upper_bound and self._velocity < 0 else "lower" if raw_next_position <= self.config.lower_bound and self._velocity > 0 else None) if bounced else None,
+        )
+        self._step_index += 1
+        return transition
