@@ -34,7 +34,7 @@
     "training": "24 straight-motion episodes per replica; dynamics-change coefficients held out"
   },
   "families": {
-    "constant_velocity": "100 unfamiliar episodes; both directions, four position bands, and four speed bands",
+    "constant_velocity": "100 unfamiliar episodes of 40 transitions; both directions, four position bands, and four speed bands using speed_min through speed_max",
     "bouncing": "100 episodes; both walls and fixed position/speed strata; 1200 transitions per episode",
     "speed_change": "100 episodes; unannounced increases/decreases at fixed randomized event streams; 50-transition response window",
     "dynamics_change": "100 paired episodes; stable second-order oscillator coefficients change at transition 600; unchanged controls branch from the same pre-event state"
