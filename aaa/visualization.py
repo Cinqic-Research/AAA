@@ -9,7 +9,6 @@ from typing import Sequence
 
 import matplotlib
 
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from .config import ExperimentConfig
@@ -22,7 +21,14 @@ COLORS = {
     "constant_motion": "#F58518",
     "linear_online": "#54A24B",
     "linear_frozen": "#B279A2",
+    "adaptive_rls": "#E45756",
 }
+
+
+def configure_static_backend() -> None:
+    """Select Agg only when static rendering is explicitly requested."""
+
+    matplotlib.use("Agg", force=True)
 
 
 def _save(fig: plt.Figure, path: Path) -> str:
@@ -179,6 +185,7 @@ def write_all_plots(
     adaptation_records: Sequence[StepRecord],
     config: ExperimentConfig,
 ) -> dict[str, str]:
+    configure_static_backend()
     directory = Path(directory)
     return {
         "representative_predictions": plot_representative_predictions(

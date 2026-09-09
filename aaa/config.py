@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
+import math
 from typing import Any
 
 
@@ -19,6 +20,38 @@ class WorldConfig:
     change_factor_low: float = 0.55
     change_factor_high: float = 1.65
     event_margin: float = 0.14
+
+    def __post_init__(self) -> None:
+        values = {
+            "lower_bound": self.lower_bound,
+            "upper_bound": self.upper_bound,
+            "dt": self.dt,
+            "speed_min": self.speed_min,
+            "speed_max": self.speed_max,
+            "change_factor_low": self.change_factor_low,
+            "change_factor_high": self.change_factor_high,
+            "event_margin": self.event_margin,
+        }
+        if any(not math.isfinite(float(value)) for value in values.values()):
+            raise ValueError("world configuration values must be finite")
+        if self.upper_bound <= self.lower_bound:
+            raise ValueError("upper_bound must be greater than lower_bound")
+        if self.dt <= 0:
+            raise ValueError("dt must be positive")
+        if self.steps_per_episode <= 0:
+            raise ValueError("steps_per_episode must be positive")
+        # A short diagnostic episode may intentionally contain only warm-up
+        # observations. The runner will then produce zero scored transitions.
+        if self.history_length < 2:
+            raise ValueError("history_length must be at least 2")
+        if self.speed_min <= 0 or self.speed_max < self.speed_min:
+            raise ValueError("speed range must satisfy 0 < speed_min <= speed_max")
+        if self.change_step < 0:
+            raise ValueError("change_step must be non-negative")
+        if self.change_factor_low <= 0 or self.change_factor_high <= 0:
+            raise ValueError("change factors must be positive")
+        if self.event_margin < 0 or self.event_margin > (self.upper_bound - self.lower_bound) / 2:
+            raise ValueError("event_margin must fit inside half the configured interval")
 
 
 @dataclass(frozen=True)
@@ -42,6 +75,22 @@ class ExperimentConfig:
     recovery_floor: float = 0.01
     meaningful_change_fraction: float = 0.25
     clip_predictions: bool = False
+
+    def __post_init__(self) -> None:
+        if self.learning_rate <= 0 or any(rate <= 0 for rate in self.learning_rate_candidates):
+            raise ValueError("learning rates must be positive")
+        if not self.dev_seeds or not self.training_seeds or not self.final_seeds:
+            raise ValueError("development, training, and final seed sets must be non-empty")
+        if self.post_change_window <= 0 or self.rolling_window <= 0:
+            raise ValueError("post-change and rolling windows must be positive")
+        if self.recovery_sustain_windows <= 0:
+            raise ValueError("recovery_sustain_windows must be positive")
+        if self.recovery_multiplier <= 0 or self.recovery_floor < 0:
+            raise ValueError("recovery thresholds must be non-negative and meaningful")
+        if self.meaningful_change_fraction < 0:
+            raise ValueError("meaningful_change_fraction must be non-negative")
+        if not self.training_scenarios or not self.final_generalization_scenarios:
+            raise ValueError("training and evaluation scenario sets must be non-empty")
 
     def as_dict(self) -> dict[str, Any]:
         """Return a JSON-friendly resolved configuration."""

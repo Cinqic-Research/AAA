@@ -18,6 +18,7 @@ def launch_animation(
     scenario: Scenario = "changed",
     seed: int = 201,
     config: ExperimentConfig | None = None,
+    online: bool = True,
 ) -> None:
     """Show actual positions and the previously issued prediction.
 
@@ -28,23 +29,29 @@ def launch_animation(
     config = config or ExperimentConfig()
     environment = MovingDotEnvironment(scenario=scenario, seed=seed, config=config.world)
     model = (
-        OnlineLinearPredictor.load(checkpoint, name="linear_online", update_enabled=False)
+        OnlineLinearPredictor.load(checkpoint, name="linear_online", update_enabled=online)
         if checkpoint
-        else OnlineLinearPredictor(learning_rate=config.learning_rate, name="linear_online", update_enabled=False)
+        else OnlineLinearPredictor(learning_rate=config.learning_rate, name="linear_online", update_enabled=online)
     )
+    initial_model_state = model.state_dict()
     state: dict[str, object] = {"history": [], "prediction": None, "paused": False}
     figure, axis = plt.subplots(figsize=(9, 3.2))
     axis.set_xlim(config.world.lower_bound, config.world.upper_bound)
     axis.set_ylim(-0.25, 0.25)
     axis.set_yticks([])
     axis.set_xlabel("position")
-    axis.set_title("AAA: actual dot and previously issued next-position prediction")
+    mode = "online" if online else "frozen"
+    axis.set_title(f"AAA: {mode} mode — actual dot and previously issued next-position prediction")
     actual_artist, = axis.plot([], [], "o", color="black", markersize=11, label="actual")
     predicted_artist, = axis.plot([], [], "x", color="crimson", markersize=10, mew=2, label="previous prediction")
     text_artist = axis.text(0.02, 0.9, "", transform=axis.transAxes, fontsize=9)
     axis.legend(loc="upper right", fontsize=8)
 
     def reset() -> None:
+        nonlocal model
+        model = OnlineLinearPredictor.from_state_dict(
+            initial_model_state, name="linear_online", update_enabled=online
+        )
         state["history"] = [environment.reset()]
         state["prediction"] = None
         actual_artist.set_data([environment.observe()], [0])
@@ -69,8 +76,10 @@ def launch_animation(
             predicted_artist.set_data([], [])
         else:
             predicted_artist.set_data([previous_prediction], [0])
+        if online and model.update_enabled and previous_prediction is not None:
+            model.update(tuple(history[:-1]), transition.position)
         event = "change" if transition.changed else "bounce" if transition.bounced else ""
-        text_artist.set_text(f"target step {transition.step_index + 1}; {event or 'steady'}")
+        text_artist.set_text(f"{mode}; target step {transition.step_index + 1}; {event or 'steady'}")
         return actual_artist, predicted_artist, text_artist
 
     def on_key(event):

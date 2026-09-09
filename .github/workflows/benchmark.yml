@@ -1,0 +1,39 @@
+name: Benchmark v2 confirmation
+
+on:
+  workflow_dispatch:
+    inputs:
+      role:
+        description: "Recorded attempt role"
+        required: true
+        default: confirmation_a
+        type: choice
+        options: [development, confirmation_a, confirmation_b]
+      attempt_id:
+        description: "Fresh immutable attempt ID"
+        required: true
+        type: string
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m unittest discover -s tests -v
+      - run: python -m aaa.cli diagnose --output benchmark-diagnosis
+      - run: python -m aaa.cli benchmark-v2 --role "${{ inputs.role }}" --attempt-id "${{ inputs.attempt_id }}" --output-root benchmark-runs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aaa-${{ inputs.attempt_id }}
+          path: |
+            benchmark-runs/benchmark-v2/${{ inputs.attempt_id }}
+            benchmark-diagnosis
+          retention-days: 30

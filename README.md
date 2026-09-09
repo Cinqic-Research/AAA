@@ -19,6 +19,7 @@ The project description is: “An experimental AI research project exploring Acc
 - Persistence baseline: `x[t+1] = x[t]`.
 - Constant-motion baseline: `x[t+1] = x[t] + (x[t] - x[t-1])`.
 - An online linear predictor using the last four positions and a bias term.
+- A separate normalized RLS candidate and a predeclared benchmark v2; the legacy SGD learner remains a named diagnostic track.
 - Strict temporal ordering: predict and record, advance, reveal and score, update, then append the new observation.
 - Learning from scratch across multiple seeds, development-only learning-rate selection, frozen generalization on final seeds, and frozen-versus-online adaptation after an unannounced speed change.
 - JSONL and CSV per-step logs, aggregate metrics, checkpoints, package/git metadata, four static plots, an experiment report, and an optional keyboard-controlled animation.
@@ -77,6 +78,22 @@ Run the full evaluation. The default final split has ten seeds:
 python -m aaa.cli full --output-root runs
 ```
 
+Run the separately versioned benchmark v2. The specification is frozen in
+[`benchmarks/benchmark_v2.json`](benchmarks/benchmark_v2.json) before candidate
+confirmation. Use a distinct attempt ID for each confirmation batch:
+
+```bash
+.venv/bin/python -m aaa.cli benchmark-v2 \
+  --role confirmation_a --attempt-id confirmation-a --output-root runs
+```
+
+The command records compressed per-step predictions, evaluator metadata,
+replica checkpoints, source-tree identity, checksums, gate decisions, and a
+generated report. `confirmation_b` must use a fresh attempt ID and the same
+committed source, configuration, model, and requirements. Development runs
+may use `--replicas` and `--episodes`; those overrides are rejected for a
+confirmation run when they would weaken the predeclared minimums.
+
 Launch the optional animation from a trained checkpoint:
 
 ```bash
@@ -108,6 +125,13 @@ experiment_report.md                report generated from those measurements
 ```
 
 The full run uses separate seeds: development `(101, 102, 103)`, training `(11, 12, 13, 14, 15)`, and final `(201, ..., 210)`. Development seeds select the learning rate using held-out development episodes. That choice is written once to `config.json` before final evaluation. Final seeds are not used for tuning. The final generalization distribution uses new straight and bouncing episodes with sampled positions, directions, and speeds; history resets at each episode while the trained weights remain frozen.
+
+The benchmark v2 stream allocation uses `numpy.random.SeedSequence` from the
+role, family, replica, and episode IDs. It is independent of worker scheduling.
+Unchanged dynamics controls branch from the same pre-event position, velocity,
+history, and complete learner state as the changed-law branch. The evaluator
+retains event labels, but predictors receive only observations and past scored
+targets.
 
 The adaptation experiment starts a frozen and an updating copy from the same saved checkpoint. Both copies, the baselines, and the evaluator share one realized changed-motion trajectory. Recovery is defined before final evaluation: tolerance is `max(1.5 * pre-change MAE, 0.01)`, with a five-transition rolling mean and three sustained qualifying windows. If the post-change error does not increase meaningfully, recovery is not applicable. If sustained recovery is not observed before the horizon ends, the result says `not recovered within evaluation horizon`.
 
