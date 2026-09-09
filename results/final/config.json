@@ -1,0 +1,65 @@
+{
+  "clip_predictions": false,
+  "dev_seeds": [
+    101,
+    102,
+    103
+  ],
+  "dev_training_episodes": 8,
+  "dev_validation_episodes": 3,
+  "final_generalization_scenarios": [
+    "straight",
+    "bouncing"
+  ],
+  "final_seeds": [
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209,
+    210
+  ],
+  "generalization_episodes_per_scenario": 2,
+  "learning_rate": 0.02,
+  "learning_rate_candidates": [
+    0.02,
+    0.04,
+    0.08,
+    0.16
+  ],
+  "meaningful_change_fraction": 0.25,
+  "post_change_window": 20,
+  "recovery_floor": 0.01,
+  "recovery_multiplier": 1.5,
+  "recovery_sustain_windows": 3,
+  "rolling_window": 5,
+  "training_episodes": 14,
+  "training_scenarios": [
+    "straight",
+    "bouncing"
+  ],
+  "training_seeds": [
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "world": {
+    "change_factor_high": 1.65,
+    "change_factor_low": 0.55,
+    "change_step": 60,
+    "dt": 0.02,
+    "event_margin": 0.14,
+    "history_length": 4,
+    "lower_bound": 0.0,
+    "speed_max": 0.32,
+    "speed_min": 0.12,
+    "steps_per_episode": 120,
+    "upper_bound": 1.0
+  }
+}
