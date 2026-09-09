@@ -1,0 +1,22 @@
+{
+  "aaa_version": "0.1.0",
+  "created_at_utc": "2026-09-09T19:23:42.624146+00:00",
+  "git": {
+    "commit": "99d688a9defc4f64df305825b838a6dcd6e74ae7",
+    "dirty": false,
+    "status": [],
+    "tree_hash": "008fdf5ddfaf0f6047a0bd6bc59173eeb55b867b510341b83225543dd8daf23a"
+  },
+  "hardware": {
+    "cpu_count": 16,
+    "gpu": "NVIDIA GeForce RTX 2060, 595.84, 6144 MiB",
+    "machine": "x86_64",
+    "os": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64"
+  },
+  "numpy": "2.5.3",
+  "python": "3.12.3",
+  "role": "confirmation_a",
+  "run_id": "confirmation-a-20260909-strata-clean",
+  "spec_version": "aaa.benchmark.v2"
+}
