@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "AAA — Accurate Autonomous Adaptation"
+message: "If you refer to this work, please cite it as below."
+type: software
+authors:
+  - name: "Cinqic"
+repository-code: "https://github.com/Cinqic/AAA"
+license: Apache-2.0
+version: "0.2.0"
+abstract: >-
+  An experimental research prototype investigating whether an autonomous system
+  can observe a small, inspectable environment, learn to predict what happens
+  next, detect when its existing knowledge is no longer adequate, adapt from
+  subsequent evidence, and improve its future predictions. The environment is
+  deliberately small and the learner deliberately tiny; the emphasis is on a
+  benchmark protocol capable of disproving the project's own hypotheses. No
+  general-intelligence claim is made or supported.
+keywords:
+  - online learning
+  - recursive least squares
+  - adaptation
+  - benchmark methodology
+  - reproducibility

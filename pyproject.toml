@@ -4,22 +4,101 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aaa"
-version = "0.1.0"
+version = "0.2.0"
 description = "An experimental AI research project exploring Accurate Autonomous Adaptation."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {file = "LICENSE"}
-authors = [{name = "Cinqic"}]
+license = { file = "LICENSE" }
+authors = [{ name = "Cinqic" }]
+keywords = ["online-learning", "adaptation", "benchmark", "reproducibility"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+]
 dependencies = [
   "numpy>=1.24",
   "matplotlib>=3.7",
 ]
 
+# Every version listed in `classifiers` is exercised by the CI matrix in
+# .github/workflows/ci.yml. Do not advertise a version that is not tested.
+
 [project.optional-dependencies]
-dev = ["pytest>=7.0"]
+dev = [
+  "coverage>=7.4",
+  "mypy>=1.8",
+  "ruff>=0.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/Cinqic/AAA"
+Source = "https://github.com/Cinqic/AAA"
+Issues = "https://github.com/Cinqic/AAA/issues"
 
 [project.scripts]
 aaa = "aaa.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["aaa*"]
+
+[tool.setuptools.package-data]
+# The canonical benchmark specification must travel with an installed package;
+# a repository-relative path disappears the moment AAA is installed elsewhere.
+"aaa.benchmark" = ["data/*.json"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+extend-exclude = ["results"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF", "ARG", "PTH"]
+ignore = [
+  # Long descriptive strings in specifications and reports read better whole.
+  "E501",
+  # The project deliberately keeps explicit loops where they document a
+  # scientific procedure step by step.
+  "SIM108",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests construct deliberately malformed inputs, build keyword bundles with
+# dict(), and pass unused fixtures.
+"tests/*" = ["ARG", "B011", "RUF012", "C408"]
+
+[tool.mypy]
+# Deliberately not pinned: mypy would then parse the installed third-party
+# stubs under that version too, and NumPy's stubs use 3.12 syntax. Language
+# level support is verified by running the suite on the CI version matrix.
+files = ["aaa"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+no_implicit_optional = true
+check_untyped_defs = true
+disallow_untyped_defs = false
+# Untyped third-party stubs are not worth carpeting the project in ignores
+# for; everything AAA itself defines is checked.
+[[tool.mypy.overrides]]
+module = ["matplotlib.*", "psutil.*"]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["aaa"]
+branch = true
+omit = ["aaa/__main__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+]

@@ -1,0 +1,228 @@
+{
+  "_meta": {
+    "base_commit": "235ce28518ca4ec3a9a240066154090a33b33470",
+    "purpose": "Independent reproduction of reviewer findings against the pre-repair tree",
+    "python": "3.12.3"
+  },
+  "gates": {
+    "7_10_never_recovered": {
+      "applicable": true,
+      "status": "not recovered within evaluation horizon"
+    },
+    "7_10_no_event": {
+      "applicable": false,
+      "reason": "no movement change in episode"
+    },
+    "7_10_rapid_recovery_after_large_shock": {
+      "applicable": true,
+      "post_window_mae": 0.01849,
+      "reason": null,
+      "shock_error_at_event": 0.9
+    },
+    "7_12_latency": {
+      "instantiates_forgetting": true,
+      "selected_forgetting": 0.9,
+      "verdict": "latency probe builds a different model than the candidate"
+    },
+    "7_17_no_event_episode": {
+      "code": "FamilyCollector.add: event_values[name].append(mean(event_errors) if event_errors else mean(errors))",
+      "verdict": "an episode with zero bounce events contributes its ordinary whole-episode MAE to the event resample"
+    },
+    "7_2_empty_strata": {
+      "all_required_gates_pass": true,
+      "straight_prediction_status_with_zero_strata": "PASS"
+    },
+    "7_2_one_stratum": {
+      "straight_prediction": "PASS"
+    },
+    "7_4_learning_gate": {
+      "gate_definition": ">= 0.99 relative reduction from zero control",
+      "note": "criterion is only relative reduction vs a zero-weight RLS; a parameterless analytic rule attains it"
+    },
+    "7_5_reproducibility_gate": {
+      "expression": "_trial_seed(...) == _trial_seed(...) and all(state['format_version'] == ...)",
+      "verdict": "compares a deterministic pure function with itself; no rerun is performed"
+    },
+    "7_6_ab_training": {
+      "seed_call_inside": [
+        "seed = _trial_seed(root, \"development\", family, replica, episode)"
+      ],
+      "train_replica_signature_has_role": true,
+      "verdict": "role parameter is accepted and never used; training seeds hardcode 'development'"
+    },
+    "7_9_aggregate_metrics": {
+      "bounce_mae": 1.0,
+      "change_mae": 1.0,
+      "mae_normalized": 0.1,
+      "non_bounce_mae": 1.0,
+      "verdict": "aggregate mae uses normalized units while bounce/change/non_bounce use RAW absolute_error"
+    },
+    "7_9_units_interval_0_10": {
+      "episode_metrics_bounce_mae": 0.1,
+      "episode_metrics_mae": 0.1,
+      "note_normalized_error": 0.1,
+      "note_raw_error": 1.0
+    }
+  },
+  "protocol": {
+    "7_11_shared_pre_event_errors": {
+      "line": [
+        "changed.add(changed_records, pre_change_errors={name: prefix_errors for name in names})"
+      ],
+      "verdict": "one prefix_model error sequence is reused as the pre-event reference for persistence, constant_motion, frozen and online"
+    },
+    "7_13_spec_keys_never_read_by_runner": [
+      "confirmation.post_change_window",
+      "randomness.streams",
+      "world.lower_bound",
+      "world.upper_bound",
+      "world.dt",
+      "world.steps_per_episode",
+      "world.history_length",
+      "world.speed_min",
+      "world.speed_max",
+      "world.change_step",
+      "world.change_factor_low",
+      "world.change_factor_high",
+      "world.event_margin",
+      "candidate",
+      "candidate.model",
+      "candidate.features",
+      "candidate.forgetting",
+      "candidate.ridge",
+      "candidate.boundary_policy",
+      "families",
+      "primary_gates",
+      "primary_gates.straight_mean_mae",
+      "primary_gates.straight_p95_absolute_error",
+      "primary_gates.bounce_event_improvement",
+      "primary_gates.speed_change_non_regression",
+      "resampling"
+    ],
+    "7_14_core_runner_minimums": {
+      "runner_validates_only": [
+        "raise ValueError(\"role must be development, confirmation_a, or confirmation_b\")",
+        "raise ValueError(\"replicas must be positive\")",
+        "raise ValueError(\"episodes must be positive\")"
+      ],
+      "verdict": "run_benchmark_v2(role='confirmation_a', replicas=1, episodes=1) is accepted; only the CLI checks minimums"
+    },
+    "7_15_dirty_tree": {
+      "code": "_git_metadata records dirty flag into metadata.json",
+      "enforcement": "no check anywhere rejects a dirty tree for confirmation",
+      "grep_hits": [
+        "aaa/benchmark.py:136:        \"dirty\": bool(status),",
+        "aaa/evaluation.py:48:        \"working_tree_dirty\": bool(status),"
+      ]
+    },
+    "7_16_attempt_id_not_in_seed": {
+      "attempt_id_in_trial_seed_signature": false,
+      "same_role_same_stream": true,
+      "verdict": "changing only --attempt-id reuses exactly the same confirmation streams"
+    },
+    "7_18_frozen_integrity": {
+      "line": [
+        "\"checkpoint_weights_unchanged\": True,",
+        "\"weights_after\": weights_before,"
+      ]
+    },
+    "7_19_source_tree_report": {
+      "line": [
+        "report_copy = project_path / \"reports\" / f\"experiment_report_{run_id}.md\"",
+        "write_experiment_report(report_copy, summary)"
+      ]
+    },
+    "7_1_cli_exit": {
+      "cli_returns": [
+        "return 0",
+        "return 0",
+        "return 0",
+        "return 0"
+      ],
+      "verdict": "benchmark-v2 always returns 0 regardless of gates['all_required_gates_pass']"
+    },
+    "7_20_animation": {
+      "loads_only_linear_checkpoint": true,
+      "on_key_none_guard": true,
+      "pause_stops_simulation": true,
+      "restart_resets_environment": true,
+      "update_history_slice": [
+        "model.update(tuple(history[:-1]), transition.position)"
+      ]
+    },
+    "7_38_episode_seed": "KeyError: 'dynamics_change'",
+    "7_6_training_seed_same_for_a_and_b": {
+      "development_stream_seed": 2387843481469329962,
+      "verdict": "Confirmation A and B train from identical development streams -> identical checkpoints"
+    },
+    "recovery_shock_dilution": {
+      "applicable": false,
+      "post_window_mae": 0.0236,
+      "pre_mae": 0.02,
+      "reason": "no meaningful post-change error increase",
+      "shock_magnitude_normalized": 0.2,
+      "shock_over_pre_ratio": 10.0
+    }
+  },
+  "reflection_fairness": {
+    "bounce_event_normalized_mae": {
+      "adaptive_rls": 4.2407793546647305e-17,
+      "adaptive_rls_noreflect": 0.0031425446414780167,
+      "constant_motion": 0.0031425446414779902,
+      "constant_motion_reflected": 3.700743415417188e-17,
+      "persistence": 0.0014718753624915373
+    },
+    "bounce_events": 42,
+    "candidate_vs_raw_constant_motion_bounce_improvement": 0.9999999999999865,
+    "candidate_vs_reflected_constant_motion_bounce_improvement": -0.1459263392857144,
+    "candidate_without_reflection_vs_raw_cm": -8.43769498715119e-15,
+    "episodes": 12,
+    "overall_normalized_mae": {
+      "adaptive_rls": 5.9521287832277765e-06,
+      "adaptive_rls_noreflect": 1.7301331897855213e-05,
+      "constant_motion": 1.7301331897855115e-05,
+      "constant_motion_reflected": 5.952128783227735e-06,
+      "persistence": 0.002876425225334296
+    },
+    "reflection_share_of_candidate_bounce_advantage": 1.1459263392857164
+  },
+  "rls": {
+    "invalid_covariance": {
+      "asymmetric": "ACCEPTED",
+      "badly_conditioned": "ACCEPTED",
+      "indefinite": "ACCEPTED",
+      "nearly_singular": "ACCEPTED",
+      "negative_definite": "ACCEPTED",
+      "nonfinite": "rejected: ValueError: RLS state must be finite",
+      "zero": "ACCEPTED"
+    },
+    "no_forgetting_vs_batch": {
+      "batch_ridge_weights": [
+        -2.7070852402456503e-07,
+        0.01000068766402823,
+        0.0
+      ],
+      "max_abs_difference": 1.734723475976807e-18,
+      "online_weights": [
+        -2.707085240245768e-07,
+        0.010000687664028231,
+        0.0
+      ]
+    },
+    "repeated_input_forget_090": {
+      "covariance_max_abs": Infinity,
+      "eig_error": "LinAlgError: Eigenvalues did not converge",
+      "error": "covariance lost positive semidefiniteness / finiteness",
+      "update_index": 6642
+    },
+    "slow_constant_velocity_forget_090": {
+      "error": "negative eigenvalue / non-finite",
+      "min_eigenvalue": -0.06672879922552966,
+      "update_index": 323
+    },
+    "stationary_stream_forget_090": {
+      "error": "non-finite covariance",
+      "update_index": 6642
+    }
+  }
+}

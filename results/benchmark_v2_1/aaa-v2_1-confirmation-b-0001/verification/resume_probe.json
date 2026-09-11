@@ -1,0 +1,64 @@
+{
+  "covariance": [
+    [
+      0.02018082539290374,
+      0.004545250406071138,
+      0.9721660408824133
+    ],
+    [
+      0.004545250406071138,
+      0.05425697209806218,
+      0.4643305500076731
+    ],
+    [
+      0.9721660408824133,
+      0.4643305500076731,
+      294.9491185503103
+    ]
+  ],
+  "dead_zone": 0.0,
+  "dead_zone_skips": 0,
+  "detected_surprises": 2,
+  "detector_decay": 0.05,
+  "detector_floor": 1e-06,
+  "detector_multiplier": 8.0,
+  "displacement_scale": 0.004,
+  "error_ewma": 1.4011392051765065e-08,
+  "feature_set": "displacement_position",
+  "forgetting": 0.5,
+  "forgetting_mode": "exponential",
+  "forgetting_suspensions": 0,
+  "format_version": "aaa.rls_predictor.v2",
+  "history_length": 4,
+  "lower_bound": 0.0,
+  "name": "interrupted",
+  "reflect": true,
+  "ridge": 0.0001,
+  "sqrt_factor": [
+    [
+      0.09160439803310942,
+      -0.1077379161566741,
+      -0.013490777446569187
+    ],
+    [
+      0.18743568132585953,
+      0.1060679307200025,
+      0.08873799376112668
+    ],
+    [
+      1.2837228940823793,
+      -9.699362243173832,
+      14.114657139201539
+    ]
+  ],
+  "target": "next_displacement_normalized_by_interval_width",
+  "trace_bound": 100000.0,
+  "unfold_target": true,
+  "update_count": 60,
+  "upper_bound": 1.0,
+  "weights": [
+    -4.5452504027156284e-10,
+    0.00399999457430279,
+    -4.64330549909132e-08
+  ]
+}

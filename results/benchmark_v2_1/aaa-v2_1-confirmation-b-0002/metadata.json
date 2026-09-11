@@ -1,0 +1,40 @@
+{
+  "aaa_version": "0.1.0",
+  "confirmation_batch": "aaa-v2_1-confirmation-b-0002",
+  "created_at_utc": "2026-09-11T06:35:57.495652+00:00",
+  "dependency_lock": {
+    "hash": "6370808d7f23a04fce4f86b136210e1669063d6ef8113509381eec6655730ec3",
+    "path": "requirements-lock.txt",
+    "present": true
+  },
+  "git": {
+    "branch": "opus/aaa-complete-engineering-repair",
+    "commit": "936b6bec6ef1e86a5224c0b070ee3540d3030a12",
+    "dirty": false,
+    "status": [],
+    "tree_hash": "d36ef665d2cc6b5892dee6f8309650a0f1c5a6267f77232ddef04474e6f0a97b"
+  },
+  "hardware": {
+    "blas": {
+      "scipy-openblas": "0.3.34.106.0"
+    },
+    "cpu_count": 16,
+    "cpu_model": "AMD Ryzen 7 5700G with Radeon Graphics",
+    "disk_available_bytes": 73799974912,
+    "gpu": "NVIDIA GeForce RTX 2060, 595.84, 6144 MiB",
+    "machine": "x86_64",
+    "memory_bytes": null,
+    "numpy": "2.5.3",
+    "os": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3",
+    "python_implementation": "CPython"
+  },
+  "parallelism": "none (serial; profiled and not worth parallelizing at this size)",
+  "purpose": "confirmation::aaa-v2_1-confirmation-b-0002",
+  "role": "confirmation_b",
+  "run_id": "aaa-v2_1-confirmation-b-0002",
+  "schema_version": "aaa.benchmark_summary.v2.1",
+  "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
+  "training_lineage": "selected"
+}

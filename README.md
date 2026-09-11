@@ -1,156 +1,189 @@
 # AAA — Accurate Autonomous Adaptation
 
-An experimental AI research project exploring Accurate Autonomous Adaptation: learning from observations, predicting what happens next, and adapting when conditions change.
+An experimental research project asking one deliberately small question:
 
-AAA is a Cinqic research prototype, not a claim that the name itself demonstrates those capabilities.
+> Can an autonomous system observe an environment, learn to predict what
+> happens next, detect when its existing knowledge is no longer adequate, adapt
+> from subsequent evidence, and improve its future predictions?
 
-## Research question
+The environment is one moving dot on a line. The learner has three parameters.
+Neither is an accident: the point of this version is not a capable system, it
+is a **measuring instrument you can check**.
 
-Can an autonomous system observe an environment, learn to predict what happens next, and adapt when the environment changes?
+AAA makes no claim to general intelligence, physical understanding, or
+independent goal formation. "Autonomous" here means the observe / predict /
+score / update loop runs unattended after launch, and nothing more.
 
-This first version makes the question small and inspectable. A one-dimensional world contains one moving dot. The system sees only numerical positions, predicts the next position before it is revealed, scores the prediction, and optionally updates a small online linear model. “Autonomous” here means that this observation, prediction, scoring, and learning loop runs unattended after launch. It does not mean general intelligence, independent goal formation, or self-directed research.
+## Why the benchmark looks the way it does
 
-The project description is: “An experimental AI research project exploring Accurate Autonomous Adaptation: learning from observations, predicting what happens next, and adapting when conditions change.”
+A previous version of this benchmark reported that all required gates passed.
+Three independent reviews then found that several of those gates could not have
+failed. Among other things:
+
+- a **parameterless analytic formula** satisfied the gate named
+  `straight_learning`;
+- a run with **zero** required strata passed the coverage gate, because
+  `all()` of an empty collection is `True`;
+- the candidate was allowed to reflect its prediction into the public bounds
+  while the baseline it was compared against was not — and essentially the
+  entire reported bounce advantage was that transform, not learned parameters;
+- the reproducibility gate compared a deterministic function with itself;
+- a confirmation run that recorded failed gates still exited 0;
+- `475 / 475` recovery counted only events whose 50-step average stayed
+  elevated, so large, fast shocks were diluted out of the denominator;
+- 26 values in the "frozen specification" were never read by the code.
+
+Every one of those was reproduced against the old tree before anything was
+changed. The probes are committed at
+[`docs/evidence/pre_repair_probes.json`](docs/evidence/pre_repair_probes.json)
+and each defect is tracked in
+[`docs/issue_ledger.md`](docs/issue_ledger.md).
+
+The current protocol is built so that it can say **no**:
+
+| Status | Meaning |
+|---|---|
+| `PASS` | the required property was measured and holds |
+| `FAIL` | it was measured and does not hold |
+| `NOT_VERIFIED` | the check did not run |
+| `INSUFFICIENT_EVIDENCE` | there was not enough evidence to decide |
+
+Only `PASS` satisfies a required gate, and formal confirmation exits non-zero
+on anything else. Absence of evidence is never turned into success.
+
+**It has already said no.** The first confirmation round under the repaired
+protocol failed: both independent fresh streams failed the required
+`always_online_stability` gate and both exited non-zero. Thirteen of fourteen
+gates passed in each. The failure was traced on development data to a specific
+mechanism, repaired in the candidate, and the failed attempts are committed
+alongside everything else. No threshold was touched. See `AAA-120` in
+[`docs/issue_ledger.md`](docs/issue_ledger.md).
 
 ## What is implemented
 
-- A seeded, bounded CPU simulator with straight, bouncing, and changed-motion scenarios.
-- Correct boundary overshoot reflection; positions remain in the configured interval.
-- Persistence baseline: `x[t+1] = x[t]`.
-- Constant-motion baseline: `x[t+1] = x[t] + (x[t] - x[t-1])`.
-- An online linear predictor using the last four positions and a bias term.
-- A separate normalized RLS candidate and a predeclared benchmark v2; the legacy SGD learner remains a named diagnostic track.
-- Strict temporal ordering: predict and record, advance, reveal and score, update, then append the new observation.
-- Learning from scratch across multiple seeds, development-only learning-rate selection, frozen generalization on final seeds, and frozen-versus-online adaptation after an unannounced speed change.
-- JSONL and CSV per-step logs, aggregate metrics, checkpoints, package/git metadata, four static plots, an experiment report, and an optional keyboard-controlled animation.
+- A seeded, bounded CPU simulator: constant velocity, reflection at the
+  boundaries, unannounced speed changes, and a damped harmonic oscillator whose
+  coefficients change mid-episode without notice.
+- A strict temporal boundary — predict, record, advance, reveal, score, then
+  update — with tests that fail if a scenario name, event flag, velocity,
+  change schedule, hidden coefficient or future observation reaches a
+  predictor.
+- A baseline suite where each member isolates one source of predictive power,
+  including a **reflected constant-motion** baseline that uses exactly the same
+  public boundary map the candidate may use.
+- A three-parameter square-root recursive-least-squares candidate with
+  trace-bounded, self-triggered forgetting, verified against an independent
+  batch least-squares reference.
+- The historical v1 SGD learner, retained and reported as a named diagnostic
+  arm rather than quietly replaced.
+- Benchmark v2.1: a typed, hash-identified, fully executable specification;
+  planned stratified coverage; a paired hierarchical bootstrap that recomputes
+  each gate's own statistic; predeclared confirmation batches with a registry
+  and a freeze manifest; an experiment registry with safe resume; and
+  independent recomputation of every metric and gate from retained raw
+  evidence.
 
-The learner receives four positions ordered oldest to newest: `[x[t-3], x[t-2], x[t-1], x[t]]`. The actual feature vector is `[1, x[t-3], x[t-2], x[t-1], x[t]]`. The model predicts a displacement `d_hat = w · features`, and its next-position prediction is `x[t] + d_hat`. The target is the observed displacement `x[t+1] - x[t]`. For loss `0.5 * (d_hat - d)^2`, the update is:
+## The learner
+
+Feature vector, from the last four observed positions only:
 
 ```text
-features = [1, x[t-3], x[t-2], x[t-1], x[t]]
-gradient = (d_hat - d) * features
-w <- w - learning_rate * gradient
+phi = [ 1,  (x[t] - x[t-1]) / (dt * speed_max),  (x[t] - midpoint) / L ]
 ```
 
-Weights start at zero, so the initial linear prediction is persistence. The prediction method does not update weights. During frozen evaluation no update is called; during online adaptation only the explicitly enabled copy updates. Model state is saved as readable JSON with a format version and required metadata, not unsafe object serialization.
+It predicts the next displacement normalized by the interval width `L` and adds
+it to `x[t]`. Parameters start at zero, so before any learning it predicts
+persistence.
 
-## What the learner does and does not observe
+Boundary reflection is **programmed public knowledge of the observation
+format**, not a learned capability. That is precisely why the reflected
+constant-motion baseline exists: so the transform is never counted as
+intelligence. The report decomposes any apparent bounce advantage into analytic
+extrapolation, public boundary handling, and learned parameters, separately.
 
-The learner receives only the current four-position history and, after scoring, the actual next position for the update. It is not given velocity, the movement equation, scenario name, boundary events, the change schedule, the change factor, or future observations. The evaluator may retain bounce/change labels for metrics, but those labels never enter predictor inputs or updates. The coordinate interval `[0, 1]` and fixed time step are public observation-format configuration.
+The covariance is propagated as a square-root factor, so symmetry and positive
+semidefiniteness hold by construction, and forgetting is suspended when the
+covariance trace would exceed its declared bound — with suspensions counted and
+reported. The previous covariance-form learner lost positive semidefiniteness
+after 323 updates on a slow constant-velocity stream and overflowed at 6,642 on
+a stationary one.
 
-All experiments use deterministic motion without observation noise or random disturbances. The three scenarios are:
-
-1. `straight`: constant velocity, with sampled episodes ending before a boundary.
-2. `bouncing`: constant speed with reflection at the boundaries, including overshoot handling.
-3. `changed`: bouncing motion with an unannounced speed-magnitude factor change during the episode. The default event is at transition 60 and is sampled away from a boundary where practical.
-
-## Installation
-
-From the project directory:
+## Install
 
 ```bash
-cd /home/cinqic/Documents/AAA
+git clone https://github.com/Cinqic/AAA.git
+cd AAA
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e '.[dev]'
+python -m pip install -r requirements-lock.txt
+python -m pip install -e . --no-deps
+python tools/check_lock.py
 ```
 
-The experiment is CPU-only. NumPy and Matplotlib are the runtime dependencies. A GPU is not required, and no external AI API, pretrained model, web service, or frontend is used.
+CPU only. NumPy and Matplotlib are the runtime dependencies. No GPU, no
+external API, no pretrained model, no paid service.
 
 ## Commands
 
-Run focused correctness tests:
-
 ```bash
-python -m unittest discover -s tests -v
+python -m unittest discover -s tests -t .        # the test suite
+python -m aaa.cli spec-hash                      # canonical specification identity
+python -m aaa.cli benchmark --role development --attempt-label dev-001 \
+    --replicas 2 --episodes 3 --output-root runs
+python -m aaa.cli recompute runs/benchmark-v2_1/dev-001
+python -m aaa.cli diagnose --output docs/evidence/diagnosis
+python -m aaa.cli select-candidate
+python -m aaa.cli animate --checkpoint runs/<attempt>/checkpoints/replica-00.json
 ```
 
-Run a small smoke experiment. It creates a unique directory under `runs/` and exercises development selection, training, checkpointing, frozen evaluation, adaptation, plots, and report generation:
+Formal confirmation requires a predeclared batch, a committed freeze manifest
+and a clean source tree; see [`docs/reproduction.md`](docs/reproduction.md).
 
-```bash
-python -m aaa.cli smoke --output-root runs
-```
+## Interpreting a result
 
-Run the full evaluation. The default final split has ten seeds:
+These are five different claims, and none of them implies another:
 
-```bash
-python -m aaa.cli full --output-root runs
-```
+1. the implementation runs correctly;
+2. the model improves with experience;
+3. what it learned generalizes to unfamiliar episodes;
+4. continued updates help after a change;
+5. it beats a baseline.
 
-Run the separately versioned benchmark v2. The specification is frozen in
-[`benchmarks/benchmark_v2.json`](benchmarks/benchmark_v2.json) before candidate
-confirmation. Use a distinct attempt ID for each confirmation batch:
+Constant-motion extrapolation is an extremely strong baseline in a
+deterministic, noiseless world — with the public boundary map it is *exact* at
+bounce transitions. A learned model losing to it is a valid and informative
+result, and this repository is built to report that rather than to avoid it.
 
-```bash
-.venv/bin/python -m aaa.cli benchmark-v2 \
-  --role confirmation_a --attempt-id confirmation-a --output-root runs
-```
+## Documentation
 
-The command records compressed per-step predictions, evaluator metadata,
-replica checkpoints, source-tree identity, checksums, gate decisions, and a
-generated report. `confirmation_b` must use a fresh attempt ID and the same
-committed source, configuration, model, and requirements. Development runs
-may use `--replicas` and `--episodes`; those overrides are rejected for a
-confirmation run when they would weaken the predeclared minimums.
+| Document | What it covers |
+|---|---|
+| [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
+| [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |
+| [Errata](docs/errata.md) | which earlier claims were affected, and why |
+| [Candidate selection](docs/candidate_selection.md) | why this candidate, with the full table including what lost |
+| [Diagnosis](docs/diagnosis.md) | controlled ablations on the legacy learner |
+| [Reproduction](docs/reproduction.md) | exact commands from a clean checkout |
+| [Evidence policy](docs/evidence_policy.md) | what is committed, what is regenerable, and the known limitation |
+| [Experiment registry](docs/experiment_registry.md) | trial state, resume semantics, verification |
+| [Limitations](docs/limitations.md) | what this cannot show, and the next experiment |
+| [Research history](CHANGELOG.md) | v1, v2, v2.1 |
+| [Self-review](docs/self_review.md) | what was checked after the repair, and what stayed weak |
+| [Review handoff](docs/handoff_astra.md) | identity, confirmation outcomes, reproduction commands |
 
-Launch the optional animation from a trained checkpoint:
+## Historical evidence
 
-```bash
-python -m aaa.cli animate \
-  --checkpoint runs/<run-id>/checkpoints/trained_linear.json \
-  --scenario changed \
-  --seed 201
-```
+[`results/final/`](results/final/) is the v1 snapshot, preserved unchanged. Its
+result was unfavourable — the original learner did not convincingly improve,
+generalized poorly, and lost to constant motion — and that is exactly why it is
+kept.
 
-In the animation window, Space pauses/resumes and `r` restarts. A graphical display is required for this command. The headless evaluation and plots do not require one.
+[`results/benchmark_v2/`](results/benchmark_v2/) holds the v2 confirmation
+attempts. They are **superseded**: historical and provisional evidence produced
+under a methodology since found defective. They are not acceptance evidence for
+anything.
 
-## Reproducing and inspecting a run
+## License
 
-Every invocation uses a unique UTC run directory such as `runs/20260909T120000Z-full/`; old results are not overwritten. The run contains:
-
-```text
-config.json                         complete resolved configuration
-metadata.json                       Python/package/platform/git metadata
-dev_selection.json                  development-only learning-rate selection
-checkpoints/trained_linear.json     inspectable model parameters
-learning_from_scratch/steps.jsonl   complete nested per-step log
-learning_from_scratch/steps.csv     flat per-step view
-learning_from_scratch/metrics.json  aggregate, per-seed, and per-episode metrics
-frozen_generalization/...           final-seed frozen comparison and integrity evidence
-online_adaptation/...               same-trajectory frozen/online change test
-plots/*.png                         static plots
-summary.json                        compact index of all measured outputs
-experiment_report.md                report generated from those measurements
-```
-
-The full run uses separate seeds: development `(101, 102, 103)`, training `(11, 12, 13, 14, 15)`, and final `(201, ..., 210)`. Development seeds select the learning rate using held-out development episodes. That choice is written once to `config.json` before final evaluation. Final seeds are not used for tuning. The final generalization distribution uses new straight and bouncing episodes with sampled positions, directions, and speeds; history resets at each episode while the trained weights remain frozen.
-
-The benchmark v2 stream allocation uses `numpy.random.SeedSequence` from the
-role, family, replica, and episode IDs. It is independent of worker scheduling.
-Unchanged dynamics controls branch from the same pre-event position, velocity,
-history, and complete learner state as the changed-law branch. The evaluator
-retains event labels, but predictors receive only observations and past scored
-targets.
-
-The adaptation experiment starts a frozen and an updating copy from the same saved checkpoint. Both copies, the baselines, and the evaluator share one realized changed-motion trajectory. Recovery is defined before final evaluation: tolerance is `max(1.5 * pre-change MAE, 0.01)`, with a five-transition rolling mean and three sustained qualifying windows. If the post-change error does not increase meaningfully, recovery is not applicable. If sustained recovery is not observed before the horizon ends, the result says `not recovered within evaluation horizon`.
-
-## Interpreting results
-
-The report keeps these conclusions separate:
-
-- The implementation runs correctly.
-- The model improves with experience.
-- The model generalizes to unfamiliar episodes.
-- Continued updates help after a change.
-- The model beats a baseline.
-
-None automatically proves the others. Constant-motion extrapolation is a strong baseline for this deterministic world and may recover quickly after a speed change. A learned model losing to a baseline is a valid result. Four positions provide a short observation history, not a general long-term memory system. The programmer supplies the world mechanics, event schedule, baselines, and evaluation protocol; parameter updates supply only the learned linear relationship from recent positions to the next displacement.
-
-AAA does not claim general intelligence, understanding of physics, a novel scientific architecture, or independent goal formation. The report is evidence about this particular local prototype and its documented seeds and configuration.
-
-## Limitations and next experiment
-
-The world is one-dimensional, deterministic, and noise-free. The model has no explicit bounce detector or change detector, and a finite episode can end before recovery is observed. Predictions are not clipped by default; raw predictions are retained in the logs. If a user enables clipping in a future configuration, the same policy must be applied to every predictor and the raw values must remain visible.
-
-The single most useful next experiment is controlled observation noise: add fixed noise levels, freeze the noise schedule and final split before evaluation, and repeat the same frozen-versus-online protocol to test whether updates contribute under imperfect observations.
+Apache License 2.0. See [LICENSE](LICENSE).

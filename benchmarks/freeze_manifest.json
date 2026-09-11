@@ -1,0 +1,397 @@
+{
+  "ab_relationship": "shared_frozen_checkpoints",
+  "baselines": {
+    "candidate_frozen": "the selected candidate with updates disabled; isolates what was learned during training",
+    "candidate_no_reflect": "the selected candidate with the boundary policy removed; isolates how much of any bounce advantage is the reflection transform",
+    "candidate_online": "the selected candidate with updates enabled; isolates the contribution of continued updating",
+    "constant_motion": "isolates analytic first-order motion extrapolation with no boundary knowledge",
+    "constant_motion_reflected": "isolates analytic motion extrapolation plus the identical public boundary policy the candidate is allowed to use; the like-for-like comparison",
+    "legacy_linear_sgd": "the historical v1 learner, retained as a diagnostic comparison only",
+    "persistence": "isolates the value of any motion model at all",
+    "zero_control": "the candidate architecture with zero-initialized parameters; isolates what the architecture predicts before any learning"
+  },
+  "candidate": {
+    "dead_zone": 0.0,
+    "detector_decay": 0.05,
+    "detector_floor": 1e-06,
+    "detector_multiplier": 8.0,
+    "displacement_scale": 0.004,
+    "feature_set": "displacement_position",
+    "features": [
+      "1",
+      "dx[t] / (dt * displacement_scale_speed)",
+      "(x[t] - midpoint) / interval_width"
+    ],
+    "forgetting": 0.3,
+    "forgetting_mode": "exponential",
+    "model": "OnlineRLSPredictor",
+    "reflect": true,
+    "ridge": 0.0001,
+    "trace_bound": 100000.0,
+    "unfold_target": true
+  },
+  "checkpoints": {
+    "hashes": [
+      "e635f04f944190742fc6037c4468814a6a53eb50b4633ed9d1c0edd86e305a96",
+      "0dede9edd8afce6f583e97ba299d571c456ff05e266df6a24cf82328547feb9e",
+      "9540f727907c0bc8b36afaf15fecdd14d35775c537145e7eab999bfd878aa0ce",
+      "745dbb6d3f29eaa4d71c337f1ecf0e3f260ad93a6b07afdf221448a6913aac8a",
+      "d31088732cd195089a209ba1460c930fefcad7b160de5eeb1ca92c3edfc9361a"
+    ],
+    "relationship": "shared_frozen_checkpoints"
+  },
+  "dependency_lock": {
+    "hash": "6370808d7f23a04fce4f86b136210e1669063d6ef8113509381eec6655730ec3",
+    "path": "requirements-lock.txt",
+    "present": true
+  },
+  "event_distributions": {
+    "changed_law": {
+      "branch_steps": 100,
+      "post_damping_range": [
+        0.05,
+        0.3
+      ],
+      "post_omega_range": [
+        5.0,
+        11.0
+      ],
+      "pre_damping": 0.1,
+      "pre_omega": 1.5,
+      "prefix_steps": 300,
+      "timing": "fixed at the end of the common prefix (not randomized)"
+    },
+    "speed_change": {
+      "change_step": 300,
+      "factor_high": 1.8,
+      "factor_low": 0.45
+    }
+  },
+  "frozen_at_utc": "2026-09-11T06:30:17.305700+00:00",
+  "gates": [
+    {
+      "evaluator": "coverage",
+      "name": "stratum_coverage",
+      "required": true,
+      "threshold": {}
+    },
+    {
+      "evaluator": "absolute_accuracy_by_stratum",
+      "name": "constant_velocity_identification",
+      "required": true,
+      "threshold": {
+        "family": "constant_velocity",
+        "max_mae": 1e-05,
+        "max_stratum_mae": 1e-05,
+        "max_stratum_p95": 0.0001,
+        "predictor": "candidate_frozen"
+      }
+    },
+    {
+      "evaluator": "learning_progress",
+      "name": "learning_progress",
+      "required": true,
+      "threshold": {
+        "min_ci_lower": 0.95,
+        "min_reduction": 0.99,
+        "require_monotone_non_increasing": true
+      }
+    },
+    {
+      "evaluator": "absolute_accuracy",
+      "name": "frozen_prediction_accuracy",
+      "required": true,
+      "threshold": {
+        "family": "bouncing",
+        "max_value": 0.0001,
+        "metric": "mae",
+        "predictor": "candidate_frozen"
+      }
+    },
+    {
+      "evaluator": "event_accuracy_and_parity",
+      "name": "bounce_event_accuracy",
+      "required": true,
+      "threshold": {
+        "absolute_floor": 1e-06,
+        "baseline": "constant_motion_reflected",
+        "candidate": "candidate_frozen",
+        "family": "bouncing",
+        "max_event_mae": 0.0001,
+        "max_ratio": 1.1
+      }
+    },
+    {
+      "evaluator": "non_regression",
+      "name": "speed_change_frozen_robustness",
+      "required": true,
+      "threshold": {
+        "absolute_floor": 1e-05,
+        "baseline": "constant_motion_reflected",
+        "candidate": "candidate_frozen",
+        "family": "speed_change",
+        "max_ratio": 1.1,
+        "metric": "post_change_window_mae"
+      }
+    },
+    {
+      "evaluator": "changed_law_adaptation",
+      "name": "changed_law_adaptation",
+      "required": true,
+      "threshold": {
+        "constant_motion_absolute_floor": 1e-05,
+        "constant_motion_max_ratio": 1.1,
+        "min_improvement_vs_frozen": 0.2,
+        "min_improvement_vs_persistence": 0.2,
+        "require_ci_lower_above": 0.0
+      }
+    },
+    {
+      "evaluator": "unchanged_control",
+      "name": "unchanged_control",
+      "required": true,
+      "threshold": {
+        "absolute_floor": 1e-05,
+        "max_ratio": 1.1
+      }
+    },
+    {
+      "evaluator": "recovery",
+      "name": "recovery",
+      "required": true,
+      "threshold": {
+        "min_eligible_events": 100,
+        "min_recovery_rate": 0.9
+      }
+    },
+    {
+      "evaluator": "non_regression",
+      "name": "always_online_stability",
+      "required": true,
+      "threshold": {
+        "absolute_floor": 1e-05,
+        "baseline": "constant_motion_reflected",
+        "candidate": "candidate_online",
+        "family": "always_online",
+        "max_ratio": 1.1,
+        "metric": "mae"
+      }
+    },
+    {
+      "evaluator": "absolute_accuracy",
+      "name": "speed_extrapolation_report",
+      "required": false,
+      "threshold": {
+        "family": "speed_extrapolation",
+        "max_value": 0.0001,
+        "metric": "mae",
+        "predictor": "candidate_frozen"
+      }
+    },
+    {
+      "evaluator": "correctness",
+      "name": "correctness",
+      "required": true,
+      "threshold": {}
+    },
+    {
+      "evaluator": "reproducibility",
+      "name": "reproducibility",
+      "required": true,
+      "threshold": {}
+    },
+    {
+      "evaluator": "latency",
+      "name": "cpu_usability",
+      "required": true,
+      "threshold": {}
+    }
+  ],
+  "notes": "Protocol v2.1 confirmation freeze, round 2. Candidate repaired on development evidence after the round-1 always_online_stability failure; selection re-run over 38 variants with the same predeclared rule. No threshold was altered in either round.",
+  "planned_confirmation_batches": [
+    "aaa-v2_1-confirmation-a-0002",
+    "aaa-v2_1-confirmation-b-0002"
+  ],
+  "protocol_status": "active",
+  "protocol_version": "aaa.benchmark.v2.1",
+  "recovery": {
+    "post_event_horizon": 50,
+    "pre_event_reference_length": 50,
+    "rolling_window": 5,
+    "shock_floor": 0.0001,
+    "shock_multiplier": 3.0,
+    "shock_window": 5,
+    "sustain_windows": 3,
+    "tolerance_floor": 1e-05,
+    "tolerance_multiplier": 1.5
+  },
+  "sample_counts": {
+    "episodes_per_family": 100,
+    "minimum_bounce_events": 500,
+    "minimum_eligible_change_events": 100,
+    "minimum_episodes_per_stratum": 10,
+    "minimum_replicas_per_stratum": 3,
+    "replicas": 5
+  },
+  "schema_version": "aaa.freeze_manifest.v1",
+  "source": {
+    "commit": "2fe2f2f3704c0194d233d5a6f9f135d401f0ddd9",
+    "dirty": false,
+    "tree_hash": "8521588003f1247e35c07eb0b487502e1cb071a4999316b098fcd6717d9e690a"
+  },
+  "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
+  "statistics": {
+    "draws": 4000,
+    "estimands": {
+      "absolute_difference": "mean_over_resampled_episodes(candidate) - mean_over_resampled_episodes(baseline)",
+      "mean": "mean_over_resampled_episodes(predictor)",
+      "relative_improvement": "1 - mean_over_resampled_episodes(candidate) / mean_over_resampled_episodes(baseline); the interval recomputes exactly this ratio-of-means on every draw",
+      "resampling_units": "level 1 = training replica with replacement; level 2 = that replica's own episode summaries with replacement, preserving its observation count; episode pairing across predictors is preserved"
+    },
+    "event_weighting": "episode_balanced",
+    "exclude_no_event_episodes": true,
+    "family_wise_alpha": 0.05,
+    "interval": 0.95,
+    "method": "paired_hierarchical_bootstrap",
+    "multiplicity": "holm_bonferroni"
+  },
+  "training": {
+    "distribution_relationship": "in-domain: the training speed range equals the confirmation speed range. Deliberate extrapolation is measured separately by the labelled speed_extrapolation family.",
+    "episodes_per_replica": 24,
+    "seeds": {
+      "0": [
+        8321608796154411012,
+        6413441476518133285,
+        6728959964979157843,
+        1464099444514723065,
+        6202696594361893500,
+        721035967320240675,
+        455444253016106000,
+        4027725560839248733,
+        4390757340581834021,
+        4233903634793307563,
+        4678747916968509382,
+        2426603706457504527,
+        4061061297076982688,
+        8525283713824161848,
+        1145353887947417588,
+        6337082421951669397,
+        4542474050090630559,
+        4367852079717722094,
+        138249304773676700,
+        4903805390145169791,
+        3002914197074147683,
+        9040490023703183015,
+        5297238720410598774,
+        984796099154420562
+      ],
+      "1": [
+        5598459544659749044,
+        6032487381679669001,
+        672146119829429880,
+        975517232075127981,
+        6644089252677939357,
+        2298525035244133796,
+        7216576536041381493,
+        5040222662854170089,
+        5758257328452278778,
+        5118760062767611641,
+        2877901946295988571,
+        6353287099123438469,
+        6557010979340472263,
+        124645857631609791,
+        2136608984451939462,
+        8469708210399690599,
+        8192130611116229996,
+        4519913608264971285,
+        3239022263119504856,
+        7216560119755010355,
+        3345591701498180832,
+        336358371284100592,
+        5708763783057549014,
+        379073498883995649
+      ],
+      "2": [
+        6588240211624389305,
+        8760622090828527518,
+        740387172006158708,
+        380553139515678536,
+        4038483591215949152,
+        3283513199846594693,
+        460295996302347023,
+        7314210042818589204,
+        919101792021986345,
+        451244510556085936,
+        634972907423766994,
+        7818021447814250247,
+        6388614072913952252,
+        4435869296350452967,
+        7669396798853368464,
+        7256914272293682127,
+        8177347901003106810,
+        6612989708406897443,
+        6753158491094152081,
+        2830709291461538839,
+        6715842778947097357,
+        3205583248662855978,
+        808852565604757978,
+        8951652459392401326
+      ],
+      "3": [
+        3011034945619366935,
+        2449063011838331298,
+        7350683360574096659,
+        7281598611766377908,
+        1743843431426658217,
+        2707159767367429054,
+        4890714547713789302,
+        1250146231504137762,
+        9058106229330064910,
+        3979512669368000834,
+        8137873769000776182,
+        8177131393347263540,
+        7888470904286418929,
+        7801732953320996777,
+        2021949164427319490,
+        7216996862507846923,
+        4844651444078666011,
+        450002926532870247,
+        5619118262676029852,
+        177058484801539673,
+        8486351816369732454,
+        6819591786024154192,
+        3961758479962262023,
+        8990868101946921199
+      ],
+      "4": [
+        4087946753712751952,
+        4905966737574391938,
+        2736864099177048648,
+        7561944640076733831,
+        2814718861784578389,
+        6892381005421941041,
+        3461531856549860500,
+        3541177793321958950,
+        1118608176358352004,
+        1572137122875579635,
+        7861353911082292154,
+        831261458025322445,
+        2773035695274299780,
+        4353689587692176511,
+        3151448475569080145,
+        3375876136613525588,
+        183375084505324652,
+        5791925096853133077,
+        6396116530137257951,
+        5736757066118341086,
+        9030752945469418062,
+        3940159574362914552,
+        2501872003914317266,
+        2538514081476868448
+      ]
+    },
+    "speed_max": 0.2,
+    "speed_min": 0.08,
+    "steps_per_episode": 180
+  }
+}

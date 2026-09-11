@@ -1,3 +1,13 @@
+> **SUPERSEDED.** This document describes benchmark v2, which has been
+> replaced by [v2.1](benchmark_protocol.md). It is retained unchanged below as
+> historical provenance. Several of the gates it describes did not measure what
+> their names claimed; see [`errata.md`](errata.md) for exactly which claims
+> were affected and why, and [`issue_ledger.md`](issue_ledger.md) for the
+> reproduction of each defect. Nothing in this document is current acceptance
+> evidence.
+
+---
+
 # Benchmark v2 specification
 
 This file describes the predeclared engineering benchmark in `benchmarks/benchmark_v2.json`. It is separate from `results/final`, which remains the historical v1 snapshot and regression track.

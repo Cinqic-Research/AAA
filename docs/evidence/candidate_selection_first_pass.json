@@ -1,0 +1,623 @@
+{
+  "data_discipline": "development streams only; no confirmation batch was inspected",
+  "eligible_count": 18,
+  "format_version": "aaa.candidate_selection.v1",
+  "seeds": {
+    "bouncing": [
+      7200000,
+      7200139,
+      7200278,
+      7200417,
+      7200556,
+      7200695,
+      7200834,
+      7200973
+    ],
+    "changed_law": [
+      7300000,
+      7300149,
+      7300298,
+      7300447,
+      7300596,
+      7300745,
+      7300894,
+      7301043,
+      7301192,
+      7301341
+    ],
+    "straight": [
+      7100000,
+      7100137,
+      7100274,
+      7100411,
+      7100548,
+      7100685,
+      7100822,
+      7100959
+    ],
+    "training": [
+      7000000,
+      7000131,
+      7000262,
+      7000393,
+      7000524,
+      7000655,
+      7000786,
+      7000917,
+      7001048,
+      7001179,
+      7001310,
+      7001441,
+      7001572,
+      7001703,
+      7001834,
+      7001965,
+      7002096,
+      7002227,
+      7002358,
+      7002489,
+      7002620,
+      7002751,
+      7002882,
+      7003013
+    ]
+  },
+  "selected": {
+    "covariance_diagnostics": {
+      "condition_number": 1827419523.7699795,
+      "max_asymmetry": 0.0,
+      "max_eigenvalue": 91391.81488855477,
+      "min_eigenvalue": 5.001140334760833e-05,
+      "trace": 91391.81631189132
+    },
+    "development_bouncing_mae": 5.770835812146072e-06,
+    "development_straight_mae": 4.214299969887159e-19,
+    "feature_set": "displacement_position",
+    "forgetting": 0.9,
+    "forgetting_suspensions": 1149,
+    "frozen_cumulative": 0.013661406561071376,
+    "improvement_vs_frozen": 0.5714635785858029,
+    "label": "displacement_position|lambda=0.9|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+    "numerically_stable": true,
+    "online_cumulative": 0.005854410279165961,
+    "reflect": true,
+    "ridge": 0.0001,
+    "stress_failures": [],
+    "trace_bound": 100000.0,
+    "training_episodes": 24,
+    "weights": [
+      -1.773717923822247e-18,
+      0.003999999999999992,
+      1.7525782367848295e-17
+    ]
+  },
+  "selection_rule": "among numerically stable variants with development straight-motion normalized MAE <= 1e-5, maximize development changed-law improvement over the identical frozen copy; ties break toward the smaller feature set and then toward less forgetting",
+  "straight_mae_limit": 1e-05,
+  "variants": [
+    {
+      "covariance_diagnostics": {
+        "condition_number": 200189520.4359588,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 10000.0000000001,
+        "min_eigenvalue": 4.995266474600067e-05,
+        "trace": 10000.001418805045
+      },
+      "development_bouncing_mae": 5.77098304742736e-06,
+      "development_straight_mae": 1.342983682320692e-10,
+      "feature_set": "displacement_position",
+      "forgetting": 1.0,
+      "forgetting_suspensions": 0,
+      "frozen_cumulative": 0.014168013931721273,
+      "improvement_vs_frozen": -0.0001667637615632156,
+      "label": "displacement_position|lambda=1.0|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.014170376643018406,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        -7.850042164200697e-12,
+        0.003999999745055824,
+        3.0374422534723334e-10
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1985952770.5845103,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 99894.23771355125,
+        "min_eigenvalue": 5.03004095531185e-05,
+        "trace": 99894.23915846231
+      },
+      "development_bouncing_mae": 5.770835812145207e-06,
+      "development_straight_mae": 1.9601395208777481e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.99,
+      "forgetting_suspensions": 0,
+      "frozen_cumulative": 0.013916918666578421,
+      "improvement_vs_frozen": 0.014101893231389884,
+      "label": "displacement_position|lambda=0.99|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.013720663765432396,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        1.3657460347048746e-18,
+        0.004000000000000002,
+        -1.187133831186842e-18
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1956254632.9545782,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 98051.32047092853,
+        "min_eigenvalue": 5.012196204889712e-05,
+        "trace": 98051.3219026897
+      },
+      "development_bouncing_mae": 5.7708358121453066e-06,
+      "development_straight_mae": 1.9601395208777481e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 65,
+      "frozen_cumulative": 0.013702755364255637,
+      "improvement_vs_frozen": 0.0962993863972017,
+      "label": "displacement_position|lambda=0.98|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.012383188430726855,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        2.8776504082287937e-19,
+        0.004000000000000001,
+        -1.1422198733364976e-18
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1909513051.48667,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 95534.74908289213,
+        "min_eigenvalue": 5.0030948470612766e-05,
+        "trace": 95534.75050773355
+      },
+      "development_bouncing_mae": 5.770835812145224e-06,
+      "development_straight_mae": 1.1760837125266489e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.95,
+      "forgetting_suspensions": 158,
+      "frozen_cumulative": 0.013661455119462557,
+      "improvement_vs_frozen": 0.3316640107515175,
+      "label": "displacement_position|lambda=0.95|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.009130442121839754,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        -1.3207475418485217e-19,
+        0.003999999999999998,
+        5.870443591200125e-18
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1827419523.7699795,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 91391.81488855477,
+        "min_eigenvalue": 5.001140334760833e-05,
+        "trace": 91391.81631189132
+      },
+      "development_bouncing_mae": 5.770835812146072e-06,
+      "development_straight_mae": 4.214299969887159e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.9,
+      "forgetting_suspensions": 1149,
+      "frozen_cumulative": 0.013661406561071376,
+      "improvement_vs_frozen": 0.5714635785858029,
+      "label": "displacement_position|lambda=0.9|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.005854410279165961,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        -1.773717923822247e-18,
+        0.003999999999999992,
+        1.7525782367848295e-17
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 200125001.0014801,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 9999.999999999989,
+        "min_eigenvalue": 4.9968769268993185e-05,
+        "trace": 10000.00004996876
+      },
+      "development_bouncing_mae": 5.770969159007767e-06,
+      "development_straight_mae": 1.3852902716377176e-10,
+      "feature_set": "displacement_only",
+      "forgetting": 1.0,
+      "forgetting_suspensions": 0,
+      "frozen_cumulative": 0.014169595661694012,
+      "improvement_vs_frozen": -0.0001695447106671022,
+      "label": "displacement_only|lambda=1.0|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.014171998041690743,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        7.298848187962353e-12,
+        0.003999999773945525
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1985238397.9895406,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 99894.23771355004,
+        "min_eigenvalue": 5.031850976422447e-05,
+        "trace": 99894.23776386854
+      },
+      "development_bouncing_mae": 5.770835812145276e-06,
+      "development_straight_mae": 1.9601395208777481e-19,
+      "feature_set": "displacement_only",
+      "forgetting": 0.99,
+      "forgetting_suspensions": 0,
+      "frozen_cumulative": 0.0141697772153213,
+      "improvement_vs_frozen": -0.013391187951380168,
+      "label": "displacement_only|lambda=0.99|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.014359527365240854,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        2.3825542091784584e-18,
+        0.0040000000000000036
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1955570645.330321,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 98051.32047092801,
+        "min_eigenvalue": 5.013949289178754e-05,
+        "trace": 98051.32052106752
+      },
+      "development_bouncing_mae": 5.77083581214539e-06,
+      "development_straight_mae": 1.1760837125266489e-19,
+      "feature_set": "displacement_only",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 65,
+      "frozen_cumulative": 0.01419553935753981,
+      "improvement_vs_frozen": -0.024863599104292033,
+      "label": "displacement_only|lambda=0.98|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.01454849155719488,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        1.1957634191331035e-19,
+        0.003999999999999999
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1909394775.3243012,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 95534.7490828911,
+        "min_eigenvalue": 5.003404760373087e-05,
+        "trace": 95534.74913292514
+      },
+      "development_bouncing_mae": 5.770835812145476e-06,
+      "development_straight_mae": 1.1760837125266489e-19,
+      "feature_set": "displacement_only",
+      "forgetting": 0.95,
+      "forgetting_suspensions": 158,
+      "frozen_cumulative": 0.014375984308497564,
+      "improvement_vs_frozen": -0.01696148012927101,
+      "label": "displacement_only|lambda=0.95|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.014619822280684858,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        -5.982664661936321e-19,
+        0.003999999999999998
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1827872695.8068829,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 91391.81488855658,
+        "min_eigenvalue": 4.999900436075677e-05,
+        "trace": 91391.81493855559
+      },
+      "development_bouncing_mae": 5.770835812145555e-06,
+      "development_straight_mae": 1.1760837125266489e-19,
+      "feature_set": "displacement_only",
+      "forgetting": 0.9,
+      "forgetting_suspensions": 1149,
+      "frozen_cumulative": 0.014657447991536798,
+      "improvement_vs_frozen": 0.07423155033000939,
+      "label": "displacement_only|lambda=0.9|ridge=0.0001|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.013569402903243538,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        -1.9587740868010986e-18,
+        0.003999999999999997
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1936701899.852272,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 98154.04205310151,
+        "min_eigenvalue": 5.0681027400545494e-05,
+        "trace": 98154.04352558841
+      },
+      "development_bouncing_mae": 5.7708358121453066e-06,
+      "development_straight_mae": 1.9601395208777481e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 0,
+      "frozen_cumulative": 0.013702755364255637,
+      "improvement_vs_frozen": 0.09629938639720204,
+      "label": "displacement_position|lambda=0.98|ridge=0.01|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.01238318843072685,
+      "reflect": true,
+      "ridge": 0.01,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        2.861753624918025e-19,
+        0.004000000000000001,
+        -1.156689617828977e-18
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 20018951974.480972,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 999999.9999999814,
+        "min_eigenvalue": 4.995266491845951e-05,
+        "trace": 1000000.0014187865
+      },
+      "development_bouncing_mae": 5.7708358121453066e-06,
+      "development_straight_mae": 1.9601395208777481e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 178,
+      "frozen_cumulative": 0.013702755364255642,
+      "improvement_vs_frozen": 0.09629938639720204,
+      "label": "displacement_position|lambda=0.98|ridge=1e-06|reflect=1|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.012383188430726855,
+      "reflect": true,
+      "ridge": 1e-06,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        2.911720968762468e-19,
+        0.004000000000000001,
+        -1.1575717910457587e-18
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1956254632.9545782,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 98051.32047092853,
+        "min_eigenvalue": 5.012196204889712e-05,
+        "trace": 98051.3219026897
+      },
+      "development_bouncing_mae": 5.770836013753868e-06,
+      "development_straight_mae": 1.7358008666644575e-13,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 65,
+      "frozen_cumulative": 0.013830688631969495,
+      "improvement_vs_frozen": 0.07513558168645318,
+      "label": "displacement_position|lambda=0.98|ridge=0.0001|reflect=1|trace=100000|episodes=4",
+      "numerically_stable": true,
+      "online_cumulative": 0.012791511796482252,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 4,
+      "weights": [
+        1.0916464631305094e-13,
+        0.003999999999628411,
+        4.279072559243363e-13
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1956254632.9545782,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 98051.32047092853,
+        "min_eigenvalue": 5.012196204889712e-05,
+        "trace": 98051.3219026897
+      },
+      "development_bouncing_mae": 5.770835812146021e-06,
+      "development_straight_mae": 1.470104640658311e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 65,
+      "frozen_cumulative": 0.013683674707495591,
+      "improvement_vs_frozen": 0.09748412235040649,
+      "label": "displacement_position|lambda=0.98|ridge=0.0001|reflect=1|trace=100000|episodes=8",
+      "numerically_stable": true,
+      "online_cumulative": 0.012349733688106929,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 8,
+      "weights": [
+        -2.930712736123044e-18,
+        0.003999999999999994,
+        8.458427814955236e-18
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1956254632.9545782,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 98051.32047092853,
+        "min_eigenvalue": 5.012196204889712e-05,
+        "trace": 98051.3219026897
+      },
+      "development_bouncing_mae": 5.7708358121460825e-06,
+      "development_straight_mae": 2.254160449009411e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 65,
+      "frozen_cumulative": 0.013778290993394154,
+      "improvement_vs_frozen": 0.08475994483251403,
+      "label": "displacement_position|lambda=0.98|ridge=0.0001|reflect=1|trace=100000|episodes=16",
+      "numerically_stable": true,
+      "online_cumulative": 0.01261044380890774,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 16,
+      "weights": [
+        1.1346266824373346e-18,
+        0.004000000000000005,
+        -1.3451127424893703e-17
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 1956254632.9545782,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 98051.32047092853,
+        "min_eigenvalue": 5.012196204889712e-05,
+        "trace": 98051.3219026897
+      },
+      "development_bouncing_mae": 1.2116337172010927e-05,
+      "development_straight_mae": 1.9601395208777481e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 65,
+      "frozen_cumulative": 0.013702755364255637,
+      "improvement_vs_frozen": 0.0962993863972017,
+      "label": "displacement_position|lambda=0.98|ridge=0.0001|reflect=0|trace=100000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.012383188430726855,
+      "reflect": false,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 100000.0,
+      "training_episodes": 24,
+      "weights": [
+        2.8776504082287937e-19,
+        0.004000000000000001,
+        -1.1422198733364976e-18
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 19466932265.53618,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 981026.6781727108,
+        "min_eigenvalue": 5.039451849891616e-05,
+        "trace": 981026.6796247433
+      },
+      "development_bouncing_mae": 5.7708358121453066e-06,
+      "development_straight_mae": 1.9601395208777481e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 0,
+      "frozen_cumulative": 0.013702755364255637,
+      "improvement_vs_frozen": 0.09629938639720292,
+      "label": "displacement_position|lambda=0.98|ridge=0.0001|reflect=1|trace=1e+06|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.012383188430726838,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 1000000.0,
+      "training_episodes": 24,
+      "weights": [
+        3.231287262324598e-19,
+        0.004000000000000001,
+        -1.1747987865159138e-18
+      ]
+    },
+    {
+      "covariance_diagnostics": {
+        "condition_number": 200189520.4359588,
+        "max_asymmetry": 0.0,
+        "max_eigenvalue": 10000.0000000001,
+        "min_eigenvalue": 4.995266474600067e-05,
+        "trace": 10000.001418805045
+      },
+      "development_bouncing_mae": 5.7708358121453066e-06,
+      "development_straight_mae": 1.9601395208777481e-19,
+      "feature_set": "displacement_position",
+      "forgetting": 0.98,
+      "forgetting_suspensions": 178,
+      "frozen_cumulative": 0.013702755364255637,
+      "improvement_vs_frozen": 0.09629938639720292,
+      "label": "displacement_position|lambda=0.98|ridge=0.0001|reflect=1|trace=10000|episodes=24",
+      "numerically_stable": true,
+      "online_cumulative": 0.012383188430726838,
+      "reflect": true,
+      "ridge": 0.0001,
+      "stress_failures": [],
+      "trace_bound": 10000.0,
+      "training_episodes": 24,
+      "weights": [
+        2.889152569462547e-19,
+        0.004000000000000001,
+        -1.14123356558005e-18
+      ]
+    }
+  ],
+  "world": {
+    "dt": 0.02,
+    "lower_bound": 0.0,
+    "speed_max": 0.2,
+    "speed_min": 0.08,
+    "training_steps_per_episode": 180,
+    "upper_bound": 1.0
+  }
+}

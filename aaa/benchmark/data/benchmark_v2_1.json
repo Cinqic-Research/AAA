@@ -1,0 +1,375 @@
+{
+  "artifacts": {
+    "checkpoint_schema": "aaa.rls_predictor.v2",
+    "compress_raw_steps": true,
+    "manifest_schema": "aaa.benchmark_manifest.v1",
+    "registry_schema": "aaa.experiment_registry.v1",
+    "retain_raw_steps": true,
+    "step_record_schema": "aaa.step_record.v2",
+    "summary_schema": "aaa.benchmark_summary.v2.1"
+  },
+  "baselines": {
+    "candidate_frozen": "the selected candidate with updates disabled; isolates what was learned during training",
+    "candidate_no_reflect": "the selected candidate with the boundary policy removed; isolates how much of any bounce advantage is the reflection transform",
+    "candidate_online": "the selected candidate with updates enabled; isolates the contribution of continued updating",
+    "constant_motion": "isolates analytic first-order motion extrapolation with no boundary knowledge",
+    "constant_motion_reflected": "isolates analytic motion extrapolation plus the identical public boundary policy the candidate is allowed to use; the like-for-like comparison",
+    "legacy_linear_sgd": "the historical v1 learner, retained as a diagnostic comparison only",
+    "persistence": "isolates the value of any motion model at all",
+    "zero_control": "the candidate architecture with zero-initialized parameters; isolates what the architecture predicts before any learning"
+  },
+  "candidate": {
+    "boundary_policy": "observation-only scalar reflection of the predicted position; the inverse of the same public map applied to the update target so the learner regresses in the coordinate its own linear law lives in; and no update on a window whose displacement feature straddles a wall, detected from the learner's own previous raw prediction having needed reflection. All three are programmed public knowledge of the observation format, not learned capability, and none uses an evaluator bounce label.",
+    "dead_zone": 0.0,
+    "detector_decay": 0.05,
+    "detector_floor": 1e-06,
+    "detector_multiplier": 8.0,
+    "displacement_scale_speed": 0.2,
+    "feature_set": "displacement_position",
+    "features": [
+      "1",
+      "dx[t] / (dt * displacement_scale_speed)",
+      "(x[t] - midpoint) / interval_width"
+    ],
+    "forgetting": 0.3,
+    "forgetting_mode": "exponential",
+    "model": "OnlineRLSPredictor",
+    "reflect": true,
+    "ridge": 0.0001,
+    "selection_evidence": "docs/evidence/candidate_selection.json",
+    "self_triggered_forgetting": "forgetting is applied only on steps whose own a-priori normalized error exceeds max(detector_multiplier * ewma(|error|), detector_floor), where the running scale is tracked from unsurprising steps only. The trigger is the model's own scored prediction error; the evaluator never signals an event, a scenario or a mode switch.",
+    "skip_after_reflected_prediction": true,
+    "straddling_window_policy": "A window whose displacement feature is a folded difference is not a sample of the linear law. Updating on it moves the weights away from the identified law by roughly 3e-5 per wall contact and costs tens of transitions to recover, which is what a continuously updating instance cannot afford. The trigger is the model's own previous raw prediction requiring reflection; the evaluator never signals a bounce.",
+    "trace_bound": 100000.0,
+    "unfold_target": true
+  },
+  "changed_law": {
+    "branch_steps": 100,
+    "description": "Fixed canonical intervention timing at the end of the common prefix, chosen for exact causal alignment between the frozen and updating branches; the post-change coefficients are sampled per episode from the declared ranges. Timing is fixed and is described as fixed, not as randomized.",
+    "equations": "a[t] = -2*zeta*omega*v[t] - omega^2*(x[t]-m); v[t+1] = v[t] + a[t]*dt; x[t+1] = reflect(x[t] + v[t+1]*dt)",
+    "initial_position_high": 0.7,
+    "initial_position_low": 0.3,
+    "initial_velocity_scale": 0.25,
+    "post_damping_high": 0.3,
+    "post_damping_low": 0.05,
+    "post_omega_high": 11.0,
+    "post_omega_low": 5.0,
+    "pre_damping": 0.1,
+    "pre_omega": 1.5,
+    "prefix_steps": 300
+  },
+  "confirmation": {
+    "ab_relationship": "shared_frozen_checkpoints",
+    "batch_registry": "benchmarks/confirmation_batches.json",
+    "episodes_per_family": 100,
+    "freeze_manifest": "benchmarks/freeze_manifest.json",
+    "high_replication_replicas": 20,
+    "minimum_bounce_events": 500,
+    "minimum_eligible_change_events": 100,
+    "replicas": 5,
+    "require_clean_source_tree": true
+  },
+  "gates": [
+    {
+      "description": "Every required direction x position x speed stratum is present with the declared minimum episode and replica counts; both walls are observed; bounce and eligible change events meet their minimums.",
+      "evaluator": "coverage",
+      "name": "stratum_coverage",
+      "required": true,
+      "threshold": {}
+    },
+    {
+      "description": "The candidate identifies the constant-velocity law: in-domain straight-motion normalized MAE and per-stratum p95 stay inside the declared absolute limits. This is an accuracy claim about a specific law, not a claim that learning occurred.",
+      "evaluator": "absolute_accuracy_by_stratum",
+      "name": "constant_velocity_identification",
+      "required": true,
+      "threshold": {
+        "family": "constant_velocity",
+        "max_mae": 1e-05,
+        "max_stratum_mae": 1e-05,
+        "max_stratum_p95": 0.0001,
+        "predictor": "candidate_frozen"
+      }
+    },
+    {
+      "description": "Frozen checkpoints taken at increasing cumulative update budgets are scored on one fixed development probe bank. The gate requires a large measured reduction from the zero-initialized checkpoint, with a hierarchical bootstrap lower bound. A parameterless analytic rule cannot satisfy it because it has no budgets and no parameter change.",
+      "evaluator": "learning_progress",
+      "name": "learning_progress",
+      "required": true,
+      "threshold": {
+        "min_ci_lower": 0.95,
+        "min_reduction": 0.99,
+        "require_monotone_non_increasing": true
+      }
+    },
+    {
+      "description": "Frozen generalization to the unfamiliar bouncing regime stays inside a declared absolute accuracy limit.",
+      "evaluator": "absolute_accuracy",
+      "name": "frozen_prediction_accuracy",
+      "required": true,
+      "threshold": {
+        "family": "bouncing",
+        "max_value": 0.0001,
+        "metric": "mae",
+        "predictor": "candidate_frozen"
+      }
+    },
+    {
+      "description": "Bounce-transition accuracy against an absolute limit, plus non-regression against the like-for-like reflected constant-motion baseline that uses the identical public boundary policy. A relative-improvement criterion against raw constant motion is deliberately not used: it measures the programmed reflection transform, and the fair baseline is analytically exact so no learner can improve on it.",
+      "evaluator": "event_accuracy_and_parity",
+      "name": "bounce_event_accuracy",
+      "required": true,
+      "threshold": {
+        "absolute_floor": 1e-06,
+        "baseline": "constant_motion_reflected",
+        "candidate": "candidate_frozen",
+        "family": "bouncing",
+        "max_event_mae": 0.0001,
+        "max_ratio": 1.1
+      }
+    },
+    {
+      "description": "With updates disabled, the candidate's 50-transition post-event error does not regress against the reflected constant-motion baseline. This is a robustness control. It is not evidence of online adaptation, because the candidate is frozen.",
+      "evaluator": "non_regression",
+      "name": "speed_change_frozen_robustness",
+      "required": true,
+      "threshold": {
+        "absolute_floor": 1e-05,
+        "baseline": "constant_motion_reflected",
+        "candidate": "candidate_frozen",
+        "family": "speed_change",
+        "max_ratio": 1.1,
+        "metric": "post_change_window_mae"
+      }
+    },
+    {
+      "description": "In the matched changed-law experiment the updating copy must beat its identical frozen copy and persistence on 50-transition cumulative error by the declared margin, and must not regress against constant motion. The unavoidable first surprise prediction is included in every total.",
+      "evaluator": "changed_law_adaptation",
+      "name": "changed_law_adaptation",
+      "required": true,
+      "threshold": {
+        "constant_motion_absolute_floor": 1e-05,
+        "constant_motion_max_ratio": 1.1,
+        "min_improvement_vs_frozen": 0.2,
+        "min_improvement_vs_persistence": 0.2,
+        "require_ci_lower_above": 0.0
+      }
+    },
+    {
+      "description": "Continuing to update in an unchanged world must not degrade the model relative to its frozen twin.",
+      "evaluator": "unchanged_control",
+      "name": "unchanged_control",
+      "required": true,
+      "threshold": {
+        "absolute_floor": 1e-05,
+        "max_ratio": 1.1
+      }
+    },
+    {
+      "description": "Eligibility is defined by the peak post-event shock; every episode falls into exactly one status and unrecovered events are counted, never dropped.",
+      "evaluator": "recovery",
+      "name": "recovery",
+      "required": true,
+      "threshold": {
+        "min_eligible_events": 100,
+        "min_recovery_rate": 0.9
+      }
+    },
+    {
+      "description": "A single continuously updating instance operating across regimes with no evaluator mode switching must not regress against the reflected constant-motion baseline.",
+      "evaluator": "non_regression",
+      "name": "always_online_stability",
+      "required": true,
+      "threshold": {
+        "absolute_floor": 1e-05,
+        "baseline": "constant_motion_reflected",
+        "candidate": "candidate_online",
+        "family": "always_online",
+        "max_ratio": 1.1,
+        "metric": "mae"
+      }
+    },
+    {
+      "description": "Reported out-of-distribution accuracy above the training speed range. Informational: a failure here is recorded, not treated as an acceptance failure.",
+      "evaluator": "absolute_accuracy",
+      "name": "speed_extrapolation_report",
+      "required": false,
+      "threshold": {
+        "family": "speed_extrapolation",
+        "max_value": 0.0001,
+        "metric": "mae",
+        "predictor": "candidate_frozen"
+      }
+    },
+    {
+      "description": "The retained evidence is complete, internally consistent, schema-valid, checksum-valid, and recomputes to the stored summary.",
+      "evaluator": "correctness",
+      "name": "correctness",
+      "required": true,
+      "threshold": {}
+    },
+    {
+      "description": "An independently initialized duplicate mini experiment, a save/resume equivalence check and a golden seed-mapping fixture are actually executed and compared. A deterministic seed function compared with itself is not accepted as evidence.",
+      "evaluator": "reproducibility",
+      "name": "reproducibility",
+      "required": true,
+      "threshold": {}
+    },
+    {
+      "description": "The selected candidate itself is benchmarked for predict, update and combined latency on the recorded CPU.",
+      "evaluator": "latency",
+      "name": "cpu_usability",
+      "required": true,
+      "threshold": {}
+    }
+  ],
+  "latency": {
+    "description": "Measured on the selected candidate with a representative trained state and a representative valid input distribution, excluding plotting and disk I/O.",
+    "p95_limit_ms": 5.0,
+    "samples": 2000,
+    "use_selected_candidate": true,
+    "warmup_samples": 200
+  },
+  "motion_families": {
+    "always_online": {
+      "description": "Continuous deployment track. One candidate instance keeps predicting and learning across a rotation of regimes with no evaluator-provided mode switch, scenario label, event flag or reset.",
+      "scenario": "mixed",
+      "speed_max": 0.2,
+      "speed_min": 0.08,
+      "steps_per_episode": 200,
+      "stratified": false,
+      "update_mode": "online"
+    },
+    "bouncing": {
+      "description": "Constant speed with wall reflection. Reflected constant motion is analytically exact here, so this family measures whether the candidate matches a known-correct rule, not whether it discovers boundary behaviour.",
+      "minimum_bounce_events": 500,
+      "required_walls": [
+        "lower",
+        "upper"
+      ],
+      "scenario": "bouncing",
+      "speed_max": 0.2,
+      "speed_min": 0.08,
+      "steps_per_episode": 600,
+      "stratified": true,
+      "update_mode": "frozen"
+    },
+    "constant_velocity": {
+      "description": "In-domain constant velocity. Episodes are deliberately allocated across the full direction x position x speed product so required coverage is known before any result is observed.",
+      "scenario": "straight",
+      "speed_max": 0.2,
+      "speed_min": 0.08,
+      "steps_per_episode": 40,
+      "stratified": true,
+      "update_mode": "frozen"
+    },
+    "speed_change": {
+      "change_factor_high": 1.8,
+      "change_factor_low": 0.45,
+      "change_step": 300,
+      "description": "Unannounced speed-magnitude change under an unchanged constant-velocity law. The frozen arm is a robustness control; a separate updating arm is reported so a frozen result is never described as adaptation.",
+      "event_margin": 0.18,
+      "scenario": "changed",
+      "speed_max": 0.2,
+      "speed_min": 0.08,
+      "steps_per_episode": 600,
+      "stratified": false,
+      "update_mode": "frozen"
+    },
+    "speed_extrapolation": {
+      "description": "Labelled out-of-distribution stress track: speeds strictly above the training range. Reported, not required.",
+      "scenario": "straight",
+      "speed_max": 0.5,
+      "speed_min": 0.3,
+      "steps_per_episode": 40,
+      "stratified": false,
+      "update_mode": "frozen"
+    }
+  },
+  "notes": {
+    "bouncing_ceiling": "Reflected constant motion is analytically exact on this deterministic noiseless world, so the bouncing family cannot show a learner outperforming it. The family is retained as an accuracy and non-regression check.",
+    "boundary_policy": "Reflection is programmed public knowledge of the observation format supplied by the programmer. It is not discovered by the learner.",
+    "leakage": "Predictors receive only past observations and, after scoring, the revealed target. Scenario, event flags, velocities, change timing, change factors and hidden coefficients never enter a predictor.",
+    "oscillator_exposure": "The candidate is allowed to learn the pre-change oscillator dynamics from observations during the common prefix. Only the changed coefficients and the intervention itself are held out.",
+    "scope": "AAA is a small, inspectable research prototype. Nothing in this benchmark supports a claim about general intelligence, physical understanding, or independent goal formation."
+  },
+  "randomness": {
+    "bootstrap_seed": 777001,
+    "description": "Every trial stream is derived from SeedSequence([root_seed, purpose, family, replica, episode]) where purpose is a frozen confirmation batch identity or the literal development purpose. Allocation depends only on trial identity, never on worker scheduling order.",
+    "root_seed": 20260910,
+    "stream_algorithm": "numpy.random.SeedSequence"
+  },
+  "recovery": {
+    "post_event_horizon": 50,
+    "pre_event_reference_length": 50,
+    "rolling_window": 5,
+    "shock_floor": 0.0001,
+    "shock_multiplier": 3.0,
+    "shock_window": 5,
+    "sustain_windows": 3,
+    "tolerance_floor": 1e-05,
+    "tolerance_multiplier": 1.5
+  },
+  "spec_version": "aaa.benchmark.v2.1",
+  "statistics": {
+    "draws": 4000,
+    "estimands": {
+      "absolute_difference": "mean_over_resampled_episodes(candidate) - mean_over_resampled_episodes(baseline)",
+      "mean": "mean_over_resampled_episodes(predictor)",
+      "relative_improvement": "1 - mean_over_resampled_episodes(candidate) / mean_over_resampled_episodes(baseline); the interval recomputes exactly this ratio-of-means on every draw",
+      "resampling_units": "level 1 = training replica with replacement; level 2 = that replica's own episode summaries with replacement, preserving its observation count; episode pairing across predictors is preserved"
+    },
+    "event_weighting": "episode_balanced",
+    "exclude_no_event_episodes": true,
+    "family_wise_alpha": 0.05,
+    "interval": 0.95,
+    "method": "paired_hierarchical_bootstrap",
+    "multiplicity": "holm_bonferroni"
+  },
+  "status": "active",
+  "stratification": {
+    "directions": [
+      "positive",
+      "negative"
+    ],
+    "minimum_episodes_per_stratum": 10,
+    "minimum_replicas_per_stratum": 3,
+    "position_bands": 4,
+    "speed_bands": 4
+  },
+  "supersedes": [
+    "aaa.benchmark.v2"
+  ],
+  "title": "AAA benchmark v2.1 - repaired measurement protocol",
+  "tolerances": {
+    "covariance_psd": 1e-09,
+    "covariance_symmetry": 1e-09,
+    "max_condition_number": 1000000000000.0,
+    "recompute_absolute": 1e-12,
+    "reproducibility_absolute": 0.0,
+    "reproducibility_relative": 0.0
+  },
+  "training": {
+    "distribution_relationship": "in-domain: the training speed range equals the confirmation speed range. Deliberate extrapolation is measured separately by the labelled speed_extrapolation family.",
+    "episodes_per_replica": 24,
+    "family": "constant_velocity",
+    "learning_probe_budgets": [
+      0,
+      2,
+      4,
+      8,
+      16,
+      24
+    ],
+    "learning_probe_episodes": 8,
+    "learning_probe_seed_offset": 900000,
+    "speed_max": 0.2,
+    "speed_min": 0.08,
+    "steps_per_episode": 180
+  },
+  "world": {
+    "dt": 0.02,
+    "history_length": 4,
+    "lower_bound": 0.0,
+    "upper_bound": 1.0
+  }
+}

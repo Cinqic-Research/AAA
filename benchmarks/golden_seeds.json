@@ -1,0 +1,16 @@
+{
+  "root_seed": 20260910,
+  "schema_version": "aaa.golden_seeds.v1",
+  "seeds": {
+    "confirmation::aaa-v2_1-confirmation-a-0001|bouncing|0|0": 1583705174160819786,
+    "confirmation::aaa-v2_1-confirmation-b-0001|bouncing|0|0": 6938902979928834462,
+    "development|bouncing|0|0": 2492422777007407171,
+    "development|bouncing|4|99": 3208990973686400634,
+    "development|changed_law|1|5": 7622988571213162504,
+    "development|constant_velocity|0|0": 1003075325629575966,
+    "development|speed_change|2|17": 4222579843074294704,
+    "learning_probe|constant_velocity|0|900000": 954143307573961782,
+    "training::selected|training|0|0": 8321608796154411012,
+    "training::selected|training|4|23": 2538514081476868448
+  }
+}

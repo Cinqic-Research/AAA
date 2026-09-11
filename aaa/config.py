@@ -2,13 +2,37 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, replace
 import math
+from dataclasses import asdict, dataclass, replace
 from typing import Any
+
+import numpy as np
+
+
+def _require_int(value: Any, name: str, *, minimum: int | None = None) -> int:
+    """Reject booleans, floats and non-integral values used as counts."""
+
+    if isinstance(value, bool):
+        raise ValueError(f"{name} must be an integer, not a boolean")
+    if isinstance(value, float) and not value.is_integer():
+        raise ValueError(f"{name} must be an integer, got {value!r}")
+    if not isinstance(value, (int, float, np.integer)):
+        raise ValueError(f"{name} must be an integer, got {type(value).__name__}")
+    number = int(value)
+    if minimum is not None and number < minimum:
+        raise ValueError(f"{name} must be at least {minimum}, got {number}")
+    return number
 
 
 @dataclass(frozen=True)
 class WorldConfig:
+    """Resolved world parameters.
+
+    ``change_step`` uses explicit semantics: ``None`` means *no change event
+    in this episode*; an integer must index a transition that is actually
+    simulated, i.e. ``0 <= change_step < steps_per_episode``.
+    """
+
     lower_bound: float = 0.0
     upper_bound: float = 1.0
     dt: float = 0.02
@@ -16,7 +40,7 @@ class WorldConfig:
     history_length: int = 4
     speed_min: float = 0.12
     speed_max: float = 0.32
-    change_step: int = 60
+    change_step: int | None = None
     change_factor_low: float = 0.55
     change_factor_high: float = 1.65
     event_margin: float = 0.14
@@ -32,31 +56,47 @@ class WorldConfig:
             "change_factor_high": self.change_factor_high,
             "event_margin": self.event_margin,
         }
-        if any(not math.isfinite(float(value)) for value in values.values()):
-            raise ValueError("world configuration values must be finite")
+        for name, value in values.items():
+            if isinstance(value, bool) or not isinstance(value, (int, float, np.floating, np.integer)):
+                raise ValueError(f"world configuration value {name} must be numeric")
+            if not math.isfinite(float(value)):
+                raise ValueError(f"world configuration value {name} must be finite")
+        object.__setattr__(
+            self, "steps_per_episode", _require_int(self.steps_per_episode, "steps_per_episode", minimum=1)
+        )
+        object.__setattr__(
+            self, "history_length", _require_int(self.history_length, "history_length", minimum=2)
+        )
         if self.upper_bound <= self.lower_bound:
             raise ValueError("upper_bound must be greater than lower_bound")
         if self.dt <= 0:
             raise ValueError("dt must be positive")
-        if self.steps_per_episode <= 0:
-            raise ValueError("steps_per_episode must be positive")
-        # A short diagnostic episode may intentionally contain only warm-up
-        # observations. The runner will then produce zero scored transitions.
-        if self.history_length < 2:
-            raise ValueError("history_length must be at least 2")
         if self.speed_min <= 0 or self.speed_max < self.speed_min:
             raise ValueError("speed range must satisfy 0 < speed_min <= speed_max")
-        if self.change_step < 0:
-            raise ValueError("change_step must be non-negative")
+        if self.change_step is not None:
+            step = _require_int(self.change_step, "change_step", minimum=0)
+            if step >= self.steps_per_episode:
+                raise ValueError(
+                    "change_step must identify a simulated transition: 0 <= change_step < steps_per_episode"
+                )
+            object.__setattr__(self, "change_step", step)
         if self.change_factor_low <= 0 or self.change_factor_high <= 0:
             raise ValueError("change factors must be positive")
         if self.event_margin < 0 or self.event_margin > (self.upper_bound - self.lower_bound) / 2:
             raise ValueError("event_margin must fit inside half the configured interval")
 
+    @property
+    def width(self) -> float:
+        """Interval width ``L``; the canonical normalization constant."""
+
+        return float(self.upper_bound - self.lower_bound)
+
 
 @dataclass(frozen=True)
 class ExperimentConfig:
-    world: WorldConfig = WorldConfig()
+    """Configuration for the historical v1 evaluation track."""
+
+    world: WorldConfig = WorldConfig(change_step=60)
     learning_rate: float = 0.08
     learning_rate_candidates: tuple[float, ...] = (0.02, 0.04, 0.08, 0.16)
     dev_seeds: tuple[int, ...] = (101, 102, 103)
@@ -77,14 +117,22 @@ class ExperimentConfig:
     clip_predictions: bool = False
 
     def __post_init__(self) -> None:
-        if self.learning_rate <= 0 or any(rate <= 0 for rate in self.learning_rate_candidates):
-            raise ValueError("learning rates must be positive")
+        if not math.isfinite(self.learning_rate) or self.learning_rate <= 0:
+            raise ValueError("learning rates must be positive and finite")
+        if any(not math.isfinite(rate) or rate <= 0 for rate in self.learning_rate_candidates):
+            raise ValueError("learning rates must be positive and finite")
         if not self.dev_seeds or not self.training_seeds or not self.final_seeds:
             raise ValueError("development, training, and final seed sets must be non-empty")
-        if self.post_change_window <= 0 or self.rolling_window <= 0:
-            raise ValueError("post-change and rolling windows must be positive")
-        if self.recovery_sustain_windows <= 0:
-            raise ValueError("recovery_sustain_windows must be positive")
+        for name in (
+            "dev_training_episodes",
+            "dev_validation_episodes",
+            "training_episodes",
+            "generalization_episodes_per_scenario",
+            "post_change_window",
+            "rolling_window",
+            "recovery_sustain_windows",
+        ):
+            _require_int(getattr(self, name), name, minimum=1)
         if self.recovery_multiplier <= 0 or self.recovery_floor < 0:
             raise ValueError("recovery thresholds must be non-negative and meaningful")
         if self.meaningful_change_fraction < 0:
@@ -97,7 +145,7 @@ class ExperimentConfig:
 
         return _jsonable(asdict(self))
 
-    def quick(self) -> "ExperimentConfig":
+    def quick(self) -> ExperimentConfig:
         """Return a small configuration suitable for a smoke run."""
 
         return replace(
