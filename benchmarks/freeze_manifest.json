@@ -22,7 +22,7 @@
       "dx[t] / (dt * displacement_scale_speed)",
       "(x[t] - midpoint) / interval_width"
     ],
-    "forgetting": 0.5,
+    "forgetting": 0.3,
     "forgetting_mode": "exponential",
     "model": "OnlineRLSPredictor",
     "reflect": true,
@@ -32,11 +32,11 @@
   },
   "checkpoints": {
     "hashes": [
-      "10e68600faf513eca5a01a4ffbecba3491c27853983de45bb43ab459a46ba290",
-      "adadfab63d0dc021abb1111b93992e2319196c10784230ffd4c52c449534cb9b",
-      "8b168a5096cd54429b973c029767522d0e444814e30c507df729c988a675425d",
-      "57f0718d11e86b4593099e6ada74fd0c7c3258e43a9de7c0af7486db039ba2a5",
-      "2f22182509b4a0e904b573cbd4b83f8568ee4fb3029bb7497fbc3f09b7dbb2c6"
+      "e635f04f944190742fc6037c4468814a6a53eb50b4633ed9d1c0edd86e305a96",
+      "0dede9edd8afce6f583e97ba299d571c456ff05e266df6a24cf82328547feb9e",
+      "9540f727907c0bc8b36afaf15fecdd14d35775c537145e7eab999bfd878aa0ce",
+      "745dbb6d3f29eaa4d71c337f1ecf0e3f260ad93a6b07afdf221448a6913aac8a",
+      "d31088732cd195089a209ba1460c930fefcad7b160de5eeb1ca92c3edfc9361a"
     ],
     "relationship": "shared_frozen_checkpoints"
   },
@@ -67,7 +67,7 @@
       "factor_low": 0.45
     }
   },
-  "frozen_at_utc": "2026-09-11T06:03:20.051910+00:00",
+  "frozen_at_utc": "2026-09-11T06:30:17.305700+00:00",
   "gates": [
     {
       "evaluator": "coverage",
@@ -207,10 +207,10 @@
       "threshold": {}
     }
   ],
-  "notes": "Protocol v2.1 confirmation freeze. Candidate selected on development evidence only; thresholds frozen before any confirmation batch was generated.",
+  "notes": "Protocol v2.1 confirmation freeze, round 2. Candidate repaired on development evidence after the round-1 always_online_stability failure; selection re-run over 38 variants with the same predeclared rule. No threshold was altered in either round.",
   "planned_confirmation_batches": [
-    "aaa-v2_1-confirmation-a-0001",
-    "aaa-v2_1-confirmation-b-0001"
+    "aaa-v2_1-confirmation-a-0002",
+    "aaa-v2_1-confirmation-b-0002"
   ],
   "protocol_status": "active",
   "protocol_version": "aaa.benchmark.v2.1",
@@ -235,11 +235,11 @@
   },
   "schema_version": "aaa.freeze_manifest.v1",
   "source": {
-    "commit": "f22839c907e28ab8ca8ebeb0b19be3a1fb3de874",
+    "commit": "2fe2f2f3704c0194d233d5a6f9f135d401f0ddd9",
     "dirty": false,
-    "tree_hash": "5790bfa63704b4cf89dd7f629a5fcc7c94044a5fcfd1f602190d34822e30771e"
+    "tree_hash": "8521588003f1247e35c07eb0b487502e1cb071a4999316b098fcd6717d9e690a"
   },
-  "spec_hash": "198b9a4ea45412068abd386ad252d8cab102e713d6fb4607461100c73c07c38f",
+  "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
   "statistics": {
     "draws": 4000,
     "estimands": {
