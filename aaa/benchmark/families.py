@@ -250,6 +250,7 @@ def make_candidate(
         feature_set=spec.candidate.feature_set,
         reflect=spec.candidate.reflect if reflect is None else reflect,
         unfold_target=spec.candidate.unfold_target,
+        skip_after_reflected_prediction=spec.candidate.skip_after_reflected_prediction,
         trace_bound=spec.candidate.trace_bound,
         dead_zone=spec.candidate.dead_zone,
         detector_multiplier=spec.candidate.detector_multiplier,

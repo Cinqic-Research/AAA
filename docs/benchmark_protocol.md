@@ -44,16 +44,24 @@ A predictor never receives the scenario name, an event flag, the velocity, the
 change schedule, a hidden coefficient, or a future observation. The evaluator
 keeps event labels for metrics only. `tests/test_experiment.py` pins this.
 
-Two things *are* public, programmed knowledge of the observation format rather
-than learned capability, and the protocol is explicit about both:
+Some things *are* public, programmed knowledge of the observation format rather
+than learned capability, and the protocol is explicit about all of them:
 
 - the coordinate interval `[lower_bound, upper_bound]` and the time step;
-- the reflection map at the boundaries.
+- the reflection map at the boundaries;
+- the inverse of that map, applied to the update target so the learner
+  regresses in the coordinate its own linear law lives in (`unfold_target`);
+- the fact that a window whose displacement feature straddles a wall is not a
+  sample of that linear law, so the candidate does not update on it
+  (`skip_after_reflected_prediction`). The trigger is the learner's **own**
+  previous raw prediction having needed reflection to stay in bounds — not an
+  evaluator bounce label.
 
-Because reflection is public, the baseline suite includes a **reflected
+Because the reflection map is public, the baseline suite includes a **reflected
 constant-motion** predictor that uses the identical map. That is the
 like-for-like comparison for any candidate allowed to reflect its own
-prediction.
+prediction. The last item exists because of a measured confirmation failure;
+see `AAA-120` in [`issue_ledger.md`](issue_ledger.md).
 
 ## Units
 

@@ -55,6 +55,17 @@ in-domain training with extrapolation measured separately; formatter, linter,
 type checker and coverage with no blanket ignores; and CI that installs the
 lock file and proves it.
 
+**The repaired benchmark said no, and that is the headline.** The first v2.1
+confirmation round failed: confirmation A and confirmation B, on independent
+fresh streams, both failed the required `always_online_stability` gate and both
+exited non-zero. Thirteen of fourteen gates passed in each. The failure was
+traced on development data to a precise mechanism — a continuously updating
+instance is damaged by the one window after each wall contact whose
+displacement feature is a folded difference — and repaired in the candidate.
+Both batches were retired permanently, no threshold was touched, and the failed
+attempts are committed. A first attempt at the repair did not work and is
+recorded too. See `AAA-120` in `docs/issue_ledger.md`.
+
 Historical v1 and v2 evidence is preserved. The v2 confirmations are
 reclassified as historical/provisional under a superseded methodology; see
 `docs/errata.md`.

@@ -422,6 +422,7 @@ class OnlineRLSPredictor(Predictor):
         feature_set: str = "displacement_position",
         reflect: bool = True,
         unfold_target: bool = False,
+        skip_after_reflected_prediction: bool = False,
         trace_bound: float = 1e5,
         symmetry_tolerance: float = SYMMETRY_TOLERANCE,
         psd_tolerance: float = PSD_TOLERANCE,
@@ -439,6 +440,8 @@ class OnlineRLSPredictor(Predictor):
         forgetting_suspensions: int = 0,
         dead_zone_skips: int = 0,
         detected_surprises: int = 0,
+        reflection_skips: int = 0,
+        previous_prediction_reflected: bool = False,
         error_ewma: float = 0.0,
     ) -> None:
         numeric = {
@@ -498,6 +501,7 @@ class OnlineRLSPredictor(Predictor):
         self.feature_set = str(feature_set)
         self.reflect = bool(reflect)
         self.unfold_target = bool(unfold_target)
+        self.skip_after_reflected_prediction = bool(skip_after_reflected_prediction)
         self.trace_bound = float(trace_bound)
         self.dead_zone = float(dead_zone)
         self.detector_multiplier = float(detector_multiplier)
@@ -538,6 +542,8 @@ class OnlineRLSPredictor(Predictor):
         self.forgetting_suspensions = int(forgetting_suspensions)
         self.dead_zone_skips = int(dead_zone_skips)
         self.detected_surprises = int(detected_surprises)
+        self.reflection_skips = int(reflection_skips)
+        self.previous_prediction_reflected = bool(previous_prediction_reflected)
         if not math.isfinite(float(error_ewma)) or error_ewma < 0:
             raise ValueError("error_ewma must be finite and non-negative")
         self.error_ewma = float(error_ewma)
@@ -584,11 +590,29 @@ class OnlineRLSPredictor(Predictor):
             raise ValueError("target_position must be finite")
         phi = self.features(history)
         width = self.upper_bound - self.lower_bound
+        raw = self.raw_predict(history)
+
+        # A window whose displacement feature straddles a wall is not a sample
+        # of the linear law. Unfolding the *target* makes the wall transition
+        # itself an ordinary sample, but the very next window still carries a
+        # folded difference as its displacement feature, and fitting that one
+        # sample is what damages a continuously updating instance.
+        #
+        # The trigger is the learner's own previous raw prediction having
+        # needed reflection to stay in bounds -- public knowledge of the
+        # observation format applied to its own output. No evaluator bounce
+        # label, scenario or event flag is involved.
+        straddling = self.previous_prediction_reflected
+        self.previous_prediction_reflected = bool(
+            self.reflect and raw != reflect_prediction(raw, self.lower_bound, self.upper_bound)
+        )
+        if self.skip_after_reflected_prediction and straddling:
+            self.reflection_skips += 1
+            return
+
         effective_target = float(target_position)
         if self.unfold_target:
-            effective_target = unfold_observation(
-                effective_target, self.raw_predict(history), self.lower_bound, self.upper_bound
-            )
+            effective_target = unfold_observation(effective_target, raw, self.lower_bound, self.upper_bound)
         target = (effective_target - float(history[-1])) / width
         innovation = target - float(phi @ self.weights)
         if self.dead_zone > 0.0 and abs(innovation) <= self.dead_zone:
@@ -680,6 +704,7 @@ class OnlineRLSPredictor(Predictor):
             "feature_set": self.feature_set,
             "reflect": self.reflect,
             "unfold_target": self.unfold_target,
+            "skip_after_reflected_prediction": self.skip_after_reflected_prediction,
             "trace_bound": self.trace_bound,
             "dead_zone": self.dead_zone,
             "detector_multiplier": self.detector_multiplier,
@@ -695,6 +720,8 @@ class OnlineRLSPredictor(Predictor):
             "update_count": self.update_count,
             "forgetting_suspensions": self.forgetting_suspensions,
             "dead_zone_skips": self.dead_zone_skips,
+            "reflection_skips": self.reflection_skips,
+            "previous_prediction_reflected": self.previous_prediction_reflected,
             "detected_surprises": self.detected_surprises,
             "error_ewma": self.error_ewma,
         }
@@ -759,6 +786,7 @@ class OnlineRLSPredictor(Predictor):
             feature_set=str(state["feature_set"]),
             reflect=bool(state.get("reflect", True)),
             unfold_target=bool(state.get("unfold_target", False)),
+            skip_after_reflected_prediction=bool(state.get("skip_after_reflected_prediction", False)),
             trace_bound=float(state.get("trace_bound", 1e5)),
             dead_zone=float(state.get("dead_zone", 0.0)),
             detector_multiplier=float(state.get("detector_multiplier", 0.0)),
@@ -779,6 +807,8 @@ class OnlineRLSPredictor(Predictor):
             update_count=int(state.get("update_count", 0)),
             forgetting_suspensions=int(state.get("forgetting_suspensions", 0)),
             dead_zone_skips=int(state.get("dead_zone_skips", 0)),
+            reflection_skips=int(state.get("reflection_skips", 0)),
+            previous_prediction_reflected=bool(state.get("previous_prediction_reflected", False)),
             detected_surprises=int(state.get("detected_surprises", 0)),
             error_ewma=float(state.get("error_ewma", 0.0)),
         )

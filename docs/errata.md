@@ -134,6 +134,23 @@ symmetrized asymmetric ones.
 These did not fire on the benchmark's own trajectories, which is precisely why
 "it passed" was not evidence that it was sound.
 
+## The first v2.1 confirmation round failed
+
+This belongs here rather than in a footnote. The first formal confirmation
+round under the repaired protocol **failed**: confirmation A and confirmation B,
+on independent fresh streams, both failed the required `always_online_stability`
+gate and both exited non-zero. Thirteen of fourteen gates passed in each.
+
+The failure was diagnosed to a specific mechanism on development data — a
+continuously updating instance is damaged by the one window after each wall
+contact whose displacement feature is a folded difference — and repaired in the
+candidate. Both batches are retired permanently, no threshold was altered, and
+the failed attempts are committed at
+[`../results/benchmark_v2_1/`](../results/benchmark_v2_1/).
+
+See `AAA-120` in [`issue_ledger.md`](issue_ledger.md) for the full diagnosis,
+including an alternative repair that was tried and did not work.
+
 ## What survived
 
 Not everything was wrong, and the repair did not assume it was.

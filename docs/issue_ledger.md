@@ -769,6 +769,96 @@ wrong acceptance decision. `medium` — wrong or misleading measurement.
 
 ---
 
+## J. Found by the repaired benchmark itself
+
+### AAA-120 — continued updating regresses in continuous deployment
+- **Source** the v2.1 `always_online` gate · **Severity** critical · **Status** repaired
+- **Affected** `aaa/predictors.py`
+
+**What happened.** The first formal confirmation round under protocol v2.1
+**failed**. Confirmation A and confirmation B, on independent fresh streams,
+both failed the required `always_online_stability` gate and both exited
+non-zero. Thirteen of fourteen gates passed in each.
+
+| | A | B |
+|---|---:|---:|
+| `candidate_online` normalized MAE | 4.427e-05 | 3.414e-05 |
+| `constant_motion_reflected` | 6.621e-06 | 7.012e-06 |
+| limit (1.1x baseline + 1e-5) | 1.728e-05 | 1.771e-05 |
+| worst replica | 1.519e-04 | 8.784e-05 |
+
+Both batches are retired permanently. **No threshold was altered.** The failed
+attempts are committed at [`../results/benchmark_v2_1/`](../results/benchmark_v2_1/).
+
+This gate did not exist before the repair. Every frozen track passed; only the
+continuously-updating deployment arm failed, which is precisely the question the
+always-online family was added to ask.
+
+**First, not a software bug.** The trained checkpoints were numerically healthy
+(condition number ~31, positive semidefinite, zero forgetting suspensions). The
+frozen copy of the same model was exact. The failure was concentrated in
+particular replicas (one at 1.5e-04 against four at ~1.2e-05), and the
+per-segment breakdown showed straight-motion segments carrying a heavy tail —
+mean 8.2e-05 against a p95 of 1.2e-05 — while the reflected baseline was exact
+at 2.2e-19 there.
+
+**Root cause, located on development streams.** Instrumenting weight drift
+against the exactly-identified solution through a single wall contact:
+
+| step | | scored error | weight drift from exact | change |
+|---:|---|---:|---:|---:|
+| 167 | wall crossing | 3.640e-11 | 9.525e-12 | +1.211e-13 |
+| 168 | **next window** | 4.222e-03 | 2.952e-05 | **+2.952e-05** |
+| 169 | | 1.664e-05 | 2.928e-05 | -2.450e-07 |
+| ... | | | | slow decay over 30+ steps |
+
+The wall transition itself is harmless: `unfold_target` already inverts the
+public reflection map, so that sample is an ordinary one. The damage is entirely
+the **next** window, whose displacement feature `x[t] - x[t-1]` is a *folded*
+difference and therefore not a sample of the linear law at all. Fitting that one
+sample moves the weights by ~3e-5 and costs tens of transitions to recover.
+A frozen copy never updates, so it is never damaged; a continuously updating
+instance accumulates the damage across every wall contact it ever sees.
+
+**Repair.** The learner does not update on a window whose displacement feature
+straddles a wall. The trigger is causally clean: the learner's **own** previous
+raw prediction having required reflection to stay in bounds. That is the same
+programmed public knowledge of the observation format that licenses reflection
+in the first place, applied to its own output. No evaluator bounce label,
+scenario, event flag or change schedule is involved. Skipped steps are counted
+in `reflection_skips` and serialized.
+
+Measured on development streams, three replicas, always-online rotation:
+
+| | mean | worst replica | p99 | max weight drift |
+|---|---:|---:|---:|---:|
+| update on every step | 4.732e-05 | 1.133e-04 | 1.549e-04 | 3.541e-01 |
+| skip the straddling window | **7.862e-06** | **9.062e-06** | **1.501e-05** | **1.564e-04** |
+
+It costs nothing where the candidate already succeeded: the changed-law
+adaptation improvement over the identical frozen copy is 0.6964 with the policy
+and 0.6964 without it, because the oscillator branch rarely reaches a wall.
+
+**An alternative that did not work, recorded because it did not.** The first
+idea was to maintain a continuous unfolded coordinate frame and run the linear
+law there. The prototype was far worse than the current candidate (mean 2.84e-01
+against 1.68e-05): the offset bookkeeping across successive reflections is
+subtler than it looks, and each reflection flips the direction of the unfolded
+axis. It was abandoned on development evidence, not adopted and quietly dropped.
+
+- **Regression** `tests/test_rls_numerics.py::StraddlingWindowTests` — six cases
+  covering the skip, its absence, the causal trigger, interaction with
+  `reflect=False`, checkpoint survival and that a skipped step moves no learned
+  state.
+- **Discipline** The change is a candidate change, so it requires a fresh
+  predeclared confirmation batch pair, a new specification hash and a new freeze
+  manifest. The spent attempts are counted in the multiplicity family. The
+  motivation to look came from a confirmation failure; the mechanism, the fix
+  and its validation all come from development streams, and the failed streams
+  were not used to choose anything.
+
+---
+
 ## Not repaired, and why
 
 ### AAA-110 — repository settings could not be verified or changed from here

@@ -140,6 +140,7 @@ class CandidateSpec:
     trace_bound: float
     reflect: bool
     unfold_target: bool
+    skip_after_reflected_prediction: bool
     dead_zone: float
     detector_multiplier: float
     detector_floor: float
@@ -147,6 +148,7 @@ class CandidateSpec:
     displacement_scale_speed: float
     boundary_policy: str
     self_triggered_forgetting: str
+    straddling_window_policy: str
     selection_evidence: str
 
     @classmethod
@@ -171,6 +173,7 @@ class CandidateSpec:
             trace_bound=_finite(data["trace_bound"], f"{path}.trace_bound"),
             reflect=bool(data["reflect"]),
             unfold_target=bool(data["unfold_target"]),
+            skip_after_reflected_prediction=bool(data["skip_after_reflected_prediction"]),
             dead_zone=_finite(data["dead_zone"], f"{path}.dead_zone"),
             detector_multiplier=_finite(data["detector_multiplier"], f"{path}.detector_multiplier"),
             detector_floor=_finite(data["detector_floor"], f"{path}.detector_floor"),
@@ -180,6 +183,7 @@ class CandidateSpec:
             ),
             boundary_policy=str(data["boundary_policy"]),
             self_triggered_forgetting=str(data["self_triggered_forgetting"]),
+            straddling_window_policy=str(data["straddling_window_policy"]),
             selection_evidence=str(data["selection_evidence"]),
         )
 

@@ -77,6 +77,7 @@ class Variant:
     dead_zone: float = 0.0
     forgetting_mode: str = "exponential"
     unfold_target: bool = False
+    skip_after_reflected_prediction: bool = False
     detector_multiplier: float = 0.0
 
     @property
@@ -85,6 +86,7 @@ class Variant:
             f"{self.feature_set}|lambda={self.forgetting}|{self.forgetting_mode}"
             f"|ridge={self.ridge:g}|reflect={int(self.reflect)}|trace={self.trace_bound:g}"
             f"|deadzone={self.dead_zone:g}|unfold={int(self.unfold_target)}"
+            f"|skipstraddle={int(self.skip_after_reflected_prediction)}"
             f"|detector={self.detector_multiplier:g}|episodes={self.training_episodes}"
         )
 
@@ -99,6 +101,7 @@ class Variant:
             "dead_zone": self.dead_zone,
             "forgetting_mode": self.forgetting_mode,
             "unfold_target": self.unfold_target,
+            "skip_after_reflected_prediction": self.skip_after_reflected_prediction,
             "detector_multiplier": self.detector_multiplier,
         }
 
@@ -130,6 +133,7 @@ def _make(variant: Variant, world: WorldConfig, *, name: str, update_enabled: bo
         trace_bound=variant.trace_bound,
         dead_zone=variant.dead_zone,
         unfold_target=variant.unfold_target,
+        skip_after_reflected_prediction=variant.skip_after_reflected_prediction,
         detector_multiplier=variant.detector_multiplier,
         name=name,
         update_enabled=update_enabled,
@@ -321,6 +325,7 @@ def variant_grid(*, quick: bool) -> list[Variant]:
             "dead_zone": 0.0,
             "forgetting_mode": "exponential",
             "unfold_target": True,
+            "skip_after_reflected_prediction": True,
             "detector_multiplier": 8.0,
         }
         settings.update(overrides)
@@ -337,7 +342,9 @@ def variant_grid(*, quick: bool) -> list[Variant]:
     for multiplier in (2.0, 4.0, 16.0, 32.0):
         variants.append(base(detector_multiplier=multiplier))
     # mechanism ablations, one factor at a time
+    variants.append(base(skip_after_reflected_prediction=False))
     variants.append(base(unfold_target=False))
+    variants.append(base(unfold_target=False, skip_after_reflected_prediction=False))
     variants.append(base(detector_multiplier=0.0))
     variants.append(base(unfold_target=False, detector_multiplier=0.0))
     variants.append(base(reflect=False))
@@ -355,13 +362,21 @@ def variant_grid(*, quick: bool) -> list[Variant]:
     # historical family: plain exponential forgetting with no detector and no
     # boundary-consistent target, i.e. the pre-repair candidate shape
     for forgetting in (1.0, 0.99, 0.98, 0.95, 0.90):
-        variants.append(base(forgetting=forgetting, unfold_target=False, detector_multiplier=0.0))
+        variants.append(
+            base(
+                forgetting=forgetting,
+                unfold_target=False,
+                skip_after_reflected_prediction=False,
+                detector_multiplier=0.0,
+            )
+        )
     for forgetting in (0.5, 0.9):
         variants.append(
             base(
                 forgetting=forgetting,
                 forgetting_mode="directional",
                 unfold_target=False,
+                skip_after_reflected_prediction=False,
                 detector_multiplier=0.0,
             )
         )

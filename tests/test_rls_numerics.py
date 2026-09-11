@@ -9,6 +9,7 @@ few thousand. The observed pre-repair failure indices are recorded in
 
 from __future__ import annotations
 
+import json
 import math
 import unittest
 
@@ -346,3 +347,83 @@ class InvalidStateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StraddlingWindowTests(unittest.TestCase):
+    """A window whose displacement feature is a folded difference is not a
+    sample of the linear law, and fitting it damages a continuously updating
+    instance. The learner detects this from its own reflected raw prediction."""
+
+    @staticmethod
+    def _model_at_a_wall(**kwargs) -> OnlineRLSPredictor:
+        # Weights that already encode the constant-velocity law, so the raw
+        # prediction from a window running into the upper wall overshoots it.
+        return _model(forgetting=0.5, weights=[0.0, 0.004, 0.0], **kwargs)
+
+    @staticmethod
+    def _at_a_wall(model: OnlineRLSPredictor):
+        """Drive one wall contact and return (updates_applied, skips)."""
+        before = model.update_count
+        # Raw prediction 1.016 -> reflected to 0.984: this window's own output
+        # had to be folded, so the *next* window straddles the wall.
+        approach = (0.944, 0.962, 0.980, 0.998)
+        assert model.raw_predict(approach) > 1.0
+        model.update(approach, 0.986)
+        model.update((0.962, 0.980, 0.998, 0.986), 0.968)
+        return model.update_count - before, model.reflection_skips
+
+    def test_the_straddling_window_is_skipped_when_enabled(self):
+        model = self._model_at_a_wall(skip_after_reflected_prediction=True)
+        applied, skips = self._at_a_wall(model)
+        self.assertEqual(skips, 1)
+        self.assertEqual(applied, 1)
+
+    def test_without_the_policy_every_window_is_fitted(self):
+        model = self._model_at_a_wall(skip_after_reflected_prediction=False)
+        applied, skips = self._at_a_wall(model)
+        self.assertEqual(skips, 0)
+        self.assertEqual(applied, 2)
+
+    def test_the_trigger_is_the_models_own_reflected_prediction(self):
+        model = self._model_at_a_wall(skip_after_reflected_prediction=True)
+        # Well inside the interval nothing is reflected and nothing is skipped.
+        for _ in range(20):
+            model.update((0.40, 0.42, 0.44, 0.46), 0.48)
+        self.assertEqual(model.reflection_skips, 0)
+        self.assertEqual(model.update_count, 20)
+
+    def test_the_policy_is_off_when_reflection_is_off(self):
+        model = self._model_at_a_wall(reflect=False, skip_after_reflected_prediction=True)
+        self._at_a_wall(model)
+        self.assertEqual(model.reflection_skips, 0)
+
+    def test_the_skip_counter_and_flag_survive_a_checkpoint(self):
+        model = self._model_at_a_wall(skip_after_reflected_prediction=True)
+        self._at_a_wall(model)
+        restored = OnlineRLSPredictor.from_state_dict(
+            model.state_dict(), name="restored", update_enabled=True
+        )
+        self.assertEqual(restored.reflection_skips, model.reflection_skips)
+        self.assertEqual(restored.previous_prediction_reflected, model.previous_prediction_reflected)
+        self.assertTrue(restored.skip_after_reflected_prediction)
+
+    def test_skipping_leaves_the_learned_state_untouched(self):
+        # A skipped step must move no weight, no covariance and no counter
+        # other than its own. It must still record whether *its* raw
+        # prediction was reflected, so a second consecutive wall contact is
+        # handled correctly.
+        bookkeeping = ("reflection_skips", "previous_prediction_reflected")
+
+        def learned(model):
+            return json.dumps(
+                {k: v for k, v in model.state_dict().items() if k not in bookkeeping}, sort_keys=True
+            )
+
+        model = self._model_at_a_wall(skip_after_reflected_prediction=True)
+        model.update((0.944, 0.962, 0.980, 0.998), 0.986)
+        self.assertTrue(model.previous_prediction_reflected)
+        before = learned(model)
+        model.update((0.962, 0.980, 0.998, 0.986), 0.968)
+        self.assertEqual(learned(model), before)
+        self.assertEqual(model.reflection_skips, 1)
+        self.assertFalse(model.previous_prediction_reflected)

@@ -46,6 +46,20 @@ In particular:
   Five checkpoints evaluated on 500 episodes is 500 episodes from five
   learners.
 
+## What the benchmark has already refused
+
+The first confirmation round under this protocol failed. Both fresh streams
+failed `always_online_stability`: a continuously updating instance regressed
+against the reflected constant-motion baseline, because it was fitting the one
+window after each wall contact whose displacement feature is a folded
+difference. That was repaired in the candidate, on development evidence, with
+the failed attempts kept and no threshold touched.
+
+Worth stating plainly: the thirteen gates that passed in that round include
+every *frozen* track. The gate that failed is the only one that asks what
+happens when the system is left running. That asymmetry is the most interesting
+thing this version has measured.
+
 ## Known open items
 
 - Raw per-step evidence is regenerable rather than durably archived

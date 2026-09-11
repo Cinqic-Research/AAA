@@ -155,6 +155,7 @@ class ExecutableSpecTests(unittest.TestCase):
         "candidate.features",
         "candidate.boundary_policy",
         "candidate.self_triggered_forgetting",
+        "candidate.straddling_window_policy",
         "candidate.selection_evidence",
         "candidate.model",
         "statistics.estimands",

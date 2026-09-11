@@ -51,6 +51,14 @@ The current protocol is built so that it can say **no**:
 Only `PASS` satisfies a required gate, and formal confirmation exits non-zero
 on anything else. Absence of evidence is never turned into success.
 
+**It has already said no.** The first confirmation round under the repaired
+protocol failed: both independent fresh streams failed the required
+`always_online_stability` gate and both exited non-zero. Thirteen of fourteen
+gates passed in each. The failure was traced on development data to a specific
+mechanism, repaired in the candidate, and the failed attempts are committed
+alongside everything else. No threshold was touched. See `AAA-120` in
+[`docs/issue_ledger.md`](docs/issue_ledger.md).
+
 ## What is implemented
 
 - A seeded, bounded CPU simulator: constant velocity, reflection at the
