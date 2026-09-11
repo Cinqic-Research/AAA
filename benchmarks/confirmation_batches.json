@@ -2,13 +2,15 @@
   "batches": [
     {
       "batch_id": "aaa-v2_1-confirmation-a-0001",
-      "consumed_by": [],
+      "consumed_by": [
+        "aaa-v2_1-confirmation-a-0001"
+      ],
       "declared_at": "2026-09-11T06:02:53.991232+00:00",
       "notes": "First fresh confirmation batch under protocol v2.1",
-      "outcome": null,
+      "outcome": "required_gate_failure",
       "role": "confirmation_a",
       "spec_hash": "198b9a4ea45412068abd386ad252d8cab102e713d6fb4607461100c73c07c38f",
-      "status": "planned"
+      "status": "retired"
     },
     {
       "batch_id": "aaa-v2_1-confirmation-b-0001",
