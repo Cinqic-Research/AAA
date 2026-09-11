@@ -507,13 +507,14 @@ def _render(result: dict[str, Any]) -> str:
             "",
             "## Order sensitivity",
             "",
-            "| Regime | Features | Estimator | Chronological | Shuffled | Shuffled - chronological |",
-            "|---|---|---|---:|---:|---:|",
+            "| Regime | Features | Estimator | Hyperparameter | Chronological | Shuffled | Shuffled - chronological |",
+            "|---|---|---|---:|---:|---:|---:|",
         ]
     )
     for row in result["order_sensitivity"][:24]:
         lines.append(
             f"| {row['regime']} | `{row['features']}` | `{row['estimator']}` | "
+            f"{row['hyperparameter']:g} | "
             f"{row['chronological_holdout_mae']:.3e} | {row['shuffled_holdout_mae']:.3e} | "
             f"{row['shuffled_minus_chronological']:+.3e} |"
         )
