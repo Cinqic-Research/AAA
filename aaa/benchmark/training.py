@@ -19,7 +19,7 @@ import numpy as np
 from ..config import WorldConfig
 from ..experiment import TrialIdentity, run_episode
 from ..metrics import normalized_errors
-from ..predictors import OnlineRLSPredictor
+from ..predictors import OnlineLinearPredictor, OnlineRLSPredictor
 from .families import build_environment, make_candidate, clone_candidate, straight_training_state, training_world, EpisodePlan
 from .seeds import probe_seed, training_seed
 from .spec import BenchmarkSpec
@@ -33,6 +33,12 @@ class TrainedReplica:
     seeds: tuple[int, ...]
     checkpoints: dict[int, dict[str, object]]
     diagnostics: dict[str, object]
+    legacy_state: dict[str, object]
+    """Frozen historical-v1 SGD state trained on the identical stream.
+
+    Reported as a diagnostic arm so the original learner's behaviour under the
+    repaired protocol stays visible. No gate depends on it.
+    """
 
 
 def _training_plan(spec: BenchmarkSpec, lineage: str, replica: int, episode: int) -> EpisodePlan:
@@ -58,6 +64,7 @@ def train_replica(spec: BenchmarkSpec, lineage: str, replica: int, *, role: str 
     """Train one replica and snapshot frozen state at every declared budget."""
 
     model = make_candidate(spec, name="candidate_online", update_enabled=True)
+    legacy = OnlineLinearPredictor(name="legacy_linear_sgd", update_enabled=True)
     budgets = set(spec.training.learning_probe_budgets)
     checkpoints: dict[int, dict[str, object]] = {}
     seeds: list[int] = []
@@ -79,7 +86,7 @@ def train_replica(spec: BenchmarkSpec, lineage: str, replica: int, *, role: str 
             stratum="training",
             update_mode="online",
         )
-        run_episode(build_environment(plan), [model], identity, learn=True)
+        run_episode(build_environment(plan), [model, legacy], identity, learn=True)
         if episode + 1 in budgets:
             checkpoints[episode + 1] = model.state_dict()
     diagnostics = dict(model.check_state())
@@ -92,6 +99,7 @@ def train_replica(spec: BenchmarkSpec, lineage: str, replica: int, *, role: str 
         seeds=tuple(seeds),
         checkpoints=checkpoints,
         diagnostics=diagnostics,
+        legacy_state=legacy.state_dict(),
     )
 
 

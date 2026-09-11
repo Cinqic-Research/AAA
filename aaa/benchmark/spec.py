@@ -23,9 +23,13 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from dataclasses import asdict, dataclass, field, fields, is_dataclass
+from dataclasses import MISSING, asdict, dataclass, field, fields, is_dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
+
+# The schema validates against the model's own declared option sets so the two
+# can never drift apart.
+from ..predictors import OnlineRLSPredictor
 
 SPEC_VERSION = "aaa.benchmark.v2.1"
 SUPERSEDED_VERSIONS = ("aaa.benchmark.v2",)
@@ -40,10 +44,19 @@ def _strict(cls: type, value: Mapping[str, Any], *, path: str) -> dict[str, Any]
 
     if not isinstance(value, Mapping):
         raise SpecError(f"{path}: expected an object, got {type(value).__name__}")
-    known = {item.name for item in fields(cls)}  # type: ignore[arg-type]
+    declared = fields(cls)  # type: ignore[arg-type]
+    known = {item.name for item in declared}
     unknown = sorted(set(value) - known)
     if unknown:
         raise SpecError(f"{path}: unknown specification keys {unknown}")
+    required = {
+        item.name
+        for item in declared
+        if item.default is MISSING and item.default_factory is MISSING  # type: ignore[misc]
+    }
+    absent = sorted(required - set(value))
+    if absent:
+        raise SpecError(f"{path}: missing required specification keys {absent}")
     return dict(value)
 
 
@@ -145,8 +158,12 @@ class CandidateSpec:
         forgetting = _finite(data["forgetting"], f"{path}.forgetting")
         if not 0 < forgetting <= 1:
             raise SpecError(f"{path}.forgetting: must satisfy 0 < lambda <= 1")
-        if data["forgetting_mode"] not in ("exponential", "directional"):
-            raise SpecError(f"{path}.forgetting_mode: must be 'exponential' or 'directional'")
+        if data["forgetting_mode"] not in OnlineRLSPredictor.FORGETTING_MODES:
+            raise SpecError(
+                f"{path}.forgetting_mode: must be one of {OnlineRLSPredictor.FORGETTING_MODES}"
+            )
+        if data["feature_set"] not in OnlineRLSPredictor.FEATURE_SETS:
+            raise SpecError(f"{path}.feature_set: must be one of {OnlineRLSPredictor.FEATURE_SETS}")
         return cls(
             model=str(data["model"]),
             feature_set=str(data["feature_set"]),
@@ -452,9 +469,26 @@ class GateSpec:
     description: str
     threshold: dict[str, Any] = field(default_factory=dict)
 
+    EVALUATORS = (
+        "coverage",
+        "absolute_accuracy",
+        "absolute_accuracy_by_stratum",
+        "learning_progress",
+        "event_accuracy_and_parity",
+        "non_regression",
+        "changed_law_adaptation",
+        "unchanged_control",
+        "recovery",
+        "correctness",
+        "reproducibility",
+        "latency",
+    )
+
     @classmethod
     def parse(cls, value: Mapping[str, Any], path: str) -> "GateSpec":
         data = _strict(cls, value, path=path)
+        if str(data["evaluator"]) not in cls.EVALUATORS:
+            raise SpecError(f"{path}.evaluator: must be one of {cls.EVALUATORS}")
         return cls(
             name=str(data["name"]),
             evaluator=str(data["evaluator"]),

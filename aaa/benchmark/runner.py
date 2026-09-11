@@ -392,6 +392,7 @@ def run_benchmark(
         )
 
     models = [item.model for item in trained]
+    legacy_states = [item.legacy_state for item in trained]
 
     # ---- evidence sink --------------------------------------------------
     def sink(plan: EpisodePlan, records) -> None:
@@ -426,6 +427,7 @@ def run_benchmark(
             training_lineage=tuple(training_seeds_by_replica.get(0, ())),
             checkpoint_hashes=checkpoint_hashes,
             recovery=recovery,
+            legacy=legacy_states,
             sink=sink,
         )
     always_plans = plan_motion_family(spec, "always_online", purpose, replicas=replica_count, episodes=episode_count)
@@ -438,6 +440,7 @@ def run_benchmark(
         training_lineage=tuple(training_seeds_by_replica.get(0, ())),
         checkpoint_hashes=checkpoint_hashes,
         recovery=recovery,
+        legacy=legacy_states,
         purpose=purpose,
         sink=sink,
     )
@@ -559,8 +562,20 @@ def run_benchmark(
             "verification": "verification/",
             "registry": "experiment_registry.json",
             "checksums": "checksums.json",
+            "plots": "plots/",
         },
     }
+    # Plots are an auditing aid derived entirely from the summary, so a
+    # rendering problem must not destroy an otherwise complete attempt.
+    try:
+        from ..visualization import write_benchmark_plots
+
+        rendered = write_benchmark_plots(directory / "plots", summary)
+        summary["plots"] = {
+            key: str(Path(value).relative_to(directory)) for key, value in rendered.items()
+        }
+    except Exception as error:  # pragma: no cover - rendering environment specific
+        summary["plots"] = {"error": f"{type(error).__name__}: {error}"}
     json_dump(directory / "summary.json", summary)
     write_report(directory / "report.md", summary)
     _write_checksums(directory)

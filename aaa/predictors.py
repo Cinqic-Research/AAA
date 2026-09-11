@@ -415,6 +415,9 @@ class OnlineRLSPredictor(Predictor):
         reflect: bool = True,
         unfold_target: bool = False,
         trace_bound: float = 1e5,
+        symmetry_tolerance: float = SYMMETRY_TOLERANCE,
+        psd_tolerance: float = PSD_TOLERANCE,
+        max_condition_number: float = MAX_CONDITION_NUMBER,
         dead_zone: float = 0.0,
         detector_multiplier: float = 0.0,
         detector_floor: float = 1e-6,
@@ -441,6 +444,9 @@ class OnlineRLSPredictor(Predictor):
             "detector_multiplier": detector_multiplier,
             "detector_floor": detector_floor,
             "detector_decay": detector_decay,
+            "symmetry_tolerance": symmetry_tolerance,
+            "psd_tolerance": psd_tolerance,
+            "max_condition_number": max_condition_number,
         }
         for key, value in numeric.items():
             if not math.isfinite(float(value)):
@@ -461,6 +467,13 @@ class OnlineRLSPredictor(Predictor):
             raise ValueError("detector parameters must be non-negative")
         if not 0 < detector_decay <= 1:
             raise ValueError("detector_decay must satisfy 0 < decay <= 1")
+        if symmetry_tolerance < 0 or psd_tolerance < 0:
+            raise ValueError("covariance tolerances must be non-negative")
+        if max_condition_number <= 1:
+            raise ValueError("max_condition_number must exceed 1")
+        self.symmetry_tolerance = float(symmetry_tolerance)
+        self.psd_tolerance = float(psd_tolerance)
+        self.max_condition_number = float(max_condition_number)
         if feature_set not in self.FEATURE_SETS:
             raise ValueError(f"feature_set must be one of {self.FEATURE_SETS}")
         if forgetting_mode not in self.FORGETTING_MODES:
@@ -503,7 +516,7 @@ class OnlineRLSPredictor(Predictor):
             if not np.all(np.isfinite(factor)):
                 raise ValueError("RLS square-root factor must be finite")
             self._factor = factor.copy()
-            self.diagnostics = validate_covariance(self.covariance)
+            self.diagnostics = self._validate(self.covariance)
         else:
             if covariance is None:
                 initial = np.eye(self.dimension, dtype=float) / self.ridge
@@ -511,7 +524,7 @@ class OnlineRLSPredictor(Predictor):
                 initial = np.asarray(covariance, dtype=float)
                 if initial.shape != (self.dimension, self.dimension):
                     raise ValueError("RLS covariance has an invalid shape")
-            self.diagnostics = validate_covariance(initial)
+            self.diagnostics = self._validate(initial)
             self._factor = _cholesky_factor(initial)
         self.update_count = int(update_count)
         self.forgetting_suspensions = int(forgetting_suspensions)
@@ -630,10 +643,18 @@ class OnlineRLSPredictor(Predictor):
             raise FloatingPointError("RLS update produced non-finite state")
         self.update_count += 1
 
+    def _validate(self, covariance: np.ndarray) -> dict[str, float]:
+        return validate_covariance(
+            covariance,
+            symmetry_tolerance=self.symmetry_tolerance,
+            psd_tolerance=self.psd_tolerance,
+            max_condition_number=self.max_condition_number,
+        )
+
     def check_state(self) -> dict[str, float]:
         """Recompute and store covariance diagnostics; raise if invalid."""
 
-        self.diagnostics = validate_covariance(self.covariance)
+        self.diagnostics = self._validate(self.covariance)
         return self.diagnostics
 
     def state_dict(self) -> dict[str, object]:
@@ -692,8 +713,22 @@ class OnlineRLSPredictor(Predictor):
 
     @classmethod
     def from_state_dict(
-        cls, state: dict[str, object], *, name: str | None = None, update_enabled: bool = False
+        cls,
+        state: dict[str, object],
+        *,
+        name: str | None = None,
+        update_enabled: bool = False,
+        symmetry_tolerance: float = SYMMETRY_TOLERANCE,
+        psd_tolerance: float = PSD_TOLERANCE,
+        max_condition_number: float = MAX_CONDITION_NUMBER,
     ) -> "OnlineRLSPredictor":
+        """Rebuild a model from serialized state.
+
+        Numerical tolerances are *validation policy*, not learner state, so
+        they are supplied by the caller (the benchmark passes the declared
+        ``spec.tolerances``) and deliberately never enter the checkpoint hash.
+        """
+
         if state.get("format_version") != cls.format_version:
             raise ValueError(
                 f"unsupported RLS predictor checkpoint format {state.get('format_version')!r}; "
@@ -721,6 +756,9 @@ class OnlineRLSPredictor(Predictor):
             detector_decay=float(state.get("detector_decay", 0.05)),  # type: ignore[arg-type]
             name=name or str(state.get("name", cls.name)),
             update_enabled=update_enabled,
+            symmetry_tolerance=symmetry_tolerance,
+            psd_tolerance=psd_tolerance,
+            max_condition_number=max_condition_number,
             weights=[float(value) for value in state["weights"]],  # type: ignore[union-attr]
             covariance=[[float(value) for value in row] for row in state["covariance"]],  # type: ignore[union-attr]
             sqrt_factor=(
@@ -736,7 +774,14 @@ class OnlineRLSPredictor(Predictor):
         )
 
     def clone(self, *, name: str, update_enabled: bool) -> "OnlineRLSPredictor":
-        return self.from_state_dict(self.state_dict(), name=name, update_enabled=update_enabled)
+        return self.from_state_dict(
+            self.state_dict(),
+            name=name,
+            update_enabled=update_enabled,
+            symmetry_tolerance=self.symmetry_tolerance,
+            psd_tolerance=self.psd_tolerance,
+            max_condition_number=self.max_condition_number,
+        )
 
 
 def batch_least_squares(

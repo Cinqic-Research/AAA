@@ -26,6 +26,7 @@ from ..metrics import (
 )
 from ..predictors import (
     ConstantMotionPredictor,
+    OnlineLinearPredictor,
     OnlineRLSPredictor,
     PersistencePredictor,
     Predictor,
@@ -252,6 +253,9 @@ def make_candidate(spec: BenchmarkSpec, *, name: str, update_enabled: bool, refl
         detector_multiplier=spec.candidate.detector_multiplier,
         detector_floor=spec.candidate.detector_floor,
         detector_decay=spec.candidate.detector_decay,
+        symmetry_tolerance=spec.tolerances.covariance_symmetry,
+        psd_tolerance=spec.tolerances.covariance_psd,
+        max_condition_number=spec.tolerances.max_condition_number,
         name=name,
         update_enabled=update_enabled,
     )
@@ -260,10 +264,19 @@ def make_candidate(spec: BenchmarkSpec, *, name: str, update_enabled: bool, refl
 def clone_candidate(
     model: OnlineRLSPredictor, *, name: str, update_enabled: bool, reflect: bool | None = None
 ) -> OnlineRLSPredictor:
+    """Clone a trained model, carrying its declared validation tolerances."""
+
     state = model.state_dict()
     if reflect is not None:
         state["reflect"] = bool(reflect)
-    return OnlineRLSPredictor.from_state_dict(state, name=name, update_enabled=update_enabled)
+    return OnlineRLSPredictor.from_state_dict(
+        state,
+        name=name,
+        update_enabled=update_enabled,
+        symmetry_tolerance=model.symmetry_tolerance,
+        psd_tolerance=model.psd_tolerance,
+        max_condition_number=model.max_condition_number,
+    )
 
 
 def baseline_predictors(spec: BenchmarkSpec) -> list[Predictor]:
@@ -281,6 +294,7 @@ MOTION_PREDICTOR_NAMES = (
     "constant_motion",
     "constant_motion_reflected",
     "zero_control",
+    "legacy_linear_sgd",
     "candidate_frozen",
     "candidate_no_reflect",
 )
@@ -507,9 +521,14 @@ def run_motion_family(
     training_lineage: Sequence[int],
     checkpoint_hashes: Sequence[str],
     recovery: RecoveryConfig,
+    legacy: Sequence[dict[str, object]],
     sink: RecordSink | None = None,
 ) -> FamilyCollector:
-    """Run one motion family with frozen candidate arms (plus an online arm)."""
+    """Run one motion family with frozen candidate arms (plus an online arm).
+
+    ``legacy`` carries one frozen historical-v1 SGD state per replica. It is a
+    reported diagnostic arm only; no gate depends on it.
+    """
 
     family = spec.motion_families[family_name]
     include_online = family.update_mode == "online" or family_name == "speed_change"
@@ -520,6 +539,11 @@ def run_motion_family(
         model = trained[plan.replica]
         predictors: list[Predictor] = list(baseline_predictors(spec))
         predictors.append(make_candidate(spec, name="zero_control", update_enabled=False))
+        predictors.append(
+            OnlineLinearPredictor.from_state_dict(
+                legacy[plan.replica], name="legacy_linear_sgd", update_enabled=False
+            )
+        )
         predictors.append(clone_candidate(model, name="candidate_frozen", update_enabled=False))
         predictors.append(clone_candidate(model, name="candidate_no_reflect", update_enabled=False, reflect=False))
         if include_online:
@@ -557,6 +581,7 @@ def run_always_online_family(
     training_lineage: Sequence[int],
     checkpoint_hashes: Sequence[str],
     recovery: RecoveryConfig,
+    legacy: Sequence[dict[str, object]],
     purpose: str,
     sink: RecordSink | None = None,
 ) -> FamilyCollector:
@@ -592,6 +617,11 @@ def run_always_online_family(
         segment = replace(plan, world=world, scenario=scenario, stratum=f"segment:{scenario}")
         predictors: list[Predictor] = list(baseline_predictors(spec))
         predictors.append(make_candidate(spec, name="zero_control", update_enabled=False))
+        predictors.append(
+            OnlineLinearPredictor.from_state_dict(
+                legacy[plan.replica], name="legacy_linear_sgd", update_enabled=False
+            )
+        )
         predictors.append(
             clone_candidate(trained[plan.replica], name="candidate_frozen", update_enabled=False)
         )
