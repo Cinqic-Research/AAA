@@ -93,6 +93,13 @@ naming:
   `enforce_admins`, so a misconfigured required check cannot lock the
   maintainer out, and the account-level read-only workflow permission, which
   every workflow here already supersedes by declaring its own.
+
+  The commit that applied those protections was pushed to `main` directly
+  through the admin bypass, because the protection had just been enabled and
+  that commit was the one recording it. Everything after went through a pull
+  request with the six required checks — which is also how the protection was
+  verified to work. Noted here rather than left in the reflog for someone to
+  find.
 - **Absolute floors do real work.** Several non-regression gates carry an
   absolute floor (`1e-5`, or `1e-6` for bounce parity) because ratios between
   quantities near `1e-17` are meaningless in a deterministic noiseless world.
