@@ -38,13 +38,15 @@
     },
     {
       "batch_id": "aaa-v2_1-confirmation-b-0002",
-      "consumed_by": [],
+      "consumed_by": [
+        "aaa-v2_1-confirmation-b-0002"
+      ],
       "declared_at": "2026-09-11T06:30:10.046835+00:00",
       "notes": "Round 2. Same frozen checkpoints as A-0002, independent evaluation streams.",
-      "outcome": null,
+      "outcome": "all_required_gates_pass",
       "role": "confirmation_b",
       "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
-      "status": "planned"
+      "status": "consumed"
     }
   ],
   "schema_version": "aaa.confirmation_batches.v1"

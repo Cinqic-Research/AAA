@@ -66,6 +66,10 @@ Both batches were retired permanently, no threshold was touched, and the failed
 attempts are committed. A first attempt at the repair did not work and is
 recorded too. See `AAA-120` in `docs/issue_ledger.md`.
 
+Round 2, with the repaired candidate and newly declared batches against a new
+specification hash, is recorded alongside it. Both rounds are in
+`benchmarks/confirmation_batches.json` and `results/benchmark_v2_1/`.
+
 Historical v1 and v2 evidence is preserved. The v2 confirmations are
 reclassified as historical/provisional under a superseded methodology; see
 `docs/errata.md`.

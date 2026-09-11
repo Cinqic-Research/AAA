@@ -51,6 +51,18 @@ Git LFS, or an external archive with content addresses recorded here, would be
 stronger. Neither is in place. This is stated as a recommendation rather than
 described as done, and it is tracked as `AAA-077` in the issue ledger.
 
+## Failed attempts
+
+A confirmation that records a required-gate failure is evidence and is kept on
+exactly the same terms as one that passes: the same compact summary, report,
+provenance, checksums and checkpoints. Its batch is retired permanently in
+`benchmarks/confirmation_batches.json`.
+
+This has happened. The round-1 v2.1 pair failed `always_online_stability` on
+both fresh streams and is committed at
+[`../results/benchmark_v2_1/`](../results/benchmark_v2_1/) alongside the
+round-2 pair.
+
 ## Historical evidence
 
 `results/final/` and `results/benchmark_v2/` are preserved unchanged. They are

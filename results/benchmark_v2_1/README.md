@@ -46,8 +46,21 @@ refused under another, so round 2 required newly declared batches.
 
 | Attempt | Role | Required gates | Outcome |
 |---|---|---|---|
-| `aaa-v2_1-confirmation-a-0002` | confirmation_a | see `summary.json` | recorded |
-| `aaa-v2_1-confirmation-b-0002` | confirmation_b | see `summary.json` | recorded |
+| `aaa-v2_1-confirmation-a-0002` | confirmation_a | 14 of 14 pass | exit 0; batch consumed |
+| `aaa-v2_1-confirmation-b-0002` | confirmation_b | 14 of 14 pass | exit 0; batch consumed |
+
+| | A | B |
+|---|---:|---:|
+| `always_online_stability` margin | -9.967e-06 | -9.550e-06 |
+| changed-law online vs identical frozen copy | 0.7635 | 0.7517 |
+| source commit | `f1b94cc` | `936b6be` |
+
+The two attempts share one frozen checkpoint set by declared design
+(`ab_relationship: shared_frozen_checkpoints`) and draw independent evaluation
+streams from their own batch identities, so together they measure
+generalization of one selected model set rather than sensitivity to training
+randomness. B's source commit differs from A's only by A's committed evidence;
+no code, specification or checkpoint changed between them.
 
 See [`docs/handoff_astra.md`](../../docs/handoff_astra.md) for the full
 cross-attempt table and the interpretation.

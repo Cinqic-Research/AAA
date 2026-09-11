@@ -869,6 +869,34 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
   about their state. The recommended settings are written out in
   [`../SECURITY.md`](../SECURITY.md) as recommendations, not as completed work.
 
+### AAA-112 — the confirmation batch registry's status field is trusted
+- **Source** self (post-repair adversarial probe) · **Status** open
+- Hand-editing a retired batch back to `planned` in
+  `benchmarks/confirmation_batches.json` lets it be claimed again. This is a
+  tamper scenario rather than an accident: the registry is in git, so the edit
+  is visible in the diff and the history, the `consumed_by` list still names
+  the runs that spent the batch, and a confirmation additionally requires a
+  clean tree and agreement with the committed freeze manifest.
+- It is recorded rather than silently hardened because hardening it would have
+  meant changing source between confirmation attempts. The obvious improvement
+  is to refuse any batch whose `consumed_by` list is non-empty regardless of
+  its status label, making the evidence of use the guard rather than a mutable
+  field.
+
+### AAA-113 — multiplicity is scoped to a specification hash
+- **Source** self · **Status** open, deliberate
+- Repeated confirmation attempts against the same frozen specification enlarge
+  the Holm family. A candidate change changes the specification hash and starts
+  a new family, so the counter does not by itself bound how many *systems* may
+  be tried. That scoping is deliberate — a different system under a different
+  frozen protocol is a different hypothesis — and the rule was declared before
+  the round-1 failure and not adjusted after it.
+- What actually bounds system-shopping is the surrounding discipline: a failed
+  batch is retired permanently, a candidate change requires a fresh freeze and
+  fresh batches, and every attempt stays on the record. A reviewer should count
+  attempts in `benchmarks/confirmation_batches.json` directly rather than read
+  the family size as the whole story.
+
 ### AAA-111 — parallel execution was profiled and not adopted
 - **Source** Astra, Opus · **Status** superseded
 - A full confirmation attempt completes in minutes of CPU time. Introducing

@@ -103,6 +103,17 @@ naming:
 - **Five replicas is few.** It is labelled a routine engineering minimum, and a
   `high_replication` role with 20 independent lineages exists, but the
   confirmation evidence here is the five-replica track.
+- **Multiplicity is scoped to a specification hash.** Repeated confirmation
+  attempts against the *same* frozen system cost statistical power, which is
+  the property that matters most. But a candidate change starts a new family,
+  so the counter does not by itself bound how many systems may be tried. That
+  is deliberate — a different system under a different frozen protocol is a
+  different hypothesis — and the discipline that actually bounds it is that
+  every attempt stays on the record, permanently retired if it failed. A
+  reviewer should count the attempts in
+  `benchmarks/confirmation_batches.json` directly rather than reading the
+  family size as the whole story. The rule was declared before the round-1
+  failure and was not adjusted after it.
 - **One dimension, no noise.** Every result depends on perfect observations,
   which is exactly the regime where an analytic extrapolator is unbeatable.
   `docs/limitations.md` names observation noise as the next experiment.

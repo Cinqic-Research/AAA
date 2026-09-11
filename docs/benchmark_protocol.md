@@ -259,9 +259,21 @@ Consequences the implementation is held to:
 - an interval that could not be computed is reported as
   `INSUFFICIENT_EVIDENCE` with its reason, never as `PASS`.
 
-Multiplicity counts repeated confirmation attempts against the same
-specification, so re-rolling until something passes costs statistical power
-rather than being free.
+Multiplicity counts repeated confirmation attempts **against the same
+specification hash**, so re-rolling the same frozen system until something
+passes costs statistical power rather than being free.
+
+The scope of that rule is deliberate and worth stating plainly: a changed
+candidate changes the specification hash, which starts a new family. The
+reasoning is that a different system tested against a different frozen
+protocol is a different hypothesis, not a repeat of the same one. The cost is
+that the counter resets whenever the system changes, so the rule does not by
+itself bound how many *systems* may be tried. What bounds that is the rest of
+the discipline: a failed batch is retired permanently, a candidate change
+requires a fresh freeze and fresh batches, and every attempt — passed, failed
+or refused — stays in `benchmarks/confirmation_batches.json` and
+`results/benchmark_v2_1/` where a reviewer can count them. This has already
+happened once; both rounds are on the record.
 
 Five training replicas is the routine engineering minimum and is labelled as
 such. A `high_replication` role runs 20 independent lineages for stronger
