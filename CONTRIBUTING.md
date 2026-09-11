@@ -34,6 +34,12 @@ before confirmation batches are generated. If a criterion turns out to measure
 the wrong thing, replace the *concept* and document the scientific reason —
 and do it on development data.
 
+When a confirmation fails, the failure is the deliverable. Keep it, retire its
+batch, diagnose on development data, change the *system* if the diagnosis
+warrants it, declare a fresh batch, and let the multiplicity accounting charge
+you for the extra attempt. This has happened once already and the whole chain is
+in `AAA-120`; follow that shape.
+
 **Keep confirmation streams clean.** Any confirmation stream that has been
 looked at is contaminated for model selection forever. Do selection on
 development data.

@@ -17,8 +17,10 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results" / "benchmark_v2_1"
 OUTPUT = ROOT / "docs" / "handoff_astra.md"
 
-BATCH_A = "aaa-v2_1-confirmation-a-0001"
-BATCH_B = "aaa-v2_1-confirmation-b-0001"
+BATCH_A = "aaa-v2_1-confirmation-a-0002"
+BATCH_B = "aaa-v2_1-confirmation-b-0002"
+RETIRED_A = "aaa-v2_1-confirmation-a-0001"
+RETIRED_B = "aaa-v2_1-confirmation-b-0001"
 STARTING_SHA = "235ce28518ca4ec3a9a240066154090a33b33470"
 TAG = "opus-independent-engineering-complete-awaiting-astra-review"
 
@@ -140,6 +142,50 @@ def main() -> int:
             f"| `{name}` | {fmt(left['required'])} | **{left['status']}** | {fmt(left['observed'])} "
             f"| **{right.get('status', 'n/a')}** | {fmt(right.get('observed'))} |"
         )
+
+    round_one = {}
+    for batch in (RETIRED_A, RETIRED_B):
+        path = RESULTS / batch / "summary.json"
+        if path.exists():
+            round_one[batch] = json.loads(path.read_text(encoding="utf-8"))
+
+    if round_one:
+        lines += [
+            "",
+            "## 2b. Round 1 — the confirmation that failed",
+            "",
+            "Recorded here because it is evidence, not an embarrassment to be tidied away.",
+            "The first confirmation round under this protocol **failed**: both fresh streams",
+            "failed the required `always_online_stability` gate and both exited non-zero.",
+            "Both batches are retired permanently and cannot be reused. **No threshold was",
+            "altered in response**; the candidate was repaired instead, on development",
+            "evidence. See `AAA-120` in [`issue_ledger.md`](issue_ledger.md) for the full",
+            "diagnosis, including an alternative repair that was tried and did not work.",
+            "",
+            "| | Round 1 A | Round 1 B |",
+            "|---|---|---|",
+        ]
+        left, right = round_one.get(RETIRED_A), round_one.get(RETIRED_B)
+
+        def detail(summary, key):
+            if summary is None:
+                return None
+            gate = gates(summary)["always_online_stability"]
+            return gate["details"].get(key)
+
+        lines += [
+            f"| batch id | `{RETIRED_A}` | `{RETIRED_B}` |",
+            f"| all required gates pass | **{fmt(left and left['gates']['all_required_gates_pass'])}** "
+            f"| **{fmt(right and right['gates']['all_required_gates_pass'])}** |",
+            f"| unmet required gates | {', '.join(left['gates']['unmet_required_gates']) if left else 'n/a'} "
+            f"| {', '.join(right['gates']['unmet_required_gates']) if right else 'n/a'} |",
+            f"| `candidate_online` normalized MAE | {fmt(detail(left, 'candidate'))} | {fmt(detail(right, 'candidate'))} |",
+            f"| `constant_motion_reflected` | {fmt(detail(left, 'baseline'))} | {fmt(detail(right, 'baseline'))} |",
+            f"| specification hash | `{left['spec_hash'][:16]}` | `{right['spec_hash'][:16]}` |",
+            "",
+            "The round-1 specification hash differs from round 2 because the candidate changed;",
+            "a batch declared against one hash is refused under the other.",
+        ]
 
     lines += [
         "",
@@ -312,7 +358,8 @@ def main() -> int:
         "- `results/benchmark_v2/` — the four v2 confirmation attempts, preserved and",
         "  reclassified as historical/provisional under a superseded methodology, with",
         "  corrections marked inline rather than rewritten away.",
-        "- No confirmation batch under protocol v2.1 has been retired by failure.",
+        f"- `{RETIRED_A}` and `{RETIRED_B}` — the round-1 confirmation pair, retired by",
+        "  required-gate failure. Preserved in full under `results/benchmark_v2_1/`.",
         "  Batch status is in `benchmarks/confirmation_batches.json`.",
         "",
         "## 6. Unresolved limitations",

@@ -21,7 +21,7 @@ means the environment that was actually exercised.
 ## Verification suite
 
 ```bash
-python -m unittest discover -s tests -t . -v     # 371 tests
+python -m unittest discover -s tests -t . -v     # 377 tests
 python -m ruff check .
 python -m ruff format --check .
 python -m mypy
@@ -79,6 +79,12 @@ python -m aaa.cli benchmark --role confirmation_b \
 Nothing may be tuned between A and B. A failed attempt is kept, its batch is
 retired permanently, and a new predeclared batch is required for a fresh
 attempt.
+
+This has already happened. The round-1 pair failed and was retired; the
+candidate was repaired on development evidence, which changed the specification
+hash, which in turn meant round 2 needed newly declared batches. A batch
+declared against one specification hash is refused under another. Both rounds
+are in `benchmarks/confirmation_batches.json` and `results/benchmark_v2_1/`.
 
 A higher-replication track with 20 independent training lineages:
 

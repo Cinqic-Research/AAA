@@ -38,5 +38,16 @@ adaptation, recovery and every frozen track.
 The diagnosis is in [`docs/issue_ledger.md`](../../docs/issue_ledger.md) under
 `AAA-120`. No threshold was altered in response.
 
+### Round 2
+
+The candidate was repaired on development evidence after round 1 (`AAA-120`),
+which changed the specification hash. A batch declared against one hash is
+refused under another, so round 2 required newly declared batches.
+
+| Attempt | Role | Required gates | Outcome |
+|---|---|---|---|
+| `aaa-v2_1-confirmation-a-0002` | confirmation_a | see `summary.json` | recorded |
+| `aaa-v2_1-confirmation-b-0002` | confirmation_b | see `summary.json` | recorded |
+
 See [`docs/handoff_astra.md`](../../docs/handoff_astra.md) for the full
 cross-attempt table and the interpretation.
