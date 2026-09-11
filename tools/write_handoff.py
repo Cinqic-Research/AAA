@@ -71,8 +71,10 @@ def main() -> int:
     manifest = json.loads((ROOT / "benchmarks" / "freeze_manifest.json").read_text(encoding="utf-8"))
     hardware = a["metadata"]["hardware"]
 
-    merge_sha = git("rev-parse", "main") or "not yet merged"
-    tag_target = git("rev-list", "-n", "1", TAG) or "not yet tagged"
+    merge_sha = git("rev-list", "-n", "1", "--merges", "main") or "not yet merged"
+    tag_target = git("rev-list", "-n", "1", TAG) or (
+        f"the final `main` commit — the one that adds this document. Verify with `git rev-list -n 1 {TAG}`."
+    )
 
     lines: list[str] = [
         "# Engineering handoff for independent review",
@@ -93,7 +95,7 @@ def main() -> int:
         "| engineering branch | `opus/aaa-complete-engineering-repair` |",
         f"| merge commit on `main` | `{merge_sha}` |",
         f"| tag | `{TAG}` |",
-        f"| tag target | `{tag_target}` |",
+        f"| tag target | {tag_target if tag_target.startswith('the final') else f'`{tag_target}`'} |",
         f"| protocol | `{a['spec_version']}` |",
         f"| specification hash | `{a['spec_hash']}` |",
         f"| dependency lock hash | `{manifest['dependency_lock']['hash']}` |",

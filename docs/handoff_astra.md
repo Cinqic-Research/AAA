@@ -14,9 +14,9 @@ an APPROVED or DECLINED decision.
 |---|---|
 | starting `main` | `235ce28518ca4ec3a9a240066154090a33b33470` |
 | engineering branch | `opus/aaa-complete-engineering-repair` |
-| merge commit on `main` | `235ce28518ca4ec3a9a240066154090a33b33470` |
+| merge commit on `main` | `7c11639656267787045c2a849ff51426bba9a4d7` |
 | tag | `opus-independent-engineering-complete-awaiting-astra-review` |
-| tag target | `not yet tagged` |
+| tag target | the final `main` commit — the one that adds this document. Verify with `git rev-list -n 1 opus-independent-engineering-complete-awaiting-astra-review`. |
 | protocol | `aaa.benchmark.v2.1` |
 | specification hash | `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
 | dependency lock hash | `6370808d7f23a04fce4f86b136210e1669063d6ef8113509381eec6655730ec3` |
