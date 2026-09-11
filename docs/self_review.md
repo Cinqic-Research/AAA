@@ -86,10 +86,13 @@ naming:
 - **Evidence durability** (`AAA-077`). Raw per-step records are regenerable
   from the committed identity, not archived. That is weaker than durable
   storage and is stated as a recommendation, not as done.
-- **Repository settings** (`AAA-110`). Branch protection, required checks and
-  Dependabot could not be verified or changed from this environment. Nothing is
-  claimed about them; the recommended settings are written out in
-  `SECURITY.md`.
+- **Repository settings** (`AAA-110`, now closed). Confirmed independently
+  rather than taken on report — no ruleset, `main` unprotected, Dependabot
+  security updates disabled — and then applied through the API and read back.
+  Two items are deliberately left off and say so with their exact commands:
+  `enforce_admins`, so a misconfigured required check cannot lock the
+  maintainer out, and the account-level read-only workflow permission, which
+  every workflow here already supersedes by declaring its own.
 - **Absolute floors do real work.** Several non-regression gates carry an
   absolute floor (`1e-5`, or `1e-6` for bounce parity) because ratios between
   quantities near `1e-17` are meaningless in a deterministic noiseless world.

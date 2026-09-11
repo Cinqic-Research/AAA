@@ -16,7 +16,7 @@ an APPROVED or DECLINED decision.
 | engineering branch | `opus/aaa-complete-engineering-repair` |
 | merge commit on `main` | `7c11639656267787045c2a849ff51426bba9a4d7` |
 | tag | `opus-independent-engineering-complete-awaiting-astra-review` |
-| tag target | the final `main` commit — the one that adds this document. Verify with `git rev-list -n 1 opus-independent-engineering-complete-awaiting-astra-review`. |
+| tag target | `61bd516ee475b8f21f56235875faf47ebda363f9` |
 | protocol | `aaa.benchmark.v2.1` |
 | specification hash | `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
 | dependency lock hash | `6370808d7f23a04fce4f86b136210e1669063d6ef8113509381eec6655730ec3` |
@@ -262,10 +262,13 @@ Samples 2,000, warm-up 200 excluded, failures 0, on the selected candidate itsel
 - `AAA-077` raw per-step evidence is regenerable rather than durably
   archived. Git LFS or an external archive would be stronger; neither is in
   place and this is stated as a recommendation, not as done.
-- `AAA-110` repository administrative settings (branch protection, required
-  checks, Dependabot, default workflow permissions) could not be verified or
-  changed from the engineering environment. Recommended settings are written
-  out in `SECURITY.md`. Nothing is claimed about their current state.
+- `AAA-110` is closed rather than open: branch protection, required status
+  checks, Dependabot and branch cleanup were applied through the API and read
+  back to confirm. Two items are deliberately *not* applied and say so with
+  their exact commands in `SECURITY.md`: `enforce_admins`, so the maintainer
+  keeps a recovery path, and the account-level read-only workflow permission,
+  which every workflow here already supersedes by declaring
+  `permissions: contents: read` directly.
 - `AAA-008` the always-online family rotates through a fixed sequence of the
   existing regimes rather than an open-ended stream.
 - The world is deterministic and noiseless. Observation noise is the single

@@ -33,21 +33,40 @@ Realistic concerns are correspondingly narrow:
 
 ## Repository settings
 
-The following are **recommendations**. They are administrative settings that
-the engineering environment could not verify or change, so nothing here is
-claimed to be in place. See `AAA-110` in
-[`docs/issue_ledger.md`](docs/issue_ledger.md).
+These were inspected and applied through the GitHub API, and then read back to
+confirm. See `AAA-110` in [`docs/issue_ledger.md`](docs/issue_ledger.md).
 
-Recommended for `main`:
+**Applied and verified on `main`:**
 
-- require a pull request before merging;
-- require the `CPU CI` status checks to pass, including the locked-environment,
-  version-matrix and fresh-install jobs;
-- require branches to be up to date before merging;
-- block force pushes and deletion;
-- do not allow administrators to bypass the above;
-- delete head branches automatically after merge;
-- enable Dependabot alerts, security updates and a weekly `github-actions`
-  ecosystem update so pinned action SHAs stay current;
-- set default workflow permissions to read-only, and disallow Actions from
-  creating or approving pull requests.
+| Setting | State |
+|---|---|
+| pull request required before merging | yes (0 approvals, so a solo maintainer can still self-merge) |
+| required status checks | `Locked environment`, `Fresh install`, `Python 3.10`, `3.11`, `3.12`, `3.13` |
+| branches must be up to date before merging | yes (`strict`) |
+| force pushes to `main` | blocked |
+| deletion of `main` | blocked |
+| conversation resolution required | yes |
+| delete head branches after merge | yes |
+| Dependabot alerts and security updates | enabled |
+| secret scanning and push protection | enabled |
+| `.github/dependabot.yml` | weekly `github-actions` and `pip` updates |
+
+**Deliberately not applied:**
+
+- *Enforce for administrators.* Left off so the maintainer retains a recovery
+  path if a required check is ever misconfigured or a runner is unavailable.
+  Turn it on with
+  `gh api -X POST repos/Cinqic/AAA/branches/main/protection/enforce_admins`
+  once the check names are considered stable.
+- *Default workflow permissions read-only.* This is an organization- or
+  account-level Actions setting rather than a repository one. Every workflow in
+  this repository already declares `permissions: contents: read` explicitly,
+  which is the stronger guarantee because it does not depend on an inherited
+  default.
+
+Verify the current state with:
+
+```bash
+gh api repos/Cinqic/AAA/branches/main/protection
+gh api repos/Cinqic/AAA --jq '.delete_branch_on_merge, .security_and_analysis'
+```

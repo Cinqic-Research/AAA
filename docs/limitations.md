@@ -64,9 +64,6 @@ thing this version has measured.
 
 - Raw per-step evidence is regenerable rather than durably archived
   (`AAA-077`).
-- Repository administrative settings could not be verified from the engineering
-  environment; recommendations are written out rather than claimed as applied
-  (`AAA-110`).
 - The always-online family rotates through a fixed sequence of the existing
   regimes; it is not an open-ended stream (`AAA-008`).
 

@@ -861,13 +861,32 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
 
 ## Not repaired, and why
 
-### AAA-110 — repository settings could not be verified or changed from here
-- **Source** Astra · **Status** open
-- Branch protections, required status checks, rulesets, Dependabot
-  configuration and default action permissions are administrative settings.
-  This environment cannot read or change them reliably, so nothing is claimed
-  about their state. The recommended settings are written out in
-  [`../SECURITY.md`](../SECURITY.md) as recommendations, not as completed work.
+### AAA-110 — no branch protection or ruleset on `main`
+- **Source** Astra · **Severity** medium · **Status** repaired
+- **Reproduction** Independently confirmed rather than taken on report:
+  `GET /repos/Cinqic/AAA/rulesets` returned `[]` and
+  `GET /repos/Cinqic/AAA/branches/main/protection` returned
+  `404 Branch not protected`. `delete_branch_on_merge` was `false` and
+  Dependabot security updates were `disabled`. Secret scanning and push
+  protection were already enabled.
+- **Consequence** Nothing required the CI that this repair made meaningful. A
+  direct push to `main` could bypass every check.
+- **Repair** Applied through the API and read back to confirm: a pull request
+  is required before merging; the six CI jobs are required status checks with
+  `strict` up-to-date enforcement; force pushes and deletion of `main` are
+  blocked; conversation resolution is required; head branches are deleted after
+  merge; Dependabot alerts and security updates are enabled; and
+  `.github/dependabot.yml` schedules weekly `github-actions` and `pip` updates
+  so the pinned action SHAs cannot go stale unnoticed.
+- **Deliberately not applied** `enforce_admins` is left off so the maintainer
+  keeps a recovery path if a required check is misconfigured or a runner is
+  unavailable, and the read-only default workflow permission is an
+  account-level setting — every workflow here already declares
+  `permissions: contents: read` explicitly, which does not depend on an
+  inherited default. Both are stated with their exact commands in
+  [`../SECURITY.md`](../SECURITY.md) rather than quietly omitted.
+- **Verification** `gh api repos/Cinqic/AAA/branches/main/protection` and
+  `gh api repos/Cinqic/AAA --jq '.delete_branch_on_merge, .security_and_analysis'`.
 
 ### AAA-112 — the confirmation batch registry's status field is trusted
 - **Source** self (post-repair adversarial probe) · **Status** open
