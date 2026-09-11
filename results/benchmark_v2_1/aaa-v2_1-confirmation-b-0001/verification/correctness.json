@@ -1,0 +1,52 @@
+{
+  "checks": {
+    "all_trials_complete": true,
+    "checkpoint_hashes_stable": true,
+    "checkpoints_load": true,
+    "checksums_valid": true,
+    "dependency_lock_recorded": true,
+    "frozen_branch_state_measured_unchanged": true,
+    "no_duplicate_trial_ids": true,
+    "online_branch_actually_updated": true,
+    "records_structurally_valid": true,
+    "source_tree_clean_when_confirming": true,
+    "spec_hash_matches_canonical_when_confirming": true,
+    "summary_recomputes_from_raw_evidence": true
+  },
+  "detail": {
+    "checksums": {
+      "files": 4050,
+      "mismatched": [],
+      "missing": [],
+      "ok": true
+    },
+    "expected_trials": 4000,
+    "families_present": [
+      "always_online:main",
+      "bouncing:main",
+      "changed_law:changed-law",
+      "changed_law:prefix",
+      "changed_law:unchanged-control",
+      "constant_velocity:main",
+      "speed_change:main",
+      "speed_extrapolation:main"
+    ],
+    "interventions_checked": 500,
+    "recomputation": {
+      "difference_count": 0,
+      "differences": [],
+      "equivalent": true
+    },
+    "registry_counts": {
+      "COMPLETE": 4000,
+      "FAILED": 0,
+      "INTERRUPTED": 0,
+      "PLANNED": 0,
+      "RUNNING": 0,
+      "SUPERSEDED": 0
+    },
+    "scored_transitions": 953800,
+    "structural_problems": []
+  },
+  "executed": true
+}

@@ -17,9 +17,26 @@ metrics, and the executed `verification/` results.
 
 ## Recorded attempts
 
+### Round 1
+
 | Attempt | Role | Required gates | Outcome |
 |---|---|---|---|
 | `aaa-v2_1-confirmation-a-0001` | confirmation_a | **1 of 14 failed** | `always_online_stability` FAIL; batch retired |
+| `aaa-v2_1-confirmation-b-0001` | confirmation_b | **1 of 14 failed** | `always_online_stability` FAIL; batch retired |
+
+Both attempts failed the same required gate on independent streams, so the
+finding replicates. Thirteen gates passed in both, including changed-law
+adaptation, recovery and every frozen track.
+
+| | A | B |
+|---|---:|---:|
+| `candidate_online` normalized MAE | 4.427e-05 | 3.414e-05 |
+| `constant_motion_reflected` | 6.621e-06 | 7.012e-06 |
+| limit (1.1x baseline + 1e-5) | 1.728e-05 | 1.771e-05 |
+| worst replica | 1.519e-04 | 8.784e-05 |
+
+The diagnosis is in [`docs/issue_ledger.md`](../../docs/issue_ledger.md) under
+`AAA-120`. No threshold was altered in response.
 
 See [`docs/handoff_astra.md`](../../docs/handoff_astra.md) for the full
 cross-attempt table and the interpretation.

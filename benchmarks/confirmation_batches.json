@@ -14,13 +14,15 @@
     },
     {
       "batch_id": "aaa-v2_1-confirmation-b-0001",
-      "consumed_by": [],
+      "consumed_by": [
+        "aaa-v2_1-confirmation-b-0001"
+      ],
       "declared_at": "2026-09-11T06:02:54.115268+00:00",
       "notes": "Second fresh confirmation batch under protocol v2.1; same frozen checkpoints, independent evaluation streams",
-      "outcome": null,
+      "outcome": "required_gate_failure",
       "role": "confirmation_b",
       "spec_hash": "198b9a4ea45412068abd386ad252d8cab102e713d6fb4607461100c73c07c38f",
-      "status": "planned"
+      "status": "retired"
     }
   ],
   "schema_version": "aaa.confirmation_batches.v1"
