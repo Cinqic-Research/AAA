@@ -169,6 +169,10 @@ def hardware_metadata() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
+class RegistryError(RuntimeError):
+    """Raised when the experiment registry would lose or contradict evidence."""
+
+
 @dataclass
 class TrialRecord:
     trial_id: str
@@ -262,14 +266,36 @@ class ExperimentRegistry:
         return counts
 
     def plan(self, trial: TrialRecord) -> TrialRecord:
+        """Register a trial, or return the existing record for a resume.
+
+        A resume must reuse the recorded identity exactly. If the immutable
+        part of a planned trial has changed, the run is not a resume of this
+        experiment and continuing would silently mix two different designs.
+        """
+
         existing = self.trials.get(trial.trial_id)
-        if existing is not None:
-            return existing
-        self.trials[trial.trial_id] = trial
-        return trial
+        if existing is None:
+            self.trials[trial.trial_id] = trial
+            return trial
+        drifted = {
+            name: (getattr(existing, name), getattr(trial, name))
+            for name in ("family", "branch", "replica", "episode", "environment_seed")
+            if getattr(existing, name) != getattr(trial, name)
+        }
+        if drifted:
+            raise RegistryError(
+                f"trial {trial.trial_id!r} is already registered with a different identity: {drifted}"
+            )
+        return existing
+
+    def _trial(self, trial_id: str) -> TrialRecord:
+        try:
+            return self.trials[trial_id]
+        except KeyError:
+            raise RegistryError(f"trial {trial_id!r} was never planned") from None
 
     def start(self, trial_id: str) -> TrialRecord:
-        trial = self.trials[trial_id]
+        trial = self._trial(trial_id)
         if trial.state == "COMPLETE":
             return trial
         trial.state = "RUNNING"
@@ -279,7 +305,7 @@ class ExperimentRegistry:
         return trial
 
     def complete(self, trial_id: str, *, outputs: Iterable[str], checksums: Mapping[str, str]) -> TrialRecord:
-        trial = self.trials[trial_id]
+        trial = self._trial(trial_id)
         trial.state = "COMPLETE"
         trial.outputs = list(outputs)
         trial.checksums = dict(checksums)
@@ -287,7 +313,7 @@ class ExperimentRegistry:
         return trial
 
     def fail(self, trial_id: str, *, stage: str, error: str) -> TrialRecord:
-        trial = self.trials[trial_id]
+        trial = self._trial(trial_id)
         trial.state = "FAILED"
         trial.failure_stage = stage
         trial.error = error

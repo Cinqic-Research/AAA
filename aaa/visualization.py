@@ -296,10 +296,19 @@ def write_benchmark_plots(directory: str | Path, summary: Mapping[str, Any]) -> 
     """Plots that support scientific auditing of one benchmark attempt."""
 
     target = Path(directory)
+    requested = (
+        ("learning_curve", plot_learning_curve, "learning_curve.png"),
+        ("stratum_performance", plot_stratum_performance, "stratum_performance.png"),
+        ("recovery_distribution", plot_recovery_distribution, "recovery_distribution.png"),
+        ("paired_scatter", plot_paired_scatter, "changed_law_paired_scatter.png"),
+        ("covariance_diagnostics", plot_covariance_diagnostics, "covariance_diagnostics.png"),
+    )
     plots: dict[str, str] = {}
-    plots["learning_curve"] = plot_learning_curve(summary, target / "learning_curve.png")
-    plots["stratum_performance"] = plot_stratum_performance(summary, target / "stratum_performance.png")
-    plots["recovery_distribution"] = plot_recovery_distribution(summary, target / "recovery_distribution.png")
-    plots["paired_scatter"] = plot_paired_scatter(summary, target / "changed_law_paired_scatter.png")
-    plots["covariance_diagnostics"] = plot_covariance_diagnostics(summary, target / "covariance_diagnostics.png")
+    for name, render, filename in requested:
+        try:
+            plots[name] = render(summary, target / filename)
+        except (KeyError, IndexError, StopIteration):
+            # The summary does not carry the section this plot describes. A
+            # missing optional figure must not cost the other four.
+            continue
     return plots

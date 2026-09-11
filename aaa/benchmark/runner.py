@@ -280,6 +280,15 @@ def run_benchmark(
 
     if role not in ROLES:
         raise ValueError(f"role must be one of {ROLES}")
+    # Validate before defaulting: ``replicas or default`` would silently turn
+    # an explicit 0 into the full confirmation budget.
+    for name, value in (("replicas", replicas), ("episodes", episodes)):
+        if value is None:
+            continue
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError(f"{name} must be an integer, got {type(value).__name__}")
+        if value <= 0:
+            raise ValueError(f"{name} must be positive, got {value}")
     project = Path(project_root or default_project_root())
     spec = load_spec(spec_path)
     resolved_spec_hash = spec_hash(spec)
@@ -311,12 +320,10 @@ def run_benchmark(
                 + "\n".join(f"  {line}" for line in git["status"][:20])
             )
 
-    replica_count = replicas or (
+    replica_count = replicas if replicas is not None else (
         spec.confirmation.high_replication_replicas if role == "high_replication" else spec.confirmation.replicas
     )
-    episode_count = episodes or spec.confirmation.episodes_per_family
-    if replica_count <= 0 or episode_count <= 0:
-        raise ValueError("replicas and episodes must be positive")
+    episode_count = episodes if episodes is not None else spec.confirmation.episodes_per_family
 
     purpose = purpose_for(role, batch_id)
     lineage = lineage_for(role, spec.confirmation.ab_relationship)

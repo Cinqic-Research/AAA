@@ -8,6 +8,8 @@ coverage is a property of the plan rather than a lucky draw.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from dataclasses import dataclass, replace
 from statistics import mean
@@ -836,7 +838,17 @@ def run_changed_law_family(
                             "post_damping": post_damping,
                             "start_position": start_position,
                             "start_velocity": start_velocity,
-                            "history": list(history),
+                            "prefix_history": list(history),
+                            # Both branch copies are created from this exact
+                            # state. The hash lets a reviewer confirm the
+                            # matched design without trusting the runtime.
+                            "branch_state_hash": hashlib.sha256(
+                                json.dumps(
+                                    {k: v for k, v in pre_event_state.items() if k != "name"},
+                                    sort_keys=True,
+                                    separators=(",", ":"),
+                                ).encode("utf-8")
+                            ).hexdigest(),
                             "prefix_updates": int(pre_event_state["update_count"]),
                             "frozen_update_count_before": int(pre_event_state["update_count"]),
                             "frozen_update_count_after": int(frozen_after["update_count"]),
