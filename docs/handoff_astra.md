@@ -326,6 +326,16 @@ Per-attempt checksums are in each attempt's `checksums.json`. Raw per-step
 records are regenerable rather than committed; see
 [`evidence_policy.md`](evidence_policy.md) and its stated limitation.
 
+### A note on how these settings were landed
+
+The commit that applied and recorded the branch protections was pushed to
+`main` directly, using the admin bypass that `enforce_admins: false`
+deliberately leaves open — the protection had just been enabled and the
+commit was the one recording it. Everything after that went through a pull
+request with the six required checks, which is also how the protection was
+verified to work end to end. Both facts are recorded here rather than left
+for a reviewer to notice in the reflog.
+
 ## 9. Self-review
 
 See [`self_review.md`](self_review.md). It is an **Opus self-review, not
