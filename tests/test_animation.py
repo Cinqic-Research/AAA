@@ -110,9 +110,7 @@ class RestartTests(unittest.TestCase):
         self.assertFalse(instance.paused)
         self.assertEqual(len(instance.history), 1)
         second = [instance.step() for _ in range(8)]
-        self.assertEqual(
-            [frame.actual for frame in first], [frame.actual for frame in second]
-        )
+        self.assertEqual([frame.actual for frame in first], [frame.actual for frame in second])
 
     def test_restart_restores_the_model_parameters(self):
         instance = session()
@@ -216,8 +214,10 @@ class HorizonTests(unittest.TestCase):
 class ScenarioTests(unittest.TestCase):
     def test_every_supported_scenario_runs(self):
         for scenario in ("straight", "bouncing", "changed"):
-            config = CONFIG if scenario != "straight" else replace(
-                CONFIG, world=replace(CONFIG.world, steps_per_episode=30, change_step=None)
+            config = (
+                CONFIG
+                if scenario != "straight"
+                else replace(CONFIG, world=replace(CONFIG.world, steps_per_episode=30, change_step=None))
             )
             instance = AnimationSession(scenario=scenario, seed=7, config=config, online=True)
             frames = [instance.step() for _ in range(10)]

@@ -1,5 +1,4 @@
 import json
-import math
 import tempfile
 import unittest
 from pathlib import Path
@@ -136,9 +135,7 @@ class RLSStateTests(unittest.TestCase):
             )
         state = model.state_dict()
         reloaded = OnlineRLSPredictor.from_state_dict(state, update_enabled=True)
-        self.assertEqual(
-            json.dumps(state, sort_keys=True), json.dumps(reloaded.state_dict(), sort_keys=True)
-        )
+        self.assertEqual(json.dumps(state, sort_keys=True), json.dumps(reloaded.state_dict(), sort_keys=True))
 
     def test_save_load_preserves_prediction_and_covariance(self):
         with tempfile.TemporaryDirectory() as directory:

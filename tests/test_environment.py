@@ -116,9 +116,7 @@ class MovingDotTests(unittest.TestCase):
             self.assertLessEqual(transition.position, 30.0)
 
     def test_exact_boundary_contact_reverses_outward_velocity(self):
-        config = WorldConfig(
-            lower_bound=-2.0, upper_bound=3.0, dt=1.0, steps_per_episode=2, history_length=2
-        )
+        config = WorldConfig(lower_bound=-2.0, upper_bound=3.0, dt=1.0, steps_per_episode=2, history_length=2)
         environment = MovingDotEnvironment(
             "bouncing", seed=1, config=config, initial_position=3.0, initial_velocity=1.0
         )
@@ -165,9 +163,7 @@ class MovingDotTests(unittest.TestCase):
 
     def test_partial_initial_state_is_rejected(self):
         with self.assertRaises(ValueError):
-            MovingDotEnvironment(
-                "bouncing", 1, WorldConfig(steps_per_episode=5), initial_position=0.5
-            )
+            MovingDotEnvironment("bouncing", 1, WorldConfig(steps_per_episode=5), initial_position=0.5)
 
     def test_initial_position_outside_the_interval_is_rejected(self):
         with self.assertRaises(ValueError):
@@ -200,9 +196,7 @@ class OscillatorTests(unittest.TestCase):
         unchanged = DampedOscillatorEnvironment(5, config)
         positions = [unchanged.advance().position for _ in range(40)]
         self.assertFalse(any(unchanged.advance().changed for _ in range(0)))
-        reference = DampedOscillatorEnvironment(
-            5, config, changed_omega=1.5, changed_damping=0.10
-        )
+        reference = DampedOscillatorEnvironment(5, config, changed_omega=1.5, changed_damping=0.10)
         self.assertEqual(positions, [reference.advance().position for _ in range(40)])
 
     def test_positions_stay_inside_the_configured_interval(self):

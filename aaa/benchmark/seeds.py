@@ -18,11 +18,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 
@@ -124,7 +124,7 @@ class ConfirmationBatch:
         }
 
     @classmethod
-    def from_dict(cls, value: Mapping[str, Any]) -> "ConfirmationBatch":
+    def from_dict(cls, value: Mapping[str, Any]) -> ConfirmationBatch:
         status = str(value["status"])
         if status not in BATCH_STATUSES:
             raise ValueError(f"batch status must be one of {BATCH_STATUSES}, got {status!r}")
@@ -152,13 +152,11 @@ class ConfirmationBatchRegistry:
 
     def __init__(self, path: str | Path, batches: Sequence[ConfirmationBatch] | None = None) -> None:
         self.path = Path(path)
-        self._batches: dict[str, ConfirmationBatch] = {
-            batch.batch_id: batch for batch in (batches or ())
-        }
+        self._batches: dict[str, ConfirmationBatch] = {batch.batch_id: batch for batch in (batches or ())}
 
     # -- io --------------------------------------------------------------
     @classmethod
-    def load(cls, path: str | Path) -> "ConfirmationBatchRegistry":
+    def load(cls, path: str | Path) -> ConfirmationBatchRegistry:
         source = Path(path)
         if not source.exists():
             return cls(source)
@@ -176,12 +174,14 @@ class ConfirmationBatchRegistry:
     def save(self) -> None:
         payload = {
             "schema_version": REGISTRY_SCHEMA,
-            "batches": [batch.to_dict() for batch in sorted(self._batches.values(), key=lambda b: b.batch_id)],
+            "batches": [
+                batch.to_dict() for batch in sorted(self._batches.values(), key=lambda b: b.batch_id)
+            ],
         }
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temporary = self.path.with_suffix(self.path.suffix + ".tmp")
         temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        os.replace(temporary, self.path)
+        temporary.replace(self.path)
 
     # -- queries ---------------------------------------------------------
     def __contains__(self, batch_id: object) -> bool:
@@ -215,7 +215,9 @@ class ConfirmationBatchRegistry:
         self._batches[batch_id] = batch
         return batch
 
-    def claim(self, batch_id: str, role: str, spec_hash: str, *, reproduction: bool = False) -> ConfirmationBatch:
+    def claim(
+        self, batch_id: str, role: str, spec_hash: str, *, reproduction: bool = False
+    ) -> ConfirmationBatch:
         """Check that a batch may be used now, before any result is produced."""
 
         batch = self.get(batch_id)

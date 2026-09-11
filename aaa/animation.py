@@ -15,19 +15,32 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol, cast
 
 from .config import ExperimentConfig
 from .environment import MovingDotEnvironment, Scenario
 from .predictors import OnlineLinearPredictor, OnlineRLSPredictor, Predictor
 
-CHECKPOINT_LOADERS = {
+
+class CheckpointLoader(Protocol):
+    """Any predictor that can serialize and restore its own state."""
+
+    @classmethod
+    def from_state_dict(
+        cls, state: dict[str, Any], *, name: str | None = ..., update_enabled: bool = ...
+    ) -> Predictor: ...
+
+
+CHECKPOINT_LOADERS: dict[str, type[CheckpointLoader]] = {
     OnlineRLSPredictor.format_version: OnlineRLSPredictor,
     OnlineLinearPredictor.format_version: OnlineLinearPredictor,
 }
 
 
-def load_checkpoint_model(path: str | Path, *, online: bool, name: str = "model") -> Predictor:
+CheckpointablePredictor = OnlineRLSPredictor | OnlineLinearPredictor
+
+
+def load_checkpoint_model(path: str | Path, *, online: bool, name: str = "model") -> CheckpointablePredictor:
     """Dispatch on the checkpoint's declared format version."""
 
     state = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -37,7 +50,7 @@ def load_checkpoint_model(path: str | Path, *, online: bool, name: str = "model"
         raise ValueError(
             f"unsupported checkpoint format {version!r}; expected one of {sorted(CHECKPOINT_LOADERS)}"
         )
-    return loader.from_state_dict(state, name=name, update_enabled=online)  # type: ignore[attr-defined]
+    return cast(CheckpointablePredictor, loader.from_state_dict(state, name=name, update_enabled=online))
 
 
 @dataclass
@@ -66,17 +79,17 @@ class AnimationSession:
         self.environment = MovingDotEnvironment(
             scenario=self.scenario, seed=self.seed, config=self.config.world
         )
-        self._initial_state: dict[str, Any] = self._build_model().state_dict()  # type: ignore[union-attr]
+        self._initial_state: dict[str, Any] = self._build_model().state_dict()
         self.paused = False
         self.history: list[float] = []
         self.prediction: float | None = None
         self.step_index = 0
         self.update_count = 0
-        self.model: Predictor
+        self.model: CheckpointablePredictor
         self.restart()
 
     # -- construction ----------------------------------------------------
-    def _build_model(self) -> Predictor:
+    def _build_model(self) -> CheckpointablePredictor:
         if self.checkpoint is not None:
             return load_checkpoint_model(self.checkpoint, online=self.online, name="model")
         return OnlineRLSPredictor(
@@ -87,10 +100,13 @@ class AnimationSession:
             update_enabled=self.online,
         )
 
-    def _restore_model(self) -> Predictor:
+    def _restore_model(self) -> CheckpointablePredictor:
         version = str(self._initial_state.get("format_version"))
         loader = CHECKPOINT_LOADERS[version]
-        return loader.from_state_dict(self._initial_state, name="model", update_enabled=self.online)  # type: ignore[attr-defined]
+        return cast(
+            CheckpointablePredictor,
+            loader.from_state_dict(self._initial_state, name="model", update_enabled=self.online),
+        )
 
     # -- controls --------------------------------------------------------
     def restart(self) -> None:
@@ -173,7 +189,11 @@ def launch_animation(
     from matplotlib.animation import FuncAnimation
 
     session = AnimationSession(
-        scenario=scenario, seed=seed, config=config or ExperimentConfig(), online=online, checkpoint=checkpoint
+        scenario=scenario,
+        seed=seed,
+        config=config or ExperimentConfig(),
+        online=online,
+        checkpoint=checkpoint,
     )
     world = session.config.world
     figure, axis = plt.subplots(figsize=(9, 3.2))
@@ -184,7 +204,9 @@ def launch_animation(
     mode = "online" if online else "frozen"
     axis.set_title(f"AAA: {mode} mode — actual dot and previously issued next-position prediction")
     (actual_artist,) = axis.plot([], [], "o", color="black", markersize=11, label="actual")
-    (predicted_artist,) = axis.plot([], [], "x", color="crimson", markersize=10, mew=2, label="previous prediction")
+    (predicted_artist,) = axis.plot(
+        [], [], "x", color="crimson", markersize=10, mew=2, label="previous prediction"
+    )
     text_artist = axis.text(0.02, 0.9, "", transform=axis.transAxes, fontsize=9)
     axis.legend(loc="upper right", fontsize=8)
 

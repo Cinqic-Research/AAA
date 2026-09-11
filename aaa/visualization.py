@@ -12,9 +12,10 @@ assumes the interval is ``[0, 1]``.
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from statistics import mean, stdev
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
@@ -67,24 +68,43 @@ def _bounds(config: ExperimentConfig) -> tuple[float, float]:
 # ---------------------------------------------------------------------------
 
 
-def plot_representative_predictions(records: Sequence[StepRecord], config: ExperimentConfig, path: Path) -> str:
+def plot_representative_predictions(
+    records: Sequence[StepRecord], config: ExperimentConfig, path: Path
+) -> str:
     if not records:
         raise ValueError("cannot plot empty records")
     first = _episode(records, records[0].replica_id, records[0].episode)
     names = list(first[0].predictions)
     figure, axis = _new((10, 4.8))
     x = [record.target_step for record in first]
-    axis.plot(x, [record.actual_next_position for record in first], color="black", linewidth=2, label="actual next position")
+    axis.plot(
+        x,
+        [record.actual_next_position for record in first],
+        color="black",
+        linewidth=2,
+        label="actual next position",
+    )
     for name in names:
-        axis.plot(x, [record.predictions[name]["scored"] for record in first], linewidth=1.25,
-                  color=COLORS.get(name), label=name)
+        axis.plot(
+            x,
+            [record.predictions[name]["scored"] for record in first],
+            linewidth=1.25,
+            color=COLORS.get(name),
+            label=name,
+        )
     for record in first:
         if record.changed:
-            axis.axvline(record.target_step, color="crimson", linestyle="--", alpha=0.7, label="unannounced speed change")
+            axis.axvline(
+                record.target_step,
+                color="crimson",
+                linestyle="--",
+                alpha=0.7,
+                label="unannounced speed change",
+            )
         if record.bounced:
             axis.axvline(record.target_step, color="gray", linestyle=":", alpha=0.35)
     handles, labels = axis.get_legend_handles_labels()
-    unique = dict(zip(labels, handles))
+    unique = dict(zip(labels, handles, strict=True))
     axis.legend(unique.values(), unique.keys(), ncol=3, fontsize=8)
     axis.set_title("Predictions aligned to their target time step")
     axis.set_xlabel("target transition step")
@@ -96,7 +116,9 @@ def plot_representative_predictions(records: Sequence[StepRecord], config: Exper
     return _save(figure, path)
 
 
-def plot_within_episode_rolling_error(records: Sequence[StepRecord], config: ExperimentConfig, path: Path) -> str:
+def plot_within_episode_rolling_error(
+    records: Sequence[StepRecord], config: ExperimentConfig, path: Path
+) -> str:
     """Within-episode short-term behaviour. This is *not* a learning curve."""
 
     if not records:
@@ -110,13 +132,19 @@ def plot_within_episode_rolling_error(records: Sequence[StepRecord], config: Exp
     values: dict[str, dict[int, list[float]]] = {name: defaultdict(list) for name in names}
     for group in groups.values():
         for name in names:
-            for index, value in enumerate(rolling_mean(normalized_errors(group, name), config.rolling_window)):
+            for index, value in enumerate(
+                rolling_mean(normalized_errors(group, name), config.rolling_window)
+            ):
                 values[name][index].append(value)
     figure, axis = _new((10, 4.8))
     for name in names:
         x = sorted(values[name])
-        axis.plot(x, [mean(values[name][index]) for index in x], color=COLORS.get(name), linewidth=1.7, label=name)
-    axis.set_title(f"Within-episode rolling normalized MAE (window={config.rolling_window}) — not a learning curve")
+        axis.plot(
+            x, [mean(values[name][index]) for index in x], color=COLORS.get(name), linewidth=1.7, label=name
+        )
+    axis.set_title(
+        f"Within-episode rolling normalized MAE (window={config.rolling_window}) — not a learning curve"
+    )
     axis.set_xlabel("scored step within episode")
     axis.set_ylabel("normalized absolute position error")
     axis.legend(fontsize=8)
@@ -132,17 +160,26 @@ def plot_change_errors(records: Sequence[StepRecord], config: ExperimentConfig, 
     if not changed:
         raise ValueError("adaptation plot requires a changed-motion event")
     event = changed[0].target_step
-    selected = [record for record in first if event - 25 <= record.target_step <= event + config.post_change_window + 12]
+    selected = [
+        record
+        for record in first
+        if event - 25 <= record.target_step <= event + config.post_change_window + 12
+    ]
     names = list(first[0].predictions)
     figure, axis = _new((10, 4.8))
     for name in names:
         axis.plot(
             [record.target_step for record in selected],
             normalized_errors(selected, name),
-            color=COLORS.get(name), linewidth=1.7, marker=".", label=name,
+            color=COLORS.get(name),
+            linewidth=1.7,
+            marker=".",
+            label=name,
         )
     axis.axvline(event, color="crimson", linestyle="--", linewidth=1.4, label="unannounced speed change")
-    axis.axvspan(event, event + config.post_change_window - 1, color="crimson", alpha=0.07, label="post-change window")
+    axis.axvspan(
+        event, event + config.post_change_window - 1, color="crimson", alpha=0.07, label="post-change window"
+    )
     axis.set_title("Error around the unannounced movement change")
     axis.set_xlabel("target transition step")
     axis.set_ylabel("normalized absolute position error")
@@ -167,8 +204,14 @@ def plot_aggregate_performance(records: Sequence[StepRecord], path: Path) -> str
         deviations.append(stdev(clean) if len(clean) > 1 else 0.0)
     figure, axis = _new((9, 4.8))
     positions = list(range(len(names)))
-    axis.bar(positions, means, yerr=deviations, capsize=4,
-             color=[COLORS.get(name, "#777777") for name in names], alpha=0.9)
+    axis.bar(
+        positions,
+        means,
+        yerr=deviations,
+        capsize=4,
+        color=[COLORS.get(name, "#777777") for name in names],
+        alpha=0.9,
+    )
     axis.set_xticks(positions)
     axis.set_xticklabels(names, rotation=15)
     axis.set_title("Frozen generalization normalized MAE across evaluation seeds")
@@ -213,12 +256,20 @@ def plot_learning_curve(summary: Mapping[str, Any], path: Path) -> str:
     curve = summary["learning_curve"]["curve"]
     budgets = summary["learning_curve"]["budgets"]
     figure, axis = _new((8, 4.6))
-    replicas = sorted({replica for budget in budgets for replica in curve[str(budget)]["replica_episode_values"]})
+    replicas = sorted(
+        {replica for budget in budgets for replica in curve[str(budget)]["replica_episode_values"]}
+    )
     for replica in replicas:
         values = [mean(curve[str(budget)]["replica_episode_values"][replica]) for budget in budgets]
         axis.plot(budgets, values, alpha=0.35, linewidth=1.0, color="#777777")
-    axis.plot(budgets, [curve[str(budget)]["mean"] for budget in budgets],
-              color="#E45756", linewidth=2.2, marker="o", label="mean across replicas")
+    axis.plot(
+        budgets,
+        [curve[str(budget)]["mean"] for budget in budgets],
+        color="#E45756",
+        linewidth=2.2,
+        marker="o",
+        label="mean across replicas",
+    )
     axis.set_yscale("log")
     axis.set_title("Learning progress: frozen checkpoints on one fixed probe bank")
     axis.set_xlabel("cumulative training episodes")
@@ -228,8 +279,13 @@ def plot_learning_curve(summary: Mapping[str, Any], path: Path) -> str:
     return _save(figure, path)
 
 
-def plot_stratum_performance(summary: Mapping[str, Any], path: Path, *, family: str = "constant_velocity",
-                             predictor: str = "candidate_frozen") -> str:
+def plot_stratum_performance(
+    summary: Mapping[str, Any],
+    path: Path,
+    *,
+    family: str = "constant_velocity",
+    predictor: str = "candidate_frozen",
+) -> str:
     strata = summary["results"][family]["predictors"][predictor]["strata"]
     names = [name for name in sorted(strata) if name != "training"]
     figure, axis = _new((11, 5.0))
@@ -257,8 +313,14 @@ def plot_recovery_distribution(summary: Mapping[str, Any], path: Path) -> str:
     return _save(figure, path)
 
 
-def plot_paired_scatter(summary: Mapping[str, Any], path: Path, *, family: str = "changed_law:changed",
-                        candidate: str = "online", baseline: str = "frozen") -> str:
+def plot_paired_scatter(
+    summary: Mapping[str, Any],
+    path: Path,
+    *,
+    family: str = "changed_law:changed",
+    candidate: str = "online",
+    baseline: str = "frozen",
+) -> str:
     result = summary["results"][family]["predictors"]
     left = result[candidate]["replica_mae"]
     right = result[baseline]["replica_mae"]
@@ -279,10 +341,20 @@ def plot_covariance_diagnostics(summary: Mapping[str, Any], path: Path) -> str:
     diagnostics = summary["checkpoints"]["diagnostics"]
     replicas = sorted(diagnostics)
     figure, axis = _new((7.4, 4.4))
-    axis.plot(range(len(replicas)), [diagnostics[key]["condition_number"] for key in replicas],
-              marker="o", color="#F58518", label="condition number")
-    axis.plot(range(len(replicas)), [diagnostics[key]["min_eigenvalue"] for key in replicas],
-              marker="s", color="#4C78A8", label="min eigenvalue")
+    axis.plot(
+        range(len(replicas)),
+        [diagnostics[key]["condition_number"] for key in replicas],
+        marker="o",
+        color="#F58518",
+        label="condition number",
+    )
+    axis.plot(
+        range(len(replicas)),
+        [diagnostics[key]["min_eigenvalue"] for key in replicas],
+        marker="s",
+        color="#4C78A8",
+        label="min eigenvalue",
+    )
     axis.set_yscale("log")
     axis.set_xticks(range(len(replicas)))
     axis.set_xticklabels([f"r{key}" for key in replicas])

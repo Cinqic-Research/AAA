@@ -38,15 +38,16 @@ protocol would rightly reject. The first-pass table is retained in
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
 from statistics import mean
-from typing import Any, Sequence
+from typing import Any
 
 import numpy as np
 
 from .config import WorldConfig
-from .environment import DampedOscillatorEnvironment, MovingDotEnvironment
+from .environment import DampedOscillatorEnvironment, MovingDotEnvironment, as_scenario
 from .experiment import TrialIdentity, continue_episode, run_episode
 from .metrics import normalized_errors
 from .predictors import (
@@ -153,7 +154,7 @@ def _stress(variant: Variant, world: WorldConfig, *, updates: int = 20_000) -> d
     model = _make(variant, world, name="stress", update_enabled=True)
     position = 0.2
     try:
-        for index in range(updates):
+        for _ in range(updates):
             velocity = 1e-4
             history = (position - 3 * velocity, position - 2 * velocity, position - velocity, position)
             model.update(history, position + velocity)
@@ -169,7 +170,9 @@ def _train(variant: Variant, world: WorldConfig, seeds: Sequence[int]) -> Online
     model = _make(variant, world, name="candidate", update_enabled=True)
     for episode, seed in enumerate(seeds[: variant.training_episodes]):
         environment = MovingDotEnvironment("straight", seed, world)
-        run_episode(environment, [model], _identity("train", seed, episode, "straight", mode="online"), learn=True)
+        run_episode(
+            environment, [model], _identity("train", seed, episode, "straight", mode="online"), learn=True
+        )
     return model
 
 
@@ -178,7 +181,9 @@ def _straight_score(model: OnlineRLSPredictor, world: WorldConfig, seeds: Sequen
     for episode, seed in enumerate(seeds):
         frozen = model.clone(name="candidate_frozen", update_enabled=False)
         environment = MovingDotEnvironment("straight", seed, world)
-        records = run_episode(environment, [frozen], _identity("straight", seed, episode, "straight"), learn=False)
+        records = run_episode(
+            environment, [frozen], _identity("straight", seed, episode, "straight"), learn=False
+        )
         values.append(mean(normalized_errors(records, "candidate_frozen")))
     return float(np.mean(values))
 
@@ -189,13 +194,15 @@ def _bouncing_score(model: OnlineRLSPredictor, world: WorldConfig, seeds: Sequen
     for episode, seed in enumerate(seeds):
         frozen = model.clone(name="candidate_frozen", update_enabled=False)
         environment = MovingDotEnvironment("bouncing", seed, bouncing_world)
-        records = run_episode(environment, [frozen], _identity("bounce", seed, episode, "bouncing"), learn=False)
+        records = run_episode(
+            environment, [frozen], _identity("bounce", seed, episode, "bouncing"), learn=False
+        )
         values.append(mean(normalized_errors(records, "candidate_frozen")))
     return float(np.mean(values))
 
 
 def _always_online_score(
-    variant: Variant, model: OnlineRLSPredictor, world: WorldConfig, seeds: Sequence[int]
+    model: OnlineRLSPredictor, world: WorldConfig, seeds: Sequence[int]
 ) -> dict[str, float]:
     """Continuous deployment probe: one instance keeps learning across regimes.
 
@@ -217,7 +224,7 @@ def _always_online_score(
         baseline = ReflectedConstantMotionPredictor(
             lower_bound=world.lower_bound, upper_bound=world.upper_bound
         )
-        environment = MovingDotEnvironment(scenario, seed, segment)
+        environment = MovingDotEnvironment(as_scenario(scenario), seed, segment)
         records = run_episode(
             environment,
             [baseline, online],
@@ -238,7 +245,9 @@ def _always_online_score(
     }
 
 
-def _changed_law_score(model: OnlineRLSPredictor, world: WorldConfig, seeds: Sequence[int]) -> dict[str, float]:
+def _changed_law_score(
+    model: OnlineRLSPredictor, world: WorldConfig, seeds: Sequence[int]
+) -> dict[str, float]:
     prefix_world = replace(world, steps_per_episode=300, change_step=None)
     branch_world = replace(world, steps_per_episode=100, change_step=0)
     online_values: list[float] = []
@@ -246,25 +255,45 @@ def _changed_law_score(model: OnlineRLSPredictor, world: WorldConfig, seeds: Seq
     for episode, seed in enumerate(seeds):
         prefix_model = model.clone(name="prefix_model", update_enabled=True)
         prefix_env = DampedOscillatorEnvironment(
-            seed, prefix_world, omega=1.5, damping=0.10, changed_omega=1.5, changed_damping=0.10, change_step=None
+            seed,
+            prefix_world,
+            omega=1.5,
+            damping=0.10,
+            changed_omega=1.5,
+            changed_damping=0.10,
+            change_step=None,
         )
         prefix_records = run_episode(
-            prefix_env, [prefix_model], _identity("prefix", seed, episode, "dynamics_change", mode="online"), learn=True
+            prefix_env,
+            [prefix_model],
+            _identity("prefix", seed, episode, "dynamics_change", mode="online"),
+            learn=True,
         )
-        history = list(prefix_records[-1].history[1:]) + [prefix_records[-1].actual_next_position]
+        history = [*prefix_records[-1].history[1:], prefix_records[-1].actual_next_position]
         state = prefix_model.state_dict()
         rng = np.random.default_rng(seed ^ 0x5EED)
         omega = float(rng.uniform(5.0, 11.0))
         damping = float(rng.uniform(0.05, 0.30))
         environment = DampedOscillatorEnvironment(
-            seed, branch_world, omega=omega, damping=damping, changed_omega=omega, changed_damping=damping,
-            change_step=0, initial_position=prefix_env.position, initial_velocity=prefix_env.velocity,
+            seed,
+            branch_world,
+            omega=omega,
+            damping=damping,
+            changed_omega=omega,
+            changed_damping=damping,
+            change_step=0,
+            initial_position=prefix_env.position,
+            initial_velocity=prefix_env.velocity,
         )
         frozen = OnlineRLSPredictor.from_state_dict(state, name="frozen", update_enabled=False)
         online = OnlineRLSPredictor.from_state_dict(state, name="online", update_enabled=True)
         records = continue_episode(
-            environment, [frozen, online], history,
-            _identity("changed", seed, episode, "dynamics_change", mode="mixed"), learn=True, step_offset=300,
+            environment,
+            [frozen, online],
+            history,
+            _identity("changed", seed, episode, "dynamics_change", mode="mixed"),
+            learn=True,
+            step_offset=300,
         )
         window = records[:50]
         online_values.append(float(sum(normalized_errors(window, "online"))))
@@ -326,9 +355,7 @@ def variant_grid(*, quick: bool) -> list[Variant]:
     # historical family: plain exponential forgetting with no detector and no
     # boundary-consistent target, i.e. the pre-repair candidate shape
     for forgetting in (1.0, 0.99, 0.98, 0.95, 0.90):
-        variants.append(
-            base(forgetting=forgetting, unfold_target=False, detector_multiplier=0.0)
-        )
+        variants.append(base(forgetting=forgetting, unfold_target=False, detector_multiplier=0.0))
     for forgetting in (0.5, 0.9):
         variants.append(
             base(
@@ -344,7 +371,9 @@ def variant_grid(*, quick: bool) -> list[Variant]:
     return list(seen.values())
 
 
-def run_candidate_selection(output: str | Path = "docs/evidence/candidate_selection.json", *, quick: bool = False) -> Path:
+def run_candidate_selection(
+    output: str | Path = "docs/evidence/candidate_selection.json", *, quick: bool = False
+) -> Path:
     world = WorldConfig(steps_per_episode=180, speed_min=0.08, speed_max=0.20, change_step=None)
     training_seeds = [7_000_000 + index * 131 for index in range(24)]
     straight_seeds = [7_100_000 + index * 137 for index in range(8)]
@@ -359,7 +388,7 @@ def run_candidate_selection(output: str | Path = "docs/evidence/candidate_select
         straight = _straight_score(model, world, straight_seeds)
         bouncing = _bouncing_score(model, world, bounce_seeds)
         changed = _changed_law_score(model, world, changed_seeds)
-        always_online = _always_online_score(variant, model, world, always_online_seeds)
+        always_online = _always_online_score(model, world, always_online_seeds)
         rows.append(
             {
                 "label": variant.label,
@@ -378,7 +407,8 @@ def run_candidate_selection(output: str | Path = "docs/evidence/candidate_select
         )
 
     eligible = [
-        row for row in rows
+        row
+        for row in rows
         if row["numerically_stable"]
         and row["development_straight_mae"] <= STRAIGHT_MAE_LIMIT
         and row["always_online_stable"]
@@ -388,9 +418,7 @@ def run_candidate_selection(output: str | Path = "docs/evidence/candidate_select
     if eligible:
         best_improvement = max(float(row["improvement_vs_frozen"]) for row in eligible)
         tied = [
-            row
-            for row in eligible
-            if float(row["improvement_vs_frozen"]) >= best_improvement - TIE_TOLERANCE
+            row for row in eligible if float(row["improvement_vs_frozen"]) >= best_improvement - TIE_TOLERANCE
         ]
         selected = sorted(
             tied,
@@ -420,13 +448,18 @@ def run_candidate_selection(output: str | Path = "docs/evidence/candidate_select
             "note": "identical in form to the frozen benchmark's always_online_stability gate",
         },
         "world": {
-            "lower_bound": world.lower_bound, "upper_bound": world.upper_bound, "dt": world.dt,
-            "speed_min": world.speed_min, "speed_max": world.speed_max,
+            "lower_bound": world.lower_bound,
+            "upper_bound": world.upper_bound,
+            "dt": world.dt,
+            "speed_min": world.speed_min,
+            "speed_max": world.speed_max,
             "training_steps_per_episode": world.steps_per_episode,
         },
         "seeds": {
-            "training": training_seeds, "straight": straight_seeds,
-            "bouncing": bounce_seeds, "changed_law": changed_seeds,
+            "training": training_seeds,
+            "straight": straight_seeds,
+            "bouncing": bounce_seeds,
+            "changed_law": changed_seeds,
             "always_online": always_online_seeds,
         },
         "variants": rows,

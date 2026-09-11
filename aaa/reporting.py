@@ -30,12 +30,12 @@ def _fmt(value: Any, digits: int = SIGNIFICANT_DIGITS) -> str:
     return str(value)
 
 
-def _metric(summary: dict[str, object], experiment: str, predictor: str, key: str) -> Any:
-    return summary["experiments"][experiment]["predictors"][predictor][key]  # type: ignore[index]
+def _metric(summary: dict[str, Any], experiment: str, predictor: str, key: str) -> Any:
+    return summary["experiments"][experiment]["predictors"][predictor][key]
 
 
-def _replica_mae_sd(summary: dict[str, object], experiment: str, predictor: str) -> float:
-    replicas = summary["experiments"][experiment].get("replicas", {})  # type: ignore[union-attr]
+def _replica_mae_sd(summary: dict[str, Any], experiment: str, predictor: str) -> float:
+    replicas = summary["experiments"][experiment].get("replicas", {})
     values = [
         info["predictors"][predictor]["mae"]
         for info in replicas.values()
@@ -44,24 +44,26 @@ def _replica_mae_sd(summary: dict[str, object], experiment: str, predictor: str)
     return stdev(values) if len(values) > 1 else 0.0
 
 
-def _recovery_line(summary: dict[str, object], predictor: str) -> str:
+def _recovery_line(summary: dict[str, Any], predictor: str) -> str:
     counts = _metric(summary, "online_adaptation", predictor, "recovery_status_counts")
     eligible = _metric(summary, "online_adaptation", predictor, "recovery_eligible_episodes")
     recovered = _metric(summary, "online_adaptation", predictor, "recovery_recovered_episodes")
     unrecovered = _metric(summary, "online_adaptation", predictor, "recovery_unrecovered_episodes")
-    ineligible = {key: value for key, value in counts.items() if value and key not in ("recovered", "unrecovered")}
+    ineligible = {
+        key: value for key, value in counts.items() if value and key not in ("recovered", "unrecovered")
+    }
     return (
         f"{recovered} recovered / {unrecovered} unrecovered of {eligible} eligible; "
         f"ineligible reasons: {json.dumps(ineligible, sort_keys=True) if ineligible else 'none'}"
     )
 
 
-def write_experiment_report(path: str | Path, summary: dict[str, object]) -> None:
+def write_experiment_report(path: str | Path, summary: dict[str, Any]) -> None:
     """Render a report whose conclusions are derived from the supplied summary."""
 
     path = Path(path)
-    learning = summary["experiments"]["learning_from_scratch"]  # type: ignore[index]
-    linear_learning_delta = learning["early_late"]["linear_online"]["late_minus_early_mean"]  # type: ignore[index]
+    learning = summary["experiments"]["learning_from_scratch"]
+    linear_learning_delta = learning["early_late"]["linear_online"]["late_minus_early_mean"]
     online_post = _metric(summary, "online_adaptation", "linear_online", "post_change_window_mae_mean")
     frozen_post = _metric(summary, "online_adaptation", "linear_frozen", "post_change_window_mae_mean")
     lines = [

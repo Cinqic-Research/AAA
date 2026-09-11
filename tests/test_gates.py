@@ -10,18 +10,16 @@ import unittest
 from dataclasses import replace
 from typing import Any
 
+from aaa.benchmark.families import (
+    ONLINE_PREDICTOR_NAMES,
+    FamilyCollector,
+)
 from aaa.benchmark.gates import (
     FAIL,
     INSUFFICIENT_EVIDENCE,
     NOT_VERIFIED,
-    PASS,
     GateContext,
     evaluate_gates,
-)
-from aaa.benchmark.families import (
-    CHANGED_LAW_PREDICTOR_NAMES,
-    FamilyCollector,
-    ONLINE_PREDICTOR_NAMES,
 )
 from aaa.benchmark.spec import load_spec
 from aaa.metrics import RecoveryConfig
@@ -135,13 +133,18 @@ def changed_law_collector(
             for step in range(16):
                 if step == 0:
                     # The unavoidable first surprise is shared by every arm.
-                    step_errors = {name: shock for name in errors}
+                    step_errors = dict.fromkeys(errors, shock)
                 else:
-                    step_errors = (
-                        dict(errors) if recovered else {name: 0.5 for name in errors}
-                    )
+                    step_errors = dict(errors) if recovered else dict.fromkeys(errors, 0.5)
                 records.append(
-                    record(step, 0.0, ident=ident, predictors=tuple(errors), errors=step_errors, changed=step == 0)
+                    record(
+                        step,
+                        0.0,
+                        ident=ident,
+                        predictors=tuple(errors),
+                        errors=step_errors,
+                        changed=step == 0,
+                    )
                 )
             collector.add(
                 records,
@@ -199,7 +202,7 @@ def flat_learning_curve() -> dict[str, Any]:
     return {"probe_episodes": 4, "budgets": budgets, "curve": curve}
 
 
-MOTION_GOOD = {name: 1e-7 for name in ONLINE_PREDICTOR_NAMES}
+MOTION_GOOD = dict.fromkeys(ONLINE_PREDICTOR_NAMES, 1e-07)
 MOTION_GOOD["constant_motion_reflected"] = 1e-7
 CHANGED_GOOD = {
     "persistence": 0.05,
@@ -222,9 +225,7 @@ def full_collectors(**overrides) -> dict[str, FamilyCollector]:
         ),
         "always_online": motion_collector("always_online", dict(MOTION_GOOD), strata=["unstratified"]),
         "changed_law:changed": changed_law_collector(dict(CHANGED_GOOD), recovered=True),
-        "changed_law:unchanged": changed_law_collector(
-            {**CHANGED_GOOD, "online": 0.05}, recovered=True
-        ),
+        "changed_law:unchanged": changed_law_collector({**CHANGED_GOOD, "online": 0.05}, recovered=True),
     }
     collectors.update(overrides)
     return collectors
@@ -257,7 +258,9 @@ class CoverageTests(unittest.TestCase):
 
     def test_all_strata_removed_is_insufficient_evidence_not_pass(self):
         collectors = full_collectors(
-            constant_velocity=motion_collector("constant_velocity", dict(MOTION_GOOD), strata=["unstratified"])
+            constant_velocity=motion_collector(
+                "constant_velocity", dict(MOTION_GOOD), strata=["unstratified"]
+            )
         )
         result = statuses(build_context(collectors=collectors))
         self.assertEqual(result["stratum_coverage"], INSUFFICIENT_EVIDENCE)
@@ -272,7 +275,9 @@ class CoverageTests(unittest.TestCase):
 
     def test_coverage_concentrated_in_one_replica_is_insufficient_evidence(self):
         collectors = full_collectors(
-            constant_velocity=motion_collector("constant_velocity", dict(MOTION_GOOD), replicas=1, episodes=20)
+            constant_velocity=motion_collector(
+                "constant_velocity", dict(MOTION_GOOD), replicas=1, episodes=20
+            )
         )
         result = statuses(build_context(collectors=collectors))
         self.assertEqual(result["stratum_coverage"], INSUFFICIENT_EVIDENCE)
@@ -327,9 +332,7 @@ class ComparisonGateTests(unittest.TestCase):
     def test_bounce_parity_fails_when_the_candidate_is_worse_than_the_fair_baseline(self):
         errors = dict(MOTION_GOOD)
         errors["candidate_frozen"] = 1e-3
-        collectors = full_collectors(
-            bouncing=motion_collector("bouncing", errors, bounce_steps=(1, 4, 9))
-        )
+        collectors = full_collectors(bouncing=motion_collector("bouncing", errors, bounce_steps=(1, 4, 9)))
         self.assertEqual(statuses(build_context(collectors=collectors))["bounce_event_accuracy"], FAIL)
 
     def test_bounce_gate_is_not_verified_without_event_episodes(self):
@@ -344,19 +347,23 @@ class ComparisonGateTests(unittest.TestCase):
         # An online error of 0.036 lands just inside 20 percent improvement,
         # so the declared margin must reject it.
         errors = {**CHANGED_GOOD, "online": 0.036}
-        collectors = full_collectors(
-            **{"changed_law:changed": changed_law_collector(errors, recovered=True)}
-        )
+        collectors = full_collectors(**{"changed_law:changed": changed_law_collector(errors, recovered=True)})
         self.assertEqual(statuses(build_context(collectors=collectors))["changed_law_adaptation"], FAIL)
 
     def test_changed_law_is_not_verified_without_the_family(self):
         collectors = full_collectors()
         del collectors["changed_law:changed"]
-        self.assertEqual(statuses(build_context(collectors=collectors))["changed_law_adaptation"], NOT_VERIFIED)
+        self.assertEqual(
+            statuses(build_context(collectors=collectors))["changed_law_adaptation"], NOT_VERIFIED
+        )
 
     def test_unchanged_control_fails_when_updating_degrades_the_model(self):
         collectors = full_collectors(
-            **{"changed_law:unchanged": changed_law_collector({**CHANGED_GOOD, "online": 1.0}, recovered=True)}
+            **{
+                "changed_law:unchanged": changed_law_collector(
+                    {**CHANGED_GOOD, "online": 1.0}, recovered=True
+                )
+            }
         )
         self.assertEqual(statuses(build_context(collectors=collectors))["unchanged_control"], FAIL)
 
@@ -412,7 +419,9 @@ class VerificationGateTests(unittest.TestCase):
         self.assertEqual(statuses(context)["correctness"], FAIL)
 
     def test_reproducibility_without_evidence_is_not_verified(self):
-        context = build_context(collectors=full_collectors(), reproducibility={"executed": False, "checks": {}})
+        context = build_context(
+            collectors=full_collectors(), reproducibility={"executed": False, "checks": {}}
+        )
         self.assertEqual(statuses(context)["reproducibility"], NOT_VERIFIED)
 
     def test_latency_over_the_limit_fails(self):

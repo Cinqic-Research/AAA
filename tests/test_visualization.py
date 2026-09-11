@@ -97,9 +97,8 @@ class ArbitraryBoundsTests(unittest.TestCase):
 
     def test_empty_records_are_a_loud_error(self):
         config = ExperimentConfig().quick()
-        with tempfile.TemporaryDirectory() as directory:
-            with self.assertRaises(ValueError):
-                visualization.plot_representative_predictions([], config, Path(directory) / "x.png")
+        with tempfile.TemporaryDirectory() as directory, self.assertRaises(ValueError):
+            visualization.plot_representative_predictions([], config, Path(directory) / "x.png")
 
 
 class BenchmarkPlotTests(unittest.TestCase):

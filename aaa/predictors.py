@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import json
 import math
-import os
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
+from typing import Any
 
 import numpy as np
 
@@ -33,7 +33,9 @@ class Predictor:
         raise NotImplementedError
 
     def update(self, history: Sequence[float], target_position: float) -> None:
-        return None
+        """Baselines and frozen copies do nothing here, by design."""
+
+        del history, target_position
 
 
 def _check_history(history: Sequence[float], minimum: int) -> None:
@@ -129,7 +131,9 @@ class ReflectedConstantMotionPredictor(ConstantMotionPredictor):
 
     name = "constant_motion_reflected"
 
-    def __init__(self, *, lower_bound: float, upper_bound: float, name: str = "constant_motion_reflected") -> None:
+    def __init__(
+        self, *, lower_bound: float, upper_bound: float, name: str = "constant_motion_reflected"
+    ) -> None:
         super().__init__(name=name)
         if not all(math.isfinite(float(value)) for value in (lower_bound, upper_bound)):
             raise ValueError("bounds must be finite")
@@ -170,7 +174,9 @@ class OnlineLinearPredictor(Predictor):
         self.learning_rate = float(learning_rate)
         self.name = name
         self.update_enabled = bool(update_enabled)
-        self.weights = np.zeros(5, dtype=float) if weights is None else np.asarray(weights, dtype=float).copy()
+        self.weights = (
+            np.zeros(5, dtype=float) if weights is None else np.asarray(weights, dtype=float).copy()
+        )
         if self.weights.shape != (5,):
             raise ValueError("weights must contain exactly five values")
         if not np.all(np.isfinite(self.weights)):
@@ -202,7 +208,7 @@ class OnlineLinearPredictor(Predictor):
             raise FloatingPointError("legacy linear update produced non-finite weights")
         self.update_count += 1
 
-    def state_dict(self) -> dict[str, object]:
+    def state_dict(self) -> dict[str, Any]:
         return {
             "format_version": self.format_version,
             "name": self.name,
@@ -223,18 +229,18 @@ class OnlineLinearPredictor(Predictor):
         *,
         name: str | None = None,
         update_enabled: bool = False,
-    ) -> "OnlineLinearPredictor":
+    ) -> OnlineLinearPredictor:
         state = json.loads(Path(path).read_text(encoding="utf-8"))
         return cls.from_state_dict(state, name=name, update_enabled=update_enabled)
 
     @classmethod
     def from_state_dict(
         cls,
-        state: dict[str, object],
+        state: dict[str, Any],
         *,
         name: str | None = None,
         update_enabled: bool = False,
-    ) -> "OnlineLinearPredictor":
+    ) -> OnlineLinearPredictor:
         if state.get("format_version") != cls.format_version:
             raise ValueError("unsupported linear predictor checkpoint format")
         if state.get("history_length") != 4 or state.get("target") != "next_displacement":
@@ -246,7 +252,7 @@ class OnlineLinearPredictor(Predictor):
             learning_rate=float(state["learning_rate"]),
             name=name or str(state.get("name", "linear_online")),
             update_enabled=update_enabled,
-            weights=[float(value) for value in state["weights"]],  # type: ignore[union-attr]
+            weights=[float(value) for value in state["weights"]],
         )
         model.update_count = int(state.get("update_count", 0))
         return model
@@ -292,7 +298,9 @@ def validate_covariance(
         raise InvalidLearnerState("covariance has no positive eigenvalue")
     condition = maximum / minimum if minimum > 0 else math.inf
     if not math.isfinite(condition) or condition > max_condition_number:
-        raise InvalidLearnerState(f"covariance condition number {condition:.3e} exceeds {max_condition_number:.3e}")
+        raise InvalidLearnerState(
+            f"covariance condition number {condition:.3e} exceeds {max_condition_number:.3e}"
+        )
     return {
         "min_eigenvalue": minimum,
         "max_eigenvalue": maximum,
@@ -602,8 +610,8 @@ class OnlineRLSPredictor(Predictor):
         # change silence the detector after a handful of transitions, which is
         # exactly when sustained forgetting is needed.
         if not surprised or self.detector_multiplier <= 0.0:
-            self.error_ewma = (
-                (1.0 - self.detector_decay) * self.error_ewma + self.detector_decay * abs(innovation)
+            self.error_ewma = (1.0 - self.detector_decay) * self.error_ewma + self.detector_decay * abs(
+                innovation
             )
 
         # Trace-bounded forgetting: only inflate while the covariance trace
@@ -657,7 +665,7 @@ class OnlineRLSPredictor(Predictor):
         self.diagnostics = self._validate(self.covariance)
         return self.diagnostics
 
-    def state_dict(self) -> dict[str, object]:
+    def state_dict(self) -> dict[str, Any]:
         return {
             "format_version": self.format_version,
             "name": self.name,
@@ -695,7 +703,9 @@ class OnlineRLSPredictor(Predictor):
         _atomic_json_write(Path(path), self.state_dict())
 
     @classmethod
-    def load(cls, path: str | Path, *, name: str | None = None, update_enabled: bool = False) -> "OnlineRLSPredictor":
+    def load(
+        cls, path: str | Path, *, name: str | None = None, update_enabled: bool = False
+    ) -> OnlineRLSPredictor:
         return cls.from_state_dict(
             json.loads(Path(path).read_text(encoding="utf-8")), name=name, update_enabled=update_enabled
         )
@@ -714,14 +724,14 @@ class OnlineRLSPredictor(Predictor):
     @classmethod
     def from_state_dict(
         cls,
-        state: dict[str, object],
+        state: dict[str, Any],
         *,
         name: str | None = None,
         update_enabled: bool = False,
         symmetry_tolerance: float = SYMMETRY_TOLERANCE,
         psd_tolerance: float = PSD_TOLERANCE,
         max_condition_number: float = MAX_CONDITION_NUMBER,
-    ) -> "OnlineRLSPredictor":
+    ) -> OnlineRLSPredictor:
         """Rebuild a model from serialized state.
 
         Numerical tolerances are *validation policy*, not learner state, so
@@ -740,40 +750,40 @@ class OnlineRLSPredictor(Predictor):
         if state.get("history_length") != 4:
             raise ValueError("RLS checkpoint history_length must be 4")
         return cls(
-            lower_bound=float(state["lower_bound"]),  # type: ignore[arg-type]
-            upper_bound=float(state["upper_bound"]),  # type: ignore[arg-type]
-            displacement_scale=float(state["displacement_scale"]),  # type: ignore[arg-type]
-            forgetting=float(state["forgetting"]),  # type: ignore[arg-type]
+            lower_bound=float(state["lower_bound"]),
+            upper_bound=float(state["upper_bound"]),
+            displacement_scale=float(state["displacement_scale"]),
+            forgetting=float(state["forgetting"]),
             forgetting_mode=str(state.get("forgetting_mode", "exponential")),
-            ridge=float(state["ridge"]),  # type: ignore[arg-type]
+            ridge=float(state["ridge"]),
             feature_set=str(state["feature_set"]),
             reflect=bool(state.get("reflect", True)),
             unfold_target=bool(state.get("unfold_target", False)),
-            trace_bound=float(state.get("trace_bound", 1e5)),  # type: ignore[arg-type]
-            dead_zone=float(state.get("dead_zone", 0.0)),  # type: ignore[arg-type]
-            detector_multiplier=float(state.get("detector_multiplier", 0.0)),  # type: ignore[arg-type]
-            detector_floor=float(state.get("detector_floor", 1e-6)),  # type: ignore[arg-type]
-            detector_decay=float(state.get("detector_decay", 0.05)),  # type: ignore[arg-type]
+            trace_bound=float(state.get("trace_bound", 1e5)),
+            dead_zone=float(state.get("dead_zone", 0.0)),
+            detector_multiplier=float(state.get("detector_multiplier", 0.0)),
+            detector_floor=float(state.get("detector_floor", 1e-6)),
+            detector_decay=float(state.get("detector_decay", 0.05)),
             name=name or str(state.get("name", cls.name)),
             update_enabled=update_enabled,
             symmetry_tolerance=symmetry_tolerance,
             psd_tolerance=psd_tolerance,
             max_condition_number=max_condition_number,
-            weights=[float(value) for value in state["weights"]],  # type: ignore[union-attr]
-            covariance=[[float(value) for value in row] for row in state["covariance"]],  # type: ignore[union-attr]
+            weights=[float(value) for value in state["weights"]],
+            covariance=[[float(value) for value in row] for row in state["covariance"]],
             sqrt_factor=(
                 None
                 if state.get("sqrt_factor") is None
-                else [[float(value) for value in row] for row in state["sqrt_factor"]]  # type: ignore[union-attr]
+                else [[float(value) for value in row] for row in state["sqrt_factor"]]
             ),
-            update_count=int(state.get("update_count", 0)),  # type: ignore[arg-type]
-            forgetting_suspensions=int(state.get("forgetting_suspensions", 0)),  # type: ignore[arg-type]
-            dead_zone_skips=int(state.get("dead_zone_skips", 0)),  # type: ignore[arg-type]
-            detected_surprises=int(state.get("detected_surprises", 0)),  # type: ignore[arg-type]
-            error_ewma=float(state.get("error_ewma", 0.0)),  # type: ignore[arg-type]
+            update_count=int(state.get("update_count", 0)),
+            forgetting_suspensions=int(state.get("forgetting_suspensions", 0)),
+            dead_zone_skips=int(state.get("dead_zone_skips", 0)),
+            detected_surprises=int(state.get("detected_surprises", 0)),
+            error_ewma=float(state.get("error_ewma", 0.0)),
         )
 
-    def clone(self, *, name: str, update_enabled: bool) -> "OnlineRLSPredictor":
+    def clone(self, *, name: str, update_enabled: bool) -> OnlineRLSPredictor:
         return self.from_state_dict(
             self.state_dict(),
             name=name,
@@ -784,9 +794,7 @@ class OnlineRLSPredictor(Predictor):
         )
 
 
-def batch_least_squares(
-    features: np.ndarray, targets: np.ndarray, *, ridge: float
-) -> np.ndarray:
+def batch_least_squares(features: np.ndarray, targets: np.ndarray, *, ridge: float) -> np.ndarray:
     """Independent stable reference solution for the ``forgetting == 1`` case.
 
     Solves ``(X^T X + ridge I) w = X^T y`` through an SVD of the augmented
@@ -811,4 +819,4 @@ def _atomic_json_write(destination: Path, value: object) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".tmp")
     temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    os.replace(temporary, destination)
+    temporary.replace(destination)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from aaa.experiment import StepRecord, TrialIdentity
 
@@ -59,7 +59,7 @@ def record(
     is derived from it exactly as :mod:`aaa.experiment` does.
     """
 
-    values = errors or {name: error for name in predictors}
+    values = errors or dict.fromkeys(predictors, error)
     return StepRecord(
         identity=ident or identity(),
         step=step,
@@ -80,6 +80,6 @@ def record(
             }
             for name, value in values.items()
         },
-        updates_enabled={name: False for name in values},
+        updates_enabled=dict.fromkeys(values, False),
         interval_width=width,
     )

@@ -7,7 +7,6 @@ importantly — that every declared leaf is actually consumed somewhere.
 
 from __future__ import annotations
 
-import copy
 import json
 import tempfile
 import unittest
@@ -134,8 +133,9 @@ class StrictValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "broken.json"
             path.write_text("{not json", encoding="utf-8")
-            with self.assertRaises(Exception):
+            with self.assertRaises(SpecError) as caught:
                 load_spec(path)
+            self.assertIn("malformed JSON", str(caught.exception))
 
     def test_a_missing_file_is_rejected(self):
         with self.assertRaises(OSError):
@@ -164,10 +164,7 @@ class ExecutableSpecTests(unittest.TestCase):
 
     def test_every_declared_leaf_is_either_consumed_or_explicitly_descriptive(self):
         spec = load_spec()
-        source = "".join(
-            path.read_text(encoding="utf-8")
-            for path in sorted(Path("aaa").rglob("*.py"))
-        )
+        source = "".join(path.read_text(encoding="utf-8") for path in sorted(Path("aaa").rglob("*.py")))
         unused = []
         for path in leaf_paths(spec.to_dict()):
             if path.startswith(self.IGNORED_PREFIXES):
@@ -216,11 +213,7 @@ class ExecutableSpecTests(unittest.TestCase):
     def test_required_strata_are_the_declared_cartesian_product(self):
         spec = load_spec()
         stratification = spec.stratification
-        expected = (
-            len(stratification.directions)
-            * stratification.position_bands
-            * stratification.speed_bands
-        )
+        expected = len(stratification.directions) * stratification.position_bands * stratification.speed_bands
         self.assertEqual(len(spec.required_strata()), expected)
         self.assertEqual(len(set(spec.required_strata())), expected)
 

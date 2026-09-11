@@ -1,6 +1,5 @@
 import unittest
 
-from aaa.experiment import StepRecord
 from aaa.metrics import (
     aggregate_metrics,
     complete_rolling_mean,
@@ -35,10 +34,7 @@ class UnitContractTests(unittest.TestCase):
     """Regression for the mixed normalized/raw units defect."""
 
     def _records(self, width: float):
-        return [
-            record(step, 1.0, width=width, bounced=step == 1, changed=step == 2)
-            for step in range(4)
-        ]
+        return [record(step, 1.0, width=width, bounced=step == 1, changed=step == 2) for step in range(4)]
 
     def test_normalized_and_raw_accessors_are_distinct(self):
         records = self._records(10.0)
@@ -114,7 +110,9 @@ class EpisodeMetricTests(unittest.TestCase):
             episode_metrics([], ["p"])
 
     def test_identity_fields_are_carried_into_the_summary(self):
-        ident = identity(trial_id="t1", replica_id=3, episode=7, family="bouncing", stratum="positive-position1-speed2")
+        ident = identity(
+            trial_id="t1", replica_id=3, episode=7, family="bouncing", stratum="positive-position1-speed2"
+        )
         summary = episode_metrics([record(0, 0.1, ident=ident)], ["p"])
         self.assertEqual(summary["trial_id"], "t1")
         self.assertEqual(summary["replica_id"], 3)

@@ -76,7 +76,7 @@ class EpisodeSeedTests(unittest.TestCase):
 class OutputIsolationTests(unittest.TestCase):
     def test_a_run_writes_nothing_outside_the_requested_output_root(self):
         project_root = Path(__file__).resolve().parents[1]
-        before = {path for path in (project_root / "reports").glob("*")} if (project_root / "reports").exists() else set()
+        before = set((project_root / "reports").glob("*")) if (project_root / "reports").exists() else set()
         with tempfile.TemporaryDirectory() as directory:
             run_dir = run_full_evaluation(
                 ExperimentConfig().quick(),
@@ -87,7 +87,7 @@ class OutputIsolationTests(unittest.TestCase):
             self.assertTrue(run_dir.is_relative_to(Path(directory)))
             self.assertTrue((run_dir / "summary.json").exists())
             self.assertTrue((run_dir / "experiment_report.md").exists())
-        after = {path for path in (project_root / "reports").glob("*")} if (project_root / "reports").exists() else set()
+        after = set((project_root / "reports").glob("*")) if (project_root / "reports").exists() else set()
         self.assertEqual(before, after)
 
     def test_frozen_integrity_is_measured_from_actual_state(self):

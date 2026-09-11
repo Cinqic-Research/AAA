@@ -121,9 +121,8 @@ class RecomputeTests(unittest.TestCase):
             holder.cleanup()
 
     def test_a_run_without_a_summary_is_refused(self):
-        with tempfile.TemporaryDirectory() as directory:
-            with self.assertRaises(FileNotFoundError):
-                recompute_run(Path(directory))
+        with tempfile.TemporaryDirectory() as directory, self.assertRaises(FileNotFoundError):
+            recompute_run(Path(directory))
 
     def test_checksum_verification_can_be_skipped_explicitly(self):
         result = recompute_run(self.run_dir, verify=False)
@@ -151,9 +150,7 @@ class CompareResultsTests(unittest.TestCase):
         self.assertTrue(compare_results(tree, tree, tolerance=0.0)["equivalent"])
 
     def test_a_numeric_difference_inside_tolerance_is_equivalent(self):
-        self.assertTrue(
-            compare_results({"a": 1.0}, {"a": 1.0 + 1e-12}, tolerance=1e-9)["equivalent"]
-        )
+        self.assertTrue(compare_results({"a": 1.0}, {"a": 1.0 + 1e-12}, tolerance=1e-9)["equivalent"])
 
     def test_a_numeric_difference_outside_tolerance_is_reported(self):
         result = compare_results({"a": 1.0}, {"a": 1.1}, tolerance=1e-9)

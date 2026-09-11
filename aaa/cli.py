@@ -20,13 +20,19 @@ from pathlib import Path
 
 from .benchmark.gates import PASS
 from .benchmark.manifest import build_manifest, save_manifest
-from .benchmark.recompute import compare_results, recompute_run
-from .benchmark.runner import ConfirmationError, default_project_root, run_benchmark, train_replicas, checkpoint_digest
+from .benchmark.recompute import recompute_run
+from .benchmark.runner import (
+    ConfirmationError,
+    checkpoint_digest,
+    default_project_root,
+    run_benchmark,
+    train_replicas,
+)
 from .benchmark.seeds import (
     CONFIRMATION_ROLES,
+    DEFAULT_GOLDEN_CASES,
     ROLES,
     ConfirmationBatchRegistry,
-    DEFAULT_GOLDEN_CASES,
     golden_seed_fixture,
     lineage_for,
 )
@@ -50,22 +56,36 @@ def build_parser() -> argparse.ArgumentParser:
 
     benchmark_parser = subparsers.add_parser("benchmark", help="Run a benchmark v2.1 attempt.")
     benchmark_parser.add_argument("--role", choices=ROLES, default="development")
-    benchmark_parser.add_argument("--batch-id", help="Predeclared confirmation batch identity (confirmation roles).")
+    benchmark_parser.add_argument(
+        "--batch-id", help="Predeclared confirmation batch identity (confirmation roles)."
+    )
     benchmark_parser.add_argument("--attempt-label", help="Label for a development attempt directory.")
     benchmark_parser.add_argument("--output-root", type=Path, default=Path("runs"))
-    benchmark_parser.add_argument("--replicas", type=int, help="Development override only; rejected below confirmation minimums.")
-    benchmark_parser.add_argument("--episodes", type=int, help="Development override only; rejected below confirmation minimums.")
+    benchmark_parser.add_argument(
+        "--replicas", type=int, help="Development override only; rejected below confirmation minimums."
+    )
+    benchmark_parser.add_argument(
+        "--episodes", type=int, help="Development override only; rejected below confirmation minimums."
+    )
     benchmark_parser.add_argument("--spec", type=Path, help="Development-only specification override.")
-    benchmark_parser.add_argument("--resume", action="store_true", help="Continue an interrupted attempt directory.")
-    benchmark_parser.add_argument("--reproduce", action="store_true", help="Re-run an already consumed confirmation batch.")
+    benchmark_parser.add_argument(
+        "--resume", action="store_true", help="Continue an interrupted attempt directory."
+    )
+    benchmark_parser.add_argument(
+        "--reproduce", action="store_true", help="Re-run an already consumed confirmation batch."
+    )
 
-    recompute_parser = subparsers.add_parser("recompute", help="Recompute metrics and gates from retained raw evidence.")
+    recompute_parser = subparsers.add_parser(
+        "recompute", help="Recompute metrics and gates from retained raw evidence."
+    )
     recompute_parser.add_argument("run_dir", type=Path)
     recompute_parser.add_argument("--spec", type=Path)
     recompute_parser.add_argument("--no-verify-checksums", action="store_true")
 
     freeze_parser = subparsers.add_parser("freeze", help="Write the confirmation freeze manifest.")
-    freeze_parser.add_argument("--batch", action="append", default=[], help="Planned confirmation batch id (repeatable).")
+    freeze_parser.add_argument(
+        "--batch", action="append", default=[], help="Planned confirmation batch id (repeatable)."
+    )
     freeze_parser.add_argument("--notes", default="")
     freeze_parser.add_argument("--project-root", type=Path)
 
@@ -83,19 +103,33 @@ def build_parser() -> argparse.ArgumentParser:
     golden_parser = subparsers.add_parser("write-golden-seeds", help="Regenerate the committed seed fixture.")
     golden_parser.add_argument("--project-root", type=Path)
 
-    diagnosis_parser = subparsers.add_parser("diagnose", help="Run the reproducible learner diagnosis and ablations.")
+    diagnosis_parser = subparsers.add_parser(
+        "diagnose", help="Run the reproducible learner diagnosis and ablations."
+    )
     diagnosis_parser.add_argument("--output", type=Path, default=Path("diagnosis"))
-    diagnosis_parser.add_argument("--quick", action="store_true", help="Reduced ablation grid for smoke checks.")
+    diagnosis_parser.add_argument(
+        "--quick", action="store_true", help="Reduced ablation grid for smoke checks."
+    )
 
-    selection_parser = subparsers.add_parser("select-candidate", help="Run development-only candidate selection.")
-    selection_parser.add_argument("--output", type=Path, default=Path("docs/evidence/candidate_selection.json"))
+    selection_parser = subparsers.add_parser(
+        "select-candidate", help="Run development-only candidate selection."
+    )
+    selection_parser.add_argument(
+        "--output", type=Path, default=Path("docs/evidence/candidate_selection.json")
+    )
     selection_parser.add_argument("--quick", action="store_true")
 
-    animation_parser = subparsers.add_parser("animate", help="Launch the optional interactive moving-dot animation.")
+    animation_parser = subparsers.add_parser(
+        "animate", help="Launch the optional interactive moving-dot animation."
+    )
     animation_parser.add_argument("--checkpoint", type=Path, help="RLS or legacy linear JSON checkpoint.")
-    animation_parser.add_argument("--scenario", choices=("straight", "bouncing", "changed"), default="changed")
+    animation_parser.add_argument(
+        "--scenario", choices=("straight", "bouncing", "changed"), default="changed"
+    )
     animation_parser.add_argument("--seed", type=int, default=201)
-    animation_parser.add_argument("--frozen", action="store_true", help="Do not update the model after scoring.")
+    animation_parser.add_argument(
+        "--frozen", action="store_true", help="Do not update the model after scoring."
+    )
 
     return parser
 
@@ -119,7 +153,9 @@ def main(argv: list[str] | None = None) -> int:
         spec = load_spec()
         registry = ConfirmationBatchRegistry.load(_project(args) / spec.confirmation.batch_registry)
         for batch in registry.batches():
-            print(f"{batch.batch_id}\t{batch.role}\t{batch.status}\t{batch.outcome or '-'}\t{batch.spec_hash[:12]}")
+            print(
+                f"{batch.batch_id}\t{batch.role}\t{batch.status}\t{batch.outcome or '-'}\t{batch.spec_hash[:12]}"
+            )
         return 0
 
     if args.command == "declare-batch":
@@ -150,7 +186,9 @@ def main(argv: list[str] | None = None) -> int:
         if not args.batch:
             raise SystemExit("freeze requires at least one --batch planned confirmation batch id")
         lineage = lineage_for("confirmation_a", spec.confirmation.ab_relationship)
-        trained = train_replicas(spec, lineage=lineage, replicas=spec.confirmation.replicas, role="development")
+        trained = train_replicas(
+            spec, lineage=lineage, replicas=spec.confirmation.replicas, role="development"
+        )
         manifest = build_manifest(
             spec,
             project_root=project,

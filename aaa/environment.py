@@ -14,6 +14,14 @@ Scenario = Literal["straight", "bouncing", "changed", "dynamics_change"]
 SCENARIOS: tuple[Scenario, ...] = ("straight", "bouncing", "changed", "dynamics_change")
 
 
+def as_scenario(value: str) -> Scenario:
+    """Narrow a string to :data:`Scenario`, rejecting anything else."""
+
+    if value not in SCENARIOS:
+        raise ValueError(f"Unknown scenario: {value}")
+    return value
+
+
 @dataclass(frozen=True)
 class ReflectionResult:
     """Complete outcome of resolving one raw position against the bounds."""
@@ -374,7 +382,9 @@ class DampedOscillatorEnvironment:
         self._position = (
             float(self._initial_position)
             if self._initial_position is not None
-            else float(self.config.lower_bound + width * (self.initial_position_low + span * self._rng.random()))
+            else float(
+                self.config.lower_bound + width * (self.initial_position_low + span * self._rng.random())
+            )
         )
         self._velocity = (
             float(self._initial_velocity)

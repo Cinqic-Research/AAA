@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 SIGNIFICANT_DIGITS = 4
 
@@ -62,7 +63,14 @@ def write_report(path: str | Path, summary: Mapping[str, Any]) -> None:
         )
     lines.append("")
 
-    lines.extend(["## Uncertainty intervals", "", "| Comparison | Estimate [95% interval] | p | replicas | episodes |", "|---|---|---:|---:|---:|"])
+    lines.extend(
+        [
+            "## Uncertainty intervals",
+            "",
+            "| Comparison | Estimate [95% interval] | p | replicas | episodes |",
+            "|---|---|---:|---:|---:|",
+        ]
+    )
     for key, entry in gates.get("intervals", {}).items():
         lines.append(
             f"| `{key}` | {_interval(entry)} | {fmt(entry.get('p_value'))} | "
@@ -90,7 +98,9 @@ def write_report(path: str | Path, summary: Mapping[str, Any]) -> None:
             )
         lines.append("")
 
-    lines.extend(["## Learning progress", "", "| Cumulative training episodes | Frozen probe MAE |", "|---:|---:|"])
+    lines.extend(
+        ["## Learning progress", "", "| Cumulative training episodes | Frozen probe MAE |", "|---:|---:|"]
+    )
     curve = summary.get("learning_curve", {}).get("curve", {})
     for budget in summary.get("learning_curve", {}).get("budgets", []):
         lines.append(f"| {budget} | {fmt(curve[str(budget)]['mean'])} |")

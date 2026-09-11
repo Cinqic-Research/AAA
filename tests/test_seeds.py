@@ -22,8 +22,8 @@ from aaa.benchmark.seeds import (
     probe_seed,
     purpose_for,
     stable_label,
-    trial_seed,
     training_seed,
+    trial_seed,
 )
 from aaa.benchmark.spec import canonical_spec_hash, load_spec
 
@@ -79,9 +79,7 @@ class StreamIdentityTests(unittest.TestCase):
         a = lineage_for("confirmation_a", "shared_frozen_checkpoints")
         b = lineage_for("confirmation_b", "shared_frozen_checkpoints")
         self.assertEqual(a, b)
-        self.assertEqual(
-            training_seed(ROOT, a, 0, 0), training_seed(ROOT, b, 0, 0)
-        )
+        self.assertEqual(training_seed(ROOT, a, 0, 0), training_seed(ROOT, b, 0, 0))
 
     def test_independent_relationship_gives_a_and_b_separate_lineages(self):
         a = lineage_for("confirmation_a", "independent_training")
@@ -202,7 +200,7 @@ class BatchRegistryTests(unittest.TestCase):
 
     def test_an_unknown_registry_schema_is_rejected(self):
         self.path.write_text(json.dumps({"schema_version": "nope", "batches": []}), encoding="utf-8")
-        with self.assertRaises(Exception):
+        with self.assertRaises(BatchRegistryError):
             ConfirmationBatchRegistry.load(self.path)
 
 

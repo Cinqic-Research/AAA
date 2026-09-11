@@ -18,9 +18,11 @@ Only ``PASS`` satisfies a required gate.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from functools import partial
-from typing import Any, Callable, Mapping, Sequence
+from itertools import pairwise
+from typing import Any
 
 import numpy as np
 
@@ -34,8 +36,8 @@ from .stats import (
     PairedSamples,
     hierarchical_bootstrap,
     holm_bonferroni,
-    relative_improvement_statistic,
     mean_statistic,
+    relative_improvement_statistic,
 )
 
 PASS = "PASS"
@@ -93,7 +95,9 @@ class GateContext:
 # ---------------------------------------------------------------------------
 
 
-def margin_statistic(candidate: np.ndarray, baseline: np.ndarray | None, *, max_ratio: float, floor: float) -> float:
+def margin_statistic(
+    candidate: np.ndarray, baseline: np.ndarray | None, *, max_ratio: float, floor: float
+) -> float:
     """``mean(candidate) - max_ratio * mean(baseline) - floor``.
 
     A single statistic for every non-regression claim. ``<= 0`` means the
@@ -130,7 +134,9 @@ def collect_intervals(context: GateContext) -> None:
     draws = statistics.draws
     level = statistics.interval
 
-    def bootstrap(key: str, samples: PairedSamples, statistic, estimand: str, *, offset: int, null_value=None) -> None:
+    def bootstrap(
+        key: str, samples: PairedSamples, statistic, estimand: str, *, offset: int, null_value=None
+    ) -> None:
         context.intervals[key] = hierarchical_bootstrap(
             samples,
             statistic,
@@ -210,7 +216,12 @@ def collect_intervals(context: GateContext) -> None:
         gate = spec.gate("bounce_event_accuracy")
         bootstrap(
             "bounce.parity_margin",
-            _paired(bouncing, str(gate.threshold["candidate"]), str(gate.threshold["baseline"]), "replica_event_mae"),
+            _paired(
+                bouncing,
+                str(gate.threshold["candidate"]),
+                str(gate.threshold["baseline"]),
+                "replica_event_mae",
+            ),
             partial(
                 margin_statistic,
                 max_ratio=float(gate.threshold["max_ratio"]),
@@ -297,9 +308,7 @@ def apply_multiplicity(context: GateContext) -> None:
 
     statistics = context.spec.statistics
     p_values = {
-        key: context.intervals[key].p_value
-        for key in PRIMARY_COMPARISONS
-        if key in context.intervals
+        key: context.intervals[key].p_value for key in PRIMARY_COMPARISONS if key in context.intervals
     }
     context.multiplicity = holm_bonferroni(
         p_values,
@@ -331,7 +340,12 @@ def evaluate_coverage(context: GateContext, gate: GateSpec) -> GateResult:
         collector = context.collectors.get(family_name)
         if collector is None:
             return GateResult(
-                gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
+                gate.name,
+                NOT_VERIFIED,
+                gate.required,
+                None,
+                gate.threshold,
+                gate.description,
                 {"reason": f"family {family_name} was not executed"},
             )
         present = collector.stratum_episodes
@@ -339,12 +353,15 @@ def evaluate_coverage(context: GateContext, gate: GateSpec) -> GateResult:
         if absent:
             missing[family_name] = absent
         thin[family_name] = sorted(
-            name for name in required & set(present)
+            name
+            for name in required & set(present)
             if present[name] < spec.stratification.minimum_episodes_per_stratum
         )
         thin_replicas[family_name] = sorted(
-            name for name in required & set(present)
-            if len(collector.stratum_replicas.get(name, set())) < spec.stratification.minimum_replicas_per_stratum
+            name
+            for name in required & set(present)
+            if len(collector.stratum_replicas.get(name, set()))
+            < spec.stratification.minimum_replicas_per_stratum
         )
     bouncing = context.collectors.get("bouncing")
     wall_ok = False
@@ -379,7 +396,9 @@ def evaluate_coverage(context: GateContext, gate: GateSpec) -> GateResult:
         and eligible >= spec.confirmation.minimum_eligible_change_events
     )
     status = PASS if ok else INSUFFICIENT_EVIDENCE
-    return GateResult(gate.name, status, gate.required, float(bounce_events), gate.threshold, gate.description, details)
+    return GateResult(
+        gate.name, status, gate.required, float(bounce_events), gate.threshold, gate.description, details
+    )
 
 
 def evaluate_absolute_accuracy(context: GateContext, gate: GateSpec) -> GateResult:
@@ -388,18 +407,39 @@ def evaluate_absolute_accuracy(context: GateContext, gate: GateSpec) -> GateResu
     metric = str(gate.threshold.get("metric", "episode_balanced_mae"))
     result = context.results.get(family)
     if result is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": f"family {family} was not executed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": f"family {family} was not executed"},
+        )
     key = {"mae": "episode_balanced_mae"}.get(metric, metric)
     observed = result["predictors"][predictor].get(key)
     interval = _interval_dict(context, f"{gate.name}.mean")
     if observed is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": f"metric {key} unavailable", "interval": interval})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": f"metric {key} unavailable", "interval": interval},
+        )
     limit = float(gate.threshold["max_value"])
     status = PASS if float(observed) <= limit else FAIL
-    return GateResult(gate.name, status, gate.required, float(observed), gate.threshold, gate.description,
-                      {"interval": interval, "metric": key})
+    return GateResult(
+        gate.name,
+        status,
+        gate.required,
+        float(observed),
+        gate.threshold,
+        gate.description,
+        {"interval": interval, "metric": key},
+    )
 
 
 def evaluate_absolute_accuracy_by_stratum(context: GateContext, gate: GateSpec) -> GateResult:
@@ -407,8 +447,15 @@ def evaluate_absolute_accuracy_by_stratum(context: GateContext, gate: GateSpec) 
     predictor = str(gate.threshold["predictor"])
     result = context.results.get(family)
     if result is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": f"family {family} was not executed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": f"family {family} was not executed"},
+        )
     predictor_result = result["predictors"][predictor]
     observed = predictor_result.get("episode_balanced_mae")
     strata = predictor_result.get("strata", {})
@@ -416,7 +463,12 @@ def evaluate_absolute_accuracy_by_stratum(context: GateContext, gate: GateSpec) 
     present = required & set(strata)
     if not present or present != required:
         return GateResult(
-            gate.name, INSUFFICIENT_EVIDENCE, gate.required, observed, gate.threshold, gate.description,
+            gate.name,
+            INSUFFICIENT_EVIDENCE,
+            gate.required,
+            observed,
+            gate.threshold,
+            gate.description,
             {
                 "reason": "required strata are missing; an empty or partial stratum set cannot pass",
                 "required_strata": len(required),
@@ -434,7 +486,12 @@ def evaluate_absolute_accuracy_by_stratum(context: GateContext, gate: GateSpec) 
     overall_ok = observed is not None and float(observed) <= float(gate.threshold["max_mae"])
     status = PASS if overall_ok and not failures else FAIL
     return GateResult(
-        gate.name, status, gate.required, observed, gate.threshold, gate.description,
+        gate.name,
+        status,
+        gate.required,
+        observed,
+        gate.threshold,
+        gate.description,
         {
             "interval": _interval_dict(context, f"{gate.name}.mean"),
             "strata_evaluated": len(required),
@@ -448,27 +505,50 @@ def evaluate_learning_progress(context: GateContext, gate: GateSpec) -> GateResu
     curve = context.learning_curve.get("curve", {})
     budgets = context.learning_curve.get("budgets", [])
     if not curve or len(budgets) < 2:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": "learning curve was not measured"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": "learning curve was not measured"},
+        )
     means = [float(curve[str(budget)]["mean"]) for budget in budgets]
     first, last = means[0], means[-1]
     reduction = None if first == 0 else 1.0 - last / first
     interval = context.intervals.get("learning_progress.reduction")
-    monotone = all(later <= earlier * (1 + 1e-9) + 1e-15 for earlier, later in zip(means, means[1:]))
-    adjusted = None if context.multiplicity is None else context.multiplicity.adjusted("learning_progress.reduction")
+    monotone = all(later <= earlier * (1 + 1e-9) + 1e-15 for earlier, later in pairwise(means))
+    adjusted = (
+        None if context.multiplicity is None else context.multiplicity.adjusted("learning_progress.reduction")
+    )
     details = {
-        "budget_means": {str(budget): value for budget, value in zip(budgets, means)},
+        "budget_means": {str(budget): value for budget, value in zip(budgets, means, strict=True)},
         "monotone_non_increasing": monotone,
         "interval": None if interval is None else interval.to_dict(),
         "multiplicity": adjusted,
         "probe_episodes": context.learning_curve.get("probe_episodes"),
     }
     if interval is None or not interval.available:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, reduction, gate.threshold, gate.description,
-                          {**details, "reason": "required uncertainty interval could not be computed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            reduction,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": "required uncertainty interval could not be computed"},
+        )
     if reduction is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {**details, "reason": "zero-budget probe error is zero; reduction is undefined"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": "zero-budget probe error is zero; reduction is undefined"},
+        )
     ok = (
         reduction >= float(gate.threshold["min_reduction"])
         and interval.lower is not None
@@ -479,7 +559,9 @@ def evaluate_learning_progress(context: GateContext, gate: GateSpec) -> GateResu
     if adjusted is not None and adjusted.get("reject") is False:
         ok = False
         details["multiplicity_rejected"] = False
-    return GateResult(gate.name, PASS if ok else FAIL, gate.required, reduction, gate.threshold, gate.description, details)
+    return GateResult(
+        gate.name, PASS if ok else FAIL, gate.required, reduction, gate.threshold, gate.description, details
+    )
 
 
 def evaluate_event_accuracy_and_parity(context: GateContext, gate: GateSpec) -> GateResult:
@@ -487,8 +569,15 @@ def evaluate_event_accuracy_and_parity(context: GateContext, gate: GateSpec) -> 
     result = context.results.get(family)
     collector = context.collectors.get(family)
     if result is None or collector is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": f"family {family} was not executed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": f"family {family} was not executed"},
+        )
     candidate = str(gate.threshold["candidate"])
     baseline = str(gate.threshold["baseline"])
     observed = result["predictors"][candidate].get("event_episode_balanced_mae")
@@ -496,7 +585,9 @@ def evaluate_event_accuracy_and_parity(context: GateContext, gate: GateSpec) -> 
     margin = context.intervals.get("bounce.parity_margin")
     decomposition = {
         "vs_raw_constant_motion": _interval_dict(context, "bounce.decomposition_vs_raw_constant_motion"),
-        "vs_reflected_constant_motion": _interval_dict(context, "bounce.decomposition_vs_reflected_constant_motion"),
+        "vs_reflected_constant_motion": _interval_dict(
+            context, "bounce.decomposition_vs_reflected_constant_motion"
+        ),
         "vs_persistence": _interval_dict(context, "bounce.decomposition_vs_persistence"),
         "no_reflect_vs_raw_constant_motion": _interval_dict(
             context, "bounce.decomposition_no_reflect_vs_raw_constant_motion"
@@ -513,18 +604,42 @@ def evaluate_event_accuracy_and_parity(context: GateContext, gate: GateSpec) -> 
         "advantage_decomposition": decomposition,
     }
     if observed is None or baseline_value is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, observed, gate.threshold, gate.description,
-                          {**details, "reason": "no event episodes were observed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            observed,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": "no event episodes were observed"},
+        )
     if margin is None or not margin.available:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, observed, gate.threshold, gate.description,
-                          {**details, "reason": "required parity interval could not be computed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            observed,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": "required parity interval could not be computed"},
+        )
     accuracy_ok = float(observed) <= float(gate.threshold["max_event_mae"])
-    parity_ok = margin.estimate is not None and margin.estimate <= 0.0 and margin.upper is not None and margin.upper <= 0.0
+    parity_ok = (
+        margin.estimate is not None
+        and margin.estimate <= 0.0
+        and margin.upper is not None
+        and margin.upper <= 0.0
+    )
     details["absolute_accuracy_within_limit"] = accuracy_ok
     details["parity_within_limit"] = parity_ok
     return GateResult(
-        gate.name, PASS if accuracy_ok and parity_ok else FAIL, gate.required, observed,
-        gate.threshold, gate.description, details,
+        gate.name,
+        PASS if accuracy_ok and parity_ok else FAIL,
+        gate.required,
+        observed,
+        gate.threshold,
+        gate.description,
+        details,
     )
 
 
@@ -532,8 +647,15 @@ def evaluate_non_regression(context: GateContext, gate: GateSpec) -> GateResult:
     family = str(gate.threshold["family"])
     result = context.results.get(family)
     if result is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": f"family {family} was not executed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": f"family {family} was not executed"},
+        )
     candidate = str(gate.threshold["candidate"])
     baseline = str(gate.threshold["baseline"])
     metric = str(gate.threshold["metric"])
@@ -548,20 +670,48 @@ def evaluate_non_regression(context: GateContext, gate: GateSpec) -> GateResult:
         "margin_interval": None if interval is None else interval.to_dict(),
     }
     if observed is None or baseline_value is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, observed, gate.threshold, gate.description,
-                          {**details, "reason": f"metric {key} unavailable for the comparison"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            observed,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": f"metric {key} unavailable for the comparison"},
+        )
     if interval is None or not interval.available:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, observed, gate.threshold, gate.description,
-                          {**details, "reason": "required non-regression interval could not be computed"})
-    ok = interval.estimate is not None and interval.estimate <= 0.0 and interval.upper is not None and interval.upper <= 0.0
-    return GateResult(gate.name, PASS if ok else FAIL, gate.required, observed, gate.threshold, gate.description, details)
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            observed,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": "required non-regression interval could not be computed"},
+        )
+    ok = (
+        interval.estimate is not None
+        and interval.estimate <= 0.0
+        and interval.upper is not None
+        and interval.upper <= 0.0
+    )
+    return GateResult(
+        gate.name, PASS if ok else FAIL, gate.required, observed, gate.threshold, gate.description, details
+    )
 
 
 def evaluate_changed_law_adaptation(context: GateContext, gate: GateSpec) -> GateResult:
     result = context.results.get("changed_law:changed")
     if result is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": "changed-law family was not executed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": "changed-law family was not executed"},
+        )
     online = result["predictors"]["online"]
     frozen = result["predictors"]["frozen"]
     persistence = result["predictors"]["persistence"]
@@ -595,8 +745,15 @@ def evaluate_changed_law_adaptation(context: GateContext, gate: GateSpec) -> Gat
         if interval is None or not interval.available
     ]
     if missing:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {**details, "reason": f"required intervals unavailable: {missing}"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": f"required intervals unavailable: {missing}"},
+        )
     assert vs_frozen is not None and vs_persistence is not None and vs_constant is not None
     floor = float(gate.threshold["require_ci_lower_above"])
     frozen_ok = (
@@ -612,8 +769,10 @@ def evaluate_changed_law_adaptation(context: GateContext, gate: GateSpec) -> Gat
         and vs_persistence.lower > floor
     )
     constant_ok = (
-        vs_constant.estimate is not None and vs_constant.estimate <= 0.0
-        and vs_constant.upper is not None and vs_constant.upper <= 0.0
+        vs_constant.estimate is not None
+        and vs_constant.estimate <= 0.0
+        and vs_constant.upper is not None
+        and vs_constant.upper <= 0.0
     )
     multiplicity_ok = True
     if context.multiplicity is not None:
@@ -630,14 +789,29 @@ def evaluate_changed_law_adaptation(context: GateContext, gate: GateSpec) -> Gat
         }
     )
     ok = frozen_ok and persistence_ok and constant_ok and multiplicity_ok
-    return GateResult(gate.name, PASS if ok else FAIL, gate.required, vs_frozen.estimate, gate.threshold, gate.description, details)
+    return GateResult(
+        gate.name,
+        PASS if ok else FAIL,
+        gate.required,
+        vs_frozen.estimate,
+        gate.threshold,
+        gate.description,
+        details,
+    )
 
 
 def evaluate_unchanged_control(context: GateContext, gate: GateSpec) -> GateResult:
     result = context.results.get("changed_law:unchanged")
     if result is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": "unchanged control branch was not executed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": "unchanged control branch was not executed"},
+        )
     interval = context.intervals.get("unchanged_control.margin")
     online = result["predictors"]["online"].get("episode_balanced_mae")
     frozen = result["predictors"]["frozen"].get("episode_balanced_mae")
@@ -647,19 +821,40 @@ def evaluate_unchanged_control(context: GateContext, gate: GateSpec) -> GateResu
         "margin_interval": None if interval is None else interval.to_dict(),
     }
     if interval is None or not interval.available:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {**details, "reason": "required interval could not be computed"})
-    ok = interval.estimate is not None and interval.estimate <= 0.0 and interval.upper is not None and interval.upper <= 0.0
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": "required interval could not be computed"},
+        )
+    ok = (
+        interval.estimate is not None
+        and interval.estimate <= 0.0
+        and interval.upper is not None
+        and interval.upper <= 0.0
+    )
     observed = None if online is None or frozen is None else float(online) - float(frozen)
-    return GateResult(gate.name, PASS if ok else FAIL, gate.required, observed, gate.threshold, gate.description, details)
+    return GateResult(
+        gate.name, PASS if ok else FAIL, gate.required, observed, gate.threshold, gate.description, details
+    )
 
 
 def evaluate_recovery(context: GateContext, gate: GateSpec) -> GateResult:
     collector = context.collectors.get("changed_law:changed")
     result = context.results.get("changed_law:changed")
     if collector is None or result is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": "changed-law family was not executed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": "changed-law family was not executed"},
+        )
     counts = collector.recovery_status_counts.get("online", {})
     eligible = sum(counts.get(status, 0) for status in ELIGIBLE_STATUSES)
     recovered = counts.get("recovered", 0)
@@ -667,7 +862,7 @@ def evaluate_recovery(context: GateContext, gate: GateSpec) -> GateResult:
     per_replica: dict[str, dict[str, int]] = {}
     for summary in collector.episode_summaries:
         replica = str(summary["replica_id"])
-        status = str(summary["predictors"]["online"]["recovery"]["status"])  # type: ignore[index]
+        status = str(summary["predictors"]["online"]["recovery"]["status"])
         bucket = per_replica.setdefault(replica, {})
         bucket[status] = bucket.get(status, 0) + 1
     rate = recovered / eligible if eligible else None
@@ -679,8 +874,7 @@ def evaluate_recovery(context: GateContext, gate: GateSpec) -> GateResult:
         "per_replica_status_counts": per_replica,
         "per_replica_recovery_rate": {
             replica: (
-                bucket.get("recovered", 0)
-                / sum(bucket.get(status, 0) for status in ELIGIBLE_STATUSES)
+                bucket.get("recovered", 0) / sum(bucket.get(status, 0) for status in ELIGIBLE_STATUSES)
                 if sum(bucket.get(status, 0) for status in ELIGIBLE_STATUSES)
                 else None
             )
@@ -694,47 +888,100 @@ def evaluate_recovery(context: GateContext, gate: GateSpec) -> GateResult:
     }
     minimum = int(gate.threshold["min_eligible_events"])
     if eligible < minimum:
-        return GateResult(gate.name, INSUFFICIENT_EVIDENCE, gate.required, rate, gate.threshold, gate.description,
-                          {**details, "reason": f"only {eligible} eligible events; {minimum} required"})
+        return GateResult(
+            gate.name,
+            INSUFFICIENT_EVIDENCE,
+            gate.required,
+            rate,
+            gate.threshold,
+            gate.description,
+            {**details, "reason": f"only {eligible} eligible events; {minimum} required"},
+        )
     ok = rate is not None and rate >= float(gate.threshold["min_recovery_rate"])
-    return GateResult(gate.name, PASS if ok else FAIL, gate.required, rate, gate.threshold, gate.description, details)
+    return GateResult(
+        gate.name, PASS if ok else FAIL, gate.required, rate, gate.threshold, gate.description, details
+    )
 
 
 def evaluate_correctness(context: GateContext, gate: GateSpec) -> GateResult:
     report = context.correctness
     if not report:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": "correctness checks were not executed"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": "correctness checks were not executed"},
+        )
     failures = [name for name, value in report.get("checks", {}).items() if value is not True]
     status = PASS if not failures and report.get("executed") else FAIL
     if not report.get("executed"):
         status = NOT_VERIFIED
-    return GateResult(gate.name, status, gate.required, float(len(failures)), gate.threshold, gate.description,
-                      {**report, "failed_checks": failures})
+    return GateResult(
+        gate.name,
+        status,
+        gate.required,
+        float(len(failures)),
+        gate.threshold,
+        gate.description,
+        {**report, "failed_checks": failures},
+    )
 
 
 def evaluate_reproducibility(context: GateContext, gate: GateSpec) -> GateResult:
     report = context.reproducibility
     if not report or not report.get("executed"):
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {**(report or {}), "reason": "no rerun evidence was produced"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {**(report or {}), "reason": "no rerun evidence was produced"},
+        )
     failures = [name for name, value in report.get("checks", {}).items() if value is not True]
-    return GateResult(gate.name, PASS if not failures else FAIL, gate.required, float(len(failures)),
-                      gate.threshold, gate.description, {**report, "failed_checks": failures})
+    return GateResult(
+        gate.name,
+        PASS if not failures else FAIL,
+        gate.required,
+        float(len(failures)),
+        gate.threshold,
+        gate.description,
+        {**report, "failed_checks": failures},
+    )
 
 
 def evaluate_latency(context: GateContext, gate: GateSpec) -> GateResult:
     report = context.latency
     if not report:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description,
-                          {"reason": "latency was not measured"})
+        return GateResult(
+            gate.name,
+            NOT_VERIFIED,
+            gate.required,
+            None,
+            gate.threshold,
+            gate.description,
+            {"reason": "latency was not measured"},
+        )
     observed = report.get("predict_plus_update_p95_ms")
     limit = context.spec.latency.p95_limit_ms
     if observed is None:
-        return GateResult(gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description, report)
+        return GateResult(
+            gate.name, NOT_VERIFIED, gate.required, None, gate.threshold, gate.description, report
+        )
     ok = float(observed) <= limit and int(report.get("failures", 0)) == 0
-    return GateResult(gate.name, PASS if ok else FAIL, gate.required, float(observed), gate.threshold,
-                      gate.description, {**report, "p95_limit_ms": limit})
+    return GateResult(
+        gate.name,
+        PASS if ok else FAIL,
+        gate.required,
+        float(observed),
+        gate.threshold,
+        gate.description,
+        {**report, "p95_limit_ms": limit},
+    )
 
 
 EVALUATORS: dict[str, Callable[[GateContext, GateSpec], GateResult]] = {

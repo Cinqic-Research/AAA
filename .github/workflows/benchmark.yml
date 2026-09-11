@@ -1,39 +1,124 @@
-name: Benchmark v2 confirmation
+name: Benchmark v2.1 confirmation
+
+# A confirmation workflow that cannot fail is not a confirmation workflow.
+# This one runs the real protocol and takes the CLI's exit status as the
+# verdict: any required gate that is not PASS fails the job.
 
 on:
   workflow_dispatch:
     inputs:
       role:
-        description: "Recorded attempt role"
+        description: "Attempt role"
         required: true
-        default: confirmation_a
+        default: development
         type: choice
-        options: [development, confirmation_a, confirmation_b]
-      attempt_id:
-        description: "Fresh immutable attempt ID"
-        required: true
+        options: [development, confirmation_a, confirmation_b, high_replication]
+      batch_id:
+        description: "Predeclared confirmation batch id (required for confirmation roles)"
+        required: false
         type: string
+      attempt_label:
+        description: "Label for a development attempt directory"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     env:
       MPLBACKEND: Agg
+      # User input is passed through the environment and never interpolated
+      # into a shell command string.
+      AAA_ROLE: ${{ inputs.role }}
+      AAA_BATCH_ID: ${{ inputs.batch_id }}
+      AAA_ATTEMPT_LABEL: ${{ inputs.attempt_label }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e '.[dev]'
-      - run: python -m unittest discover -s tests -v
-      - run: python -m aaa.cli diagnose --output benchmark-diagnosis
-      - run: python -m aaa.cli benchmark-v2 --role "${{ inputs.role }}" --attempt-id "${{ inputs.attempt_id }}" --output-root benchmark-runs
-      - uses: actions/upload-artifact@v4
+
+      - name: Validate the dispatch inputs
+        run: |
+          set -euo pipefail
+          case "${AAA_ROLE}" in
+            development|confirmation_a|confirmation_b|high_replication) ;;
+            *) echo "unsupported role: ${AAA_ROLE}" >&2; exit 1 ;;
+          esac
+          if [[ "${AAA_ROLE}" == confirmation_* ]]; then
+            if [[ -z "${AAA_BATCH_ID}" ]]; then
+              echo "a confirmation role requires batch_id" >&2
+              exit 1
+            fi
+            if ! [[ "${AAA_BATCH_ID}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$ ]]; then
+              echo "batch_id must be 3-64 characters of [A-Za-z0-9._-]" >&2
+              exit 1
+            fi
+          fi
+          if [[ -n "${AAA_ATTEMPT_LABEL}" ]] && ! [[ "${AAA_ATTEMPT_LABEL}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]]; then
+            echo "attempt_label must be 1-64 characters of [A-Za-z0-9._-]" >&2
+            exit 1
+          fi
+
+      - name: Install the locked environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-lock.txt
+          python -m pip install -e . --no-deps
+
+      - name: Verify the installed set matches the lock exactly
+        run: python tools/check_lock.py
+
+      - name: Tests
+        run: python -m unittest discover -s tests -t .
+
+      - name: Canonical specification identity
+        run: python -m aaa.cli spec-hash
+
+      - name: Run the attempt
+        run: |
+          set -euo pipefail
+          arguments=(benchmark --role "${AAA_ROLE}" --output-root benchmark-runs)
+          if [[ -n "${AAA_BATCH_ID}" ]]; then
+            arguments+=(--batch-id "${AAA_BATCH_ID}")
+          fi
+          if [[ -n "${AAA_ATTEMPT_LABEL}" ]]; then
+            arguments+=(--attempt-label "${AAA_ATTEMPT_LABEL}")
+          fi
+          # No `|| true`, no swallowed status: a required-gate failure fails
+          # this job.
+          python -m aaa.cli "${arguments[@]}"
+
+      - name: Recompute every metric and gate from the retained raw evidence
+        if: always()
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          attempts=(benchmark-runs/benchmark-v2_1/*)
+          if [[ ${#attempts[@]} -eq 0 ]]; then
+            echo "no attempt directory was produced" >&2
+            exit 1
+          fi
+          for attempt in "${attempts[@]}"; do
+            python -m aaa.cli recompute "${attempt}"
+          done
+
+      # Evidence is retained whether the attempt passed or failed. A failed
+      # confirmation is evidence too, and is never thrown away.
+      - name: Retain the attempt evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: aaa-${{ inputs.attempt_id }}
-          path: |
-            benchmark-runs/benchmark-v2/${{ inputs.attempt_id }}
-            benchmark-diagnosis
-          retention-days: 30
+          name: aaa-benchmark-${{ github.run_id }}
+          path: benchmark-runs
+          retention-days: 90
+          if-no-files-found: error

@@ -10,20 +10,20 @@ deliberately unchanged so the historical comparison remains meaningful.
 from __future__ import annotations
 
 import json
-import os
 import platform
 import sys
+from collections.abc import Sequence
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Sequence
+from typing import Any
 
 from . import __version__
 from .config import ExperimentConfig
-from .environment import MovingDotEnvironment, Scenario
+from .environment import MovingDotEnvironment, Scenario, as_scenario
 from .experiment import StepRecord, TrialIdentity, run_episode, write_step_records
 from .metrics import RecoveryConfig, aggregate_metrics, mean_absolute_error, normalized_errors
-from .predictors import ConstantMotionPredictor, OnlineLinearPredictor, PersistencePredictor
+from .predictors import ConstantMotionPredictor, OnlineLinearPredictor, PersistencePredictor, Predictor
 from .reporting import write_experiment_report
 from .visualization import write_all_plots
 
@@ -35,7 +35,7 @@ def _json_dump(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    os.replace(temporary, path)
+    temporary.replace(path)
 
 
 def _episode_seed(seed: int, phase: str, episode: int, scenario: str) -> int:
@@ -72,7 +72,7 @@ def _identity(
 
 
 def _training_scenario(config: ExperimentConfig, episode: int) -> Scenario:
-    return config.training_scenarios[episode % len(config.training_scenarios)]  # type: ignore[return-value]
+    return as_scenario(config.training_scenarios[episode % len(config.training_scenarios)])
 
 
 def _recovery(config: ExperimentConfig) -> RecoveryConfig:
@@ -104,7 +104,7 @@ def _run_training_seed(
     records: list[StepRecord] = []
     for episode in range(episodes):
         scenario = _training_scenario(config, episode)
-        predictors = [model]
+        predictors: list[Predictor] = [model]
         if include_baselines:
             predictors = [PersistencePredictor(), ConstantMotionPredictor(), model]
         environment = _new_environment(config, seed, phase, episode, scenario)
@@ -127,15 +127,20 @@ def _run_training_seed(
     return model, records
 
 
-def select_learning_rate(config: ExperimentConfig) -> dict[str, object]:
+def select_learning_rate(config: ExperimentConfig) -> dict[str, Any]:
     """Choose a rate using only the development split, before final runs."""
 
-    candidates: list[dict[str, object]] = []
+    candidates: list[dict[str, Any]] = []
     for learning_rate in config.learning_rate_candidates:
         seed_scores: dict[str, float] = {}
         for seed in config.dev_seeds:
             model, _ = _run_training_seed(
-                config, seed, learning_rate, config.dev_training_episodes, phase="dev", include_baselines=False
+                config,
+                seed,
+                learning_rate,
+                config.dev_training_episodes,
+                phase="dev",
+                include_baselines=False,
             )
             validation_records: list[StepRecord] = []
             for episode in range(config.dev_validation_episodes):
@@ -176,10 +181,12 @@ def select_learning_rate(config: ExperimentConfig) -> dict[str, object]:
     }
 
 
-def _train_canonical_checkpoint(config: ExperimentConfig, destination: Path) -> dict[str, object]:
+def _train_canonical_checkpoint(config: ExperimentConfig, destination: Path) -> dict[str, Any]:
     """Train one checkpoint sequentially on the independent training split."""
 
-    model = OnlineLinearPredictor(learning_rate=config.learning_rate, name="linear_online", update_enabled=True)
+    model = OnlineLinearPredictor(
+        learning_rate=config.learning_rate, name="linear_online", update_enabled=True
+    )
     episode_count = 0
     for seed in config.training_seeds:
         for local_episode in range(config.training_episodes):
@@ -214,7 +221,12 @@ def _run_learning_from_scratch(config: ExperimentConfig) -> list[StepRecord]:
     records: list[StepRecord] = []
     for seed in config.training_seeds:
         _, seed_records = _run_training_seed(
-            config, seed, config.learning_rate, config.training_episodes, phase="train", include_baselines=True
+            config,
+            seed,
+            config.learning_rate,
+            config.training_episodes,
+            phase="train",
+            include_baselines=True,
         )
         records.extend(seed_records)
     return records
@@ -222,7 +234,7 @@ def _run_learning_from_scratch(config: ExperimentConfig) -> list[StepRecord]:
 
 def _run_frozen_generalization(
     config: ExperimentConfig, checkpoint: Path
-) -> tuple[list[StepRecord], dict[str, object]]:
+) -> tuple[list[StepRecord], dict[str, Any]]:
     """Evaluate a frozen checkpoint and *measure* whether it stayed frozen."""
 
     records: list[StepRecord] = []
@@ -233,7 +245,7 @@ def _run_frozen_generalization(
     observed_update_counts: list[int] = []
     for seed in config.final_seeds:
         for scenario_index, scenario_name in enumerate(config.final_generalization_scenarios):
-            scenario: Scenario = scenario_name  # type: ignore[assignment]
+            scenario: Scenario = as_scenario(scenario_name)
             for episode in range(config.generalization_episodes_per_scenario):
                 model = OnlineLinearPredictor.load(checkpoint, name="linear_frozen", update_enabled=False)
                 global_episode = scenario_index * config.generalization_episodes_per_scenario + episode
@@ -275,8 +287,12 @@ def _run_online_adaptation(config: ExperimentConfig, checkpoint: Path) -> list[S
     records: list[StepRecord] = []
     checkpoint_state = json.loads(checkpoint.read_text(encoding="utf-8"))
     for seed in config.final_seeds:
-        frozen = OnlineLinearPredictor.from_state_dict(checkpoint_state, name="linear_frozen", update_enabled=False)
-        online = OnlineLinearPredictor.from_state_dict(checkpoint_state, name="linear_online", update_enabled=True)
+        frozen = OnlineLinearPredictor.from_state_dict(
+            checkpoint_state, name="linear_frozen", update_enabled=False
+        )
+        online = OnlineLinearPredictor.from_state_dict(
+            checkpoint_state, name="linear_online", update_enabled=True
+        )
         environment = _new_environment(config, seed, "final", 10_000, "changed")
         records.extend(
             run_episode(
@@ -357,10 +373,14 @@ def run_full_evaluation(
     )
     _write_experiment_files(run_dir / "learning_from_scratch", learning_records, learning_metrics)
 
-    checkpoint_info = _train_canonical_checkpoint(resolved_config, run_dir / "checkpoints" / "trained_linear.json")
+    checkpoint_info = _train_canonical_checkpoint(
+        resolved_config, run_dir / "checkpoints" / "trained_linear.json"
+    )
     _json_dump(run_dir / "checkpoints" / "checkpoint_metadata.json", checkpoint_info)
 
-    frozen_records, frozen_integrity = _run_frozen_generalization(resolved_config, Path(checkpoint_info["path"]))
+    frozen_records, frozen_integrity = _run_frozen_generalization(
+        resolved_config, Path(checkpoint_info["path"])
+    )
     frozen_metrics = aggregate_metrics(
         frozen_records,
         ["persistence", "constant_motion", "linear_frozen"],
@@ -410,7 +430,7 @@ def run_full_evaluation(
     return run_dir
 
 
-def _write_experiment_files(directory: Path, records: Sequence[StepRecord], metrics: dict[str, object]) -> None:
+def _write_experiment_files(directory: Path, records: Sequence[StepRecord], metrics: dict[str, Any]) -> None:
     write_step_records(records, directory / "steps.jsonl", directory / "steps.csv")
     _json_dump(directory / "metrics.json", metrics)
 

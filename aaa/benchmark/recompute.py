@@ -11,17 +11,18 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from ..experiment import StepRecord
 from ..metrics import RecoveryConfig, normalized_errors
 from .evidence import iter_raw_records, verify_checksums
 from .families import (
     CHANGED_LAW_PREDICTOR_NAMES,
-    FamilyCollector,
     MOTION_PREDICTOR_NAMES,
     ONLINE_PREDICTOR_NAMES,
+    FamilyCollector,
 )
 from .gates import GateContext, evaluate_gates
 from .spec import BenchmarkSpec, load_spec, spec_hash
@@ -47,7 +48,7 @@ def collector_key(family: str, branch: str) -> str:
     return family
 
 
-def predictor_names_for(spec: BenchmarkSpec, family: str, present: Sequence[str]) -> list[str]:
+def predictor_names_for(family: str, present: Sequence[str]) -> list[str]:
     if family == "changed_law":
         declared: Sequence[str] = CHANGED_LAW_PREDICTOR_NAMES
     elif "candidate_online" in present:
@@ -79,7 +80,7 @@ def rebuild_collectors(run_dir: Path, spec: BenchmarkSpec) -> dict[str, FamilyCo
     collectors: dict[str, FamilyCollector] = {}
     for (family, branch), grouped in sorted(episodes.items()):
         any_records = next(iter(grouped.values()))
-        names = predictor_names_for(spec, family, list(any_records[0].predictions))
+        names = predictor_names_for(family, list(any_records[0].predictions))
         collector = FamilyCollector(family, names, recovery=recovery, branch=branch)
         for (replica, episode), records in sorted(grouped.items()):
             pre_event_errors = None
@@ -124,9 +125,7 @@ def recompute_run(
     resolved_hash = spec_hash(spec)
     stored_hash = stored.get("spec_hash")
     if stored_hash is not None and stored_hash != resolved_hash:
-        raise ValueError(
-            f"specification hash mismatch: stored {stored_hash}, resolved {resolved_hash}"
-        )
+        raise ValueError(f"specification hash mismatch: stored {stored_hash}, resolved {resolved_hash}")
 
     collectors = rebuild_collectors(directory, spec)
     results = {key: collector.finish() for key, collector in collectors.items()}
@@ -176,7 +175,7 @@ def compare_results(
             if len(left) != len(right):
                 differences.append({"path": path, "reason": f"length {len(left)} vs {len(right)}"})
                 return
-            for index, (a, b) in enumerate(zip(left, right)):
+            for index, (a, b) in enumerate(zip(left, right, strict=True)):
                 walk(a, b, f"{path}[{index}]")
         elif isinstance(left, bool) or isinstance(right, bool):
             if left != right:
@@ -188,4 +187,8 @@ def compare_results(
             differences.append({"path": path, "stored": left, "recomputed": right})
 
     walk(stored, recomputed, "results")
-    return {"equivalent": not differences, "differences": differences[:50], "difference_count": len(differences)}
+    return {
+        "equivalent": not differences,
+        "differences": differences[:50],
+        "difference_count": len(differences),
+    }

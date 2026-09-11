@@ -12,7 +12,6 @@ from aaa.environment import MovingDotEnvironment
 from aaa.experiment import (
     STEP_RECORD_SCHEMA,
     StepRecord,
-    TrialIdentity,
     run_episode,
     write_step_records,
 )
@@ -81,7 +80,7 @@ class TemporalOrderTests(unittest.TestCase):
             learn=True,
         )
         self.assertTrue(probe.update_histories)
-        for predicted, (updated, _) in zip(probe.histories, probe.update_histories):
+        for predicted, (updated, _) in zip(probe.histories, probe.update_histories, strict=True):
             self.assertEqual(predicted, updated)
 
     def test_update_target_is_the_revealed_next_position(self):
@@ -93,7 +92,7 @@ class TemporalOrderTests(unittest.TestCase):
             identity(family="straight", scenario="straight", update_mode="online"),
             learn=True,
         )
-        for record, (_, target) in zip(records, probe.update_histories):
+        for record, (_, target) in zip(records, probe.update_histories, strict=True):
             self.assertEqual(record.actual_next_position, target)
 
     def test_learning_only_changes_enabled_model(self):
@@ -156,7 +155,7 @@ class LeakageTests(unittest.TestCase):
             identity(family="speed_change", scenario="changed"),
             learn=False,
         )
-        for record, history in zip(records, probe.histories):
+        for record, history in zip(records, probe.histories, strict=True):
             self.assertEqual(record.history, history)
             self.assertNotIn(record.actual_next_position, history)
 

@@ -29,8 +29,9 @@ References
 from __future__ import annotations
 
 import math
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Callable, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 
@@ -84,7 +85,7 @@ class Interval:
     def available(self) -> bool:
         return self.status == "OK" and self.lower is not None and self.upper is not None
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "estimate": self.estimate,
             "lower": self.lower,
@@ -100,7 +101,7 @@ class Interval:
         }
 
     @classmethod
-    def unavailable(cls, estimand: str, reason: str, *, level: float, draws: int) -> "Interval":
+    def unavailable(cls, estimand: str, reason: str, *, level: float, draws: int) -> Interval:
         return cls(
             estimate=None,
             lower=None,
@@ -169,7 +170,9 @@ def hierarchical_bootstrap(
     try:
         point = float(statistic(observed_candidate, observed_baseline))
     except (ZeroDivisionError, FloatingPointError, ValueError) as error:
-        return Interval.unavailable(estimand, f"point estimate could not be computed: {error}", level=level, draws=draws)
+        return Interval.unavailable(
+            estimand, f"point estimate could not be computed: {error}", level=level, draws=draws
+        )
     if not math.isfinite(point):
         return Interval.unavailable(estimand, "point estimate is not finite", level=level, draws=draws)
 
@@ -219,6 +222,10 @@ def hierarchical_bootstrap(
 
 
 def mean_statistic(candidate: np.ndarray, baseline: np.ndarray | None) -> float:
+    """Absolute mean of the candidate. Shares the two-argument statistic
+    signature every bootstrap callable uses; ``baseline`` is unused."""
+
+    del baseline
     if candidate.size == 0:
         raise ValueError("no observations")
     return float(np.mean(candidate))
@@ -254,12 +261,22 @@ def ratio_statistic(candidate: np.ndarray, baseline: np.ndarray | None) -> float
     return float(np.mean(candidate)) / denominator
 
 
-def point_relative_improvement(candidate: Mapping[str, Sequence[float]], baseline: Mapping[str, Sequence[float]]) -> float | None:
+def point_relative_improvement(
+    candidate: Mapping[str, Sequence[float]], baseline: Mapping[str, Sequence[float]]
+) -> float | None:
     """Point estimate computed with exactly the bootstrap statistic."""
 
     replicas = sorted(set(candidate) & set(baseline))
-    values = np.concatenate([np.asarray(candidate[r], dtype=float) for r in replicas]) if replicas else np.asarray([])
-    others = np.concatenate([np.asarray(baseline[r], dtype=float) for r in replicas]) if replicas else np.asarray([])
+    values = (
+        np.concatenate([np.asarray(candidate[r], dtype=float) for r in replicas])
+        if replicas
+        else np.asarray([])
+    )
+    others = (
+        np.concatenate([np.asarray(baseline[r], dtype=float) for r in replicas])
+        if replicas
+        else np.asarray([])
+    )
     if values.size == 0 or others.size == 0 or float(np.mean(others)) == 0.0:
         return None
     return 1.0 - float(np.mean(values)) / float(np.mean(others))
@@ -280,9 +297,9 @@ class MultiplicityResult:
     method: str
     family_size: int
     alpha: float
-    entries: list[dict[str, object]] = field(default_factory=list)
+    entries: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "method": self.method,
             "family_size": self.family_size,
@@ -290,7 +307,7 @@ class MultiplicityResult:
             "entries": self.entries,
         }
 
-    def adjusted(self, name: str) -> dict[str, object] | None:
+    def adjusted(self, name: str) -> dict[str, Any] | None:
         for entry in self.entries:
             if entry["name"] == name:
                 return entry
@@ -317,8 +334,9 @@ def holm_bonferroni(
     the family so that re-testing is paid for rather than ignored.
     """
 
-    named = [(name, value) for name, value in p_values.items()]
+    named = list(p_values.items())
     family_size = len(named) + max(0, int(extra_family_size))
+    entries: list[dict[str, Any]]
     if method == "none":
         entries = [
             {
@@ -332,7 +350,7 @@ def holm_bonferroni(
         return MultiplicityResult("none", len(named), alpha, entries)
 
     usable = sorted([(value, name) for name, value in named if value is not None])
-    entries: list[dict[str, object]] = []
+    entries = []
     running = 0.0
     rejected: dict[str, bool] = {}
     adjusted: dict[str, float] = {}
@@ -348,13 +366,15 @@ def holm_bonferroni(
         if stop or not rejected[name]:
             stop = True
             rejected[name] = False
-    for name, value in sorted(named):
+    for name, reported in sorted(named):
         entries.append(
             {
                 "name": name,
-                "p_value": value,
+                "p_value": reported,
                 "adjusted_p_value": adjusted.get(name),
-                "reject": None if value is None else rejected.get(name, False),
+                # A comparison without a p-value is *not reported* as rejected
+                # or not rejected; absence of evidence stays absent.
+                "reject": None if reported is None else rejected.get(name, False),
             }
         )
     return MultiplicityResult(method, family_size, alpha, entries)

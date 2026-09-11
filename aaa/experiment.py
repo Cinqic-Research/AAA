@@ -20,10 +20,10 @@ from __future__ import annotations
 import csv
 import json
 import math
-import os
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
-from typing import Callable, Sequence
+from typing import Any
 
 from .environment import Environment
 from .predictors import Predictor
@@ -65,7 +65,7 @@ class TrialIdentity:
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
                 raise ValueError(f"{name} must be a non-negative integer")
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, Any]:
         value = asdict(self)
         value["training_seed_lineage"] = list(self.training_seed_lineage)
         return value
@@ -117,7 +117,7 @@ class StepRecord:
     def bounce_wall(self) -> str | None:
         return self.bounce_walls[0] if self.bounce_walls else None
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             **self.identity.to_dict(),
             "step": self.step,
@@ -135,7 +135,7 @@ class StepRecord:
         }
 
     @classmethod
-    def from_dict(cls, value: dict[str, object]) -> "StepRecord":
+    def from_dict(cls, value: dict[str, Any]) -> StepRecord:
         if value.get("schema_version") != STEP_RECORD_SCHEMA:
             raise ValueError(
                 f"unsupported step record schema {value.get('schema_version')!r}; expected {STEP_RECORD_SCHEMA!r}"
@@ -145,32 +145,34 @@ class StepRecord:
             role=str(value["role"]),
             family=str(value["family"]),
             scenario=str(value["scenario"]),
-            environment_seed=int(value["environment_seed"]),  # type: ignore[arg-type]
-            replica_id=int(value["replica_id"]),  # type: ignore[arg-type]
-            episode=int(value["episode"]),  # type: ignore[arg-type]
+            environment_seed=int(value["environment_seed"]),
+            replica_id=int(value["replica_id"]),
+            episode=int(value["episode"]),
             branch=str(value.get("branch", "main")),
-            confirmation_batch=(None if value.get("confirmation_batch") is None else str(value["confirmation_batch"])),
-            training_seed_lineage=tuple(int(item) for item in value.get("training_seed_lineage", [])),  # type: ignore[union-attr]
+            confirmation_batch=(
+                None if value.get("confirmation_batch") is None else str(value["confirmation_batch"])
+            ),
+            training_seed_lineage=tuple(int(item) for item in value.get("training_seed_lineage", [])),
             stratum=str(value.get("stratum", "unstratified")),
             checkpoint_hash=(None if value.get("checkpoint_hash") is None else str(value["checkpoint_hash"])),
             update_mode=str(value.get("update_mode", "frozen")),
         )
         return cls(
             identity=identity,
-            step=int(value["step"]),  # type: ignore[arg-type]
-            target_step=int(value["target_step"]),  # type: ignore[arg-type]
-            history=tuple(float(item) for item in value["history"]),  # type: ignore[union-attr]
-            current_observation=float(value["current_observation"]),  # type: ignore[arg-type]
-            actual_next_position=float(value["actual_next_position"]),  # type: ignore[arg-type]
+            step=int(value["step"]),
+            target_step=int(value["target_step"]),
+            history=tuple(float(item) for item in value["history"]),
+            current_observation=float(value["current_observation"]),
+            actual_next_position=float(value["actual_next_position"]),
             bounced=bool(value["bounced"]),
             changed=bool(value["changed"]),
             predictions={
-                str(name): {str(k): float(v) for k, v in metrics.items()}  # type: ignore[union-attr]
-                for name, metrics in value["predictions"].items()  # type: ignore[union-attr]
+                str(name): {str(k): float(v) for k, v in metrics.items()}
+                for name, metrics in value["predictions"].items()
             },
-            updates_enabled={str(name): bool(flag) for name, flag in value["updates_enabled"].items()},  # type: ignore[union-attr]
-            bounce_walls=tuple(str(item) for item in value.get("bounce_walls", [])),  # type: ignore[union-attr]
-            interval_width=float(value.get("interval_width", 1.0)),  # type: ignore[arg-type]
+            updates_enabled={str(name): bool(flag) for name, flag in value["updates_enabled"].items()},
+            bounce_walls=tuple(str(item) for item in value.get("bounce_walls", [])),
+            interval_width=float(value.get("interval_width", 1.0)),
         )
 
 
@@ -239,7 +241,8 @@ def run_episode(
                 "raw": raw_predictions[predictor.name],
                 "scored": scored_predictions[predictor.name],
                 "absolute_error": abs(scored_predictions[predictor.name] - transition.position),
-                "normalized_absolute_error": abs(scored_predictions[predictor.name] - transition.position) / width,
+                "normalized_absolute_error": abs(scored_predictions[predictor.name] - transition.position)
+                / width,
                 "signed_error": scored_predictions[predictor.name] - transition.position,
             }
             for predictor in predictors
@@ -316,7 +319,9 @@ def with_stratum(identity: TrialIdentity, stratum: str) -> TrialIdentity:
     return replace(identity, stratum=stratum)
 
 
-def write_step_records(records: Sequence[StepRecord], jsonl_path: str | Path, csv_path: str | Path | None = None) -> None:
+def write_step_records(
+    records: Sequence[StepRecord], jsonl_path: str | Path, csv_path: str | Path | None = None
+) -> None:
     """Write complete nested JSONL and an optional flat CSV view."""
 
     jsonl_destination = Path(jsonl_path)
@@ -325,7 +330,7 @@ def write_step_records(records: Sequence[StepRecord], jsonl_path: str | Path, cs
     with jsonl_temporary.open("w", encoding="utf-8") as handle:
         for record in records:
             handle.write(json.dumps(record.to_dict(), sort_keys=True) + "\n")
-    os.replace(jsonl_temporary, jsonl_destination)
+    jsonl_temporary.replace(jsonl_destination)
 
     if csv_path is None:
         return
@@ -361,7 +366,7 @@ def write_step_records(records: Sequence[StepRecord], jsonl_path: str | Path, cs
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         for record in records:
-            row: dict[str, object] = {
+            row: dict[str, Any] = {
                 "trial_id": record.identity.trial_id,
                 "role": record.identity.role,
                 "family": record.identity.family,
@@ -388,7 +393,7 @@ def write_step_records(records: Sequence[StepRecord], jsonl_path: str | Path, cs
                 row[f"{name}_absolute_error"] = prediction.get("absolute_error", "")
                 row[f"{name}_normalized_absolute_error"] = prediction.get("normalized_absolute_error", "")
             writer.writerow(row)
-    os.replace(csv_temporary, csv_destination)
+    csv_temporary.replace(csv_destination)
 
 
 def read_step_records(path: str | Path) -> list[StepRecord]:

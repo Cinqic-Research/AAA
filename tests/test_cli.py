@@ -37,16 +37,25 @@ def invoke(argv: list[str]) -> tuple[int, str, str]:
 
 
 def outcome(statuses: dict[str, str], *, required: dict[str, bool] | None = None) -> RunOutcome:
-    required = required or {name: True for name in statuses}
+    required = required or dict.fromkeys(statuses, True)
     gates = [
-        {"name": name, "status": status, "required": required[name], "observed": None,
-         "threshold": {}, "description": "", "details": {}}
+        {
+            "name": name,
+            "status": status,
+            "required": required[name],
+            "observed": None,
+            "threshold": {},
+            "description": "",
+            "details": {},
+        }
         for name, status in statuses.items()
     ]
     unmet = [gate["name"] for gate in gates if gate["required"] and gate["status"] != PASS]
     return RunOutcome(
         directory=Path("/tmp/aaa-fake-attempt"),
-        summary={"gates": {"gates": gates, "all_required_gates_pass": not unmet, "unmet_required_gates": unmet}},
+        summary={
+            "gates": {"gates": gates, "all_required_gates_pass": not unmet, "unmet_required_gates": unmet}
+        },
     )
 
 
@@ -65,9 +74,7 @@ class ExitCodeTests(unittest.TestCase):
         self.assertEqual(self._run("confirmation_a", {"a": PASS, "b": FAIL}, ["--batch-id", "x"]), 1)
 
     def test_confirmation_returns_nonzero_on_not_verified(self):
-        self.assertEqual(
-            self._run("confirmation_a", {"a": PASS, "b": NOT_VERIFIED}, ["--batch-id", "x"]), 1
-        )
+        self.assertEqual(self._run("confirmation_a", {"a": PASS, "b": NOT_VERIFIED}, ["--batch-id", "x"]), 1)
 
     def test_confirmation_returns_nonzero_on_insufficient_evidence(self):
         self.assertEqual(
@@ -149,13 +156,21 @@ class RunnerEnforcementTests(unittest.TestCase):
             copy = Path(directory) / "tree"
             copy.mkdir()
             (copy / "requirements-lock.txt").write_text("numpy==2.5.3\n", encoding="utf-8")
-            with mock.patch.object(
-                runner_module,
-                "git_metadata",
-                return_value={"commit": "abc", "branch": "x", "tree_hash": "t", "dirty": True, "status": ["M x"]},
+            with (
+                mock.patch.object(
+                    runner_module,
+                    "git_metadata",
+                    return_value={
+                        "commit": "abc",
+                        "branch": "x",
+                        "tree_hash": "t",
+                        "dirty": True,
+                        "status": ["M x"],
+                    },
+                ),
+                self.assertRaises(ConfirmationError) as caught,
             ):
-                with self.assertRaises(ConfirmationError) as caught:
-                    self._confirm()
+                self._confirm()
         self.assertIn("clean source tree", str(caught.exception).lower())
 
     def test_an_unknown_role_is_refused(self):
@@ -228,9 +243,7 @@ class InformationalCommandTests(unittest.TestCase):
             )
             self.assertEqual(code, 0)
             self.assertIn("unit-test-batch", out)
-            registry = ConfirmationBatchRegistry.load(
-                project / load_spec().confirmation.batch_registry
-            )
+            registry = ConfirmationBatchRegistry.load(project / load_spec().confirmation.batch_registry)
             self.assertEqual(registry.get("unit-test-batch").status, "planned")
 
     def test_an_unknown_command_is_rejected(self):
@@ -258,9 +271,8 @@ class RecomputeCommandTests(unittest.TestCase):
         self.assertIn("every stored gate status was reproduced", out)
 
     def test_recompute_of_a_missing_run_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            with self.assertRaises(FileNotFoundError):
-                invoke(["recompute", str(Path(directory) / "nothing")])
+        with tempfile.TemporaryDirectory() as directory, self.assertRaises(FileNotFoundError):
+            invoke(["recompute", str(Path(directory) / "nothing")])
 
 
 if __name__ == "__main__":

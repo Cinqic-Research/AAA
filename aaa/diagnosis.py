@@ -25,14 +25,15 @@ Everything here uses development streams only. No confirmation data is touched.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Sequence
+from typing import Any
 
 import numpy as np
 
 from .config import WorldConfig
-from .environment import MovingDotEnvironment
+from .environment import MovingDotEnvironment, as_scenario
 from .experiment import TrialIdentity, run_episode
 from .predictors import OnlineLinearPredictor, batch_least_squares
 
@@ -61,6 +62,13 @@ def _identity(scenario: str, seed: int, episode: int) -> TrialIdentity:
 
 
 def legacy_positions(history: np.ndarray, world: WorldConfig) -> np.ndarray:
+    """The historical v1 basis: raw absolute positions, ignoring the bounds.
+
+    ``world`` is unused on purpose — that this basis is blind to the interval
+    it lives in is precisely the property the diagnosis is measuring.
+    """
+
+    del world
     return np.concatenate([[1.0], history[-4:]])
 
 
@@ -77,9 +85,7 @@ def displacement_only(history: np.ndarray, world: WorldConfig) -> np.ndarray:
 def displacement_position(history: np.ndarray, world: WorldConfig) -> np.ndarray:
     scale = world.dt * world.speed_max
     midpoint = (world.lower_bound + world.upper_bound) / 2
-    return np.asarray(
-        [1.0, (history[-1] - history[-2]) / scale, (history[-1] - midpoint) / world.width]
-    )
+    return np.asarray([1.0, (history[-1] - history[-2]) / scale, (history[-1] - midpoint) / world.width])
 
 
 FEATURE_SETS: dict[str, FeatureFn] = {
@@ -107,13 +113,15 @@ class Dataset:
 
 
 def build_dataset(regime: str, *, seeds: Sequence[int], world: WorldConfig) -> Dataset:
-    scenarios = {"straight": ("straight",), "bouncing": ("bouncing",), "mixed": ("straight", "bouncing")}[regime]
+    scenarios = {"straight": ("straight",), "bouncing": ("bouncing",), "mixed": ("straight", "bouncing")}[
+        regime
+    ]
     histories: list[np.ndarray] = []
     targets: list[float] = []
     for seed in seeds:
         for index, scenario in enumerate(scenarios):
             probe = OnlineLinearPredictor(update_enabled=False, name="probe")
-            environment = MovingDotEnvironment(scenario, seed + index * 977, world)
+            environment = MovingDotEnvironment(as_scenario(scenario), seed + index * 977, world)
             records = run_episode(environment, [probe], _identity(scenario, seed, index), learn=False)
             for record in records:
                 histories.append(np.asarray(record.history, dtype=float))
@@ -126,7 +134,7 @@ def build_dataset(regime: str, *, seeds: Sequence[int], world: WorldConfig) -> D
     return Dataset(features=features, targets=np.asarray(targets, dtype=float), world=world, regime=regime)
 
 
-def conditioning(matrix: np.ndarray) -> dict[str, object]:
+def conditioning(matrix: np.ndarray) -> dict[str, Any]:
     singular = np.linalg.svd(matrix, compute_uv=False)
     tolerance = max(matrix.shape) * float(singular[0]) * np.finfo(float).eps if singular.size else 0.0
     rank = int(np.sum(singular > tolerance))
@@ -152,7 +160,7 @@ def conditioning(matrix: np.ndarray) -> dict[str, object]:
 # ---------------------------------------------------------------------------
 
 
-def _sgd(features: np.ndarray, targets: np.ndarray, *, rate: float, order: np.ndarray) -> dict[str, object]:
+def _sgd(features: np.ndarray, targets: np.ndarray, *, rate: float, order: np.ndarray) -> dict[str, Any]:
     weights = np.zeros(features.shape[1])
     norms: list[float] = []
     for index in order:
@@ -171,7 +179,7 @@ def _sgd(features: np.ndarray, targets: np.ndarray, *, rate: float, order: np.nd
     }
 
 
-def _nlms(features: np.ndarray, targets: np.ndarray, *, rate: float, order: np.ndarray) -> dict[str, object]:
+def _nlms(features: np.ndarray, targets: np.ndarray, *, rate: float, order: np.ndarray) -> dict[str, Any]:
     weights = np.zeros(features.shape[1])
     norms: list[float] = []
     for index in order:
@@ -189,32 +197,67 @@ def _nlms(features: np.ndarray, targets: np.ndarray, *, rate: float, order: np.n
     }
 
 
-def _rls(features: np.ndarray, targets: np.ndarray, *, forgetting: float, ridge: float, order: np.ndarray) -> dict[str, object]:
-    """Square-root RLS, matching the candidate's numerical formulation."""
+def _rls(
+    features: np.ndarray,
+    targets: np.ndarray,
+    *,
+    forgetting: float,
+    ridge: float,
+    order: np.ndarray,
+    trace_bound: float | None = None,
+) -> dict[str, Any]:
+    """Square-root RLS, matching the candidate's numerical formulation.
+
+    ``trace_bound=None`` deliberately runs the *unbounded* recursion so the
+    ablation can show what trace-bounded forgetting is protecting against. The
+    factor itself stays finite either way, but with a weakly exciting stream and
+    ``forgetting < 1`` the trace grows like ``forgetting ** -n``; reconstructing
+    ``P = S S^T`` at that scale is then dominated by rounding and the
+    reconstruction loses positive semidefiniteness even though the estimate
+    does not diverge. That is exactly the effect the candidate's trace bound
+    exists to prevent, so both arms are reported.
+    """
 
     dimension = features.shape[1]
     weights = np.zeros(dimension)
     factor = np.eye(dimension) / np.sqrt(ridge)
+    suspensions = 0
     for index in order:
         phi = features[index]
+        effective = forgetting
+        if trace_bound is not None and forgetting < 1.0:
+            trace = float(np.sum(factor * factor))
+            if trace / forgetting > trace_bound:
+                effective = 1.0
+                suspensions += 1
         f = factor.T @ phi
         beta = float(f @ f)
-        alpha = forgetting + beta
+        alpha = effective + beta
         error = float(targets[index]) - float(phi @ weights)
         if beta > 0:
             gain = (factor @ f) / alpha
             weights = weights + gain * error
-            gamma = (1.0 - np.sqrt(forgetting / alpha)) / beta
-            factor = (factor - gamma * np.outer(factor @ f, f)) / np.sqrt(forgetting)
+            gamma = (1.0 - np.sqrt(effective / alpha)) / beta
+            factor = (factor - gamma * np.outer(factor @ f, f)) / np.sqrt(effective)
         else:
-            factor = factor / np.sqrt(forgetting)
+            factor = factor / np.sqrt(effective)
     covariance = factor @ factor.T
+    trace = float(np.trace(covariance))
     eigenvalues = np.linalg.eigvalsh((covariance + covariance.T) / 2)
+    minimum = float(eigenvalues.min())
+    # Rounding in the reconstruction is of order eps * ||P||, so a negative
+    # minimum eigenvalue only means "lost to rounding" when it is inside that
+    # scale. Report which it is rather than asserting either.
+    rounding_scale = float(np.finfo(float).eps * max(abs(eigenvalues.max()), 1.0)) * dimension
     return {
         "weights": weights.tolist(),
         "diverged": bool(not np.all(np.isfinite(weights))),
-        "covariance_min_eigenvalue": float(eigenvalues.min()),
-        "covariance_condition_number": float(eigenvalues.max() / eigenvalues.min()) if eigenvalues.min() > 0 else None,
+        "trace_bound": trace_bound,
+        "forgetting_suspensions": suspensions,
+        "covariance_trace": trace,
+        "covariance_min_eigenvalue": minimum,
+        "covariance_psd_lost_to_rounding": bool(-rounding_scale <= minimum < 0.0),
+        "covariance_condition_number": float(eigenvalues.max() / minimum) if minimum > 0 else None,
     }
 
 
@@ -232,7 +275,9 @@ def _order(count: int, ordering: str, rng: np.random.Generator) -> np.ndarray:
     raise ValueError(f"unknown ordering {ordering!r}")
 
 
-def _score(weights: Sequence[float] | None, features: np.ndarray, targets: np.ndarray) -> float | None:
+def _score(
+    weights: Sequence[float] | np.ndarray | None, features: np.ndarray, targets: np.ndarray
+) -> float | None:
     if weights is None:
         return None
     array = np.asarray(weights, dtype=float)
@@ -255,15 +300,28 @@ def run_diagnosis(output: str | Path = "diagnosis", *, quick: bool = False) -> P
     regimes = ("mixed",) if quick else ("straight", "bouncing", "mixed")
     rates = (0.08,) if quick else (0.02, 0.08, 0.32)
     orderings = ("chronological",) if quick else ORDERINGS
+    # (forgetting, trace_bound): the None arm is the unbounded recursion, the
+    # 1e5 arm is the candidate's declared bound.
+    rls_settings: tuple[tuple[float, float | None], ...] = (
+        ((1.0, None), (0.90, None), (0.90, 1e5))
+        if quick
+        else (
+            (1.0, None),
+            (0.98, None),
+            (0.90, None),
+            (0.50, None),
+            (0.98, 1e5),
+            (0.90, 1e5),
+            (0.50, 1e5),
+        )
+    )
 
-    conditioning_report: dict[str, object] = {}
-    rows: list[dict[str, object]] = []
+    conditioning_report: dict[str, Any] = {}
+    rows: list[dict[str, Any]] = []
     for regime in regimes:
         train = build_dataset(regime, seeds=list(train_seeds), world=world)
         holdout = build_dataset(regime, seeds=list(holdout_seeds), world=world)
-        conditioning_report[regime] = {
-            name: conditioning(matrix) for name, matrix in train.features.items()
-        }
+        conditioning_report[regime] = {name: conditioning(matrix) for name, matrix in train.features.items()}
         conditioning_report[f"{regime}_target"] = {
             "mean": float(train.targets.mean()),
             "scale": float(train.targets.std()),
@@ -292,10 +350,13 @@ def run_diagnosis(output: str | Path = "diagnosis", *, quick: bool = False) -> P
                     result = _sgd(matrix, train.targets, rate=rate, order=order)
                     rows.append(
                         {
-                            "regime": regime, "features": feature_name, "estimator": "sgd",
-                            "ordering": ordering, "hyperparameter": rate,
-                            "train_mae": _score(result["weights"], matrix, train.targets),  # type: ignore[arg-type]
-                            "holdout_mae": _score(result["weights"], holdout_matrix, holdout.targets),  # type: ignore[arg-type]
+                            "regime": regime,
+                            "features": feature_name,
+                            "estimator": "sgd",
+                            "ordering": ordering,
+                            "hyperparameter": rate,
+                            "train_mae": _score(result["weights"], matrix, train.targets),
+                            "holdout_mae": _score(result["weights"], holdout_matrix, holdout.targets),
                             **{k: v for k, v in result.items() if k != "weights"},
                             "weights": result["weights"],
                         }
@@ -303,22 +364,35 @@ def run_diagnosis(output: str | Path = "diagnosis", *, quick: bool = False) -> P
                     nlms = _nlms(matrix, train.targets, rate=min(rate * 4, 1.0), order=order)
                     rows.append(
                         {
-                            "regime": regime, "features": feature_name, "estimator": "normalized_lms",
-                            "ordering": ordering, "hyperparameter": min(rate * 4, 1.0),
-                            "train_mae": _score(nlms["weights"], matrix, train.targets),  # type: ignore[arg-type]
-                            "holdout_mae": _score(nlms["weights"], holdout_matrix, holdout.targets),  # type: ignore[arg-type]
+                            "regime": regime,
+                            "features": feature_name,
+                            "estimator": "normalized_lms",
+                            "ordering": ordering,
+                            "hyperparameter": min(rate * 4, 1.0),
+                            "train_mae": _score(nlms["weights"], matrix, train.targets),
+                            "holdout_mae": _score(nlms["weights"], holdout_matrix, holdout.targets),
                             **{k: v for k, v in nlms.items() if k != "weights"},
                             "weights": nlms["weights"],
                         }
                     )
-                for forgetting in (1.0, 0.98, 0.90):
-                    result = _rls(matrix, train.targets, forgetting=forgetting, ridge=1e-4, order=order)
+                for forgetting, trace_bound in rls_settings:
+                    result = _rls(
+                        matrix,
+                        train.targets,
+                        forgetting=forgetting,
+                        ridge=1e-4,
+                        order=order,
+                        trace_bound=trace_bound,
+                    )
                     rows.append(
                         {
-                            "regime": regime, "features": feature_name, "estimator": "sqrt_rls",
-                            "ordering": ordering, "hyperparameter": forgetting,
-                            "train_mae": _score(result["weights"], matrix, train.targets),  # type: ignore[arg-type]
-                            "holdout_mae": _score(result["weights"], holdout_matrix, holdout.targets),  # type: ignore[arg-type]
+                            "regime": regime,
+                            "features": feature_name,
+                            "estimator": "sqrt_rls" if trace_bound is None else "sqrt_rls_trace_bounded",
+                            "ordering": ordering,
+                            "hyperparameter": forgetting,
+                            "train_mae": _score(result["weights"], matrix, train.targets),
+                            "holdout_mae": _score(result["weights"], holdout_matrix, holdout.targets),
                             **{k: v for k, v in result.items() if k != "weights"},
                             "weights": result["weights"],
                         }
@@ -327,8 +401,11 @@ def run_diagnosis(output: str | Path = "diagnosis", *, quick: bool = False) -> P
     valid = [row for row in rows if row.get("holdout_mae") is not None]
     best = min(valid, key=lambda row: float(row["holdout_mae"])) if valid else None
     legacy = [
-        row for row in rows
-        if row["features"] == "legacy_positions" and row["estimator"] == "sgd" and row["ordering"] == "chronological"
+        row
+        for row in rows
+        if row["features"] == "legacy_positions"
+        and row["estimator"] == "sgd"
+        and row["ordering"] == "chronological"
     ]
     order_sensitivity = _order_sensitivity(rows)
 
@@ -336,8 +413,12 @@ def run_diagnosis(output: str | Path = "diagnosis", *, quick: bool = False) -> P
         "format_version": DIAGNOSIS_SCHEMA,
         "purpose": "controlled development-only ablations separating conditioning, feature basis, optimizer, regime and ordering",
         "world": {
-            "lower_bound": world.lower_bound, "upper_bound": world.upper_bound, "dt": world.dt,
-            "steps_per_episode": world.steps_per_episode, "speed_min": world.speed_min, "speed_max": world.speed_max,
+            "lower_bound": world.lower_bound,
+            "upper_bound": world.upper_bound,
+            "dt": world.dt,
+            "steps_per_episode": world.steps_per_episode,
+            "speed_min": world.speed_min,
+            "speed_max": world.speed_max,
         },
         "train_seeds": list(train_seeds),
         "holdout_seeds": list(holdout_seeds),
@@ -351,24 +432,29 @@ def run_diagnosis(output: str | Path = "diagnosis", *, quick: bool = False) -> P
             "causal_scope": "these rows separate feature basis, estimator, regime and ordering, but they do not establish a single root cause for the historical v1 outcome; each factor is reported with its own measured effect",
         },
     }
-    (destination / "diagnosis.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (destination / "diagnosis.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     (destination / "diagnosis.md").write_text(_render(result), encoding="utf-8")
     return destination
 
 
-def _order_sensitivity(rows: Sequence[dict[str, object]]) -> list[dict[str, object]]:
+def _order_sensitivity(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     grouped: dict[tuple[object, ...], dict[str, float]] = {}
     for row in rows:
         if row["ordering"] not in ORDERINGS or row.get("holdout_mae") is None:
             continue
-        key = (row["regime"], row["features"], row["estimator"], row["hyperparameter"])
+        key: tuple[Any, ...] = (row["regime"], row["features"], row["estimator"], row["hyperparameter"])
         grouped.setdefault(key, {})[str(row["ordering"])] = float(row["holdout_mae"])
-    output: list[dict[str, object]] = []
+    output: list[dict[str, Any]] = []
     for key, values in sorted(grouped.items(), key=lambda item: str(item[0])):
         if "chronological" in values and "shuffled" in values:
             output.append(
                 {
-                    "regime": key[0], "features": key[1], "estimator": key[2], "hyperparameter": key[3],
+                    "regime": key[0],
+                    "features": key[1],
+                    "estimator": key[2],
+                    "hyperparameter": key[3],
                     "chronological_holdout_mae": values["chronological"],
                     "shuffled_holdout_mae": values["shuffled"],
                     "replay_holdout_mae": values.get("replay_x3"),
@@ -378,8 +464,8 @@ def _order_sensitivity(rows: Sequence[dict[str, object]]) -> list[dict[str, obje
     return output
 
 
-def _render(result: dict[str, object]) -> str:
-    rows = result["rows"]  # type: ignore[index]
+def _render(result: dict[str, Any]) -> str:
+    rows = result["rows"]
     best = result["best_holdout"]
     lines = [
         "# Legacy learner diagnosis",
@@ -388,17 +474,19 @@ def _render(result: dict[str, object]) -> str:
         "",
         f"- Configurations evaluated: `{len(rows)}`",
         f"- Best held-out configuration: `{best['features']}` / `{best['estimator']}` / `{best['ordering']}` "
-        f"(hyperparameter `{best['hyperparameter']}`), held-out MAE `{best['holdout_mae']:.3e}`" if best else "- No configuration produced a finite held-out score",
+        f"(hyperparameter `{best['hyperparameter']}`), held-out MAE `{best['holdout_mae']:.3e}`"
+        if best
+        else "- No configuration produced a finite held-out score",
         "",
         "## Conditioning of each feature basis",
         "",
         "| Regime | Features | Effective rank / columns | Condition number |",
         "|---|---|---:|---:|",
     ]
-    for regime, entry in result["conditioning"].items():  # type: ignore[union-attr]
+    for regime, entry in result["conditioning"].items():
         if regime.endswith("_target"):
             continue
-        for name, values in entry.items():  # type: ignore[union-attr]
+        for name, values in entry.items():
             condition = values["condition_number"]
             lines.append(
                 f"| {regime} | `{name}` | {values['effective_rank']} / {values['columns']} | "
@@ -419,11 +507,11 @@ def _render(result: dict[str, object]) -> str:
             "",
             "## Order sensitivity",
             "",
-            "| Regime | Features | Estimator | Chronological | Shuffled | Shuffled − chronological |",
+            "| Regime | Features | Estimator | Chronological | Shuffled | Shuffled - chronological |",
             "|---|---|---|---:|---:|---:|",
         ]
     )
-    for row in result["order_sensitivity"][:24]:  # type: ignore[index]
+    for row in result["order_sensitivity"][:24]:
         lines.append(
             f"| {row['regime']} | `{row['features']}` | `{row['estimator']}` | "
             f"{row['chronological_holdout_mae']:.3e} | {row['shuffled_holdout_mae']:.3e} | "

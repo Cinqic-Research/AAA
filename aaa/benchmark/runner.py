@@ -9,16 +9,16 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import dataclass, field
+from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 import numpy as np
 
 from .. import __version__
 from ..experiment import TrialIdentity, run_episode
-from ..metrics import RecoveryConfig, normalized_errors
 from ..predictors import OnlineRLSPredictor
 from .evidence import (
     ExperimentRegistry,
@@ -35,9 +35,9 @@ from .evidence import (
 )
 from .families import (
     CHANGED_LAW_PREDICTOR_NAMES,
-    EpisodePlan,
     MOTION_PREDICTOR_NAMES,
     ONLINE_PREDICTOR_NAMES,
+    EpisodePlan,
     build_environment,
     clone_candidate,
     make_candidate,
@@ -53,14 +53,12 @@ from .recompute import compare_results, rebuild_collectors, recovery_config
 from .report import write_report
 from .seeds import (
     CONFIRMATION_ROLES,
+    DEFAULT_GOLDEN_CASES,
     ROLES,
     ConfirmationBatchRegistry,
-    DEFAULT_GOLDEN_CASES,
     golden_seed_fixture,
     lineage_for,
     purpose_for,
-    trial_seed,
-    training_seed,
 )
 from .spec import BenchmarkSpec, load_spec, spec_hash
 from .training import TrainedReplica, measure_learning_curve, train_replica
@@ -96,9 +94,7 @@ def default_project_root() -> Path:
 # ---------------------------------------------------------------------------
 
 
-def train_replicas(
-    spec: BenchmarkSpec, *, lineage: str, replicas: int, role: str
-) -> list[TrainedReplica]:
+def train_replicas(spec: BenchmarkSpec, *, lineage: str, replicas: int, role: str) -> list[TrainedReplica]:
     return [train_replica(spec, lineage, replica, role=role) for replica in range(replicas)]
 
 
@@ -253,7 +249,11 @@ def golden_seed_check(spec: BenchmarkSpec, project_root: Path) -> dict[str, Any]
     stored = json.loads(fixture_path.read_text(encoding="utf-8"))
     if stored.get("root_seed") != spec.randomness.root_seed:
         return {"matches": False, "reason": "fixture root seed differs from the specification"}
-    mismatches = {key: [stored["seeds"].get(key), value] for key, value in computed.items() if stored["seeds"].get(key) != value}
+    mismatches = {
+        key: [stored["seeds"].get(key), value]
+        for key, value in computed.items()
+        if stored["seeds"].get(key) != value
+    }
     return {"matches": not mismatches, "cases": len(computed), "mismatches": mismatches}
 
 
@@ -274,7 +274,6 @@ def run_benchmark(
     project_root: str | Path | None = None,
     reproduce: bool = False,
     resume: bool = False,
-    allow_dirty_development: bool = True,
 ) -> RunOutcome:
     """Execute one benchmark attempt and return its outcome."""
 
@@ -302,13 +301,13 @@ def run_benchmark(
                 "development experiments only"
             )
         if spec.status != "active":
-            raise ConfirmationError(f"confirmation requires an active specification, got status {spec.status!r}")
+            raise ConfirmationError(
+                f"confirmation requires an active specification, got status {spec.status!r}"
+            )
         if not batch_id:
             raise ConfirmationError("confirmation requires a predeclared confirmation batch id")
         if replicas is not None and replicas < spec.confirmation.replicas:
-            raise ConfirmationError(
-                f"confirmation requires at least {spec.confirmation.replicas} replicas"
-            )
+            raise ConfirmationError(f"confirmation requires at least {spec.confirmation.replicas} replicas")
         if episodes is not None and episodes < spec.confirmation.episodes_per_family:
             raise ConfirmationError(
                 f"confirmation requires at least {spec.confirmation.episodes_per_family} episodes per family"
@@ -320,8 +319,14 @@ def run_benchmark(
                 + "\n".join(f"  {line}" for line in git["status"][:20])
             )
 
-    replica_count = replicas if replicas is not None else (
-        spec.confirmation.high_replication_replicas if role == "high_replication" else spec.confirmation.replicas
+    replica_count = (
+        replicas
+        if replicas is not None
+        else (
+            spec.confirmation.high_replication_replicas
+            if role == "high_replication"
+            else spec.confirmation.replicas
+        )
     )
     episode_count = episodes if episodes is not None else spec.confirmation.episodes_per_family
 
@@ -341,7 +346,9 @@ def run_benchmark(
         )
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    attempt = batch_id if is_confirmation else (attempt_label or f"{timestamp}-{role}")
+    # A confirmation batch id is guaranteed non-empty by the invariants above,
+    # and a confirmation attempt directory *is* its batch identity.
+    attempt = str(batch_id) if is_confirmation else (attempt_label or f"{timestamp}-{role}")
     directory = Path(output_root) / "benchmark-v2_1" / attempt
     if directory.exists() and not resume:
         raise FileExistsError(
@@ -383,7 +390,10 @@ def run_benchmark(
         json_dump(directory / "checkpoints" / f"replica-{item.replica:02d}.json", state)
         for budget, snapshot in sorted(item.checkpoints.items()):
             json_dump(
-                directory / "checkpoints" / "budgets" / f"replica-{item.replica:02d}-budget-{budget:04d}.json",
+                directory
+                / "checkpoints"
+                / "budgets"
+                / f"replica-{item.replica:02d}-budget-{budget:04d}.json",
                 snapshot,
             )
 
@@ -416,7 +426,13 @@ def run_benchmark(
             )
         )
         registry.start(trial_id)
-        relative = Path("raw") / plan.family / plan.branch / f"replica-{plan.replica:02d}" / f"episode-{plan.episode:04d}.jsonl.gz"
+        relative = (
+            Path("raw")
+            / plan.family
+            / plan.branch
+            / f"replica-{plan.replica:02d}"
+            / f"episode-{plan.episode:04d}.jsonl.gz"
+        )
         digest = write_jsonl_gz(directory / relative, records)
         registry.complete(trial_id, outputs=[str(relative)], checksums={str(relative): digest})
 
@@ -437,7 +453,9 @@ def run_benchmark(
             legacy=legacy_states,
             sink=sink,
         )
-    always_plans = plan_motion_family(spec, "always_online", purpose, replicas=replica_count, episodes=episode_count)
+    always_plans = plan_motion_family(
+        spec, "always_online", purpose, replicas=replica_count, episodes=episode_count
+    )
     collectors["always_online"] = run_always_online_family(
         spec,
         always_plans,
@@ -448,7 +466,6 @@ def run_benchmark(
         checkpoint_hashes=checkpoint_hashes,
         recovery=recovery,
         legacy=legacy_states,
-        purpose=purpose,
         sink=sink,
     )
 
@@ -512,7 +529,7 @@ def run_benchmark(
         directory,
         spec,
         results=results,
-        expected_trials=_expected_trial_count(spec, replica_count, episode_count),
+        expected_trials=_expected_trial_count(replica_count, episode_count),
         registry=registry,
         trained=trained,
         checkpoint_hashes=checkpoint_hashes,
@@ -578,9 +595,7 @@ def run_benchmark(
         from ..visualization import write_benchmark_plots
 
         rendered = write_benchmark_plots(directory / "plots", summary)
-        summary["plots"] = {
-            key: str(Path(value).relative_to(directory)) for key, value in rendered.items()
-        }
+        summary["plots"] = {key: str(Path(value).relative_to(directory)) for key, value in rendered.items()}
     except Exception as error:  # pragma: no cover - rendering environment specific
         summary["plots"] = {"error": f"{type(error).__name__}: {error}"}
     json_dump(directory / "summary.json", summary)
@@ -588,7 +603,7 @@ def run_benchmark(
     _write_checksums(directory)
 
     if is_confirmation and batch_registry is not None and not reproduce:
-        batch_registry.record_outcome(batch_id or "", attempt, passed=bool(gates["all_required_gates_pass"]))
+        batch_registry.record_outcome(str(batch_id), attempt, passed=bool(gates["all_required_gates_pass"]))
         batch_registry.save()
 
     return RunOutcome(directory=directory, summary=summary)
@@ -600,7 +615,7 @@ def _canonical_path() -> Path:
     return canonical_spec_path()
 
 
-def _expected_trial_count(spec: BenchmarkSpec, replicas: int, episodes: int) -> int:
+def _expected_trial_count(replicas: int, episodes: int) -> int:
     motion = len(MOTION_FAMILY_ORDER) + 1  # + always_online
     changed_law = 3  # prefix, changed branch, unchanged branch
     return replicas * episodes * (motion + changed_law)
@@ -682,7 +697,7 @@ def _verify_correctness(
             reloaded.check_state()
             if checkpoint_digest(reloaded.state_dict()) != checkpoint_hashes[index]:
                 frozen_intact = False
-        except Exception:  # noqa: BLE001 - recorded as a failed check
+        except Exception:
             loadable = False
     checks["checkpoints_load"] = loadable
     checks["checkpoint_hashes_stable"] = frozen_intact
@@ -707,19 +722,21 @@ def _verify_correctness(
     checks["online_branch_actually_updated"] = branch_matched
 
     checks["spec_hash_matches_canonical_when_confirming"] = (
-        (not is_confirmation) or resolved_spec_hash == spec_hash(load_spec())
-    )
+        not is_confirmation
+    ) or resolved_spec_hash == spec_hash(load_spec())
     checks["dependency_lock_recorded"] = bool(metadata["dependency_lock"]["hash"])
     checks["source_tree_clean_when_confirming"] = (not is_confirmation) or not metadata["git"]["dirty"]
 
     try:
-        recomputed = {key: collector.finish() for key, collector in rebuild_collectors(directory, spec).items()}
+        recomputed = {
+            key: collector.finish() for key, collector in rebuild_collectors(directory, spec).items()
+        }
         comparison = compare_results(
             _comparable(results), _comparable(recomputed), tolerance=spec.tolerances.recompute_absolute
         )
         checks["summary_recomputes_from_raw_evidence"] = bool(comparison["equivalent"])
         detail["recomputation"] = comparison
-    except Exception as error:  # noqa: BLE001 - recorded as a failed check
+    except Exception as error:
         checks["summary_recomputes_from_raw_evidence"] = False
         detail["recomputation"] = {"error": f"{type(error).__name__}: {error}"}
 

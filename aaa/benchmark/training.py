@@ -10,17 +10,23 @@ decreasing one.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from statistics import mean
-from typing import Sequence
+from typing import Any
 
 import numpy as np
 
-from ..config import WorldConfig
 from ..experiment import TrialIdentity, run_episode
 from ..metrics import normalized_errors
 from ..predictors import OnlineLinearPredictor, OnlineRLSPredictor
-from .families import build_environment, make_candidate, clone_candidate, straight_training_state, training_world, EpisodePlan
+from .families import (
+    EpisodePlan,
+    build_environment,
+    make_candidate,
+    straight_training_state,
+    training_world,
+)
 from .seeds import probe_seed, training_seed
 from .spec import BenchmarkSpec
 
@@ -31,9 +37,9 @@ class TrainedReplica:
     model: OnlineRLSPredictor
     lineage: str
     seeds: tuple[int, ...]
-    checkpoints: dict[int, dict[str, object]]
-    diagnostics: dict[str, object]
-    legacy_state: dict[str, object]
+    checkpoints: dict[int, dict[str, Any]]
+    diagnostics: dict[str, Any]
+    legacy_state: dict[str, Any]
     """Frozen historical-v1 SGD state trained on the identical stream.
 
     Reported as a diagnostic arm so the original learner's behaviour under the
@@ -60,13 +66,15 @@ def _training_plan(spec: BenchmarkSpec, lineage: str, replica: int, episode: int
     )
 
 
-def train_replica(spec: BenchmarkSpec, lineage: str, replica: int, *, role: str = "development") -> TrainedReplica:
+def train_replica(
+    spec: BenchmarkSpec, lineage: str, replica: int, *, role: str = "development"
+) -> TrainedReplica:
     """Train one replica and snapshot frozen state at every declared budget."""
 
     model = make_candidate(spec, name="candidate_online", update_enabled=True)
     legacy = OnlineLinearPredictor(name="legacy_linear_sgd", update_enabled=True)
     budgets = set(spec.training.learning_probe_budgets)
-    checkpoints: dict[int, dict[str, object]] = {}
+    checkpoints: dict[int, dict[str, Any]] = {}
     seeds: list[int] = []
     if 0 in budgets:
         checkpoints[0] = model.state_dict()
@@ -131,7 +139,7 @@ def probe_bank(spec: BenchmarkSpec) -> list[EpisodePlan]:
 
 def measure_learning_curve(
     spec: BenchmarkSpec, replicas: Sequence[TrainedReplica], *, role: str = "development"
-) -> dict[str, object]:
+) -> dict[str, Any]:
     """Score every frozen budget checkpoint on the identical probe bank."""
 
     plans = probe_bank(spec)

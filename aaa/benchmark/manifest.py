@@ -9,10 +9,11 @@ mechanical error rather than a matter of discipline.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from .evidence import dependency_lock, git_metadata, json_dump, sha256_text
 from .spec import BenchmarkSpec, spec_hash
@@ -41,7 +42,9 @@ class FreezeManifest:
         return [str(item) for item in self.payload["planned_confirmation_batches"]]
 
     def identity_hash(self) -> str:
-        comparable = {key: value for key, value in self.payload.items() if key not in ("frozen_at_utc", "notes")}
+        comparable = {
+            key: value for key, value in self.payload.items() if key not in ("frozen_at_utc", "notes")
+        }
         return sha256_text(json.dumps(comparable, sort_keys=True, separators=(",", ":")))
 
 
@@ -93,7 +96,12 @@ def build_manifest(
         },
         "baselines": dict(spec.baselines),
         "gates": [
-            {"name": gate.name, "evaluator": gate.evaluator, "required": gate.required, "threshold": gate.threshold}
+            {
+                "name": gate.name,
+                "evaluator": gate.evaluator,
+                "required": gate.required,
+                "threshold": gate.threshold,
+            }
             for gate in spec.gates
         ],
         "sample_counts": {
@@ -178,9 +186,13 @@ def check_manifest(
     problems: list[str] = []
     resolved = spec_hash(spec)
     if manifest.spec_hash != resolved:
-        problems.append(f"specification hash: frozen {manifest.spec_hash[:12]}..., resolved {resolved[:12]}...")
+        problems.append(
+            f"specification hash: frozen {manifest.spec_hash[:12]}..., resolved {resolved[:12]}..."
+        )
     if batch_id not in manifest.planned_batches:
-        problems.append(f"confirmation batch {batch_id!r} was not in the frozen plan {manifest.planned_batches}")
+        problems.append(
+            f"confirmation batch {batch_id!r} was not in the frozen plan {manifest.planned_batches}"
+        )
     frozen_hashes = manifest.checkpoint_hashes
     if list(checkpoint_hashes) != frozen_hashes:
         problems.append(
@@ -194,9 +206,7 @@ def check_manifest(
     lock = dependency_lock(project_root)
     frozen_lock = manifest.payload["dependency_lock"]
     if lock["hash"] != frozen_lock["hash"]:
-        problems.append(
-            f"dependency lock hash: frozen {frozen_lock['hash']}, resolved {lock['hash']}"
-        )
+        problems.append(f"dependency lock hash: frozen {frozen_lock['hash']}, resolved {lock['hash']}")
     if problems:
         raise FreezeMismatch(
             "confirmation attempt does not match the frozen manifest:\n  - " + "\n  - ".join(problems)

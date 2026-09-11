@@ -10,15 +10,15 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
 from statistics import mean
-from typing import Callable, Iterable, Sequence
+from typing import Any
 
 import numpy as np
 
 from ..config import WorldConfig
-from ..environment import DampedOscillatorEnvironment, Environment, MovingDotEnvironment
+from ..environment import DampedOscillatorEnvironment, Environment, MovingDotEnvironment, as_scenario
 from ..experiment import StepRecord, TrialIdentity, continue_episode, run_episode
 from ..metrics import (
     RecoveryConfig,
@@ -34,8 +34,8 @@ from ..predictors import (
     Predictor,
     ReflectedConstantMotionPredictor,
 )
-from .spec import BenchmarkSpec, MotionFamilySpec
 from .seeds import trial_seed
+from .spec import BenchmarkSpec, MotionFamilySpec
 
 SAMPLE_MARGIN_FRACTION = 0.08
 
@@ -183,9 +183,7 @@ def plan_motion_family(
                 speed_bands=spec.stratification.speed_bands,
             )
             if realized != target:
-                raise AssertionError(
-                    f"stratum allocation mismatch: planned {target}, realized {realized}"
-                )
+                raise AssertionError(f"stratum allocation mismatch: planned {target}, realized {realized}")
             plans.append(
                 EpisodePlan(
                     family=family_name,
@@ -239,7 +237,9 @@ def changed_law_worlds(spec: BenchmarkSpec) -> tuple[WorldConfig, WorldConfig]:
 # ---------------------------------------------------------------------------
 
 
-def make_candidate(spec: BenchmarkSpec, *, name: str, update_enabled: bool, reflect: bool | None = None) -> OnlineRLSPredictor:
+def make_candidate(
+    spec: BenchmarkSpec, *, name: str, update_enabled: bool, reflect: bool | None = None
+) -> OnlineRLSPredictor:
     return OnlineRLSPredictor(
         lower_bound=spec.world.lower_bound,
         upper_bound=spec.world.upper_bound,
@@ -301,7 +301,7 @@ MOTION_PREDICTOR_NAMES = (
     "candidate_no_reflect",
 )
 
-ONLINE_PREDICTOR_NAMES = MOTION_PREDICTOR_NAMES + ("candidate_online",)
+ONLINE_PREDICTOR_NAMES = (*MOTION_PREDICTOR_NAMES, "candidate_online")
 
 CHANGED_LAW_PREDICTOR_NAMES = (
     "persistence",
@@ -332,7 +332,7 @@ class FamilyCollector:
         self.branch = branch
         self.predictor_names = list(predictor_names)
         self.recovery = recovery
-        self.episode_summaries: list[dict[str, object]] = []
+        self.episode_summaries: list[dict[str, Any]] = []
         self.replica_episode_mae: dict[str, dict[str, list[float]]] = {}
         self.replica_event_mae: dict[str, dict[str, list[float]]] = {}
         self.replica_post_change_mae: dict[str, dict[str, list[float]]] = {}
@@ -340,8 +340,8 @@ class FamilyCollector:
         self.pooled_errors: dict[str, list[float]] = {name: [] for name in predictor_names}
         self.pooled_event_errors: dict[str, list[float]] = {name: [] for name in predictor_names}
         self.pooled_non_event_errors: dict[str, list[float]] = {name: [] for name in predictor_names}
-        self.signed_sums: dict[str, float] = {name: 0.0 for name in predictor_names}
-        self.signed_counts: dict[str, int] = {name: 0 for name in predictor_names}
+        self.signed_sums: dict[str, float] = dict.fromkeys(predictor_names, 0.0)
+        self.signed_counts: dict[str, int] = dict.fromkeys(predictor_names, 0)
         self.stratum_errors: dict[str, dict[str, list[float]]] = {name: {} for name in predictor_names}
         self.stratum_episodes: dict[str, int] = {}
         self.stratum_replicas: dict[str, set[int]] = {}
@@ -358,9 +358,9 @@ class FamilyCollector:
         self,
         records: Sequence[StepRecord],
         *,
-        pre_event_errors: dict[str, Sequence[float]] | None = None,
+        pre_event_errors: Mapping[str, Sequence[float]] | None = None,
         post_change_window: int | None = None,
-    ) -> dict[str, object]:
+    ) -> dict[str, Any]:
         if not records:
             raise ValueError("cannot collect an empty episode")
         summary = episode_metrics(
@@ -412,30 +412,36 @@ class FamilyCollector:
             self.signed_sums[name] += float(sum(signed))
             self.signed_counts[name] += len(signed)
             self.stratum_errors[name].setdefault(stratum, []).extend(errors)
-            predictor_summary = summary["predictors"][name]  # type: ignore[index]
+            predictor_summary = summary["predictors"][name]
             if predictor_summary["post_change_window_mae"] is not None:
                 post_values[name].append(float(predictor_summary["post_change_window_mae"]))
                 post_cumulative[name].append(float(predictor_summary["post_change_window_cumulative"]))
-            status = str(predictor_summary["recovery"]["status"])  # type: ignore[index]
+            status = str(predictor_summary["recovery"]["status"])
             counts = self.recovery_status_counts[name]
             counts[status] = counts.get(status, 0) + 1
-            elapsed = predictor_summary["recovery"].get("recovery_time_steps")  # type: ignore[index]
+            elapsed = predictor_summary["recovery"].get("recovery_time_steps")
             if elapsed is not None:
                 self.recovery_times[name].append(float(elapsed))
         self.completed += 1
         return summary
 
     # -- summarizing -----------------------------------------------------
-    def finish(self) -> dict[str, object]:
-        predictors: dict[str, object] = {}
+    def finish(self) -> dict[str, Any]:
+        predictors: dict[str, Any] = {}
         for name in self.predictor_names:
-            replica_means = [mean(values[name]) for values in self.replica_episode_mae.values() if values[name]]
+            replica_means = [
+                mean(values[name]) for values in self.replica_episode_mae.values() if values[name]
+            ]
             pooled = self.pooled_errors[name]
             event_pooled = self.pooled_event_errors[name]
             predictors[name] = {
                 "episode_balanced_mae": _flat_mean(self.replica_episode_mae, name),
                 "pooled_transition_mae": float(np.mean(pooled)) if pooled else None,
-                "replica_mae": {replica: mean(values[name]) for replica, values in self.replica_episode_mae.items() if values[name]},
+                "replica_mae": {
+                    replica: mean(values[name])
+                    for replica, values in self.replica_episode_mae.items()
+                    if values[name]
+                },
                 "replica_mae_mean": mean(replica_means) if replica_means else None,
                 "worst_replica_mae": max(replica_means) if replica_means else None,
                 "best_replica_mae": min(replica_means) if replica_means else None,
@@ -447,7 +453,9 @@ class FamilyCollector:
                 "event_p95": float(np.percentile(event_pooled, 95)) if event_pooled else None,
                 "event_p99": float(np.percentile(event_pooled, 99)) if event_pooled else None,
                 "non_event_pooled_mae": (
-                    float(np.mean(self.pooled_non_event_errors[name])) if self.pooled_non_event_errors[name] else None
+                    float(np.mean(self.pooled_non_event_errors[name]))
+                    if self.pooled_non_event_errors[name]
+                    else None
                 ),
                 "post_change_window_mae": _flat_mean(self.replica_post_change_mae, name),
                 "post_change_cumulative_mean": _flat_mean(self.replica_post_change_cumulative, name),
@@ -467,9 +475,15 @@ class FamilyCollector:
                 "recovery_status_counts": dict(sorted(self.recovery_status_counts[name].items())),
                 "recovery_time_steps": {
                     "count": len(self.recovery_times[name]),
-                    "median": float(np.median(self.recovery_times[name])) if self.recovery_times[name] else None,
-                    "p90": float(np.percentile(self.recovery_times[name], 90)) if self.recovery_times[name] else None,
-                    "p95": float(np.percentile(self.recovery_times[name], 95)) if self.recovery_times[name] else None,
+                    "median": float(np.median(self.recovery_times[name]))
+                    if self.recovery_times[name]
+                    else None,
+                    "p90": float(np.percentile(self.recovery_times[name], 90))
+                    if self.recovery_times[name]
+                    else None,
+                    "p95": float(np.percentile(self.recovery_times[name], 95))
+                    if self.recovery_times[name]
+                    else None,
                     "max": max(self.recovery_times[name]) if self.recovery_times[name] else None,
                 },
             }
@@ -504,7 +518,7 @@ RecordSink = Callable[[EpisodePlan, Sequence[StepRecord]], None]
 
 def build_environment(plan: EpisodePlan) -> Environment:
     return MovingDotEnvironment(
-        plan.scenario,  # type: ignore[arg-type]
+        as_scenario(plan.scenario),
         plan.environment_seed,
         plan.world,
         initial_position=plan.initial_position,
@@ -523,7 +537,7 @@ def run_motion_family(
     training_lineage: Sequence[int],
     checkpoint_hashes: Sequence[str],
     recovery: RecoveryConfig,
-    legacy: Sequence[dict[str, object]],
+    legacy: Sequence[dict[str, Any]],
     sink: RecordSink | None = None,
 ) -> FamilyCollector:
     """Run one motion family with frozen candidate arms (plus an online arm).
@@ -547,7 +561,9 @@ def run_motion_family(
             )
         )
         predictors.append(clone_candidate(model, name="candidate_frozen", update_enabled=False))
-        predictors.append(clone_candidate(model, name="candidate_no_reflect", update_enabled=False, reflect=False))
+        predictors.append(
+            clone_candidate(model, name="candidate_no_reflect", update_enabled=False, reflect=False)
+        )
         if include_online:
             predictors.append(clone_candidate(model, name="candidate_online", update_enabled=True))
         identity = TrialIdentity(
@@ -583,8 +599,7 @@ def run_always_online_family(
     training_lineage: Sequence[int],
     checkpoint_hashes: Sequence[str],
     recovery: RecoveryConfig,
-    legacy: Sequence[dict[str, object]],
-    purpose: str,
+    legacy: Sequence[dict[str, Any]],
     sink: RecordSink | None = None,
 ) -> FamilyCollector:
     """Continuous deployment track.
@@ -628,7 +643,9 @@ def run_always_online_family(
             clone_candidate(trained[plan.replica], name="candidate_frozen", update_enabled=False)
         )
         predictors.append(
-            clone_candidate(trained[plan.replica], name="candidate_no_reflect", update_enabled=False, reflect=False)
+            clone_candidate(
+                trained[plan.replica], name="candidate_no_reflect", update_enabled=False, reflect=False
+            )
         )
         predictors.append(online)
         identity = TrialIdentity(
@@ -658,7 +675,7 @@ def run_always_online_family(
 class ChangedLawOutcome:
     changed: FamilyCollector
     unchanged: FamilyCollector
-    interventions: list[dict[str, object]]
+    interventions: list[dict[str, Any]]
 
 
 def run_changed_law_family(
@@ -688,7 +705,7 @@ def run_changed_law_family(
     names = CHANGED_LAW_PREDICTOR_NAMES
     changed = FamilyCollector("changed_law", names, recovery=recovery, branch="changed-law")
     unchanged = FamilyCollector("changed_law", names, recovery=recovery, branch="unchanged-control")
-    interventions: list[dict[str, object]] = []
+    interventions: list[dict[str, Any]] = []
     for replica in range(replicas):
         for episode in range(episodes):
             seed = trial_seed(spec.randomness.root_seed, purpose, "changed_law", replica, episode)
@@ -745,7 +762,7 @@ def run_changed_law_family(
                     prefix_records,
                 )
 
-            history = list(prefix_records[-1].history[1:]) + [prefix_records[-1].actual_next_position]
+            history = [*prefix_records[-1].history[1:], prefix_records[-1].actual_next_position]
             start_position = prefix_env.position
             start_velocity = prefix_env.velocity
             pre_event_state = prefix_model.state_dict()
@@ -852,8 +869,8 @@ def run_changed_law_family(
                             "prefix_updates": int(pre_event_state["update_count"]),
                             "frozen_update_count_before": int(pre_event_state["update_count"]),
                             "frozen_update_count_after": int(frozen_after["update_count"]),
-                            "frozen_weights_before": list(pre_event_state["weights"]),  # type: ignore[arg-type]
-                            "frozen_weights_after": list(frozen_after["weights"]),  # type: ignore[arg-type]
+                            "frozen_weights_before": list(pre_event_state["weights"]),
+                            "frozen_weights_after": list(frozen_after["weights"]),
                             "online_update_count_after": int(online.state_dict()["update_count"]),
                         }
                     )

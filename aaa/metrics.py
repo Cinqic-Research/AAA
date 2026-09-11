@@ -16,9 +16,10 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from statistics import mean, stdev
-from typing import Iterable, Sequence
+from typing import Any
 
 from .experiment import StepRecord
 
@@ -64,7 +65,8 @@ def signed_normalized_errors(records: Sequence[StepRecord], predictor: str) -> l
             values.append(float(prediction["signed_error"]) / float(record.interval_width))
         else:
             values.append(
-                (float(prediction["scored"]) - float(record.actual_next_position)) / float(record.interval_width)
+                (float(prediction["scored"]) - float(record.actual_next_position))
+                / float(record.interval_width)
             )
     return values
 
@@ -147,17 +149,17 @@ class RecoveryConfig:
             raise ValueError("shock_window must fit inside post_event_horizon")
         if self.rolling_window + self.sustain_windows - 1 > self.post_event_horizon:
             raise ValueError("rolling and sustain windows must fit inside post_event_horizon")
-        for name, value in (
+        for name, number in (
             ("shock_multiplier", self.shock_multiplier),
             ("tolerance_multiplier", self.tolerance_multiplier),
         ):
-            if not math.isfinite(value) or value <= 0:
+            if not math.isfinite(number) or number <= 0:
                 raise ValueError(f"{name} must be positive and finite")
-        for name, value in (("shock_floor", self.shock_floor), ("tolerance_floor", self.tolerance_floor)):
-            if not math.isfinite(value) or value < 0:
+        for name, number in (("shock_floor", self.shock_floor), ("tolerance_floor", self.tolerance_floor)):
+            if not math.isfinite(number) or number < 0:
                 raise ValueError(f"{name} must be non-negative and finite")
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "pre_event_reference_length": self.pre_event_reference_length,
             "post_event_horizon": self.post_event_horizon,
@@ -177,7 +179,7 @@ def recovery_metric(
     config: RecoveryConfig | None = None,
     *,
     pre_event_errors: Sequence[float] | None = None,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     """Classify one episode into exactly one recovery status.
 
     ``pre_event_errors`` must be **this predictor's own** normalized errors
@@ -270,11 +272,11 @@ def episode_metrics(
     predictor_names: Sequence[str],
     *,
     recovery: RecoveryConfig | None = None,
-    pre_event_errors: dict[str, Sequence[float]] | None = None,
+    pre_event_errors: Mapping[str, Sequence[float]] | None = None,
     post_change_window: int | None = None,
     include_rolling: bool = False,
     rolling_window: int = 5,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     """Per-episode normalized summaries and recovery classification."""
 
     if not records:
@@ -282,7 +284,7 @@ def episode_metrics(
     recovery = recovery or RecoveryConfig()
     window = int(post_change_window if post_change_window is not None else recovery.post_event_horizon)
     identity = records[0].identity
-    result: dict[str, object] = {
+    result: dict[str, Any] = {
         "trial_id": identity.trial_id,
         "replica_id": identity.replica_id,
         "episode": identity.episode,
@@ -305,7 +307,7 @@ def episode_metrics(
         post_records = [record for record in records if event_step <= record.step < event_step + window]
     for predictor in predictor_names:
         errors = normalized_errors(records, predictor)
-        predictor_result: dict[str, object] = {
+        predictor_result: dict[str, Any] = {
             "mae": mean_absolute_error(errors),
             "bounce_mae": mean_absolute_error(normalized_errors(bounce_records, predictor)),
             "non_bounce_mae": mean_absolute_error(normalized_errors(non_bounce_records, predictor)),
@@ -327,7 +329,7 @@ def episode_metrics(
         }
         if include_rolling:
             predictor_result["rolling_mae"] = rolling_mean(errors, rolling_window)
-        result["predictors"][predictor] = predictor_result  # type: ignore[index]
+        result["predictors"][predictor] = predictor_result
     return result
 
 
@@ -338,7 +340,7 @@ def aggregate_metrics(
     recovery: RecoveryConfig | None = None,
     post_change_window: int | None = None,
     rolling_window: int = 5,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     """Return overall, per-episode, per-replica, and adaptation metrics.
 
     Every aggregate below is in normalized units. Raw-unit values are exposed
@@ -365,7 +367,7 @@ def aggregate_metrics(
     replica_groups: dict[int, list[StepRecord]] = defaultdict(list)
     for record in records:
         replica_groups[record.replica_id].append(record)
-    by_replica: dict[str, object] = {}
+    by_replica: dict[str, Any] = {}
     for replica, group in sorted(replica_groups.items()):
         nested: dict[tuple[int, str], list[StepRecord]] = defaultdict(list)
         for record in group:
@@ -381,24 +383,24 @@ def aggregate_metrics(
             },
         }
 
-    aggregate_predictors: dict[str, object] = {}
+    aggregate_predictors: dict[str, Any] = {}
     for predictor in predictor_names:
         errors = normalized_errors(records, predictor)
         episode_values = [
-            episode["predictors"][predictor]["mae"]  # type: ignore[index]
+            episode["predictors"][predictor]["mae"]
             for episode in episodes
-            if episode["predictors"][predictor]["mae"] is not None  # type: ignore[index]
+            if episode["predictors"][predictor]["mae"] is not None
         ]
-        statuses = [episode["predictors"][predictor]["recovery"]["status"] for episode in episodes]  # type: ignore[index]
+        statuses = [episode["predictors"][predictor]["recovery"]["status"] for episode in episodes]
         recovery_values = [
-            episode["predictors"][predictor]["recovery"].get("recovery_time_steps")  # type: ignore[index]
+            episode["predictors"][predictor]["recovery"].get("recovery_time_steps")
             for episode in episodes
-            if episode["predictors"][predictor]["recovery"].get("recovery_time_steps") is not None  # type: ignore[index]
+            if episode["predictors"][predictor]["recovery"].get("recovery_time_steps") is not None
         ]
         post_values = [
-            episode["predictors"][predictor]["post_change_window_mae"]  # type: ignore[index]
+            episode["predictors"][predictor]["post_change_window_mae"]
             for episode in episodes
-            if episode["predictors"][predictor]["post_change_window_mae"] is not None  # type: ignore[index]
+            if episode["predictors"][predictor]["post_change_window_mae"] is not None
         ]
         aggregate_predictors[predictor] = {
             "mae": mean_absolute_error(errors),
@@ -417,7 +419,7 @@ def aggregate_metrics(
             "recovery_unrecovered_episodes": statuses.count("unrecovered"),
             "recovery_time_steps_mean": mean(recovery_values) if recovery_values else None,
         }
-    early_late = _early_late(records, replica_groups, predictor_names)
+    early_late = _early_late(replica_groups, predictor_names)
     return {
         "scored_steps": len(records),
         "episode_count": len(episodes),
@@ -429,37 +431,44 @@ def aggregate_metrics(
     }
 
 
+def _early_late_row(early: float | None, late: float | None) -> dict[str, float | None]:
+    """A missing side stays missing rather than becoming a fabricated zero."""
+
+    return {
+        "early_mae": early,
+        "late_mae": late,
+        "late_minus_early": None if early is None or late is None else late - early,
+    }
+
+
 def _early_late(
-    records: Sequence[StepRecord],
     replica_groups: dict[int, list[StepRecord]],
     predictor_names: Sequence[str],
-) -> dict[str, object]:
+) -> dict[str, Any]:
     """Within-run early/late comparison. Descriptive only, not a learning gate."""
 
-    per_replica: dict[str, object] = {}
+    per_replica: dict[str, Any] = {}
     for replica, group in sorted(replica_groups.items()):
         ordered = sorted(group, key=lambda record: (record.episode, record.step))
         split = max(1, len(ordered) // 3)
         early, late = ordered[:split], ordered[-split:]
         per_replica[str(replica)] = {
-            predictor: {
-                "early_mae": mean_absolute_error(normalized_errors(early, predictor)),
-                "late_mae": mean_absolute_error(normalized_errors(late, predictor)),
-                "late_minus_early": (
-                    mean_absolute_error(normalized_errors(late, predictor))
-                    - mean_absolute_error(normalized_errors(early, predictor))
-                ),
-            }
+            predictor: _early_late_row(
+                mean_absolute_error(normalized_errors(early, predictor)),
+                mean_absolute_error(normalized_errors(late, predictor)),
+            )
             for predictor in predictor_names
         }
-    result: dict[str, object] = {}
+    result: dict[str, Any] = {}
     for predictor in predictor_names:
-        rows = [per_replica[str(replica)][predictor] for replica in sorted(replica_groups)]  # type: ignore[index]
+        rows = [per_replica[str(replica)][predictor] for replica in sorted(replica_groups)]
         early_values = [row["early_mae"] for row in rows]
         late_values = [row["late_mae"] for row in rows]
         delta_values = [row["late_minus_early"] for row in rows]
         result[predictor] = {
-            "by_replica": {str(replica): per_replica[str(replica)][predictor] for replica in sorted(replica_groups)},  # type: ignore[index]
+            "by_replica": {
+                str(replica): per_replica[str(replica)][predictor] for replica in sorted(replica_groups)
+            },
             "early_mae_mean": mean(early_values),
             "early_mae_sd": stdev(early_values) if len(early_values) > 1 else 0.0,
             "late_mae_mean": mean(late_values),

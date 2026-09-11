@@ -8,10 +8,11 @@ import json
 import os
 import platform
 import subprocess
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 
@@ -26,8 +27,10 @@ TRIAL_STATES = ("PLANNED", "RUNNING", "COMPLETE", "FAILED", "INTERRUPTED", "SUPE
 def json_dump(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(value, indent=2, sort_keys=True, default=_default) + "\n", encoding="utf-8")
-    os.replace(temporary, path)
+    temporary.write_text(
+        json.dumps(value, indent=2, sort_keys=True, default=_default) + "\n", encoding="utf-8"
+    )
+    temporary.replace(path)
 
 
 def _default(value: object) -> object:
@@ -58,7 +61,7 @@ def write_jsonl_gz(path: Path, records: Sequence[StepRecord]) -> str:
     with gzip.open(temporary, "wt", encoding="utf-8", compresslevel=6) as handle:
         for record in records:
             handle.write(json.dumps(record.to_dict(), sort_keys=True) + "\n")
-    os.replace(temporary, path)
+    temporary.replace(path)
     return sha256_file(path)
 
 
@@ -132,7 +135,7 @@ def hardware_metadata() -> dict[str, Any]:
     except OSError:
         result["cpu_model"] = None
     try:
-        import psutil  # type: ignore
+        import psutil
 
         result["memory_bytes"] = psutil.virtual_memory().total
     except Exception:
@@ -140,7 +143,7 @@ def hardware_metadata() -> dict[str, Any]:
     try:
         result["blas"] = {
             item.get("name"): item.get("version")
-            for item in np.__config__.CONFIG.get("Build Dependencies", {}).values()  # type: ignore[attr-defined]
+            for item in np.__config__.CONFIG.get("Build Dependencies", {}).values()
             if isinstance(item, dict)
         }
     except Exception:
@@ -209,7 +212,7 @@ class TrialRecord:
         }
 
     @classmethod
-    def from_dict(cls, value: Mapping[str, Any]) -> "TrialRecord":
+    def from_dict(cls, value: Mapping[str, Any]) -> TrialRecord:
         state = str(value["state"])
         if state not in TRIAL_STATES:
             raise ValueError(f"trial state must be one of {TRIAL_STATES}, got {state!r}")
@@ -239,7 +242,7 @@ class ExperimentRegistry:
         self.trials: dict[str, TrialRecord] = {trial.trial_id: trial for trial in (trials or ())}
 
     @classmethod
-    def load(cls, path: str | Path) -> "ExperimentRegistry":
+    def load(cls, path: str | Path) -> ExperimentRegistry:
         source = Path(path)
         if not source.exists():
             return cls(source)
@@ -254,13 +257,15 @@ class ExperimentRegistry:
             {
                 "schema_version": REGISTRY_SCHEMA,
                 "updated_at_utc": datetime.now(timezone.utc).isoformat(),
-                "trials": [trial.to_dict() for trial in sorted(self.trials.values(), key=lambda t: t.trial_id)],
+                "trials": [
+                    trial.to_dict() for trial in sorted(self.trials.values(), key=lambda t: t.trial_id)
+                ],
                 "counts": self.counts(),
             },
         )
 
     def counts(self) -> dict[str, int]:
-        counts = {state: 0 for state in TRIAL_STATES}
+        counts = dict.fromkeys(TRIAL_STATES, 0)
         for trial in self.trials.values():
             counts[trial.state] += 1
         return counts

@@ -23,9 +23,10 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+from collections.abc import Mapping, Sequence
 from dataclasses import MISSING, asdict, dataclass, field, fields, is_dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 # The schema validates against the model's own declared option sets so the two
 # can never drift apart.
@@ -44,16 +45,12 @@ def _strict(cls: type, value: Mapping[str, Any], *, path: str) -> dict[str, Any]
 
     if not isinstance(value, Mapping):
         raise SpecError(f"{path}: expected an object, got {type(value).__name__}")
-    declared = fields(cls)  # type: ignore[arg-type]
+    declared = fields(cls)
     known = {item.name for item in declared}
     unknown = sorted(set(value) - known)
     if unknown:
         raise SpecError(f"{path}: unknown specification keys {unknown}")
-    required = {
-        item.name
-        for item in declared
-        if item.default is MISSING and item.default_factory is MISSING  # type: ignore[misc]
-    }
+    required = {item.name for item in declared if item.default is MISSING and item.default_factory is MISSING}
     absent = sorted(required - set(value))
     if absent:
         raise SpecError(f"{path}: missing required specification keys {absent}")
@@ -90,7 +87,7 @@ class RandomnessSpec:
     description: str
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "RandomnessSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> RandomnessSpec:
         data = _strict(cls, value, path=path)
         if data.get("stream_algorithm") != "numpy.random.SeedSequence":
             raise SpecError(f"{path}.stream_algorithm: only numpy.random.SeedSequence is implemented")
@@ -110,7 +107,7 @@ class WorldSpec:
     history_length: int
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "WorldSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> WorldSpec:
         data = _strict(cls, value, path=path)
         lower = _finite(data["lower_bound"], f"{path}.lower_bound")
         upper = _finite(data["upper_bound"], f"{path}.upper_bound")
@@ -119,7 +116,9 @@ class WorldSpec:
         dt = _finite(data["dt"], f"{path}.dt")
         if dt <= 0:
             raise SpecError(f"{path}.dt: must be positive")
-        return cls(lower, upper, dt, _positive_int(data["history_length"], f"{path}.history_length", minimum=2))
+        return cls(
+            lower, upper, dt, _positive_int(data["history_length"], f"{path}.history_length", minimum=2)
+        )
 
     @property
     def width(self) -> float:
@@ -151,7 +150,7 @@ class CandidateSpec:
     selection_evidence: str
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "CandidateSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> CandidateSpec:
         data = _strict(cls, value, path=path)
         if data["model"] != "OnlineRLSPredictor":
             raise SpecError(f"{path}.model: only OnlineRLSPredictor is implemented")
@@ -159,9 +158,7 @@ class CandidateSpec:
         if not 0 < forgetting <= 1:
             raise SpecError(f"{path}.forgetting: must satisfy 0 < lambda <= 1")
         if data["forgetting_mode"] not in OnlineRLSPredictor.FORGETTING_MODES:
-            raise SpecError(
-                f"{path}.forgetting_mode: must be one of {OnlineRLSPredictor.FORGETTING_MODES}"
-            )
+            raise SpecError(f"{path}.forgetting_mode: must be one of {OnlineRLSPredictor.FORGETTING_MODES}")
         if data["feature_set"] not in OnlineRLSPredictor.FEATURE_SETS:
             raise SpecError(f"{path}.feature_set: must be one of {OnlineRLSPredictor.FEATURE_SETS}")
         return cls(
@@ -178,7 +175,9 @@ class CandidateSpec:
             detector_multiplier=_finite(data["detector_multiplier"], f"{path}.detector_multiplier"),
             detector_floor=_finite(data["detector_floor"], f"{path}.detector_floor"),
             detector_decay=_finite(data["detector_decay"], f"{path}.detector_decay"),
-            displacement_scale_speed=_finite(data["displacement_scale_speed"], f"{path}.displacement_scale_speed"),
+            displacement_scale_speed=_finite(
+                data["displacement_scale_speed"], f"{path}.displacement_scale_speed"
+            ),
             boundary_policy=str(data["boundary_policy"]),
             self_triggered_forgetting=str(data["self_triggered_forgetting"]),
             selection_evidence=str(data["selection_evidence"]),
@@ -198,9 +197,12 @@ class TrainingSpec:
     learning_probe_seed_offset: int
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "TrainingSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> TrainingSpec:
         data = _strict(cls, value, path=path)
-        budgets = tuple(_positive_int(item, f"{path}.learning_probe_budgets", minimum=0) for item in data["learning_probe_budgets"])
+        budgets = tuple(
+            _positive_int(item, f"{path}.learning_probe_budgets", minimum=0)
+            for item in data["learning_probe_budgets"]
+        )
         if not budgets or sorted(budgets) != list(budgets) or len(set(budgets)) != len(budgets):
             raise SpecError(f"{path}.learning_probe_budgets: must be strictly increasing and non-empty")
         episodes = _positive_int(data["episodes_per_replica"], f"{path}.episodes_per_replica")
@@ -218,8 +220,12 @@ class TrainingSpec:
             speed_max=speed_max,
             distribution_relationship=str(data["distribution_relationship"]),
             learning_probe_budgets=budgets,
-            learning_probe_episodes=_positive_int(data["learning_probe_episodes"], f"{path}.learning_probe_episodes"),
-            learning_probe_seed_offset=_positive_int(data["learning_probe_seed_offset"], f"{path}.learning_probe_seed_offset", minimum=0),
+            learning_probe_episodes=_positive_int(
+                data["learning_probe_episodes"], f"{path}.learning_probe_episodes"
+            ),
+            learning_probe_seed_offset=_positive_int(
+                data["learning_probe_seed_offset"], f"{path}.learning_probe_seed_offset", minimum=0
+            ),
         )
 
 
@@ -232,7 +238,7 @@ class StratificationSpec:
     minimum_replicas_per_stratum: int
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "StratificationSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> StratificationSpec:
         data = _strict(cls, value, path=path)
         directions = tuple(str(item) for item in data["directions"])
         if sorted(directions) != ["negative", "positive"]:
@@ -277,7 +283,7 @@ class MotionFamilySpec:
     update_mode: str = "frozen"
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "MotionFamilySpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> MotionFamilySpec:
         data = _strict(cls, value, path=path)
         speed_min = _finite(data["speed_min"], f"{path}.speed_min")
         speed_max = _finite(data["speed_max"], f"{path}.speed_max")
@@ -300,10 +306,18 @@ class MotionFamilySpec:
             stratified=bool(data["stratified"]),
             description=str(data["description"]),
             change_step=change_step,
-            change_factor_low=None if data.get("change_factor_low") is None else _finite(data["change_factor_low"], f"{path}.change_factor_low"),
-            change_factor_high=None if data.get("change_factor_high") is None else _finite(data["change_factor_high"], f"{path}.change_factor_high"),
-            event_margin=None if data.get("event_margin") is None else _finite(data["event_margin"], f"{path}.event_margin"),
-            minimum_bounce_events=None if data.get("minimum_bounce_events") is None else _positive_int(data["minimum_bounce_events"], f"{path}.minimum_bounce_events"),
+            change_factor_low=None
+            if data.get("change_factor_low") is None
+            else _finite(data["change_factor_low"], f"{path}.change_factor_low"),
+            change_factor_high=None
+            if data.get("change_factor_high") is None
+            else _finite(data["change_factor_high"], f"{path}.change_factor_high"),
+            event_margin=None
+            if data.get("event_margin") is None
+            else _finite(data["event_margin"], f"{path}.event_margin"),
+            minimum_bounce_events=None
+            if data.get("minimum_bounce_events") is None
+            else _positive_int(data["minimum_bounce_events"], f"{path}.minimum_bounce_events"),
             required_walls=tuple(str(item) for item in data.get("required_walls", ())),
             update_mode=update_mode,
         )
@@ -326,7 +340,7 @@ class ChangedLawSpec:
     description: str
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "ChangedLawSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> ChangedLawSpec:
         data = _strict(cls, value, path=path)
         numbers = {
             name: _finite(data[name], f"{path}.{name}")
@@ -372,7 +386,7 @@ class ConfirmationSpec:
     AB_RELATIONSHIPS = ("shared_frozen_checkpoints", "independent_replication")
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "ConfirmationSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> ConfirmationSpec:
         data = _strict(cls, value, path=path)
         relationship = str(data["ab_relationship"])
         if relationship not in cls.AB_RELATIONSHIPS:
@@ -383,7 +397,9 @@ class ConfirmationSpec:
             high_replication_replicas=_positive_int(
                 data["high_replication_replicas"], f"{path}.high_replication_replicas", minimum=2
             ),
-            minimum_bounce_events=_positive_int(data["minimum_bounce_events"], f"{path}.minimum_bounce_events"),
+            minimum_bounce_events=_positive_int(
+                data["minimum_bounce_events"], f"{path}.minimum_bounce_events"
+            ),
             minimum_eligible_change_events=_positive_int(
                 data["minimum_eligible_change_events"], f"{path}.minimum_eligible_change_events"
             ),
@@ -407,10 +423,12 @@ class RecoverySpec:
     sustain_windows: int
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "RecoverySpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> RecoverySpec:
         data = _strict(cls, value, path=path)
         return cls(
-            pre_event_reference_length=_positive_int(data["pre_event_reference_length"], f"{path}.pre_event_reference_length"),
+            pre_event_reference_length=_positive_int(
+                data["pre_event_reference_length"], f"{path}.pre_event_reference_length"
+            ),
             post_event_horizon=_positive_int(data["post_event_horizon"], f"{path}.post_event_horizon"),
             shock_window=_positive_int(data["shock_window"], f"{path}.shock_window"),
             shock_multiplier=_finite(data["shock_multiplier"], f"{path}.shock_multiplier"),
@@ -438,7 +456,7 @@ class StatisticsSpec:
     WEIGHTINGS = ("episode_balanced", "event_weighted", "replica_balanced")
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "StatisticsSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> StatisticsSpec:
         data = _strict(cls, value, path=path)
         if data["method"] not in cls.METHODS:
             raise SpecError(f"{path}.method: must be one of {cls.METHODS}")
@@ -485,7 +503,7 @@ class GateSpec:
     )
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "GateSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> GateSpec:
         data = _strict(cls, value, path=path)
         if str(data["evaluator"]) not in cls.EVALUATORS:
             raise SpecError(f"{path}.evaluator: must be one of {cls.EVALUATORS}")
@@ -507,7 +525,7 @@ class LatencySpec:
     description: str
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "LatencySpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> LatencySpec:
         data = _strict(cls, value, path=path)
         if not bool(data["use_selected_candidate"]):
             raise SpecError(f"{path}.use_selected_candidate: latency must measure the selected candidate")
@@ -530,7 +548,7 @@ class TolerancesSpec:
     max_condition_number: float
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "TolerancesSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> TolerancesSpec:
         data = _strict(cls, value, path=path)
         return cls(**{name: _finite(data[name], f"{path}.{name}") for name in _field_names(cls)})
 
@@ -546,7 +564,7 @@ class ArtifactsSpec:
     compress_raw_steps: bool
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any], path: str) -> "ArtifactsSpec":
+    def parse(cls, value: Mapping[str, Any], path: str) -> ArtifactsSpec:
         data = _strict(cls, value, path=path)
         return cls(
             step_record_schema=str(data["step_record_schema"]),
@@ -560,7 +578,7 @@ class ArtifactsSpec:
 
 
 def _field_names(cls: type) -> tuple[str, ...]:
-    return tuple(item.name for item in fields(cls))  # type: ignore[arg-type]
+    return tuple(item.name for item in fields(cls))
 
 
 # ---------------------------------------------------------------------------
@@ -594,7 +612,7 @@ class BenchmarkSpec:
     REQUIRED_MOTION_FAMILIES = ("constant_velocity", "bouncing", "speed_change", "always_online")
 
     @classmethod
-    def parse(cls, value: Mapping[str, Any]) -> "BenchmarkSpec":
+    def parse(cls, value: Mapping[str, Any]) -> BenchmarkSpec:
         data = _strict(cls, value, path="spec")
         version = str(data["spec_version"])
         if version != SPEC_VERSION:
@@ -606,7 +624,9 @@ class BenchmarkSpec:
         missing = [name for name in cls.REQUIRED_MOTION_FAMILIES if name not in families]
         if missing:
             raise SpecError(f"spec.motion_families: missing required families {missing}")
-        gates = tuple(GateSpec.parse(item, f"spec.gates[{index}]") for index, item in enumerate(data["gates"]))
+        gates = tuple(
+            GateSpec.parse(item, f"spec.gates[{index}]") for index, item in enumerate(data["gates"])
+        )
         names = [gate.name for gate in gates]
         if len(set(names)) != len(names):
             raise SpecError("spec.gates: gate names must be unique")
@@ -653,7 +673,9 @@ class BenchmarkSpec:
         if speed_change.change_step is None:
             raise SpecError("spec.motion_families.speed_change requires an explicit change_step")
         if speed_change.change_step + recovery.post_event_horizon > speed_change.steps_per_episode:
-            raise SpecError("spec.motion_families.speed_change: post-event horizon must fit inside the episode")
+            raise SpecError(
+                "spec.motion_families.speed_change: post-event horizon must fit inside the episode"
+            )
         constant_velocity = self.motion_families["constant_velocity"]
         if not constant_velocity.stratified:
             raise SpecError("spec.motion_families.constant_velocity must be stratified")

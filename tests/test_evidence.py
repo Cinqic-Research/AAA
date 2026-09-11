@@ -10,6 +10,7 @@ from pathlib import Path
 
 from aaa.benchmark.evidence import (
     ExperimentRegistry,
+    RegistryError,
     TrialRecord,
     dependency_lock,
     git_metadata,
@@ -23,7 +24,7 @@ from aaa.benchmark.evidence import (
     write_jsonl_gz,
 )
 
-from .helpers import identity, record
+from .helpers import record
 
 
 def trial(trial_id: str = "fam:main:r00:e0000", **overrides) -> TrialRecord:
@@ -102,7 +103,7 @@ class RegistryStateMachineTests(unittest.TestCase):
         self.registry.plan(trial())
         self.registry.start("fam:main:r00:e0000")
         self.registry.complete("fam:main:r00:e0000", outputs=["x"], checksums={"x": "y"})
-        with self.assertRaises(Exception):
+        with self.assertRaises(RegistryError):
             self.registry.plan(trial(environment_seed=12345))
 
     def test_incomplete_lists_everything_not_complete(self):
@@ -113,7 +114,7 @@ class RegistryStateMachineTests(unittest.TestCase):
         self.assertEqual([item.trial_id for item in self.registry.incomplete()], ["a"])
 
     def test_an_unknown_trial_id_is_a_loud_error(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(RegistryError):
             self.registry.start("never-planned")
 
     def test_an_unknown_registry_schema_is_rejected(self):
@@ -182,9 +183,7 @@ class RawRecordTests(unittest.TestCase):
             self.assertEqual(len(digest), 64)
             loaded = list(iter_raw_records(run))
             self.assertEqual(len(loaded), 1)
-            self.assertEqual(
-                [item.to_dict() for item in loaded[0][1]], [item.to_dict() for item in records]
-            )
+            self.assertEqual([item.to_dict() for item in loaded[0][1]], [item.to_dict() for item in records])
 
     def test_a_truncated_raw_file_fails_loudly(self):
         records = [record(step, 0.01) for step in range(5)]
@@ -192,10 +191,11 @@ class RawRecordTests(unittest.TestCase):
             run = Path(directory)
             path = run / "raw" / "bouncing" / "main" / "e.jsonl.gz"
             write_jsonl_gz(path, records)
-            lines = gzip.open(path, "rt", encoding="utf-8").read().splitlines()
+            with gzip.open(path, "rt", encoding="utf-8") as handle:
+                lines = handle.read().splitlines()
             with gzip.open(path, "wt", encoding="utf-8") as handle:
                 handle.write("\n".join(lines[:2]) + "\n" + lines[3][:20])
-            with self.assertRaises(Exception):
+            with self.assertRaises((json.JSONDecodeError, EOFError, OSError, ValueError)):
                 list(iter_raw_records(run))
 
 
@@ -231,7 +231,7 @@ class StructuralVerificationTests(unittest.TestCase):
         bad = record(4, 0.01)
         object.__setattr__(bad, "bounced", True)
         object.__setattr__(bad, "bounce_walls", ())
-        self.assertFalse(verify_records(records + [bad], expected_predictors=["p"])["ok"])
+        self.assertFalse(verify_records([*records, bad], expected_predictors=["p"])["ok"])
 
     def test_a_non_positive_interval_width_is_detected(self):
         records = [record(step, 0.01, width=1.0) for step in range(3)]
@@ -241,13 +241,13 @@ class StructuralVerificationTests(unittest.TestCase):
 
 class ProvenanceTests(unittest.TestCase):
     def test_git_metadata_reports_commit_and_dirty_state(self):
-        value = git_metadata(Path("."))
+        value = git_metadata(Path())
         self.assertIn("commit", value)
         self.assertIn("dirty", value)
         self.assertIn("tree_hash", value)
 
     def test_dependency_lock_is_hashed(self):
-        lock = dependency_lock(Path("."))
+        lock = dependency_lock(Path())
         self.assertEqual(len(lock["hash"]), 64)
         self.assertTrue(lock["path"].endswith("requirements-lock.txt"))
 

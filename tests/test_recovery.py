@@ -179,9 +179,8 @@ class ConfigValidationTests(unittest.TestCase):
             {"pre_event_reference_length": True},
         )
         for overrides in cases:
-            with self.subTest(overrides=overrides):
-                with self.assertRaises(ValueError):
-                    RecoveryConfig(**overrides)
+            with self.subTest(overrides=overrides), self.assertRaises(ValueError):
+                RecoveryConfig(**overrides)
 
     def test_to_dict_round_trips(self):
         payload = CONFIG.to_dict()

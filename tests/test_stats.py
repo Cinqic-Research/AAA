@@ -27,7 +27,9 @@ def paired(candidate, baseline):
 class ResamplingStructureTests(unittest.TestCase):
     def test_a_draw_preserves_each_replica_observation_count(self):
         counts = {"0": 7, "1": 3, "2": 11}
-        samples = PairedSamples(candidate={key: [float(index) for index in range(size)] for key, size in counts.items()})
+        samples = PairedSamples(
+            candidate={key: [float(index) for index in range(size)] for key, size in counts.items()}
+        )
         observed: list[int] = []
 
         def statistic(candidate: np.ndarray, baseline):
@@ -64,10 +66,16 @@ class ResamplingStructureTests(unittest.TestCase):
         candidate = {str(key): list(rng.uniform(0.5, 2.0, size=9)) for key in range(4)}
         baseline = {str(key): list(rng.uniform(2.0, 6.0, size=9)) for key in range(4)}
         samples = paired(candidate, baseline)
-        first = hierarchical_bootstrap(samples, relative_improvement_statistic, estimand="ri", seed=7, draws=500)
-        second = hierarchical_bootstrap(samples, relative_improvement_statistic, estimand="ri", seed=7, draws=500)
+        first = hierarchical_bootstrap(
+            samples, relative_improvement_statistic, estimand="ri", seed=7, draws=500
+        )
+        second = hierarchical_bootstrap(
+            samples, relative_improvement_statistic, estimand="ri", seed=7, draws=500
+        )
         self.assertEqual(first.to_dict(), second.to_dict())
-        different = hierarchical_bootstrap(samples, relative_improvement_statistic, estimand="ri", seed=8, draws=500)
+        different = hierarchical_bootstrap(
+            samples, relative_improvement_statistic, estimand="ri", seed=8, draws=500
+        )
         self.assertAlmostEqual(first.estimate, different.estimate)
         self.assertNotEqual((first.lower, first.upper), (different.lower, different.upper))
 
@@ -78,7 +86,9 @@ class EstimandTests(unittest.TestCase):
         baseline = {"0": [1.0, 100.0], "1": [1.0, 100.0]}
         ratio_of_means = point_relative_improvement(candidate, baseline)
         mean_of_ratios = float(
-            np.mean([1.0 - c / b for key in candidate for c, b in zip(candidate[key], baseline[key])])
+            np.mean(
+                [1.0 - c / b for key in candidate for c, b in zip(candidate[key], baseline[key], strict=True)]
+            )
         )
         self.assertAlmostEqual(ratio_of_means, 1.0 - 4.0 / 202.0)
         self.assertNotAlmostEqual(ratio_of_means, mean_of_ratios)
@@ -101,9 +111,8 @@ class EstimandTests(unittest.TestCase):
 
     def test_statistics_reject_a_missing_baseline(self):
         for statistic in (relative_improvement_statistic, absolute_difference_statistic):
-            with self.subTest(statistic=statistic.__name__):
-                with self.assertRaises(ValueError):
-                    statistic(np.asarray([1.0]), None)
+            with self.subTest(statistic=statistic.__name__), self.assertRaises(ValueError):
+                statistic(np.asarray([1.0]), None)
 
     def test_zero_baseline_mean_is_undefined_not_silently_zero(self):
         with self.assertRaises(ZeroDivisionError):
@@ -137,7 +146,9 @@ class InsufficientEvidenceTests(unittest.TestCase):
 
     def test_p_value_is_reported_only_when_a_null_is_declared(self):
         samples = paired({"0": [1.0, 1.0], "1": [1.0, 1.0]}, {"0": [2.0, 2.0], "1": [2.0, 2.0]})
-        without = hierarchical_bootstrap(samples, relative_improvement_statistic, estimand="ri", seed=9, draws=400)
+        without = hierarchical_bootstrap(
+            samples, relative_improvement_statistic, estimand="ri", seed=9, draws=400
+        )
         self.assertIsNone(without.p_value)
         with_null = hierarchical_bootstrap(
             samples, relative_improvement_statistic, estimand="ri", seed=9, draws=400, null_value=0.2

@@ -68,7 +68,12 @@ class WeakExcitationTests(unittest.TestCase):
         def stream(index: int):
             velocity = 1e-5
             position = 0.2 + velocity * (index % 20_000)
-            return (position - 3 * velocity, position - 2 * velocity, position - velocity, position), position + velocity
+            return (
+                position - 3 * velocity,
+                position - 2 * velocity,
+                position - velocity,
+                position,
+            ), position + velocity
 
         self._assert_survives(_model(forgetting=0.90), stream)
 
@@ -76,7 +81,12 @@ class WeakExcitationTests(unittest.TestCase):
         def stream(index: int):
             velocity = 1e-12
             position = 0.5 + 1e-12 * index
-            return (position - 3 * velocity, position - 2 * velocity, position - velocity, position), position + velocity
+            return (
+                position - 3 * velocity,
+                position - 2 * velocity,
+                position - velocity,
+                position,
+            ), position + velocity
 
         self._assert_survives(_model(forgetting=0.90), stream, count=10_000)
 
@@ -84,7 +94,12 @@ class WeakExcitationTests(unittest.TestCase):
         def stream(index: int):
             velocity = 0.004 if index < LONG_RUN // 2 else -0.001
             position = 0.5
-            return (position - 3 * velocity, position - 2 * velocity, position - velocity, position), position + velocity
+            return (
+                position - 3 * velocity,
+                position - 2 * velocity,
+                position - velocity,
+                position,
+            ), position + velocity
 
         self._assert_survives(_model(forgetting=0.90), stream)
 
@@ -138,7 +153,12 @@ class WeakExcitationTests(unittest.TestCase):
         def stream(index: int):
             velocity = float(rng.uniform(-0.004, 0.004))
             position = float(rng.uniform(0.1, 0.9))
-            return (position - 3 * velocity, position - 2 * velocity, position - velocity, position), position + velocity
+            return (
+                position - 3 * velocity,
+                position - 2 * velocity,
+                position - velocity,
+                position,
+            ), position + velocity
 
         _drive(model, stream, 5_000)
         self.assertEqual(model.forgetting_suspensions, 0)
@@ -223,7 +243,12 @@ class SerializationAndResumeTests(unittest.TestCase):
         for _ in range(200):
             velocity = float(rng.uniform(-0.004, 0.004))
             position = float(rng.uniform(0.2, 0.8))
-            stream.append(((position - 3 * velocity, position - 2 * velocity, position - velocity, position), position + velocity))
+            stream.append(
+                (
+                    (position - 3 * velocity, position - 2 * velocity, position - velocity, position),
+                    position + velocity,
+                )
+            )
         uninterrupted = _model(forgetting=0.9)
         for history, target in stream:
             uninterrupted.update(history, target)
@@ -245,7 +270,12 @@ class DetectorAndDeadZoneTests(unittest.TestCase):
         def stream(index: int):
             velocity = 0.002
             position = 0.2 + velocity * (index % 300)
-            return (position - 3 * velocity, position - 2 * velocity, position - velocity, position), position + velocity
+            return (
+                position - 3 * velocity,
+                position - 2 * velocity,
+                position - velocity,
+                position,
+            ), position + velocity
 
         _drive(model, stream, 2_000)
         self.assertLess(model.detected_surprises, 20)
@@ -257,7 +287,12 @@ class DetectorAndDeadZoneTests(unittest.TestCase):
         def early(index: int):
             velocity = 0.002
             position = 0.2 + velocity * (index % 300)
-            return (position - 3 * velocity, position - 2 * velocity, position - velocity, position), position + velocity
+            return (
+                position - 3 * velocity,
+                position - 2 * velocity,
+                position - velocity,
+                position,
+            ), position + velocity
 
         _drive(model, early, 1_000)
         quiet = model.detected_surprises
@@ -305,9 +340,8 @@ class InvalidStateTests(unittest.TestCase):
             ("non-finite", np.array([[math.inf, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])),
             ("ill-conditioned", np.diag([1e12, 1.0, 1e-12])),
         ):
-            with self.subTest(label=label):
-                with self.assertRaises(InvalidLearnerState):
-                    validate_covariance(matrix)
+            with self.subTest(label=label), self.assertRaises(InvalidLearnerState):
+                validate_covariance(matrix)
 
 
 if __name__ == "__main__":

@@ -61,8 +61,12 @@ class WorldConfig:
                 raise ValueError(f"world configuration value {name} must be numeric")
             if not math.isfinite(float(value)):
                 raise ValueError(f"world configuration value {name} must be finite")
-        object.__setattr__(self, "steps_per_episode", _require_int(self.steps_per_episode, "steps_per_episode", minimum=1))
-        object.__setattr__(self, "history_length", _require_int(self.history_length, "history_length", minimum=2))
+        object.__setattr__(
+            self, "steps_per_episode", _require_int(self.steps_per_episode, "steps_per_episode", minimum=1)
+        )
+        object.__setattr__(
+            self, "history_length", _require_int(self.history_length, "history_length", minimum=2)
+        )
         if self.upper_bound <= self.lower_bound:
             raise ValueError("upper_bound must be greater than lower_bound")
         if self.dt <= 0:
@@ -141,7 +145,7 @@ class ExperimentConfig:
 
         return _jsonable(asdict(self))
 
-    def quick(self) -> "ExperimentConfig":
+    def quick(self) -> ExperimentConfig:
         """Return a small configuration suitable for a smoke run."""
 
         return replace(
