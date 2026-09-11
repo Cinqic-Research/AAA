@@ -13,6 +13,16 @@
       "status": "retired"
     },
     {
+      "batch_id": "aaa-v2_1-confirmation-a-0002",
+      "consumed_by": [],
+      "declared_at": "2026-09-11T06:30:09.922341+00:00",
+      "notes": "Round 2. Declared after the round-1 pair was retired by a required-gate failure and the candidate was repaired on development evidence (AAA-120).",
+      "outcome": null,
+      "role": "confirmation_a",
+      "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
+      "status": "planned"
+    },
+    {
       "batch_id": "aaa-v2_1-confirmation-b-0001",
       "consumed_by": [
         "aaa-v2_1-confirmation-b-0001"
@@ -23,6 +33,16 @@
       "role": "confirmation_b",
       "spec_hash": "198b9a4ea45412068abd386ad252d8cab102e713d6fb4607461100c73c07c38f",
       "status": "retired"
+    },
+    {
+      "batch_id": "aaa-v2_1-confirmation-b-0002",
+      "consumed_by": [],
+      "declared_at": "2026-09-11T06:30:10.046835+00:00",
+      "notes": "Round 2. Same frozen checkpoints as A-0002, independent evaluation streams.",
+      "outcome": null,
+      "role": "confirmation_b",
+      "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
+      "status": "planned"
     }
   ],
   "schema_version": "aaa.confirmation_batches.v1"
