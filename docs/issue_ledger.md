@@ -888,19 +888,24 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
 - **Verification** `gh api repos/Cinqic/AAA/branches/main/protection` and
   `gh api repos/Cinqic/AAA --jq '.delete_branch_on_merge, .security_and_analysis'`.
 
-### AAA-112 — the confirmation batch registry's status field is trusted
-- **Source** self (post-repair adversarial probe) · **Status** open
-- Hand-editing a retired batch back to `planned` in
-  `benchmarks/confirmation_batches.json` lets it be claimed again. This is a
-  tamper scenario rather than an accident: the registry is in git, so the edit
-  is visible in the diff and the history, the `consumed_by` list still names
-  the runs that spent the batch, and a confirmation additionally requires a
-  clean tree and agreement with the committed freeze manifest.
-- It is recorded rather than silently hardened because hardening it would have
-  meant changing source between confirmation attempts. The obvious improvement
-  is to refuse any batch whose `consumed_by` list is non-empty regardless of
-  its status label, making the evidence of use the guard rather than a mutable
-  field.
+### AAA-112 — confirmation status edits could erase prior-use eligibility
+- **Source** independent Astra reproduction · **Severity** blocking · **Status** repaired
+- **Reproduction before repair** Changing only a retired batch's serialized
+  status to `planned`, while retaining its prior run and failure, allowed a
+  fresh claim. Conversely, changing a fresh status to `consumed` established
+  reproduction eligibility without execution evidence.
+- **Repair** Loading, saving and claiming validate status against durable
+  consumption and outcome evidence. Planned batches require both an empty
+  consumption list and null outcome; completed states require nonempty unique
+  run identities and their corresponding outcome. Invalid serialized types,
+  empty identities and contradictory in-memory edits are refused.
+- **Regression** `tests/test_batch_integrity.py` reproduces serialized tampering
+  for failed and passed batches, fabricated prior execution, and in-memory
+  tampering. The historical registry loads unchanged. Tests failed before the
+  repair; all 381 tests passed afterward (68.775 seconds).
+- **Boundary** This prevents contradictory records, not malicious rewriting of
+  every field and Git history. Interrupted-run reservation and concurrent use
+  require separate review; this change does not claim to solve them.
 
 ### AAA-113 — multiplicity is scoped to a specification hash
 - **Source** self · **Status** open, deliberate

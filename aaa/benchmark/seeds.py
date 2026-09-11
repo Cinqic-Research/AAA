@@ -111,6 +111,27 @@ class ConfirmationBatch:
     consumed_by: list[str] = field(default_factory=list)
     outcome: str | None = None
 
+    def validate(self) -> None:
+        """Status is a summary of durable evidence, never authority to erase it."""
+        if self.status not in BATCH_STATUSES or self.role not in CONFIRMATION_ROLES:
+            raise BatchRegistryError("invalid confirmation status or role")
+        if not isinstance(self.consumed_by, list) or any(
+            not isinstance(item, str) or not item.strip() for item in self.consumed_by
+        ):
+            raise BatchRegistryError("consumed_by must be a list of non-empty run identities")
+        if len(set(self.consumed_by)) != len(self.consumed_by):
+            raise BatchRegistryError("duplicate confirmation consumption records")
+        if self.status == "planned":
+            if self.consumed_by or self.outcome is not None:
+                raise BatchRegistryError("planned batch contradicts durable evidence of prior use")
+        elif not self.consumed_by:
+            raise BatchRegistryError("consumed or retired batch has no evidence of execution")
+        elif (
+            self.outcome
+            != {"consumed": "all_required_gates_pass", "retired": "required_gate_failure"}[self.status]
+        ):
+            raise BatchRegistryError("confirmation status and outcome contradict one another")
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "batch_id": self.batch_id,
@@ -125,22 +146,27 @@ class ConfirmationBatch:
 
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> ConfirmationBatch:
+        consumed = value.get("consumed_by", [])
+        if not isinstance(consumed, list) or any(not isinstance(item, str) for item in consumed):
+            raise BatchRegistryError("consumed_by must be a list of run identities")
         status = str(value["status"])
         if status not in BATCH_STATUSES:
             raise ValueError(f"batch status must be one of {BATCH_STATUSES}, got {status!r}")
         role = str(value["role"])
         if role not in CONFIRMATION_ROLES:
             raise ValueError(f"batch role must be one of {CONFIRMATION_ROLES}, got {role!r}")
-        return cls(
+        batch = cls(
             batch_id=str(value["batch_id"]),
             role=role,
             status=status,
             declared_at=str(value["declared_at"]),
             spec_hash=str(value["spec_hash"]),
             notes=str(value.get("notes", "")),
-            consumed_by=[str(item) for item in value.get("consumed_by", [])],
+            consumed_by=list(consumed),
             outcome=None if value.get("outcome") is None else str(value["outcome"]),
         )
+        batch.validate()
+        return batch
 
 
 class BatchRegistryError(RuntimeError):
@@ -172,6 +198,8 @@ class ConfirmationBatchRegistry:
         return cls(source, batches)
 
     def save(self) -> None:
+        for batch in self._batches.values():
+            batch.validate()
         payload = {
             "schema_version": REGISTRY_SCHEMA,
             "batches": [
@@ -221,6 +249,7 @@ class ConfirmationBatchRegistry:
         """Check that a batch may be used now, before any result is produced."""
 
         batch = self.get(batch_id)
+        batch.validate()
         if batch.role != role:
             raise BatchRegistryError(
                 f"confirmation batch {batch_id!r} was declared for role {batch.role!r}, not {role!r}"
@@ -231,12 +260,12 @@ class ConfirmationBatchRegistry:
                 f"but the resolved specification is {spec_hash[:12]}...; declare a new batch instead"
             )
         if reproduction:
-            if batch.status == "planned":
+            if not batch.consumed_by or batch.outcome is None:
                 raise BatchRegistryError(
                     f"confirmation batch {batch_id!r} has never been run; reproduction mode requires a consumed batch"
                 )
             return batch
-        if batch.status != "planned":
+        if batch.status != "planned" or batch.consumed_by or batch.outcome is not None:
             raise BatchRegistryError(
                 f"confirmation batch {batch_id!r} has status {batch.status!r}. A fresh confirmation requires an "
                 "unused batch. Use --reproduce to re-run an existing batch, or declare a new batch."
