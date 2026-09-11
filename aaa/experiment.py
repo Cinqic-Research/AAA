@@ -1,4 +1,19 @@
-"""The strict observation, prediction, scoring, update loop."""
+"""The strict observation, prediction, scoring, update loop.
+
+This module owns AAA's causal boundary. For every scored transition:
+
+1. the learner receives only causally available observation history;
+2. all predictors produce their predictions;
+3. predictions are recorded;
+4. the environment advances;
+5. the actual target is revealed;
+6. the prediction error is scored;
+7. only then may an enabled learner update;
+8. the newly revealed observation enters history.
+
+No scenario name, event flag, velocity, change schedule, hidden coefficient or
+future observation ever crosses into a predictor.
+"""
 
 from __future__ import annotations
 
@@ -6,20 +21,61 @@ import csv
 import json
 import math
 import os
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Callable, Sequence
 
-from .environment import MovingDotEnvironment
+from .environment import Environment
 from .predictors import Predictor
+
+STEP_RECORD_SCHEMA = "aaa.step_record.v2"
+
+UPDATE_MODES = ("frozen", "online", "mixed")
+
+
+@dataclass(frozen=True)
+class TrialIdentity:
+    """Immutable provenance for one evaluated trajectory.
+
+    Previously ``StepRecord.seed`` was overloaded to carry a replica ID while
+    ``environment_seed`` carried the trajectory seed. Every distinct concept
+    now has its own named field.
+    """
+
+    trial_id: str
+    role: str
+    family: str
+    scenario: str
+    environment_seed: int
+    replica_id: int
+    episode: int
+    branch: str = "main"
+    confirmation_batch: str | None = None
+    training_seed_lineage: tuple[int, ...] = ()
+    stratum: str = "unstratified"
+    checkpoint_hash: str | None = None
+    update_mode: str = "frozen"
+    schema_version: str = STEP_RECORD_SCHEMA
+
+    def __post_init__(self) -> None:
+        if self.update_mode not in UPDATE_MODES:
+            raise ValueError(f"update_mode must be one of {UPDATE_MODES}")
+        for name in ("replica_id", "episode"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"{name} must be a non-negative integer")
+
+    def to_dict(self) -> dict[str, object]:
+        value = asdict(self)
+        value["training_seed_lineage"] = list(self.training_seed_lineage)
+        return value
 
 
 @dataclass(frozen=True)
 class StepRecord:
-    seed: int
-    environment_seed: int
-    episode: int
-    scenario: str
+    """One scored transition and every predictor's outcome on it."""
+
+    identity: TrialIdentity
     step: int
     target_step: int
     history: tuple[float, ...]
@@ -29,52 +85,113 @@ class StepRecord:
     changed: bool
     predictions: dict[str, dict[str, float]]
     updates_enabled: dict[str, bool]
-    bounce_wall: str | None = None
-    stratum: str = "unstratified"
+    bounce_walls: tuple[str, ...] = field(default=())
+    interval_width: float = 1.0
+
+    # -- convenience accessors -------------------------------------------
+    @property
+    def replica_id(self) -> int:
+        return self.identity.replica_id
+
+    @property
+    def episode(self) -> int:
+        return self.identity.episode
+
+    @property
+    def scenario(self) -> str:
+        return self.identity.scenario
+
+    @property
+    def stratum(self) -> str:
+        return self.identity.stratum
+
+    @property
+    def environment_seed(self) -> int:
+        return self.identity.environment_seed
+
+    @property
+    def bounce_count(self) -> int:
+        return len(self.bounce_walls)
+
+    @property
+    def bounce_wall(self) -> str | None:
+        return self.bounce_walls[0] if self.bounce_walls else None
 
     def to_dict(self) -> dict[str, object]:
         return {
-            "seed": self.seed,
-            "environment_seed": self.environment_seed,
-            "episode": self.episode,
-            "scenario": self.scenario,
+            **self.identity.to_dict(),
             "step": self.step,
             "target_step": self.target_step,
             "history": list(self.history),
             "current_observation": self.current_observation,
             "actual_next_position": self.actual_next_position,
             "bounced": self.bounced,
+            "bounce_walls": list(self.bounce_walls),
+            "bounce_count": self.bounce_count,
             "changed": self.changed,
-            "bounce_wall": self.bounce_wall,
+            "interval_width": self.interval_width,
             "predictions": self.predictions,
             "updates_enabled": self.updates_enabled,
-            "stratum": self.stratum,
         }
+
+    @classmethod
+    def from_dict(cls, value: dict[str, object]) -> "StepRecord":
+        if value.get("schema_version") != STEP_RECORD_SCHEMA:
+            raise ValueError(
+                f"unsupported step record schema {value.get('schema_version')!r}; expected {STEP_RECORD_SCHEMA!r}"
+            )
+        identity = TrialIdentity(
+            trial_id=str(value["trial_id"]),
+            role=str(value["role"]),
+            family=str(value["family"]),
+            scenario=str(value["scenario"]),
+            environment_seed=int(value["environment_seed"]),  # type: ignore[arg-type]
+            replica_id=int(value["replica_id"]),  # type: ignore[arg-type]
+            episode=int(value["episode"]),  # type: ignore[arg-type]
+            branch=str(value.get("branch", "main")),
+            confirmation_batch=(None if value.get("confirmation_batch") is None else str(value["confirmation_batch"])),
+            training_seed_lineage=tuple(int(item) for item in value.get("training_seed_lineage", [])),  # type: ignore[union-attr]
+            stratum=str(value.get("stratum", "unstratified")),
+            checkpoint_hash=(None if value.get("checkpoint_hash") is None else str(value["checkpoint_hash"])),
+            update_mode=str(value.get("update_mode", "frozen")),
+        )
+        return cls(
+            identity=identity,
+            step=int(value["step"]),  # type: ignore[arg-type]
+            target_step=int(value["target_step"]),  # type: ignore[arg-type]
+            history=tuple(float(item) for item in value["history"]),  # type: ignore[union-attr]
+            current_observation=float(value["current_observation"]),  # type: ignore[arg-type]
+            actual_next_position=float(value["actual_next_position"]),  # type: ignore[arg-type]
+            bounced=bool(value["bounced"]),
+            changed=bool(value["changed"]),
+            predictions={
+                str(name): {str(k): float(v) for k, v in metrics.items()}  # type: ignore[union-attr]
+                for name, metrics in value["predictions"].items()  # type: ignore[union-attr]
+            },
+            updates_enabled={str(name): bool(flag) for name, flag in value["updates_enabled"].items()},  # type: ignore[union-attr]
+            bounce_walls=tuple(str(item) for item in value.get("bounce_walls", [])),  # type: ignore[union-attr]
+            interval_width=float(value.get("interval_width", 1.0)),  # type: ignore[arg-type]
+        )
 
 
 ScoreHook = Callable[[StepRecord], None]
+UpdateHook = Callable[[StepRecord, Sequence[Predictor]], None]
 
 
 def run_episode(
-    environment: MovingDotEnvironment,
+    environment: Environment,
     predictors: Sequence[Predictor],
+    identity: TrialIdentity,
     *,
-    episode: int = 0,
-    record_seed: int | None = None,
     learn: bool = False,
     clip_predictions: bool = False,
     score_hook: ScoreHook | None = None,
+    update_hook: UpdateHook | None = None,
     initial_history: Sequence[float] | None = None,
     reset_environment: bool = True,
     step_offset: int = 0,
-    stratum: str = "unstratified",
 ) -> list[StepRecord]:
-    """Run one episode with prediction before outcome reveal and learning.
-
-    The runner is the only code that sees evaluator event labels. A predictor
-    receives a tuple of positions and, after scoring, the target position.
-    No velocity, scenario, event flag, or schedule is passed into the model.
-    """
+    """Run one episode with prediction before outcome reveal and learning."""
 
     if reset_environment:
         current = environment.reset()
@@ -85,9 +202,13 @@ def run_episode(
         history = [float(value) for value in initial_history]
         if not history:
             raise ValueError("initial_history must not be empty")
+        if not all(math.isfinite(value) for value in history):
+            raise ValueError("initial_history must be finite")
     records: list[StepRecord] = []
     history_length = environment.config.history_length
-    bounds = (environment.config.lower_bound, environment.config.upper_bound)
+    lower = environment.config.lower_bound
+    upper = environment.config.upper_bound
+    width = upper - lower
     if len({predictor.name for predictor in predictors}) != len(predictors):
         raise ValueError("predictor names must be unique within an episode")
 
@@ -95,7 +216,7 @@ def run_episode(
         step = step_offset + local_step
         if len(history) < history_length:
             # Warm-up observations are not scored so all predictors start on
-            # precisely the same four-observation input window.
+            # precisely the same observation window.
             transition = environment.advance()
             history.append(transition.position)
             continue
@@ -108,9 +229,7 @@ def run_episode(
             if not math.isfinite(raw):
                 raise FloatingPointError(f"predictor {predictor.name} returned a non-finite value")
             raw_predictions[predictor.name] = raw
-            scored_predictions[predictor.name] = (
-                min(max(raw, bounds[0]), bounds[1]) if clip_predictions else raw
-            )
+            scored_predictions[predictor.name] = min(max(raw, lower), upper) if clip_predictions else raw
 
         # The environment is advanced only after every prediction has been
         # recorded. This is the temporal boundary that prevents leakage.
@@ -120,16 +239,13 @@ def run_episode(
                 "raw": raw_predictions[predictor.name],
                 "scored": scored_predictions[predictor.name],
                 "absolute_error": abs(scored_predictions[predictor.name] - transition.position),
-                "normalized_absolute_error": abs(scored_predictions[predictor.name] - transition.position)
-                / (bounds[1] - bounds[0]),
+                "normalized_absolute_error": abs(scored_predictions[predictor.name] - transition.position) / width,
+                "signed_error": scored_predictions[predictor.name] - transition.position,
             }
             for predictor in predictors
         }
         record = StepRecord(
-            seed=environment.seed if record_seed is None else int(record_seed),
-            environment_seed=environment.seed,
-            episode=episode,
-            scenario=environment.scenario,
+            identity=identity,
             step=step,
             target_step=step + 1,
             history=input_history,
@@ -137,12 +253,12 @@ def run_episode(
             actual_next_position=float(transition.position),
             bounced=transition.bounced,
             changed=transition.changed,
-            bounce_wall=transition.bounce_wall,
+            bounce_walls=transition.bounce_walls,
             predictions=predictions,
             updates_enabled={
                 predictor.name: bool(learn and predictor.update_enabled) for predictor in predictors
             },
-            stratum=stratum,
+            interval_width=width,
         )
         records.append(record)
         if score_hook is not None:
@@ -154,23 +270,24 @@ def run_episode(
             for predictor in predictors:
                 if predictor.update_enabled:
                     predictor.update(input_history, transition.position)
+            if update_hook is not None:
+                update_hook(record, predictors)
         history.append(transition.position)
 
     return records
 
 
 def continue_episode(
-    environment: object,
+    environment: Environment,
     predictors: Sequence[Predictor],
     history: Sequence[float],
+    identity: TrialIdentity,
     *,
-    episode: int = 0,
-    record_seed: int | None = None,
     learn: bool = False,
     clip_predictions: bool = False,
     score_hook: ScoreHook | None = None,
+    update_hook: UpdateHook | None = None,
     step_offset: int = 0,
-    stratum: str = "unstratified",
 ) -> list[StepRecord]:
     """Continue an already-realized world from a supplied observation history.
 
@@ -182,18 +299,21 @@ def continue_episode(
     if not hasattr(environment, "advance") or not hasattr(environment, "config"):
         raise TypeError("environment must provide advance() and config")
     return run_episode(
-        environment,  # type: ignore[arg-type]
+        environment,
         predictors,
-        episode=episode,
-        record_seed=record_seed,
+        identity,
         learn=learn,
         clip_predictions=clip_predictions,
         score_hook=score_hook,
+        update_hook=update_hook,
         initial_history=history,
         reset_environment=False,
         step_offset=step_offset,
-        stratum=stratum,
     )
+
+
+def with_stratum(identity: TrialIdentity, stratum: str) -> TrialIdentity:
+    return replace(identity, stratum=stratum)
 
 
 def write_step_records(records: Sequence[StepRecord], jsonl_path: str | Path, csv_path: str | Path | None = None) -> None:
@@ -212,20 +332,29 @@ def write_step_records(records: Sequence[StepRecord], jsonl_path: str | Path, cs
     csv_destination = Path(csv_path)
     predictor_names = sorted({name for record in records for name in record.predictions})
     fieldnames = [
-        "seed",
+        "trial_id",
+        "role",
+        "family",
+        "branch",
+        "replica_id",
         "environment_seed",
         "episode",
         "scenario",
+        "stratum",
+        "update_mode",
         "step",
         "target_step",
         "history",
         "current_observation",
         "actual_next_position",
         "bounced",
+        "bounce_count",
         "changed",
     ]
     for name in predictor_names:
-        fieldnames.extend([f"{name}_raw", f"{name}_scored", f"{name}_absolute_error", f"{name}_normalized_absolute_error"])
+        fieldnames.extend(
+            [f"{name}_raw", f"{name}_scored", f"{name}_absolute_error", f"{name}_normalized_absolute_error"]
+        )
     csv_destination.parent.mkdir(parents=True, exist_ok=True)
     csv_temporary = csv_destination.with_suffix(csv_destination.suffix + ".tmp")
     with csv_temporary.open("w", newline="", encoding="utf-8") as handle:
@@ -233,16 +362,23 @@ def write_step_records(records: Sequence[StepRecord], jsonl_path: str | Path, cs
         writer.writeheader()
         for record in records:
             row: dict[str, object] = {
-                "seed": record.seed,
+                "trial_id": record.identity.trial_id,
+                "role": record.identity.role,
+                "family": record.identity.family,
+                "branch": record.identity.branch,
+                "replica_id": record.replica_id,
                 "environment_seed": record.environment_seed,
                 "episode": record.episode,
                 "scenario": record.scenario,
+                "stratum": record.stratum,
+                "update_mode": record.identity.update_mode,
                 "step": record.step,
                 "target_step": record.target_step,
-                "history": json.dumps(record.history),
+                "history": json.dumps(list(record.history)),
                 "current_observation": record.current_observation,
                 "actual_next_position": record.actual_next_position,
                 "bounced": record.bounced,
+                "bounce_count": record.bounce_count,
                 "changed": record.changed,
             }
             for name in predictor_names:
@@ -253,3 +389,17 @@ def write_step_records(records: Sequence[StepRecord], jsonl_path: str | Path, cs
                 row[f"{name}_normalized_absolute_error"] = prediction.get("normalized_absolute_error", "")
             writer.writerow(row)
     os.replace(csv_temporary, csv_destination)
+
+
+def read_step_records(path: str | Path) -> list[StepRecord]:
+    """Read a JSONL (optionally gzipped) step log back into typed records."""
+
+    source = Path(path)
+    if source.suffix == ".gz":
+        import gzip
+
+        with gzip.open(source, "rt", encoding="utf-8") as handle:
+            lines = handle.read().splitlines()
+    else:
+        lines = source.read_text(encoding="utf-8").splitlines()
+    return [StepRecord.from_dict(json.loads(line)) for line in lines if line.strip()]

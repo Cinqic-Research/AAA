@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Literal
+import math
+from dataclasses import dataclass, field
+from typing import Literal, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -14,18 +15,119 @@ SCENARIOS: tuple[Scenario, ...] = ("straight", "bouncing", "changed", "dynamics_
 
 
 @dataclass(frozen=True)
+class ReflectionResult:
+    """Complete outcome of resolving one raw position against the bounds."""
+
+    position: float
+    velocity: float
+    walls: tuple[str, ...]
+
+    @property
+    def bounced(self) -> bool:
+        return bool(self.walls)
+
+    @property
+    def bounce_count(self) -> int:
+        return len(self.walls)
+
+    @property
+    def first_wall(self) -> str | None:
+        return self.walls[0] if self.walls else None
+
+
+def resolve_reflection(
+    position: float, velocity: float, lower: float, upper: float, *, iteration_limit: int = 10_000
+) -> ReflectionResult:
+    """Reflect an overshooting position back into ``[lower, upper]``.
+
+    Every wall contact is recorded in crossing order, so a transition that
+    crosses two walls is reported as two walls rather than collapsed into a
+    single boolean plus one inferred wall. Exact contact counts as a bounce
+    only when the velocity points out of the interval.
+    """
+
+    if upper <= lower:
+        raise ValueError("upper bound must exceed lower bound")
+    if not all(math.isfinite(float(value)) for value in (position, velocity, lower, upper)):
+        raise ValueError("reflection inputs must be finite")
+    walls: list[str] = []
+    for _ in range(iteration_limit):
+        if position > upper or (position == upper and velocity > 0):
+            position = upper - (position - upper)
+            velocity = -abs(velocity)
+            walls.append("upper")
+        elif position < lower or (position == lower and velocity < 0):
+            position = lower + (lower - position)
+            velocity = abs(velocity)
+            walls.append("lower")
+        else:
+            return ReflectionResult(float(position), float(velocity), tuple(walls))
+    raise RuntimeError("reflection exceeded safety iteration limit")
+
+
+@dataclass(frozen=True)
 class EnvironmentStep:
     """Evaluator-side information for one transition.
 
-    ``bounced`` and ``changed`` are deliberately evaluator metadata. The
-    experiment runner passes only ``position`` to a learner.
+    ``bounced``, ``bounce_walls`` and ``changed`` are deliberately evaluator
+    metadata. The experiment runner passes only ``position`` to a learner.
     """
 
     step_index: int
     position: float
     bounced: bool
     changed: bool
-    bounce_wall: str | None = None
+    bounce_walls: tuple[str, ...] = field(default=())
+
+    @property
+    def bounce_count(self) -> int:
+        return len(self.bounce_walls)
+
+    @property
+    def bounce_wall(self) -> str | None:
+        """First wall contacted in this transition, if any."""
+
+        return self.bounce_walls[0] if self.bounce_walls else None
+
+
+@runtime_checkable
+class Environment(Protocol):
+    """Structural interface every AAA world implements.
+
+    Declaring this explicitly removes the ``object`` plus ``type: ignore``
+    pattern that previously hid interface mistakes from the type checker.
+    """
+
+    scenario: str
+    seed: int
+    config: WorldConfig
+
+    def observe(self) -> float: ...
+
+    def reset(self) -> float: ...
+
+    def advance(self) -> EnvironmentStep: ...
+
+
+def _validate_change_step(change_step: int | None, steps_per_episode: int) -> int | None:
+    """Validate explicit change-event semantics.
+
+    ``None`` means *this episode has no change event*. Any integer must index
+    a transition that is actually simulated and scored, so the end-of-horizon
+    sentinel that previously slipped through (``change_step == steps``) is
+    rejected instead of silently describing an event that never happens.
+    """
+
+    if change_step is None:
+        return None
+    if isinstance(change_step, bool) or not isinstance(change_step, (int, np.integer)):
+        raise ValueError("change_step must be an integer or None")
+    step = int(change_step)
+    if not 0 <= step < steps_per_episode:
+        raise ValueError(
+            f"change_step must satisfy 0 <= change_step < steps_per_episode ({steps_per_episode}); got {step}"
+        )
+    return step
 
 
 class MovingDotEnvironment:
@@ -45,9 +147,14 @@ class MovingDotEnvironment:
             raise ValueError(f"Unknown scenario: {scenario}")
         if scenario == "dynamics_change":
             raise ValueError("use DampedOscillatorEnvironment for dynamics_change")
-        self.scenario = scenario
+        if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)):
+            raise ValueError("seed must be an integer")
+        self.scenario: str = scenario
         self.seed = int(seed)
         self.config = config or WorldConfig()
+        for label, value in (("initial_position", initial_position), ("initial_velocity", initial_velocity)):
+            if value is not None and not math.isfinite(float(value)):
+                raise ValueError(f"{label} must be finite")
         self._initial_position = initial_position
         self._initial_velocity = initial_velocity
         self._requested_change_step = change_step
@@ -56,7 +163,7 @@ class MovingDotEnvironment:
         self._velocity = 0.0
         self._step_index = 0
         self._change_factor = 1.0
-        self._change_step = None
+        self._change_step: int | None = None
         self.reset()
 
     @property
@@ -88,9 +195,9 @@ class MovingDotEnvironment:
 
         self._rng = np.random.default_rng(self.seed)
         self._step_index = 0
+        self._change_step = self._resolve_change_step()
         self._position, self._velocity = self._sample_initial_state()
         self._change_factor = self._sample_change_factor()
-        self._change_step = self._resolve_change_step()
         return self.observe()
 
     def advance(self) -> EnvironmentStep:
@@ -100,27 +207,26 @@ class MovingDotEnvironment:
         if changed:
             self._velocity *= self._change_factor
 
-        bounced = False
         next_position = self._position + self._velocity * self.config.dt
-        raw_next_position = next_position
         if self.scenario in ("bouncing", "changed"):
-            next_position, self._velocity, bounced = self._reflect(
-                next_position,
-                self._velocity,
-                self.config.lower_bound,
-                self.config.upper_bound,
+            reflection = resolve_reflection(
+                next_position, self._velocity, self.config.lower_bound, self.config.upper_bound
             )
+            self._position = reflection.position
+            self._velocity = reflection.velocity
+            walls = reflection.walls
         else:
             if not self.config.lower_bound <= next_position <= self.config.upper_bound:
                 raise RuntimeError("straight scenario crossed a boundary; sampling is invalid")
+            self._position = float(next_position)
+            walls = ()
 
-        self._position = float(next_position)
         transition = EnvironmentStep(
             step_index=self._step_index,
             position=self._position,
-            bounced=bounced,
+            bounced=bool(walls),
             changed=changed,
-            bounce_wall=("upper" if raw_next_position >= self.config.upper_bound and self._velocity < 0 else "lower" if raw_next_position <= self.config.lower_bound and self._velocity > 0 else None) if bounced else None,
+            bounce_walls=walls,
         )
         self._step_index += 1
         return transition
@@ -146,15 +252,8 @@ class MovingDotEnvironment:
                 if self.config.lower_bound < final_position < self.config.upper_bound:
                     return position, velocity
             elif self.scenario in ("bouncing", "changed"):
-                if self.scenario == "changed":
-                    event_step = self._requested_change_step
-                    if event_step is None:
-                        event_step = self.config.change_step
-                    event_position, _, _ = self._simulate_reflection(
-                        position,
-                        velocity,
-                        event_step,
-                    )
+                if self.scenario == "changed" and self._change_step is not None:
+                    event_position, _, _ = self._simulate_reflection(position, velocity, self._change_step)
                     if not (
                         self.config.lower_bound + self.config.event_margin
                         <= event_position
@@ -165,7 +264,7 @@ class MovingDotEnvironment:
         raise RuntimeError("could not sample a valid initial state")
 
     def _sample_change_factor(self) -> float:
-        if self.scenario != "changed":
+        if self.scenario != "changed" or self._change_step is None:
             return 1.0
         if self._rng.integers(0, 2) == 0:
             return self.config.change_factor_low
@@ -177,56 +276,24 @@ class MovingDotEnvironment:
         step = self._requested_change_step
         if step is None:
             step = self.config.change_step
-        if not 0 <= step <= self.config.steps_per_episode:
-            raise ValueError("change_step must identify a transition inside the episode")
-        return int(step)
+        return _validate_change_step(step, self.config.steps_per_episode)
 
-    @staticmethod
-    def _reflect(
-        position: float,
-        velocity: float,
-        lower: float,
-        upper: float,
-    ) -> tuple[float, float, bool]:
-        """Reflect overshoot until the position is inside the interval."""
-
-        bounced = False
-        # Speeds used by this prototype cross at most a few boundaries per
-        # step, but the loop keeps the boundary operation correct for tests
-        # and future configurations with larger steps.
-        for _ in range(10_000):
-            if position > upper or (position == upper and velocity > 0):
-                position = upper - (position - upper)
-                velocity = -abs(velocity)
-                bounced = True
-            elif position < lower or (position == lower and velocity < 0):
-                position = lower + (lower - position)
-                velocity = abs(velocity)
-                bounced = True
-            else:
-                return float(position), float(velocity), bounced
-        raise RuntimeError("reflection exceeded safety iteration limit")
-
-    def _simulate_reflection(
-        self,
-        position: float,
-        velocity: float,
-        steps: int,
-    ) -> tuple[float, float, bool]:
+    def _simulate_reflection(self, position: float, velocity: float, steps: int) -> tuple[float, float, bool]:
         bounced = False
         for _ in range(steps):
-            position, velocity, this_bounced = self._reflect(
+            reflection = resolve_reflection(
                 position + velocity * self.config.dt,
                 velocity,
                 self.config.lower_bound,
                 self.config.upper_bound,
             )
-            bounced = bounced or this_bounced
+            position, velocity = reflection.position, reflection.velocity
+            bounced = bounced or reflection.bounced
         return position, velocity, bounced
 
 
 class DampedOscillatorEnvironment:
-    """Bounded second-order world used by benchmark v2.
+    """Bounded second-order world used by the changed-law family.
 
     The evaluator exposes only ``position`` through the common runner. The
     oscillator is integrated with a semi-implicit Euler step around the
@@ -246,8 +313,13 @@ class DampedOscillatorEnvironment:
         initial_position: float | None = None,
         initial_velocity: float | None = None,
         change_step: int | None = None,
+        initial_position_low: float = 0.35,
+        initial_position_high: float = 0.65,
+        initial_velocity_scale: float = 0.25,
     ) -> None:
-        self.scenario: Scenario = "dynamics_change"
+        if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)):
+            raise ValueError("seed must be an integer")
+        self.scenario: str = "dynamics_change"
         self.seed = int(seed)
         self.config = config or WorldConfig()
         for name, value in {
@@ -258,10 +330,17 @@ class DampedOscillatorEnvironment:
         }.items():
             if not np.isfinite(value) or value <= 0:
                 raise ValueError(f"{name} must be finite and positive")
+        if not 0.0 <= initial_position_low <= initial_position_high <= 1.0:
+            raise ValueError("initial position fractions must satisfy 0 <= low <= high <= 1")
+        if not math.isfinite(initial_velocity_scale) or initial_velocity_scale < 0:
+            raise ValueError("initial_velocity_scale must be finite and non-negative")
         self.omega = float(omega)
         self.damping = float(damping)
         self.changed_omega = float(changed_omega)
         self.changed_damping = float(changed_damping)
+        self.initial_position_low = float(initial_position_low)
+        self.initial_position_high = float(initial_position_high)
+        self.initial_velocity_scale = float(initial_velocity_scale)
         self._initial_position = initial_position
         self._initial_velocity = initial_velocity
         self._requested_change_step = change_step
@@ -281,8 +360,7 @@ class DampedOscillatorEnvironment:
         return self._velocity
 
     @property
-    def change_step(self) -> int:
-        assert self._change_step is not None
+    def change_step(self) -> int | None:
         return self._change_step
 
     def observe(self) -> float:
@@ -292,15 +370,16 @@ class DampedOscillatorEnvironment:
         self._rng = np.random.default_rng(self.seed)
         self._step_index = 0
         width = self.config.upper_bound - self.config.lower_bound
+        span = self.initial_position_high - self.initial_position_low
         self._position = (
             float(self._initial_position)
             if self._initial_position is not None
-            else float(self.config.lower_bound + width * (0.35 + 0.3 * self._rng.random()))
+            else float(self.config.lower_bound + width * (self.initial_position_low + span * self._rng.random()))
         )
         self._velocity = (
             float(self._initial_velocity)
             if self._initial_velocity is not None
-            else float((self._rng.random() - 0.5) * width * 0.25)
+            else float((self._rng.random() - 0.5) * width * self.initial_velocity_scale)
         )
         if not self.config.lower_bound <= self._position <= self.config.upper_bound:
             raise ValueError("initial_position is outside the configured interval")
@@ -309,33 +388,31 @@ class DampedOscillatorEnvironment:
         step = self._requested_change_step
         if step is None:
             step = self.config.change_step
-        if not 0 <= step <= self.config.steps_per_episode:
-            raise ValueError("change_step must identify a transition inside the episode")
-        self._change_step = int(step)
+        self._change_step = _validate_change_step(step, self.config.steps_per_episode)
         return self.observe()
 
     def advance(self) -> EnvironmentStep:
-        changed = self._step_index == self.change_step
-        omega = self.changed_omega if self._step_index >= self.change_step else self.omega
-        damping = self.changed_damping if self._step_index >= self.change_step else self.damping
+        after_change = self._change_step is not None and self._step_index >= self._change_step
+        changed = self._change_step is not None and self._step_index == self._change_step
+        omega = self.changed_omega if after_change else self.omega
+        damping = self.changed_damping if after_change else self.damping
         midpoint = (self.config.lower_bound + self.config.upper_bound) / 2
         acceleration = -2.0 * damping * omega * self._velocity - omega * omega * (self._position - midpoint)
         self._velocity += acceleration * self.config.dt
-        next_position = self._position + self._velocity * self.config.dt
-        raw_next_position = next_position
-        next_position, self._velocity, bounced = MovingDotEnvironment._reflect(
-            next_position,
+        reflection = resolve_reflection(
+            self._position + self._velocity * self.config.dt,
             self._velocity,
             self.config.lower_bound,
             self.config.upper_bound,
         )
-        self._position = float(next_position)
+        self._position = reflection.position
+        self._velocity = reflection.velocity
         transition = EnvironmentStep(
             step_index=self._step_index,
             position=self._position,
-            bounced=bounced,
+            bounced=reflection.bounced,
             changed=changed,
-            bounce_wall=("upper" if raw_next_position >= self.config.upper_bound and self._velocity < 0 else "lower" if raw_next_position <= self.config.lower_bound and self._velocity > 0 else None) if bounced else None,
+            bounce_walls=reflection.walls,
         )
         self._step_index += 1
         return transition
