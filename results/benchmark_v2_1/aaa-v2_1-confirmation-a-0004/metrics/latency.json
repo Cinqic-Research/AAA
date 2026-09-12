@@ -1,0 +1,32 @@
+{
+  "candidate_forgetting": 0.3,
+  "candidate_update_count": 6448,
+  "failures": 0,
+  "hardware": {
+    "blas": {
+      "scipy-openblas": "0.3.34.106.0"
+    },
+    "cpu_count": 16,
+    "cpu_model": "AMD Ryzen 7 5700G with Radeon Graphics",
+    "disk_available_bytes": 73017352192,
+    "gpu": "NVIDIA GeForce RTX 2060, 595.84, 6144 MiB",
+    "machine": "x86_64",
+    "memory_bytes": null,
+    "numpy": "2.5.3",
+    "os": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3",
+    "python_implementation": "CPython"
+  },
+  "predict_p50_ms": 0.00431,
+  "predict_p95_ms": 0.00497,
+  "predict_p99_ms": 0.0058706999999999995,
+  "predict_plus_update_p50_ms": 0.02956,
+  "predict_plus_update_p95_ms": 0.03245045,
+  "predict_plus_update_p99_ms": 0.041749,
+  "samples": 2000,
+  "update_p50_ms": 0.02523,
+  "update_p95_ms": 0.02726,
+  "update_p99_ms": 0.036323589999999996,
+  "warmup_samples": 200
+}

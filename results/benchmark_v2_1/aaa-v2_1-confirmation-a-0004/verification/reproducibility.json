@@ -1,0 +1,28 @@
+{
+  "checks": {
+    "deterministic_rerun_identical": true,
+    "golden_seed_mapping_matches": true,
+    "save_resume_identical": true
+  },
+  "detail": {
+    "deterministic_rerun": {
+      "identical": true,
+      "transitions": 74
+    },
+    "golden_seeds": {
+      "cases": 10,
+      "matches": true,
+      "mismatches": {}
+    },
+    "save_resume": {
+      "identical": true,
+      "max_weight_difference": 0.0,
+      "updates": 120
+    }
+  },
+  "executed": true,
+  "tolerances": {
+    "absolute": 0.0,
+    "relative": 0.0
+  }
+}
