@@ -82,3 +82,16 @@ manifest verified before archival. The compact committed archive contains 55
 files covered by its own passing `checksums.json`; the original manifest is
 retained separately as `full_attempt_checksums.json`. The paired B-0003 stream
 was never observed and is explicitly `cancelled`, with no fabricated consumer.
+
+### Round 4 — fresh Sol-review confirmation
+
+| Attempt | Role | Required gates | Original checksums | Semantic replay |
+|---|---|---|---|---|
+| `aaa-v2_1-confirmation-a-0004` | confirmation_a | 14 of 14 PASS | 4,058/4,058 | exact; exit 0 |
+| `aaa-v2_1-confirmation-b-0004` | confirmation_b | 14 of 14 PASS | 4,058/4,058 | exact; exit 0 |
+
+The pair was predeclared and frozen at `11ba061`; A's evidence was committed at
+`dc4a6e1` before B began. The scientific fingerprint, specification, thresholds,
+checkpoint hashes and dependency lock stayed fixed. A and B used independent
+evaluation streams and the declared shared selected checkpoints. Each compact
+archive has 55 retained files and a passing clean-clone checksum manifest.

@@ -98,15 +98,17 @@
     },
     {
       "batch_id": "aaa-v2_1-confirmation-b-0004",
-      "claim_started_at": null,
-      "claimed_by": null,
-      "consumed_by": [],
+      "claim_started_at": "2026-09-12T20:52:13.231552+00:00",
+      "claimed_by": "aaa-v2_1-confirmation-b-0004",
+      "consumed_by": [
+        "aaa-v2_1-confirmation-b-0004"
+      ],
       "declared_at": "2026-09-12T20:39:06.603959+00:00",
       "notes": "Fresh Sol-review B; shared frozen checkpoints and independent evaluation stream; predeclared before observation",
-      "outcome": null,
+      "outcome": "all_required_gates_pass",
       "role": "confirmation_b",
       "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
-      "status": "planned"
+      "status": "consumed"
     }
   ],
   "schema_version": "aaa.confirmation_batches.v2"

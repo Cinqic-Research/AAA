@@ -2,12 +2,13 @@
 
 ## Verdict
 
-**REVIEW IN PROGRESS — NOT APPROVED, NOT MERGED.**
+**APPROVED FOR NORMAL MERGE through PR #10, subject to required checks on the
+exact final PR head. NOT YET MERGED at the time of this record.**
 
-This is the designated review record. It remains deliberately non-approving
-until the repaired candidate has passed the complete local gate set, a fresh
-untuned A/B pair, the required GitHub checks, and post-merge clean-clone
-verification. Historical green summaries are not substituted for those gates.
+The scientific and engineering review gates are satisfied. This is not a
+release approval and does not authorize a tag or published artifact. Normal
+branch protection remains the integration gate; a post-merge clean-clone smoke
+must still be recorded before the task is called complete.
 
 ## Scope and method
 
@@ -36,6 +37,11 @@ tag; none is an active assignment or approval.
 - `AAA-125`: separate Actions checkouts could not enforce one durable formal
   batch claim. Formal roles are now confined to the maintained checkout; local
   reservation is persisted under a lock before observation.
+- `AAA-126`: wheel and runtime versions disagreed. They now coherently report
+  `0.2.0`, verified from an installed wheel outside the checkout.
+- `AAA-127`: fresh A-0003 exposed self-induced Git dirtiness after durable
+  reservation. The failed attempt is retained, B-0003 was cancelled unobserved,
+  and the pre-claim source snapshot repair passed the new A/B pair.
 
 Additional repairs reject unknown/coercive/non-finite step-record fields,
 duplicate trial identities, unsafe checksum paths, negative tolerances, and
@@ -55,10 +61,37 @@ exact reviewed versions proposed by PRs 6–9, with the build backend locked.
 
 ## Final evidence
 
-Pending. This section will record exact commands, exit statuses, test counts,
-candidate/freeze identities, A/B batch IDs, gate outcomes, CI run IDs, review
-PR and merge SHAs, and the post-merge clean-clone result. It will not be upgraded
-from pending unless each corresponding artifact was freshly verified.
+- Local complete suite: 401 tests, exit 0, 78.855 seconds after the final
+  scientific repair. An earlier instrumented 400-test run covered 89%; the new
+  lifecycle regression then passed in focused and complete suites.
+- Static gates: Ruff lint, Ruff format check, configured mypy scope, dependency
+  lock validation (24/24 exact pins), diff whitespace, and confirmation exit-code
+  contract all exited 0.
+- Package: `aaa-0.2.0-py3-none-any.whl` built without isolation using the locked
+  setuptools backend; payload included the canonical specification, license and
+  console entry point. In a fresh venv outside the checkout, the exact lock was
+  installed, the wheel was installed with `--no-deps`, import reported `0.2.0`,
+  `spec-hash` resolved the packaged file, and the 24-pin check passed.
+- Runtime smoke: a 2-replica/3-episode development run correctly reported thin
+  coverage as `INSUFFICIENT_EVIDENCE`; recomputation reproduced its full status
+  tree. Historical v1 smoke and headless animation/plot tests passed. These are
+  mechanics/regression evidence, not confirmation.
+- Frozen candidate: `11ba061d2c33a5f04e71fd10a186de3af887b180`, spec
+  `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37`,
+  lock `2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7`.
+- A-0004: source `11ba061d2c33`, runtime 666.191 seconds, confirmation family
+  size 4, process exit 0, 14/14 required gates PASS, 4,058/4,058 full checksums,
+  exact semantic recomputation, and 55/55 compact archive checksums.
+- A evidence/bookkeeping commit: `dc4a6e1988c00dde3a3b27622c0af9982c395f1d`.
+- B-0004: source `dc4a6e1988c0`, runtime 666.648 seconds, confirmation family
+  size 5, process exit 0, 14/14 required gates PASS, 4,058/4,058 full checksums,
+  exact semantic recomputation, and 55/55 compact archive checksums.
+- GitHub PR #10: observed CPU CI runs `34718326277` and `34718328566` passed
+  locked environment, fresh install, and Python 3.10/3.11/3.12/3.13. The final
+  evidence/documentation head must receive the same required checks before merge.
+- [`final_audit.md`](final_audit.md) is generated from the exact staged path set
+  and includes every tracked regular file. Historical and generated evidence
+  are explicitly categorized; a row is not itself scientific re-verification.
 
 ## Residual limitations
 

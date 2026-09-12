@@ -1,0 +1,248 @@
+{
+  "bounce_events": 0,
+  "bounce_transitions": 0,
+  "bounce_walls": {
+    "lower": 0,
+    "upper": 0
+  },
+  "branch": "unchanged-control",
+  "episodes": 500,
+  "event_episodes": 0,
+  "family": "changed_law",
+  "no_event_episodes": 500,
+  "predictors": {
+    "constant_motion": {
+      "best_replica_mae": 2.194597698795061e-05,
+      "episode_balanced_mae": 2.3180500212873338e-05,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 1.9187594435032818e-05,
+      "non_event_pooled_mae": 2.3180500212873335e-05,
+      "p95": 5.870558255612054e-05,
+      "p99": 6.853807538668714e-05,
+      "pooled_transition_mae": 2.3180500212873335e-05,
+      "post_change_cumulative_mean": 0.001503773764388263,
+      "post_change_window_mae": 3.0075475287765263e-05,
+      "recovery_status_counts": {
+        "no_measured_shock": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 2.3574876949086883e-05,
+        "1": 2.282853089109001e-05,
+        "2": 2.3748634386017757e-05,
+        "3": 2.380448185022142e-05,
+        "4": 2.194597698795061e-05
+      },
+      "replica_mae_mean": 2.3180500212873335e-05,
+      "signed_bias": -6.487642352680956e-07,
+      "strata": {
+        "unchanged-control": {
+          "episodes": 500,
+          "mae": 2.3180500212873335e-05,
+          "p95": 5.870558255612054e-05,
+          "replicas": 5,
+          "transitions": 50000
+        }
+      },
+      "worst_replica_mae": 2.380448185022142e-05
+    },
+    "constant_motion_reflected": {
+      "best_replica_mae": 2.194597698795061e-05,
+      "episode_balanced_mae": 2.3180500212873338e-05,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 1.9187594435032818e-05,
+      "non_event_pooled_mae": 2.3180500212873335e-05,
+      "p95": 5.870558255612054e-05,
+      "p99": 6.853807538668714e-05,
+      "pooled_transition_mae": 2.3180500212873335e-05,
+      "post_change_cumulative_mean": 0.001503773764388263,
+      "post_change_window_mae": 3.0075475287765263e-05,
+      "recovery_status_counts": {
+        "no_measured_shock": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 2.3574876949086883e-05,
+        "1": 2.282853089109001e-05,
+        "2": 2.3748634386017757e-05,
+        "3": 2.380448185022142e-05,
+        "4": 2.194597698795061e-05
+      },
+      "replica_mae_mean": 2.3180500212873335e-05,
+      "signed_bias": -6.487642352680956e-07,
+      "strata": {
+        "unchanged-control": {
+          "episodes": 500,
+          "mae": 2.3180500212873335e-05,
+          "p95": 5.870558255612054e-05,
+          "replicas": 5,
+          "transitions": 50000
+        }
+      },
+      "worst_replica_mae": 2.380448185022142e-05
+    },
+    "frozen": {
+      "best_replica_mae": 5.96533537264271e-07,
+      "episode_balanced_mae": 8.291645426466877e-07,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 1.0057881680292091e-07,
+      "non_event_pooled_mae": 8.291645426466876e-07,
+      "p95": 3.8997269059009955e-06,
+      "p99": 1.4149733830525215e-05,
+      "pooled_transition_mae": 8.291645426466876e-07,
+      "post_change_cumulative_mean": 3.131829970463174e-05,
+      "post_change_window_mae": 6.263659940926346e-07,
+      "recovery_status_counts": {
+        "no_measured_shock": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 6.141028654380598e-07,
+        "1": 5.96533537264271e-07,
+        "2": 1.1716237359603754e-06,
+        "3": 9.935771477299183e-07,
+        "4": 7.699854268408135e-07
+      },
+      "replica_mae_mean": 8.291645426466876e-07,
+      "signed_bias": 3.857831833345982e-08,
+      "strata": {
+        "unchanged-control": {
+          "episodes": 500,
+          "mae": 8.291645426466876e-07,
+          "p95": 3.8997269059009955e-06,
+          "replicas": 5,
+          "transitions": 50000
+        }
+      },
+      "worst_replica_mae": 1.1716237359603754e-06
+    },
+    "online": {
+      "best_replica_mae": 5.489034083676014e-07,
+      "episode_balanced_mae": 7.757587544291655e-07,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 8.855941002750001e-08,
+      "non_event_pooled_mae": 7.757587544291655e-07,
+      "p95": 3.607563184140903e-06,
+      "p99": 1.3716105330852673e-05,
+      "pooled_transition_mae": 7.757587544291655e-07,
+      "post_change_cumulative_mean": 2.9580450974636796e-05,
+      "post_change_window_mae": 5.916090194927359e-07,
+      "recovery_status_counts": {
+        "no_measured_shock": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 5.732227280440149e-07,
+        "1": 5.489034083676014e-07,
+        "2": 1.1058069816167193e-06,
+        "3": 9.2469167113986e-07,
+        "4": 7.261689829776319e-07
+      },
+      "replica_mae_mean": 7.757587544291655e-07,
+      "signed_bias": 3.375446274012983e-08,
+      "strata": {
+        "unchanged-control": {
+          "episodes": 500,
+          "mae": 7.757587544291655e-07,
+          "p95": 3.607563184140903e-06,
+          "replicas": 5,
+          "transitions": 50000
+        }
+      },
+      "worst_replica_mae": 1.1058069816167193e-06
+    },
+    "persistence": {
+      "best_replica_mae": 0.0007163748060848643,
+      "episode_balanced_mae": 0.000759430757421572,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 0.000668252161503402,
+      "non_event_pooled_mae": 0.000759430757421572,
+      "p95": 0.0017326827261213479,
+      "p99": 0.0019597447518494454,
+      "pooled_transition_mae": 0.000759430757421572,
+      "post_change_cumulative_mean": 0.03134134122720891,
+      "post_change_window_mae": 0.0006268268245441782,
+      "recovery_status_counts": {
+        "no_measured_shock": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 0.0007743606812188417,
+        "1": 0.0007437217059959006,
+        "2": 0.0007823662169756237,
+        "3": 0.00078033037683263,
+        "4": 0.0007163748060848643
+      },
+      "replica_mae_mean": 0.000759430757421572,
+      "signed_bias": -2.225179233948025e-06,
+      "strata": {
+        "unchanged-control": {
+          "episodes": 500,
+          "mae": 0.000759430757421572,
+          "p95": 0.0017326827261213479,
+          "replicas": 5,
+          "transitions": 50000
+        }
+      },
+      "worst_replica_mae": 0.0007823662169756237
+    }
+  },
+  "replicas": 5,
+  "stratum_episodes": {
+    "unchanged-control": 500
+  },
+  "stratum_replicas": {
+    "unchanged-control": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  }
+}

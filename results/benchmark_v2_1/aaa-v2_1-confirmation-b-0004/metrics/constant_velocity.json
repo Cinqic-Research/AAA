@@ -1,0 +1,2103 @@
+{
+  "bounce_events": 0,
+  "bounce_transitions": 0,
+  "bounce_walls": {
+    "lower": 0,
+    "upper": 0
+  },
+  "branch": "main",
+  "episodes": 500,
+  "event_episodes": 0,
+  "family": "constant_velocity",
+  "no_event_episodes": 500,
+  "predictors": {
+    "candidate_frozen": {
+      "best_replica_mae": 3.1158554504359443e-11,
+      "episode_balanced_mae": 3.894523903763247e-11,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 3.924344182948403e-11,
+      "non_event_pooled_mae": 3.894523903763247e-11,
+      "p95": 6.445197153759351e-11,
+      "p99": 7.375599492265265e-11,
+      "pooled_transition_mae": 3.894523903763247e-11,
+      "post_change_cumulative_mean": null,
+      "post_change_window_mae": null,
+      "recovery_status_counts": {
+        "no_intervention": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 3.1158554504359443e-11,
+        "1": 4.115787794568799e-11,
+        "2": 3.950249046412934e-11,
+        "3": 3.693448873038397e-11,
+        "4": 4.59727835436016e-11
+      },
+      "replica_mae_mean": 3.894523903763247e-11,
+      "signed_bias": -4.552578526436976e-12,
+      "strata": {
+        "negative-position0-speed0": {
+          "episodes": 15,
+          "mae": 1.8613570169674393e-11,
+          "p95": 4.54509929692648e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed1": {
+          "episodes": 15,
+          "mae": 2.812799710992307e-11,
+          "p95": 5.441912059866993e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed2": {
+          "episodes": 15,
+          "mae": 3.7445851927853404e-11,
+          "p95": 6.922662443287209e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed3": {
+          "episodes": 15,
+          "mae": 4.5703798725448683e-11,
+          "p95": 7.92026437490545e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed0": {
+          "episodes": 15,
+          "mae": 2.2194170175356196e-11,
+          "p95": 4.2612458006630046e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed1": {
+          "episodes": 15,
+          "mae": 3.011148897792205e-11,
+          "p95": 5.5234217199995325e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed2": {
+          "episodes": 15,
+          "mae": 3.803975417943034e-11,
+          "p95": 6.103811067692533e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed3": {
+          "episodes": 15,
+          "mae": 4.7089001766933605e-11,
+          "p95": 7.614964214752717e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed0": {
+          "episodes": 15,
+          "mae": 2.4824224757884342e-11,
+          "p95": 4.480796844674728e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed1": {
+          "episodes": 15,
+          "mae": 3.3531394877934214e-11,
+          "p95": 5.252531742883093e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed2": {
+          "episodes": 15,
+          "mae": 4.201205359575664e-11,
+          "p95": 6.068594515795667e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed3": {
+          "episodes": 15,
+          "mae": 5.014193194786377e-11,
+          "p95": 7.602506402193399e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed0": {
+          "episodes": 15,
+          "mae": 2.5950183743592222e-11,
+          "p95": 3.9912051441604034e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed1": {
+          "episodes": 15,
+          "mae": 3.396139765806391e-11,
+          "p95": 4.973792488982553e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed2": {
+          "episodes": 15,
+          "mae": 4.365898813645302e-11,
+          "p95": 6.118275885924617e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed3": {
+          "episodes": 15,
+          "mae": 5.180520076983505e-11,
+          "p95": 6.878225766726587e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position0-speed0": {
+          "episodes": 16,
+          "mae": 3.2039559373642224e-11,
+          "p95": 4.7132808767003096e-11,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position0-speed1": {
+          "episodes": 17,
+          "mae": 4.1558696402069916e-11,
+          "p95": 5.430481619939087e-11,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position0-speed2": {
+          "episodes": 18,
+          "mae": 4.929345782907175e-11,
+          "p95": 6.010563574632144e-11,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position0-speed3": {
+          "episodes": 19,
+          "mae": 5.800936359211928e-11,
+          "p95": 7.005283020333763e-11,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed0": {
+          "episodes": 19,
+          "mae": 3.0074050014975935e-11,
+          "p95": 4.196268332812281e-11,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed1": {
+          "episodes": 18,
+          "mae": 3.932895334060263e-11,
+          "p95": 5.061255581306767e-11,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position1-speed2": {
+          "episodes": 17,
+          "mae": 4.581733358723655e-11,
+          "p95": 5.743988618078788e-11,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position1-speed3": {
+          "episodes": 16,
+          "mae": 5.4956954809021035e-11,
+          "p95": 6.52942200307649e-11,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position2-speed0": {
+          "episodes": 15,
+          "mae": 2.7658764768002155e-11,
+          "p95": 3.892836053509541e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed1": {
+          "episodes": 15,
+          "mae": 3.569383207420814e-11,
+          "p95": 4.788281993128862e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed2": {
+          "episodes": 15,
+          "mae": 4.499107032875206e-11,
+          "p95": 5.647535772368428e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed3": {
+          "episodes": 15,
+          "mae": 5.301428805458207e-11,
+          "p95": 6.441136513046786e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed0": {
+          "episodes": 15,
+          "mae": 2.5867458125444725e-11,
+          "p95": 3.9073699831249084e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed1": {
+          "episodes": 15,
+          "mae": 3.4353303785234183e-11,
+          "p95": 4.679397980211775e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed2": {
+          "episodes": 15,
+          "mae": 4.257859690451963e-11,
+          "p95": 5.7651694529425866e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed3": {
+          "episodes": 15,
+          "mae": 5.1064645605096475e-11,
+          "p95": 6.404419217176383e-11,
+          "replicas": 5,
+          "transitions": 555
+        }
+      },
+      "worst_replica_mae": 4.59727835436016e-11
+    },
+    "candidate_no_reflect": {
+      "best_replica_mae": 3.1158554504359443e-11,
+      "episode_balanced_mae": 3.894523903763247e-11,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 3.924344182948403e-11,
+      "non_event_pooled_mae": 3.894523903763247e-11,
+      "p95": 6.445197153759351e-11,
+      "p99": 7.375599492265265e-11,
+      "pooled_transition_mae": 3.894523903763247e-11,
+      "post_change_cumulative_mean": null,
+      "post_change_window_mae": null,
+      "recovery_status_counts": {
+        "no_intervention": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 3.1158554504359443e-11,
+        "1": 4.115787794568799e-11,
+        "2": 3.950249046412934e-11,
+        "3": 3.693448873038397e-11,
+        "4": 4.59727835436016e-11
+      },
+      "replica_mae_mean": 3.894523903763247e-11,
+      "signed_bias": -4.552578526436976e-12,
+      "strata": {
+        "negative-position0-speed0": {
+          "episodes": 15,
+          "mae": 1.8613570169674393e-11,
+          "p95": 4.54509929692648e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed1": {
+          "episodes": 15,
+          "mae": 2.812799710992307e-11,
+          "p95": 5.441912059866993e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed2": {
+          "episodes": 15,
+          "mae": 3.7445851927853404e-11,
+          "p95": 6.922662443287209e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed3": {
+          "episodes": 15,
+          "mae": 4.5703798725448683e-11,
+          "p95": 7.92026437490545e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed0": {
+          "episodes": 15,
+          "mae": 2.2194170175356196e-11,
+          "p95": 4.2612458006630046e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed1": {
+          "episodes": 15,
+          "mae": 3.011148897792205e-11,
+          "p95": 5.5234217199995325e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed2": {
+          "episodes": 15,
+          "mae": 3.803975417943034e-11,
+          "p95": 6.103811067692533e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed3": {
+          "episodes": 15,
+          "mae": 4.7089001766933605e-11,
+          "p95": 7.614964214752717e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed0": {
+          "episodes": 15,
+          "mae": 2.4824224757884342e-11,
+          "p95": 4.480796844674728e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed1": {
+          "episodes": 15,
+          "mae": 3.3531394877934214e-11,
+          "p95": 5.252531742883093e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed2": {
+          "episodes": 15,
+          "mae": 4.201205359575664e-11,
+          "p95": 6.068594515795667e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed3": {
+          "episodes": 15,
+          "mae": 5.014193194786377e-11,
+          "p95": 7.602506402193399e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed0": {
+          "episodes": 15,
+          "mae": 2.5950183743592222e-11,
+          "p95": 3.9912051441604034e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed1": {
+          "episodes": 15,
+          "mae": 3.396139765806391e-11,
+          "p95": 4.973792488982553e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed2": {
+          "episodes": 15,
+          "mae": 4.365898813645302e-11,
+          "p95": 6.118275885924617e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed3": {
+          "episodes": 15,
+          "mae": 5.180520076983505e-11,
+          "p95": 6.878225766726587e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position0-speed0": {
+          "episodes": 16,
+          "mae": 3.2039559373642224e-11,
+          "p95": 4.7132808767003096e-11,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position0-speed1": {
+          "episodes": 17,
+          "mae": 4.1558696402069916e-11,
+          "p95": 5.430481619939087e-11,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position0-speed2": {
+          "episodes": 18,
+          "mae": 4.929345782907175e-11,
+          "p95": 6.010563574632144e-11,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position0-speed3": {
+          "episodes": 19,
+          "mae": 5.800936359211928e-11,
+          "p95": 7.005283020333763e-11,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed0": {
+          "episodes": 19,
+          "mae": 3.0074050014975935e-11,
+          "p95": 4.196268332812281e-11,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed1": {
+          "episodes": 18,
+          "mae": 3.932895334060263e-11,
+          "p95": 5.061255581306767e-11,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position1-speed2": {
+          "episodes": 17,
+          "mae": 4.581733358723655e-11,
+          "p95": 5.743988618078788e-11,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position1-speed3": {
+          "episodes": 16,
+          "mae": 5.4956954809021035e-11,
+          "p95": 6.52942200307649e-11,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position2-speed0": {
+          "episodes": 15,
+          "mae": 2.7658764768002155e-11,
+          "p95": 3.892836053509541e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed1": {
+          "episodes": 15,
+          "mae": 3.569383207420814e-11,
+          "p95": 4.788281993128862e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed2": {
+          "episodes": 15,
+          "mae": 4.499107032875206e-11,
+          "p95": 5.647535772368428e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed3": {
+          "episodes": 15,
+          "mae": 5.301428805458207e-11,
+          "p95": 6.441136513046786e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed0": {
+          "episodes": 15,
+          "mae": 2.5867458125444725e-11,
+          "p95": 3.9073699831249084e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed1": {
+          "episodes": 15,
+          "mae": 3.4353303785234183e-11,
+          "p95": 4.679397980211775e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed2": {
+          "episodes": 15,
+          "mae": 4.257859690451963e-11,
+          "p95": 5.7651694529425866e-11,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed3": {
+          "episodes": 15,
+          "mae": 5.1064645605096475e-11,
+          "p95": 6.404419217176383e-11,
+          "replicas": 5,
+          "transitions": 555
+        }
+      },
+      "worst_replica_mae": 4.59727835436016e-11
+    },
+    "constant_motion": {
+      "best_replica_mae": 1.8519345216509158e-19,
+      "episode_balanced_mae": 2.5251947680029957e-19,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 0.0,
+      "non_event_pooled_mae": 2.525194768002995e-19,
+      "p95": 0.0,
+      "p99": 0.0,
+      "pooled_transition_mae": 2.525194768002995e-19,
+      "post_change_cumulative_mean": null,
+      "post_change_window_mae": null,
+      "recovery_status_counts": {
+        "no_intervention": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 3.206894209643611e-19,
+        "1": 2.250452076942885e-19,
+        "2": 1.8519345216509158e-19,
+        "3": 2.672411841369676e-19,
+        "4": 2.6442811904078897e-19
+      },
+      "replica_mae_mean": 2.525194768002995e-19,
+      "signed_bias": 3.8726529490725477e-20,
+      "strata": {
+        "negative-position0-speed0": {
+          "episodes": 15,
+          "mae": 1.1877385961643003e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed1": {
+          "episodes": 15,
+          "mae": 2.5005023077143166e-20,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed2": {
+          "episodes": 15,
+          "mae": 1.6565827788607346e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed3": {
+          "episodes": 15,
+          "mae": 2.0629144038643113e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed0": {
+          "episodes": 15,
+          "mae": 5.001004615428633e-20,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed1": {
+          "episodes": 15,
+          "mae": 1.0002009230857266e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed2": {
+          "episodes": 15,
+          "mae": 2.5005023077143165e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed3": {
+          "episodes": 15,
+          "mae": 5.001004615428633e-20,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed0": {
+          "episodes": 15,
+          "mae": 3.00060276925718e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed1": {
+          "episodes": 15,
+          "mae": 5.001004615428633e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed2": {
+          "episodes": 15,
+          "mae": 7.001406461600086e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed3": {
+          "episodes": 15,
+          "mae": 5.001004615428633e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position0-speed0": {
+          "episodes": 16,
+          "mae": 1.8753767307857375e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position0-speed1": {
+          "episodes": 17,
+          "mae": 5.29518135751267e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position0-speed2": {
+          "episodes": 18,
+          "mae": 4.1675038461905275e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position0-speed3": {
+          "episodes": 19,
+          "mae": 4.342977692345918e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed0": {
+          "episodes": 19,
+          "mae": 7.896323076992579e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed1": {
+          "episodes": 18,
+          "mae": 1.1669010769333478e-18,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position1-speed2": {
+          "episodes": 17,
+          "mae": 3.530120905008447e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position1-speed3": {
+          "episodes": 16,
+          "mae": 7.50150692314295e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position2-speed0": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed1": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed2": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed3": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        }
+      },
+      "worst_replica_mae": 3.206894209643611e-19
+    },
+    "constant_motion_reflected": {
+      "best_replica_mae": 1.8519345216509158e-19,
+      "episode_balanced_mae": 2.5251947680029957e-19,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 0.0,
+      "non_event_pooled_mae": 2.525194768002995e-19,
+      "p95": 0.0,
+      "p99": 0.0,
+      "pooled_transition_mae": 2.525194768002995e-19,
+      "post_change_cumulative_mean": null,
+      "post_change_window_mae": null,
+      "recovery_status_counts": {
+        "no_intervention": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 3.206894209643611e-19,
+        "1": 2.250452076942885e-19,
+        "2": 1.8519345216509158e-19,
+        "3": 2.672411841369676e-19,
+        "4": 2.6442811904078897e-19
+      },
+      "replica_mae_mean": 2.525194768002995e-19,
+      "signed_bias": 3.8726529490725477e-20,
+      "strata": {
+        "negative-position0-speed0": {
+          "episodes": 15,
+          "mae": 1.1877385961643003e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed1": {
+          "episodes": 15,
+          "mae": 2.5005023077143166e-20,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed2": {
+          "episodes": 15,
+          "mae": 1.6565827788607346e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed3": {
+          "episodes": 15,
+          "mae": 2.0629144038643113e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed0": {
+          "episodes": 15,
+          "mae": 5.001004615428633e-20,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed1": {
+          "episodes": 15,
+          "mae": 1.0002009230857266e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed2": {
+          "episodes": 15,
+          "mae": 2.5005023077143165e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed3": {
+          "episodes": 15,
+          "mae": 5.001004615428633e-20,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed0": {
+          "episodes": 15,
+          "mae": 3.00060276925718e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed1": {
+          "episodes": 15,
+          "mae": 5.001004615428633e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed2": {
+          "episodes": 15,
+          "mae": 7.001406461600086e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed3": {
+          "episodes": 15,
+          "mae": 5.001004615428633e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position0-speed0": {
+          "episodes": 16,
+          "mae": 1.8753767307857375e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position0-speed1": {
+          "episodes": 17,
+          "mae": 5.29518135751267e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position0-speed2": {
+          "episodes": 18,
+          "mae": 4.1675038461905275e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position0-speed3": {
+          "episodes": 19,
+          "mae": 4.342977692345918e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed0": {
+          "episodes": 19,
+          "mae": 7.896323076992579e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed1": {
+          "episodes": 18,
+          "mae": 1.1669010769333478e-18,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position1-speed2": {
+          "episodes": 17,
+          "mae": 3.530120905008447e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position1-speed3": {
+          "episodes": 16,
+          "mae": 7.50150692314295e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position2-speed0": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed1": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed2": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed3": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.0,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 555
+        }
+      },
+      "worst_replica_mae": 3.206894209643611e-19
+    },
+    "legacy_linear_sgd": {
+      "best_replica_mae": 0.003369842781411268,
+      "episode_balanced_mae": 0.004434498924491303,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 0.004203645269878098,
+      "non_event_pooled_mae": 0.004434498924491304,
+      "p95": 0.009736282778980133,
+      "p99": 0.01148761927317596,
+      "pooled_transition_mae": 0.004434498924491304,
+      "post_change_cumulative_mean": null,
+      "post_change_window_mae": null,
+      "recovery_status_counts": {
+        "no_intervention": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 0.004684852273948727,
+        "1": 0.004004397924066693,
+        "2": 0.005967834706749304,
+        "3": 0.003369842781411268,
+        "4": 0.004145566936280525
+      },
+      "replica_mae_mean": 0.004434498924491303,
+      "signed_bias": 0.001624140539171771,
+      "strata": {
+        "negative-position0-speed0": {
+          "episodes": 15,
+          "mae": 0.005995560043191715,
+          "p95": 0.008918781112264212,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed1": {
+          "episodes": 15,
+          "mae": 0.006194168228701451,
+          "p95": 0.008999500123552287,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed2": {
+          "episodes": 15,
+          "mae": 0.006927945498588038,
+          "p95": 0.010392551625716761,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed3": {
+          "episodes": 15,
+          "mae": 0.0072989669191775115,
+          "p95": 0.010724182868726473,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed0": {
+          "episodes": 15,
+          "mae": 0.005342019166816742,
+          "p95": 0.007371301626896204,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed1": {
+          "episodes": 15,
+          "mae": 0.006047169917498384,
+          "p95": 0.00809827586883332,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed2": {
+          "episodes": 15,
+          "mae": 0.006407655184274293,
+          "p95": 0.009074019552059992,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed3": {
+          "episodes": 15,
+          "mae": 0.006574523257062117,
+          "p95": 0.009636676775577526,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed0": {
+          "episodes": 15,
+          "mae": 0.0049697670249666485,
+          "p95": 0.006751783719344522,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed1": {
+          "episodes": 15,
+          "mae": 0.005455153051305878,
+          "p95": 0.006940299792123472,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed2": {
+          "episodes": 15,
+          "mae": 0.005896234151306869,
+          "p95": 0.0076239813995171435,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed3": {
+          "episodes": 15,
+          "mae": 0.006246428651072915,
+          "p95": 0.008254727818501196,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.004606400204099968,
+          "p95": 0.006831348952377036,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.004941194315253796,
+          "p95": 0.006444989855205807,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0051508988736256416,
+          "p95": 0.007156405266223664,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.0056295486490618085,
+          "p95": 0.007542062778444092,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position0-speed0": {
+          "episodes": 16,
+          "mae": 0.0036529102320207963,
+          "p95": 0.005955807258904518,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position0-speed1": {
+          "episodes": 17,
+          "mae": 0.003080821825452115,
+          "p95": 0.00632959234861753,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position0-speed2": {
+          "episodes": 18,
+          "mae": 0.002978558794112625,
+          "p95": 0.007721356471069196,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position0-speed3": {
+          "episodes": 19,
+          "mae": 0.0027059181249598236,
+          "p95": 0.008461789094110694,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed0": {
+          "episodes": 19,
+          "mae": 0.003279404078083754,
+          "p95": 0.007910108098544477,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed1": {
+          "episodes": 18,
+          "mae": 0.0027737390813681886,
+          "p95": 0.008491982533815348,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position1-speed2": {
+          "episodes": 17,
+          "mae": 0.0023634778196351615,
+          "p95": 0.009212581216209381,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position1-speed3": {
+          "episodes": 16,
+          "mae": 0.002499322392255392,
+          "p95": 0.009733498097934829,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position2-speed0": {
+          "episodes": 15,
+          "mae": 0.0030926241564945968,
+          "p95": 0.00929542867257106,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed1": {
+          "episodes": 15,
+          "mae": 0.003196847507764258,
+          "p95": 0.00968132031878046,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed2": {
+          "episodes": 15,
+          "mae": 0.0029098545371757933,
+          "p95": 0.009937291226491484,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed3": {
+          "episodes": 15,
+          "mae": 0.0030698399452844627,
+          "p95": 0.010702135887350849,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0035947511467475683,
+          "p95": 0.010553550570902048,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.0035078862706009913,
+          "p95": 0.01151870814646464,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0036586577944442695,
+          "p95": 0.011792326511934391,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.0038857830171020475,
+          "p95": 0.012158718667371504,
+          "replicas": 5,
+          "transitions": 555
+        }
+      },
+      "worst_replica_mae": 0.005967834706749304
+    },
+    "persistence": {
+      "best_replica_mae": 0.00277133076866512,
+      "episode_balanced_mae": 0.002796823122267116,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 0.0028027133900041246,
+      "non_event_pooled_mae": 0.0027968231222671165,
+      "p95": 0.0038795174415663545,
+      "p99": 0.003951338238623043,
+      "pooled_transition_mae": 0.0027968231222671165,
+      "post_change_cumulative_mean": null,
+      "post_change_window_mae": null,
+      "recovery_status_counts": {
+        "no_intervention": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 0.002789142049111074,
+        "1": 0.0028158815593814376,
+        "2": 0.0028076051086609395,
+        "3": 0.0028001561255170102,
+        "4": 0.00277133076866512
+      },
+      "replica_mae_mean": 0.002796823122267116,
+      "signed_bias": -0.00010583300591738273,
+      "strata": {
+        "negative-position0-speed0": {
+          "episodes": 15,
+          "mae": 0.0018615134205973874,
+          "p95": 0.002130909003829576,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed1": {
+          "episodes": 15,
+          "mae": 0.0024596285139541953,
+          "p95": 0.002752712165183524,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed2": {
+          "episodes": 15,
+          "mae": 0.00315592919994351,
+          "p95": 0.0033402640182199905,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed3": {
+          "episodes": 15,
+          "mae": 0.0037584389849740583,
+          "p95": 0.003969935866522306,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed0": {
+          "episodes": 15,
+          "mae": 0.0019047258080582908,
+          "p95": 0.002124010841090762,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed1": {
+          "episodes": 15,
+          "mae": 0.0024387838396812537,
+          "p95": 0.0027255814817127577,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed2": {
+          "episodes": 15,
+          "mae": 0.003070101176087414,
+          "p95": 0.0033363074284842864,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed3": {
+          "episodes": 15,
+          "mae": 0.0037070510740819934,
+          "p95": 0.003956053111272173,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed0": {
+          "episodes": 15,
+          "mae": 0.0019603440799207013,
+          "p95": 0.002168299184830913,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed1": {
+          "episodes": 15,
+          "mae": 0.002561184151874304,
+          "p95": 0.0027596632307560487,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed2": {
+          "episodes": 15,
+          "mae": 0.003149275375043854,
+          "p95": 0.003363333397969792,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed3": {
+          "episodes": 15,
+          "mae": 0.0036993838971739936,
+          "p95": 0.003956337671875032,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0018760369244590566,
+          "p95": 0.0020158365311225834,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.002435329825351359,
+          "p95": 0.002736319852614799,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0031040981631576055,
+          "p95": 0.0033647172130036873,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.0037080108381365804,
+          "p95": 0.0039629772538216645,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position0-speed0": {
+          "episodes": 16,
+          "mae": 0.0018902314641249627,
+          "p95": 0.0021533619445072705,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position0-speed1": {
+          "episodes": 17,
+          "mae": 0.002543942986262923,
+          "p95": 0.00274372986976934,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position0-speed2": {
+          "episodes": 18,
+          "mae": 0.003097020429133222,
+          "p95": 0.003353171165210056,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position0-speed3": {
+          "episodes": 19,
+          "mae": 0.003678791206695949,
+          "p95": 0.003935191360795454,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed0": {
+          "episodes": 19,
+          "mae": 0.0018301122912099143,
+          "p95": 0.0021383913628062468,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed1": {
+          "episodes": 18,
+          "mae": 0.0025163120911211225,
+          "p95": 0.002762671687427054,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position1-speed2": {
+          "episodes": 17,
+          "mae": 0.0030474315153850014,
+          "p95": 0.0033173562704649218,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position1-speed3": {
+          "episodes": 16,
+          "mae": 0.003705688339106059,
+          "p95": 0.00393685758539275,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position2-speed0": {
+          "episodes": 15,
+          "mae": 0.0018875191671566297,
+          "p95": 0.002155142830893908,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed1": {
+          "episodes": 15,
+          "mae": 0.0024504658458262664,
+          "p95": 0.002719851355776015,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed2": {
+          "episodes": 15,
+          "mae": 0.003106659085198819,
+          "p95": 0.0033591157579054842,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed3": {
+          "episodes": 15,
+          "mae": 0.0036948627824953785,
+          "p95": 0.003919869378443019,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0018967453150264303,
+          "p95": 0.0021598022460102007,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.0025041094380514974,
+          "p95": 0.0027487465736536487,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0031129703003255865,
+          "p95": 0.0033487346444441846,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.003704454522027663,
+          "p95": 0.0039681872892859404,
+          "replicas": 5,
+          "transitions": 555
+        }
+      },
+      "worst_replica_mae": 0.0028158815593814376
+    },
+    "zero_control": {
+      "best_replica_mae": 0.00277133076866512,
+      "episode_balanced_mae": 0.002796823122267116,
+      "event_episode_balanced_mae": null,
+      "event_p95": null,
+      "event_p99": null,
+      "event_pooled_mae": null,
+      "median": 0.0028027133900041246,
+      "non_event_pooled_mae": 0.0027968231222671165,
+      "p95": 0.0038795174415663545,
+      "p99": 0.003951338238623043,
+      "pooled_transition_mae": 0.0027968231222671165,
+      "post_change_cumulative_mean": null,
+      "post_change_window_mae": null,
+      "recovery_status_counts": {
+        "no_intervention": 500
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 0.002789142049111074,
+        "1": 0.0028158815593814376,
+        "2": 0.0028076051086609395,
+        "3": 0.0028001561255170102,
+        "4": 0.00277133076866512
+      },
+      "replica_mae_mean": 0.002796823122267116,
+      "signed_bias": -0.00010583300591738273,
+      "strata": {
+        "negative-position0-speed0": {
+          "episodes": 15,
+          "mae": 0.0018615134205973874,
+          "p95": 0.002130909003829576,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed1": {
+          "episodes": 15,
+          "mae": 0.0024596285139541953,
+          "p95": 0.002752712165183524,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed2": {
+          "episodes": 15,
+          "mae": 0.00315592919994351,
+          "p95": 0.0033402640182199905,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position0-speed3": {
+          "episodes": 15,
+          "mae": 0.0037584389849740583,
+          "p95": 0.003969935866522306,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed0": {
+          "episodes": 15,
+          "mae": 0.0019047258080582908,
+          "p95": 0.002124010841090762,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed1": {
+          "episodes": 15,
+          "mae": 0.0024387838396812537,
+          "p95": 0.0027255814817127577,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed2": {
+          "episodes": 15,
+          "mae": 0.003070101176087414,
+          "p95": 0.0033363074284842864,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position1-speed3": {
+          "episodes": 15,
+          "mae": 0.0037070510740819934,
+          "p95": 0.003956053111272173,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed0": {
+          "episodes": 15,
+          "mae": 0.0019603440799207013,
+          "p95": 0.002168299184830913,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed1": {
+          "episodes": 15,
+          "mae": 0.002561184151874304,
+          "p95": 0.0027596632307560487,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed2": {
+          "episodes": 15,
+          "mae": 0.003149275375043854,
+          "p95": 0.003363333397969792,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position2-speed3": {
+          "episodes": 15,
+          "mae": 0.0036993838971739936,
+          "p95": 0.003956337671875032,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0018760369244590566,
+          "p95": 0.0020158365311225834,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.002435329825351359,
+          "p95": 0.002736319852614799,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0031040981631576055,
+          "p95": 0.0033647172130036873,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "negative-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.0037080108381365804,
+          "p95": 0.0039629772538216645,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position0-speed0": {
+          "episodes": 16,
+          "mae": 0.0018902314641249627,
+          "p95": 0.0021533619445072705,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position0-speed1": {
+          "episodes": 17,
+          "mae": 0.002543942986262923,
+          "p95": 0.00274372986976934,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position0-speed2": {
+          "episodes": 18,
+          "mae": 0.003097020429133222,
+          "p95": 0.003353171165210056,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position0-speed3": {
+          "episodes": 19,
+          "mae": 0.003678791206695949,
+          "p95": 0.003935191360795454,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed0": {
+          "episodes": 19,
+          "mae": 0.0018301122912099143,
+          "p95": 0.0021383913628062468,
+          "replicas": 5,
+          "transitions": 703
+        },
+        "positive-position1-speed1": {
+          "episodes": 18,
+          "mae": 0.0025163120911211225,
+          "p95": 0.002762671687427054,
+          "replicas": 5,
+          "transitions": 666
+        },
+        "positive-position1-speed2": {
+          "episodes": 17,
+          "mae": 0.0030474315153850014,
+          "p95": 0.0033173562704649218,
+          "replicas": 5,
+          "transitions": 629
+        },
+        "positive-position1-speed3": {
+          "episodes": 16,
+          "mae": 0.003705688339106059,
+          "p95": 0.00393685758539275,
+          "replicas": 5,
+          "transitions": 592
+        },
+        "positive-position2-speed0": {
+          "episodes": 15,
+          "mae": 0.0018875191671566297,
+          "p95": 0.002155142830893908,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed1": {
+          "episodes": 15,
+          "mae": 0.0024504658458262664,
+          "p95": 0.002719851355776015,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed2": {
+          "episodes": 15,
+          "mae": 0.003106659085198819,
+          "p95": 0.0033591157579054842,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position2-speed3": {
+          "episodes": 15,
+          "mae": 0.0036948627824953785,
+          "p95": 0.003919869378443019,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed0": {
+          "episodes": 15,
+          "mae": 0.0018967453150264303,
+          "p95": 0.0021598022460102007,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed1": {
+          "episodes": 15,
+          "mae": 0.0025041094380514974,
+          "p95": 0.0027487465736536487,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed2": {
+          "episodes": 15,
+          "mae": 0.0031129703003255865,
+          "p95": 0.0033487346444441846,
+          "replicas": 5,
+          "transitions": 555
+        },
+        "positive-position3-speed3": {
+          "episodes": 15,
+          "mae": 0.003704454522027663,
+          "p95": 0.0039681872892859404,
+          "replicas": 5,
+          "transitions": 555
+        }
+      },
+      "worst_replica_mae": 0.0028158815593814376
+    }
+  },
+  "replicas": 5,
+  "stratum_episodes": {
+    "negative-position0-speed0": 15,
+    "negative-position0-speed1": 15,
+    "negative-position0-speed2": 15,
+    "negative-position0-speed3": 15,
+    "negative-position1-speed0": 15,
+    "negative-position1-speed1": 15,
+    "negative-position1-speed2": 15,
+    "negative-position1-speed3": 15,
+    "negative-position2-speed0": 15,
+    "negative-position2-speed1": 15,
+    "negative-position2-speed2": 15,
+    "negative-position2-speed3": 15,
+    "negative-position3-speed0": 15,
+    "negative-position3-speed1": 15,
+    "negative-position3-speed2": 15,
+    "negative-position3-speed3": 15,
+    "positive-position0-speed0": 16,
+    "positive-position0-speed1": 17,
+    "positive-position0-speed2": 18,
+    "positive-position0-speed3": 19,
+    "positive-position1-speed0": 19,
+    "positive-position1-speed1": 18,
+    "positive-position1-speed2": 17,
+    "positive-position1-speed3": 16,
+    "positive-position2-speed0": 15,
+    "positive-position2-speed1": 15,
+    "positive-position2-speed2": 15,
+    "positive-position2-speed3": 15,
+    "positive-position3-speed0": 15,
+    "positive-position3-speed1": 15,
+    "positive-position3-speed2": 15,
+    "positive-position3-speed3": 15
+  },
+  "stratum_replicas": {
+    "negative-position0-speed0": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position0-speed1": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position0-speed2": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position0-speed3": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position1-speed0": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position1-speed1": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position1-speed2": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position1-speed3": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position2-speed0": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position2-speed1": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position2-speed2": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position2-speed3": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position3-speed0": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position3-speed1": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position3-speed2": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "negative-position3-speed3": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position0-speed0": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position0-speed1": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position0-speed2": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position0-speed3": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position1-speed0": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position1-speed1": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position1-speed2": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position1-speed3": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position2-speed0": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position2-speed1": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position2-speed2": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position2-speed3": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position3-speed0": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position3-speed1": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position3-speed2": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "positive-position3-speed3": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  }
+}
