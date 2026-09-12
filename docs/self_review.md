@@ -1,9 +1,9 @@
 # Opus self-review — not independent approval
 
 This is a record of what was checked and what it found. It is **not** an
-approval decision and must not be read as one. GPT-6 Astra is the designated
-independent reviewer and is the only reviewer authorized to issue APPROVED or
-DECLINED.
+approval decision and must not be read as one. GPT-5.6 Sol is the current
+designated independent reviewer and remediation owner; Sol's separate verdict
+belongs in `sol_review.md` after the final evidence qualifies.
 
 The review was carried out by re-reading the whole repository rather than only
 the diff, and by trying to break the repaired system rather than confirming it.
@@ -131,4 +131,4 @@ naming:
 ## Verification performed
 
 The full list of commands and their outcomes is in
-[`handoff_astra.md`](handoff_astra.md).
+[`handoff_sol.md`](handoff_sol.md).

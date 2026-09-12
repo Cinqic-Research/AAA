@@ -62,5 +62,13 @@ generalization of one selected model set rather than sensitivity to training
 randomness. B's source commit differs from A's only by A's committed evidence;
 no code, specification or checkpoint changed between them.
 
-See [`docs/handoff_astra.md`](../../docs/handoff_astra.md) for the full
+See [`docs/handoff_sol.md`](../../docs/handoff_sol.md) for the full
 cross-attempt table and the interpretation.
+
+## Archive limitation reproduced during Sol review
+
+The four historical checksum manifests name raw, metric, registry, plot and
+verification files that are not committed. Consequently, a clean clone cannot
+verify those manifests: missing bytes are reported, as they should be. The
+tables above accurately summarize the retained JSON, but they are not described
+as fresh byte-integrity or clean-clone recomputation evidence. See `AAA-124`.

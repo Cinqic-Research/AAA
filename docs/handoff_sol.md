@@ -1,12 +1,12 @@
 # Engineering handoff for independent review
 
-**Status: Opus engineering complete. Awaiting independent Astra review.**
+**Status: Prepared for GPT-5.6 Sol independent review and remediation.**
 **This document does not grant approval.**
 
 Every status below is a measured engineering outcome. None of it is an
-approval decision, and none of it should be read as one. GPT-6 Astra is the
-designated independent reviewer and is the only reviewer authorized to issue
-an APPROVED or DECLINED decision.
+approval decision, and none of it should be read as one. GPT-5.6 Sol is the
+current designated independent reviewer and remediation owner. Sol's verdict
+is recorded separately in `sol_review.md` only after the final evidence qualifies.
 
 ## 1. Identity
 
@@ -14,9 +14,10 @@ an APPROVED or DECLINED decision.
 |---|---|
 | starting `main` | `235ce28518ca4ec3a9a240066154090a33b33470` |
 | engineering branch | `opus/aaa-complete-engineering-repair` |
-| merge commit on `main` | `7c11639656267787045c2a849ff51426bba9a4d7` |
-| tag | `opus-independent-engineering-complete-awaiting-astra-review` |
-| tag target | `61bd516ee475b8f21f56235875faf47ebda363f9` |
+| merge commit on `main` | `03923083ed1619cde01816922e6c9968031d59ba` |
+| review baseline | `03923083ed1619cde01816922e6c9968031d59ba` |
+| historical handoff tag | `opus-independent-engineering-complete-awaiting-astra-review` (provenance only) |
+| historical tag target | `03923083ed1619cde01816922e6c9968031d59ba` |
 | protocol | `aaa.benchmark.v2.1` |
 | specification hash | `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
 | dependency lock hash | `6370808d7f23a04fce4f86b136210e1669063d6ef8113509381eec6655730ec3` |
@@ -278,7 +279,7 @@ Samples 2,000, warm-up 200 excluded, failures 0, on the selected candidate itsel
 
 ```bash
 git clone https://github.com/Cinqic/AAA.git && cd AAA
-git checkout opus-independent-engineering-complete-awaiting-astra-review
+git checkout 03923083ed1619cde01816922e6c9968031d59ba
 python3 -m venv .venv && . .venv/bin/activate
 python -m pip install -r requirements-lock.txt
 python -m pip install -e . --no-deps
@@ -317,7 +318,6 @@ any stored gate status fails to reproduce.
 | golden seed fixture | `benchmarks/golden_seeds.json` |
 | canonical specification | `aaa/benchmark/data/benchmark_v2_1.json` |
 | pre-repair defect reproduction | `docs/evidence/pre_repair_probes.json` |
-| learner diagnosis | `docs/evidence/diagnosis/` |
 | candidate selection | `docs/evidence/candidate_selection.json` |
 | issue ledger | `docs/issue_ledger.md` |
 | errata | `docs/errata.md` |
@@ -344,5 +344,5 @@ what was found, not as a verdict.
 
 ---
 
-**Opus independent engineering complete. Awaiting Astra independent review.**
-**No independent approval decision has been made.**
+**Prepared for GPT-5.6 Sol independent review and remediation.**
+**The handoff itself is not an approval decision.**

@@ -139,7 +139,8 @@ class BatchRegistryTests(unittest.TestCase):
 
     def test_a_consumed_batch_cannot_be_reused_as_a_fresh_confirmation(self):
         self.registry.declare("b1", "confirmation_a", self.spec_hash)
-        self.registry.claim("b1", "confirmation_a", self.spec_hash)
+        self.registry.save()
+        self.registry.reserve("b1", "confirmation_a", self.spec_hash, run_id="run-1")
         self.registry.record_outcome("b1", "run-1", passed=True)
         with self.assertRaises(BatchRegistryError) as caught:
             self.registry.claim("b1", "confirmation_a", self.spec_hash)
@@ -147,7 +148,8 @@ class BatchRegistryTests(unittest.TestCase):
 
     def test_a_consumed_batch_may_be_rerun_in_explicit_reproduction_mode(self):
         self.registry.declare("b1", "confirmation_a", self.spec_hash)
-        self.registry.claim("b1", "confirmation_a", self.spec_hash)
+        self.registry.save()
+        self.registry.reserve("b1", "confirmation_a", self.spec_hash, run_id="run-1")
         self.registry.record_outcome("b1", "run-1", passed=True)
         again = self.registry.claim("b1", "confirmation_a", self.spec_hash, reproduction=True)
         self.assertEqual(again.batch_id, "b1")
@@ -159,7 +161,8 @@ class BatchRegistryTests(unittest.TestCase):
 
     def test_a_failed_batch_is_retired_and_never_reusable(self):
         self.registry.declare("b1", "confirmation_a", self.spec_hash)
-        self.registry.claim("b1", "confirmation_a", self.spec_hash)
+        self.registry.save()
+        self.registry.reserve("b1", "confirmation_a", self.spec_hash, run_id="run-1")
         batch = self.registry.record_outcome("b1", "run-1", passed=False)
         self.assertEqual(batch.status, "retired")
         self.assertEqual(batch.outcome, "required_gate_failure")
@@ -168,12 +171,30 @@ class BatchRegistryTests(unittest.TestCase):
 
     def test_a_failed_batch_stays_recorded_rather_than_disappearing(self):
         self.registry.declare("b1", "confirmation_a", self.spec_hash)
-        self.registry.claim("b1", "confirmation_a", self.spec_hash)
+        self.registry.save()
+        self.registry.reserve("b1", "confirmation_a", self.spec_hash, run_id="run-1")
         self.registry.record_outcome("b1", "run-1", passed=False)
         self.registry.save()
         reloaded = ConfirmationBatchRegistry.load(self.path)
         self.assertEqual(reloaded.get("b1").status, "retired")
         self.assertEqual(reloaded.get("b1").consumed_by, ["run-1"])
+
+    def test_stale_registry_instances_cannot_both_reserve_one_batch(self):
+        self.registry.declare("b1", "confirmation_a", self.spec_hash)
+        self.registry.save()
+        stale = ConfirmationBatchRegistry.load(self.path)
+        self.registry.reserve("b1", "confirmation_a", self.spec_hash, run_id="first")
+        with self.assertRaises(BatchRegistryError):
+            stale.reserve("b1", "confirmation_a", self.spec_hash, run_id="second")
+
+    def test_matching_interrupted_claim_can_resume_but_not_restart_fresh(self):
+        self.registry.declare("b1", "confirmation_a", self.spec_hash)
+        self.registry.save()
+        self.registry.reserve("b1", "confirmation_a", self.spec_hash, run_id="run-1")
+        resumed = self.registry.reserve("b1", "confirmation_a", self.spec_hash, run_id="run-1", resume=True)
+        self.assertEqual(resumed.status, "running")
+        with self.assertRaises(BatchRegistryError):
+            self.registry.reserve("b1", "confirmation_a", self.spec_hash, run_id="run-1")
 
     def test_claiming_with_the_wrong_role_is_rejected(self):
         self.registry.declare("b1", "confirmation_a", self.spec_hash)

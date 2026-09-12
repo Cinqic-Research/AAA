@@ -295,6 +295,8 @@ def run_benchmark(
 
     # ---- confirmation invariants, enforced in the core runner -----------
     if is_confirmation:
+        if project.resolve() != default_project_root().resolve():
+            raise ConfirmationError("confirmation source root must contain the loaded AAA implementation")
         if spec_path is not None and Path(spec_path).resolve() != _canonical_path().resolve():
             raise ConfirmationError(
                 "confirmation must use the canonical committed specification; custom specifications are "
@@ -313,6 +315,8 @@ def run_benchmark(
                 f"confirmation requires at least {spec.confirmation.episodes_per_family} episodes per family"
             )
         git = git_metadata(project)
+        if not git["commit"]:
+            raise ConfirmationError("confirmation requires a committed Git source tree")
         if spec.confirmation.require_clean_source_tree and git["dirty"]:
             raise ConfirmationError(
                 "confirmation requires a clean source tree; commit or stash before running.\n"
@@ -339,11 +343,16 @@ def run_benchmark(
     if is_confirmation:
         batch_registry = ConfirmationBatchRegistry.load(project / spec.confirmation.batch_registry)
         batch_registry.claim(batch_id or "", role, resolved_spec_hash, reproduction=reproduce)
-        confirmation_attempts = 1 + sum(
-            1
-            for batch in batch_registry.batches()
-            if batch.spec_hash == resolved_spec_hash and batch.status in ("consumed", "retired")
-        )
+        if reproduce:
+            confirmation_attempts = _recorded_confirmation_attempts(
+                project, str(batch_id), role=role, resolved_spec_hash=resolved_spec_hash
+            )
+        else:
+            confirmation_attempts = 1 + sum(
+                1
+                for batch in batch_registry.batches()
+                if batch.spec_hash == resolved_spec_hash and batch.status in ("consumed", "retired")
+            )
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     # A confirmation batch id is guaranteed non-empty by the invariants above,
@@ -356,6 +365,9 @@ def run_benchmark(
             "fresh immutable attempt identity."
         )
     directory.mkdir(parents=True, exist_ok=True)
+
+    if is_confirmation and batch_registry is not None and not reproduce:
+        batch_registry.reserve(str(batch_id), role, resolved_spec_hash, run_id=attempt, resume=resume)
 
     registry = ExperimentRegistry.load(directory / "experiment_registry.json")
     started = time.perf_counter()
@@ -412,8 +424,8 @@ def run_benchmark(
     legacy_states = [item.legacy_state for item in trained]
 
     # ---- evidence sink --------------------------------------------------
-    def sink(plan: EpisodePlan, records) -> None:
-        trial_id = records[0].identity.trial_id
+    def start_sink(plan: EpisodePlan) -> None:
+        trial_id = plan.trial_id
         registry.plan(
             TrialRecord(
                 trial_id=trial_id,
@@ -422,10 +434,14 @@ def run_benchmark(
                 replica=plan.replica,
                 episode=plan.episode,
                 environment_seed=plan.environment_seed,
-                checkpoint_hash=records[0].identity.checkpoint_hash,
+                checkpoint_hash=checkpoint_hashes[plan.replica],
             )
         )
         registry.start(trial_id)
+        registry.save()
+
+    def sink(plan: EpisodePlan, records) -> None:
+        trial_id = records[0].identity.trial_id
         relative = (
             Path("raw")
             / plan.family
@@ -435,6 +451,7 @@ def run_benchmark(
         )
         digest = write_jsonl_gz(directory / relative, records)
         registry.complete(trial_id, outputs=[str(relative)], checksums={str(relative): digest})
+        registry.save()
 
     # ---- families -------------------------------------------------------
     collectors: dict[str, Any] = {}
@@ -447,10 +464,11 @@ def run_benchmark(
             models,
             role=role,
             batch_id=batch_id,
-            training_lineage=tuple(training_seeds_by_replica.get(0, ())),
+            training_lineage=training_seeds_by_replica,
             checkpoint_hashes=checkpoint_hashes,
             recovery=recovery,
             legacy=legacy_states,
+            start_sink=start_sink,
             sink=sink,
         )
     always_plans = plan_motion_family(
@@ -462,10 +480,11 @@ def run_benchmark(
         models,
         role=role,
         batch_id=batch_id,
-        training_lineage=tuple(training_seeds_by_replica.get(0, ())),
+        training_lineage=training_seeds_by_replica,
         checkpoint_hashes=checkpoint_hashes,
         recovery=recovery,
         legacy=legacy_states,
+        start_sink=start_sink,
         sink=sink,
     )
 
@@ -475,11 +494,12 @@ def run_benchmark(
         purpose=purpose,
         role=role,
         batch_id=batch_id,
-        training_lineage=tuple(training_seeds_by_replica.get(0, ())),
+        training_lineage=training_seeds_by_replica,
         checkpoint_hashes=checkpoint_hashes,
         recovery=recovery,
         replicas=replica_count,
         episodes=episode_count,
+        start_sink=start_sink,
         sink=sink,
     )
     collectors["changed_law:changed"] = changed_law.changed
@@ -619,6 +639,27 @@ def _expected_trial_count(replicas: int, episodes: int) -> int:
     motion = len(MOTION_FAMILY_ORDER) + 1  # + always_online
     changed_law = 3  # prefix, changed branch, unchanged branch
     return replicas * episodes * (motion + changed_law)
+
+
+def _recorded_confirmation_attempts(
+    project: Path, batch_id: str, *, role: str, resolved_spec_hash: str
+) -> int:
+    summary_path = project / "results" / "benchmark_v2_1" / batch_id / "summary.json"
+    if not summary_path.is_file():
+        raise ConfirmationError(
+            "reproduction requires the committed recorded summary so its frozen statistical context is known"
+        )
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    if summary.get("run_id") != batch_id or summary.get("confirmation_batch") != batch_id:
+        raise ConfirmationError("recorded summary identity does not match the requested batch")
+    if summary.get("role") != role:
+        raise ConfirmationError("recorded summary role does not match the requested reproduction role")
+    if summary.get("spec_hash") != resolved_spec_hash:
+        raise ConfirmationError("recorded summary specification does not match the active reproduction")
+    value = summary.get("confirmation_attempts")
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ConfirmationError("recorded confirmation_attempts is missing or invalid")
+    return value
 
 
 def _write_checksums(directory: Path) -> None:

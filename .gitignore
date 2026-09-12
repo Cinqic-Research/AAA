@@ -13,3 +13,4 @@ runs/
 reports/
 diagnosis/
 *.log
+benchmarks/confirmation_batches.json.lock

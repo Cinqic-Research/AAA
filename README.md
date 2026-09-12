@@ -170,7 +170,7 @@ result, and this repository is built to report that rather than to avoid it.
 | [Limitations](docs/limitations.md) | what this cannot show, and the next experiment |
 | [Research history](CHANGELOG.md) | v1, v2, v2.1 |
 | [Self-review](docs/self_review.md) | what was checked after the repair, and what stayed weak |
-| [Review handoff](docs/handoff_astra.md) | identity, confirmation outcomes, reproduction commands |
+| [Review handoff](docs/handoff_sol.md) | identity, confirmation outcomes, reproduction commands |
 
 ## Historical evidence
 

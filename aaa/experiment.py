@@ -136,10 +136,110 @@ class StepRecord:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> StepRecord:
+        allowed = {
+            "schema_version",
+            "trial_id",
+            "role",
+            "family",
+            "scenario",
+            "environment_seed",
+            "replica_id",
+            "episode",
+            "branch",
+            "confirmation_batch",
+            "training_seed_lineage",
+            "stratum",
+            "checkpoint_hash",
+            "update_mode",
+            "step",
+            "target_step",
+            "history",
+            "current_observation",
+            "actual_next_position",
+            "bounced",
+            "bounce_walls",
+            "bounce_count",
+            "changed",
+            "interval_width",
+            "predictions",
+            "updates_enabled",
+        }
+        required = allowed - {
+            "branch",
+            "confirmation_batch",
+            "training_seed_lineage",
+            "stratum",
+            "checkpoint_hash",
+            "update_mode",
+            "bounce_walls",
+            "bounce_count",
+            "interval_width",
+        }
+        unknown = sorted(set(value) - allowed)
+        missing = sorted(required - set(value))
+        if unknown or missing:
+            raise ValueError(f"invalid step record fields: unknown={unknown}, missing={missing}")
         if value.get("schema_version") != STEP_RECORD_SCHEMA:
             raise ValueError(
                 f"unsupported step record schema {value.get('schema_version')!r}; expected {STEP_RECORD_SCHEMA!r}"
             )
+        integer_fields = ("environment_seed", "replica_id", "episode", "step", "target_step")
+        for name in integer_fields:
+            if isinstance(value[name], bool) or not isinstance(value[name], int):
+                raise ValueError(f"step record {name} must be an integer")
+        for name in ("bounced", "changed"):
+            if not isinstance(value[name], bool):
+                raise ValueError(f"step record {name} must be a boolean")
+        history = value["history"]
+        if not isinstance(history, list) or not history:
+            raise ValueError("step record history must be a non-empty list")
+        numeric_values = [
+            *history,
+            value["current_observation"],
+            value["actual_next_position"],
+            value.get("interval_width", 1.0),
+        ]
+        if any(
+            isinstance(item, bool) or not isinstance(item, (int, float)) or not math.isfinite(float(item))
+            for item in numeric_values
+        ):
+            raise ValueError("step record numeric values must be finite numbers")
+        predictions = value["predictions"]
+        updates = value["updates_enabled"]
+        if not isinstance(predictions, dict) or not predictions:
+            raise ValueError("step record predictions must be a non-empty object")
+        if not isinstance(updates, dict) or set(updates) != set(predictions):
+            raise ValueError("step record update flags must exactly match predictor names")
+        metric_fields = {
+            "raw",
+            "scored",
+            "absolute_error",
+            "normalized_absolute_error",
+            "signed_error",
+        }
+        for name, metrics in predictions.items():
+            if not isinstance(name, str) or not isinstance(metrics, dict) or set(metrics) != metric_fields:
+                raise ValueError(f"predictor {name!r} has an invalid metric shape")
+            if any(
+                isinstance(item, bool) or not isinstance(item, (int, float)) or not math.isfinite(float(item))
+                for item in metrics.values()
+            ):
+                raise ValueError(f"predictor {name!r} has a non-finite or non-numeric metric")
+        if any(not isinstance(flag, bool) for flag in updates.values()):
+            raise ValueError("step record update flags must be booleans")
+        lineage = value.get("training_seed_lineage", [])
+        if not isinstance(lineage, list) or any(
+            isinstance(item, bool) or not isinstance(item, int) for item in lineage
+        ):
+            raise ValueError("training_seed_lineage must be a list of integers")
+        walls = value.get("bounce_walls", [])
+        if not isinstance(walls, list) or any(not isinstance(item, str) for item in walls):
+            raise ValueError("bounce_walls must be a list of strings")
+        if "bounce_count" in value:
+            count = value["bounce_count"]
+            if isinstance(count, bool) or not isinstance(count, int) or count != len(walls):
+                raise ValueError("bounce_count must equal the number of bounce_walls")
+
         identity = TrialIdentity(
             trial_id=str(value["trial_id"]),
             role=str(value["role"]),
@@ -152,7 +252,7 @@ class StepRecord:
             confirmation_batch=(
                 None if value.get("confirmation_batch") is None else str(value["confirmation_batch"])
             ),
-            training_seed_lineage=tuple(int(item) for item in value.get("training_seed_lineage", [])),
+            training_seed_lineage=tuple(lineage),
             stratum=str(value.get("stratum", "unstratified")),
             checkpoint_hash=(None if value.get("checkpoint_hash") is None else str(value["checkpoint_hash"])),
             update_mode=str(value.get("update_mode", "frozen")),
@@ -161,17 +261,17 @@ class StepRecord:
             identity=identity,
             step=int(value["step"]),
             target_step=int(value["target_step"]),
-            history=tuple(float(item) for item in value["history"]),
+            history=tuple(float(item) for item in history),
             current_observation=float(value["current_observation"]),
             actual_next_position=float(value["actual_next_position"]),
-            bounced=bool(value["bounced"]),
-            changed=bool(value["changed"]),
+            bounced=value["bounced"],
+            changed=value["changed"],
             predictions={
                 str(name): {str(k): float(v) for k, v in metrics.items()}
-                for name, metrics in value["predictions"].items()
+                for name, metrics in predictions.items()
             },
-            updates_enabled={str(name): bool(flag) for name, flag in value["updates_enabled"].items()},
-            bounce_walls=tuple(str(item) for item in value.get("bounce_walls", [])),
+            updates_enabled=dict(updates),
+            bounce_walls=tuple(walls),
             interval_width=float(value.get("interval_width", 1.0)),
         )
 

@@ -183,6 +183,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "freeze":
         spec = load_spec()
         project = _project(args)
+        if project.resolve() != default_project_root().resolve():
+            raise SystemExit("freeze source root must contain the loaded AAA implementation")
         if not args.batch:
             raise SystemExit("freeze requires at least one --batch planned confirmation batch id")
         lineage = lineage_for("confirmation_a", spec.confirmation.ab_relationship)
@@ -212,6 +214,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"spec hash: {result['spec_hash']}")
         print(f"checksums: {result['checksums']}")
         print(f"recomputed all_required_gates_pass: {recomputed['all_required_gates_pass']}")
+        for label in ("result_comparison", "gate_comparison"):
+            comparison = result[label]
+            if not comparison["equivalent"]:
+                print(f"{label.replace('_', ' ')} failed: {comparison}")
+                return 3
         if stored:
             stored_statuses = {gate["name"]: gate["status"] for gate in stored.get("gates", [])}
             new_statuses = {gate["name"]: gate["status"] for gate in recomputed["gates"]}

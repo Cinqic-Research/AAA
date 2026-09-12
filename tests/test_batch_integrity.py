@@ -23,6 +23,8 @@ class BatchTamperTests(unittest.TestCase):
                     path = Path(d) / "registry.json"
                     registry = ConfirmationBatchRegistry(path)
                     registry.declare("batch", "confirmation_a", "hash")
+                    registry.save()
+                    registry.reserve("batch", "confirmation_a", "hash", run_id="run")
                     registry.record_outcome("batch", "run", passed=passed)
                     registry.save()
                     payload = json.loads(path.read_text())
@@ -47,11 +49,14 @@ class BatchTamperTests(unittest.TestCase):
                     )
 
     def test_in_memory_tamper_is_also_refused(self):
-        registry = ConfirmationBatchRegistry("unused")
-        registry.declare("batch", "confirmation_a", "hash")
-        registry.record_outcome("batch", "run", passed=False).status = "planned"
-        with self.assertRaises(BatchRegistryError):
-            registry.claim("batch", "confirmation_a", "hash")
+        with tempfile.TemporaryDirectory() as directory:
+            registry = ConfirmationBatchRegistry(Path(directory) / "registry.json")
+            registry.declare("batch", "confirmation_a", "hash")
+            registry.save()
+            registry.reserve("batch", "confirmation_a", "hash", run_id="run")
+            registry.record_outcome("batch", "run", passed=False).status = "planned"
+            with self.assertRaises(BatchRegistryError):
+                registry.claim("batch", "confirmation_a", "hash")
 
     def test_historical_batches_remain_readable(self):
         registry = ConfirmationBatchRegistry.load("benchmarks/confirmation_batches.json")

@@ -10,6 +10,7 @@ the original runtime aggregation code.
 from __future__ import annotations
 
 import json
+import math
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -67,15 +68,27 @@ def rebuild_collectors(run_dir: Path, spec: BenchmarkSpec) -> dict[str, FamilyCo
     recovery = recovery_config(spec)
     episodes: dict[tuple[str, str], dict[tuple[int, int], list[StepRecord]]] = defaultdict(dict)
     prefixes: dict[tuple[int, int], list[StepRecord]] = {}
-    for _, records in iter_raw_records(run_dir):
+    seen_trials: dict[str, Path] = {}
+    for source, records in iter_raw_records(run_dir):
         if not records:
             continue
         identity = records[0].identity
+        if any(record.identity != identity for record in records):
+            raise ValueError(f"raw file {source} mixes more than one immutable trial identity")
+        previous = seen_trials.setdefault(identity.trial_id, source)
+        if previous != source:
+            raise ValueError(f"duplicate raw trial identity {identity.trial_id!r} in {previous} and {source}")
         key = (identity.family, identity.branch)
         if identity.branch == "prefix":
-            prefixes[(identity.replica_id, identity.episode)] = records
+            episode_key = (identity.replica_id, identity.episode)
+            if episode_key in prefixes:
+                raise ValueError(f"duplicate changed-law prefix for replica/episode {episode_key}")
+            prefixes[episode_key] = records
             continue
-        episodes[key][(identity.replica_id, identity.episode)] = records
+        episode_key = (identity.replica_id, identity.episode)
+        if episode_key in episodes[key]:
+            raise ValueError(f"duplicate {key} evidence for replica/episode {episode_key}")
+        episodes[key][episode_key] = records
 
     collectors: dict[str, FamilyCollector] = {}
     for (family, branch), grouped in sorted(episodes.items()):
@@ -140,6 +153,12 @@ def recompute_run(
         confirmation_attempts=int(stored.get("confirmation_attempts", 0)),
     )
     gates = evaluate_gates(context)
+    result_comparison = compare_results(
+        stored.get("results", {}), results, tolerance=spec.tolerances.recompute_absolute
+    )
+    gate_comparison = compare_results(
+        stored.get("gates", {}), gates, tolerance=spec.tolerances.recompute_absolute
+    )
     return {
         "run_id": stored.get("run_id"),
         "spec_hash": resolved_hash,
@@ -147,6 +166,8 @@ def recompute_run(
         "results": results,
         "gates": gates,
         "stored_gates": stored.get("gates"),
+        "result_comparison": result_comparison,
+        "gate_comparison": gate_comparison,
     }
 
 
@@ -161,6 +182,14 @@ def compare_results(
     stored: Mapping[str, Any], recomputed: Mapping[str, Any], *, tolerance: float
 ) -> dict[str, Any]:
     """Deep numeric comparison of two result trees."""
+
+    if (
+        isinstance(tolerance, bool)
+        or not isinstance(tolerance, (int, float))
+        or not math.isfinite(float(tolerance))
+        or tolerance < 0
+    ):
+        raise ValueError("comparison tolerance must be a finite non-negative number")
 
     differences: list[dict[str, Any]] = []
 
@@ -181,7 +210,16 @@ def compare_results(
             if left != right:
                 differences.append({"path": path, "stored": left, "recomputed": right})
         elif isinstance(left, (int, float)) and isinstance(right, (int, float)):
-            if abs(float(left) - float(right)) > tolerance:
+            if not math.isfinite(float(left)) or not math.isfinite(float(right)):
+                differences.append(
+                    {
+                        "path": path,
+                        "stored": left,
+                        "recomputed": right,
+                        "reason": "non-finite numeric value",
+                    }
+                )
+            elif abs(float(left) - float(right)) > tolerance:
                 differences.append({"path": path, "stored": left, "recomputed": right})
         elif left != right:
             differences.append({"path": path, "stored": left, "recomputed": right})

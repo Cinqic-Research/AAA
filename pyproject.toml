@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools==84.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,13 +8,13 @@ version = "0.2.0"
 description = "An experimental AI research project exploring Accurate Autonomous Adaptation."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [{ name = "Cinqic" }]
 keywords = ["online-learning", "adaptation", "benchmark", "reproducibility"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -31,6 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "build>=1.6",
   "coverage>=7.4",
   "mypy>=1.8",
   "ruff>=0.5",
