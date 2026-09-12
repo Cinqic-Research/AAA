@@ -72,3 +72,13 @@ verification files that are not committed. Consequently, a clean clone cannot
 verify those manifests: missing bytes are reported, as they should be. The
 tables above accurately summarize the retained JSON, but they are not described
 as fresh byte-integrity or clean-clone recomputation evidence. See `AAA-124`.
+
+### Round 3 — retained review failure
+
+`aaa-v2_1-confirmation-a-0003` exited 1 because the runner's own newly durable
+batch claim made its later Git metadata snapshot appear dirty (`AAA-127`). All
+other 13 required gates passed and the complete local 4,058-entry checksum
+manifest verified before archival. The compact committed archive contains 55
+files covered by its own passing `checksums.json`; the original manifest is
+retained separately as `full_attempt_checksums.json`. The paired B-0003 stream
+was never observed and is explicitly `cancelled`, with no fabricated consumer.

@@ -30,7 +30,7 @@ DEVELOPMENT_PURPOSE = "development"
 REGISTRY_SCHEMA = "aaa.confirmation_batches.v2"
 LEGACY_REGISTRY_SCHEMA = "aaa.confirmation_batches.v1"
 
-BATCH_STATUSES = ("planned", "running", "consumed", "retired")
+BATCH_STATUSES = ("planned", "running", "consumed", "retired", "cancelled")
 CONFIRMATION_ROLES = ("confirmation_a", "confirmation_b")
 ROLES = ("development", "high_replication", *CONFIRMATION_ROLES)
 
@@ -135,6 +135,14 @@ class ConfirmationBatch:
                 or not self.claim_started_at
             ):
                 raise BatchRegistryError("running batch requires one durable claim and no completed outcome")
+        elif self.status == "cancelled":
+            if (
+                self.consumed_by
+                or self.claimed_by
+                or self.claim_started_at
+                or self.outcome != "superseded_before_observation"
+            ):
+                raise BatchRegistryError("cancelled batch must have no execution evidence")
         elif not self.consumed_by:
             raise BatchRegistryError("consumed or retired batch has no evidence of execution")
         elif (
@@ -333,6 +341,19 @@ class ConfirmationBatchRegistry:
             batch.consumed_by.append(run_id)
         batch.outcome = "all_required_gates_pass" if passed else "required_gate_failure"
         batch.status = "consumed" if passed else "retired"
+        return batch
+
+    def cancel_unobserved(self, batch_id: str, *, reason: str) -> ConfirmationBatch:
+        """Permanently cancel a planned stream without pretending it ran."""
+
+        batch = self.get(batch_id)
+        batch.validate()
+        if batch.status != "planned":
+            raise BatchRegistryError("only an unobserved planned batch may be cancelled")
+        batch.status = "cancelled"
+        batch.outcome = "superseded_before_observation"
+        batch.notes = f"{batch.notes} Cancelled unobserved: {reason}".strip()
+        batch.validate()
         return batch
 
 

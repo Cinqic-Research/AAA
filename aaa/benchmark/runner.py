@@ -292,6 +292,7 @@ def run_benchmark(
     spec = load_spec(spec_path)
     resolved_spec_hash = spec_hash(spec)
     is_confirmation = role in CONFIRMATION_ROLES
+    source_git = git_metadata(project)
 
     # ---- confirmation invariants, enforced in the core runner -----------
     if is_confirmation:
@@ -314,13 +315,12 @@ def run_benchmark(
             raise ConfirmationError(
                 f"confirmation requires at least {spec.confirmation.episodes_per_family} episodes per family"
             )
-        git = git_metadata(project)
-        if not git["commit"]:
+        if not source_git["commit"]:
             raise ConfirmationError("confirmation requires a committed Git source tree")
-        if spec.confirmation.require_clean_source_tree and git["dirty"]:
+        if spec.confirmation.require_clean_source_tree and source_git["dirty"]:
             raise ConfirmationError(
                 "confirmation requires a clean source tree; commit or stash before running.\n"
-                + "\n".join(f"  {line}" for line in git["status"][:20])
+                + "\n".join(f"  {line}" for line in source_git["status"][:20])
             )
 
     replica_count = (
@@ -383,7 +383,10 @@ def run_benchmark(
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "aaa_version": __version__,
         "spec_hash": resolved_spec_hash,
-        "git": git_metadata(project),
+        # This snapshot is intentionally taken before reserve() writes its own
+        # durable batch claim. The claim is evidence bookkeeping, not source
+        # dirtiness, and must not make an initially clean confirmation fail.
+        "git": source_git,
         "dependency_lock": dependency_lock(project),
         "hardware": hardware_metadata(),
         "parallelism": "none (serial; profiled and not worth parallelizing at this size)",

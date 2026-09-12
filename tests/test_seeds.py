@@ -187,6 +187,17 @@ class BatchRegistryTests(unittest.TestCase):
         with self.assertRaises(BatchRegistryError):
             stale.reserve("b1", "confirmation_a", self.spec_hash, run_id="second")
 
+    def test_an_unobserved_batch_can_be_cancelled_without_fabricated_consumption(self):
+        self.registry.declare("b1", "confirmation_a", self.spec_hash)
+        self.registry.cancel_unobserved("b1", reason="paired attempt failed before this stream ran")
+        self.registry.save()
+        batch = ConfirmationBatchRegistry.load(self.path).get("b1")
+        self.assertEqual(batch.status, "cancelled")
+        self.assertEqual(batch.outcome, "superseded_before_observation")
+        self.assertEqual(batch.consumed_by, [])
+        with self.assertRaises(BatchRegistryError):
+            self.registry.claim("b1", "confirmation_a", self.spec_hash)
+
     def test_matching_interrupted_claim_can_resume_but_not_restart_fresh(self):
         self.registry.declare("b1", "confirmation_a", self.spec_hash)
         self.registry.save()

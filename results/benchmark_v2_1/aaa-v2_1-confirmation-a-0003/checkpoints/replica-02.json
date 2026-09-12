@@ -1,0 +1,67 @@
+{
+  "covariance": [
+    [
+      0.00025328234272510764,
+      8.526189216537044e-05,
+      0.00010531710910504318
+    ],
+    [
+      8.526189216537044e-05,
+      0.0004730435681289552,
+      -0.00013735998828873146
+    ],
+    [
+      0.00010531710910504318,
+      -0.00013735998828873146,
+      0.0067813963588776146
+    ]
+  ],
+  "dead_zone": 0.0,
+  "dead_zone_skips": 0,
+  "detected_surprises": 2,
+  "detector_decay": 0.05,
+  "detector_floor": 1e-06,
+  "detector_multiplier": 8.0,
+  "displacement_scale": 0.004,
+  "error_ewma": 2.9851283513810226e-11,
+  "feature_set": "displacement_position",
+  "forgetting": 0.3,
+  "forgetting_mode": "exponential",
+  "forgetting_suspensions": 1,
+  "format_version": "aaa.rls_predictor.v2",
+  "history_length": 4,
+  "lower_bound": 0.0,
+  "name": "candidate_online",
+  "previous_prediction_reflected": false,
+  "reflect": true,
+  "reflection_skips": 0,
+  "ridge": 0.0001,
+  "skip_after_reflected_prediction": true,
+  "sqrt_factor": [
+    [
+      -0.015712221557115442,
+      0.002050702944129424,
+      0.0014842688099408934
+    ],
+    [
+      -0.004084940901424317,
+      0.01827981298388855,
+      -0.011054648942181994
+    ],
+    [
+      -0.019126053339143398,
+      -0.04975031331813034,
+      -0.06277337626170604
+    ]
+  ],
+  "target": "next_displacement_normalized_by_interval_width",
+  "trace_bound": 100000.0,
+  "unfold_target": true,
+  "update_count": 4248,
+  "upper_bound": 1.0,
+  "weights": [
+    -1.0231426788014212e-11,
+    0.003999999943234784,
+    1.648319812309745e-11
+  ]
+}

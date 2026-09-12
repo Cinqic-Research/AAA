@@ -1014,3 +1014,14 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
 - **Repair** The runtime constant is `0.2.0`. The wheel is rebuilt, its payload
   inspected, installed after the exact dependency lock with `--no-deps`, and
   exercised outside the source checkout before package evidence is accepted.
+
+### AAA-127 — a durable claim made clean confirmation look dirty
+- **Source** fresh Sol confirmation A-0003 · **Severity** blocking · **Status** repaired
+- **Reproduction** The runner correctly verified a clean tree, then persisted
+  its `running` batch claim. Metadata was collected afterward, saw that expected
+  registry edit, and failed `source_tree_clean_when_confirming`. All other 13
+  required gates passed; the batch exited 1 and remains retired evidence.
+- **Repair** Git identity and cleanliness are captured once, before reservation,
+  and that exact pre-observation snapshot is retained in metadata. Reservation
+  remains durable before the first observation. The unobserved paired B stream
+  is cancelled explicitly, without a fabricated consumer or outcome.

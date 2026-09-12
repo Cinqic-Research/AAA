@@ -64,20 +64,25 @@ def gates(summary: dict[str, Any]) -> dict[str, Any]:
     return {gate["name"]: gate for gate in summary["gates"]["gates"]}
 
 
-def latest_batch(role: str) -> str:
-    candidates = []
+def latest_pair() -> tuple[str, str]:
+    by_role: dict[str, set[str]] = {"confirmation_a": set(), "confirmation_b": set()}
     for path in RESULTS.glob("*/summary.json"):
         summary = json.loads(path.read_text(encoding="utf-8"))
-        if summary.get("role") == role:
-            candidates.append(str(summary["run_id"]))
-    if not candidates:
-        raise SystemExit(f"no retained {role} summary exists")
-    return sorted(candidates)[-1]
+        role = summary.get("role")
+        if role in by_role:
+            by_role[str(role)].add(str(summary["run_id"]))
+    pairs = []
+    for left in by_role["confirmation_a"]:
+        right = left.replace("confirmation-a", "confirmation-b")
+        if right in by_role["confirmation_b"]:
+            pairs.append((left, right))
+    if not pairs:
+        raise SystemExit("no retained matched confirmation A/B pair exists")
+    return sorted(pairs)[-1]
 
 
 def main() -> int:
-    BATCH_A = latest_batch("confirmation_a")
-    BATCH_B = latest_batch("confirmation_b")
+    BATCH_A, BATCH_B = latest_pair()
     a, b = load(BATCH_A), load(BATCH_B)
     ga, gb = gates(a), gates(b)
     manifest = json.loads((ROOT / "benchmarks" / "freeze_manifest.json").read_text(encoding="utf-8"))

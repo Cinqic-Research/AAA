@@ -20,8 +20,8 @@ is recorded separately in `sol_review.md` only after the final evidence qualifie
 | historical tag target | `03923083ed1619cde01816922e6c9968031d59ba` |
 | protocol | `aaa.benchmark.v2.1` |
 | specification hash | `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
-| dependency lock hash | `6370808d7f23a04fce4f86b136210e1669063d6ef8113509381eec6655730ec3` |
-| freeze manifest source | `2fe2f2f3704c0194d233d5a6f9f135d401f0ddd9`, dirty: no |
+| dependency lock hash | `2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7` |
+| freeze manifest source | `2e54cc3696baf52dd4edc544090d5861dec5cccc`, dirty: yes |
 | A/B relationship | `shared_frozen_checkpoints` |
 
 ### Selected candidate

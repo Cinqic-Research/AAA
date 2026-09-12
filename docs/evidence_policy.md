@@ -6,7 +6,8 @@
 |---|---|
 | compact per-attempt `summary.json` and `report.md` | the result, readable without regenerating anything |
 | `metadata.json`, `benchmark_spec.json` | provenance and the exact resolved specification |
-| `checksums.json` | integrity of everything the attempt produced |
+| `checksums.json` | integrity of every byte retained in the compact archive |
+| `full_attempt_checksums.json`, when present | identity of the complete local attempt, including omitted bytes; not clean-clone verification |
 | `experiment_registry.json` | per-trial state, seeds and completion |
 | selected checkpoints (a few kB of JSON) | the model the claim is about |
 | `benchmarks/freeze_manifest.json`, `benchmarks/confirmation_batches.json` | what was frozen, and which batches were spent |
@@ -43,6 +44,12 @@ other runtime provenance. Byte integrity and semantic reproducibility are
 deliberately reported as different claims.
 
 CI additionally retains the full attempt directory for 90 days.
+
+`tools/archive_attempt.py` creates the compact Git archive. It omits `raw/` and
+`plots/`, retains the original complete-attempt manifest under the explicit
+`full_attempt_checksums.json` name, and writes a new `checksums.json` that covers
+every retained file. Thus a clean clone can verify the compact bytes without
+pretending the omitted bytes are present.
 
 Formal confirmation is run only in the canonical maintained checkout. The
 manual Actions workflow accepts development and high-replication roles, but

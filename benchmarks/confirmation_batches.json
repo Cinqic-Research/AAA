@@ -30,15 +30,17 @@
     },
     {
       "batch_id": "aaa-v2_1-confirmation-a-0003",
-      "claim_started_at": null,
-      "claimed_by": null,
-      "consumed_by": [],
+      "claim_started_at": "2026-09-12T20:21:55.215841+00:00",
+      "claimed_by": "aaa-v2_1-confirmation-a-0003",
+      "consumed_by": [
+        "aaa-v2_1-confirmation-a-0003"
+      ],
       "declared_at": "2026-09-12T20:21:42.534505+00:00",
       "notes": "Fresh Sol-review A after AAA-121 through AAA-126 repairs; predeclared before observation",
-      "outcome": null,
+      "outcome": "required_gate_failure",
       "role": "confirmation_a",
       "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
-      "status": "planned"
+      "status": "retired"
     },
     {
       "batch_id": "aaa-v2_1-confirmation-b-0001",
@@ -74,11 +76,11 @@
       "claimed_by": null,
       "consumed_by": [],
       "declared_at": "2026-09-12T20:21:42.668242+00:00",
-      "notes": "Fresh Sol-review B; shared frozen checkpoints and independent evaluation stream; predeclared before observation",
-      "outcome": null,
+      "notes": "Fresh Sol-review B; shared frozen checkpoints and independent evaluation stream; predeclared before observation Cancelled unobserved: paired A-0003 failed correctness; source repair AAA-127 invalidated the freeze",
+      "outcome": "superseded_before_observation",
       "role": "confirmation_b",
       "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
-      "status": "planned"
+      "status": "cancelled"
     }
   ],
   "schema_version": "aaa.confirmation_batches.v2"
