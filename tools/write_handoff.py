@@ -15,14 +15,13 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results" / "benchmark_v2_1"
-OUTPUT = ROOT / "docs" / "handoff_astra.md"
+OUTPUT = ROOT / "docs" / "handoff_sol.md"
 
-BATCH_A = "aaa-v2_1-confirmation-a-0002"
-BATCH_B = "aaa-v2_1-confirmation-b-0002"
 RETIRED_A = "aaa-v2_1-confirmation-a-0001"
 RETIRED_B = "aaa-v2_1-confirmation-b-0001"
 STARTING_SHA = "235ce28518ca4ec3a9a240066154090a33b33470"
-TAG = "opus-independent-engineering-complete-awaiting-astra-review"
+HISTORICAL_TAG = "opus-independent-engineering-complete-awaiting-astra-review"
+REVIEW_BASE_SHA = "03923083ed1619cde01816922e6c9968031d59ba"
 
 
 def git(*args: str) -> str:
@@ -65,27 +64,45 @@ def gates(summary: dict[str, Any]) -> dict[str, Any]:
     return {gate["name"]: gate for gate in summary["gates"]["gates"]}
 
 
+def latest_pair() -> tuple[str, str]:
+    by_role: dict[str, set[str]] = {"confirmation_a": set(), "confirmation_b": set()}
+    for path in RESULTS.glob("*/summary.json"):
+        summary = json.loads(path.read_text(encoding="utf-8"))
+        role = summary.get("role")
+        if role in by_role:
+            by_role[str(role)].add(str(summary["run_id"]))
+    pairs = []
+    for left in by_role["confirmation_a"]:
+        right = left.replace("confirmation-a", "confirmation-b")
+        if right in by_role["confirmation_b"]:
+            pairs.append((left, right))
+    if not pairs:
+        raise SystemExit("no retained matched confirmation A/B pair exists")
+    return sorted(pairs)[-1]
+
+
 def main() -> int:
+    BATCH_A, BATCH_B = latest_pair()
     a, b = load(BATCH_A), load(BATCH_B)
     ga, gb = gates(a), gates(b)
     manifest = json.loads((ROOT / "benchmarks" / "freeze_manifest.json").read_text(encoding="utf-8"))
     hardware = a["metadata"]["hardware"]
 
     merge_sha = git("rev-list", "-n", "1", "--merges", "main") or "not yet merged"
-    tag_target = git("rev-list", "-n", "1", TAG) or (
-        f"the final `main` commit — the one that adds this document. Verify with `git rev-list -n 1 {TAG}`."
+    tag_target = git("rev-list", "-n", "1", HISTORICAL_TAG) or (
+        "unavailable; this historical tag is provenance only"
     )
 
     lines: list[str] = [
         "# Engineering handoff for independent review",
         "",
-        "**Status: Opus engineering complete. Awaiting independent Astra review.**",
+        "**Status: Prepared for GPT-5.6 Sol independent review and remediation.**",
         "**This document does not grant approval.**",
         "",
         "Every status below is a measured engineering outcome. None of it is an",
-        "approval decision, and none of it should be read as one. GPT-6 Astra is the",
-        "designated independent reviewer and is the only reviewer authorized to issue",
-        "an APPROVED or DECLINED decision.",
+        "approval decision, and none of it should be read as one. GPT-5.6 Sol is the",
+        "current designated independent reviewer and remediation owner. Sol's verdict",
+        "is recorded separately in `sol_review.md` only after the final evidence qualifies.",
         "",
         "## 1. Identity",
         "",
@@ -94,8 +111,9 @@ def main() -> int:
         f"| starting `main` | `{STARTING_SHA}` |",
         "| engineering branch | `opus/aaa-complete-engineering-repair` |",
         f"| merge commit on `main` | `{merge_sha}` |",
-        f"| tag | `{TAG}` |",
-        f"| tag target | {tag_target if tag_target.startswith('the final') else f'`{tag_target}`'} |",
+        f"| review baseline | `{REVIEW_BASE_SHA}` |",
+        f"| historical handoff tag | `{HISTORICAL_TAG}` (provenance only) |",
+        f"| historical tag target | `{tag_target}` |",
         f"| protocol | `{a['spec_version']}` |",
         f"| specification hash | `{a['spec_hash']}` |",
         f"| dependency lock hash | `{manifest['dependency_lock']['hash']}` |",
@@ -385,7 +403,7 @@ def main() -> int:
         "",
         "```bash",
         "git clone https://github.com/Cinqic/AAA.git && cd AAA",
-        f"git checkout {TAG}",
+        f"git checkout {REVIEW_BASE_SHA}",
         "python3 -m venv .venv && . .venv/bin/activate",
         "python -m pip install -r requirements-lock.txt",
         "python -m pip install -e . --no-deps",
@@ -424,7 +442,6 @@ def main() -> int:
         "| golden seed fixture | `benchmarks/golden_seeds.json` |",
         "| canonical specification | `aaa/benchmark/data/benchmark_v2_1.json` |",
         "| pre-repair defect reproduction | `docs/evidence/pre_repair_probes.json` |",
-        "| learner diagnosis | `docs/evidence/diagnosis/` |",
         "| candidate selection | `docs/evidence/candidate_selection.json` |",
         "| issue ledger | `docs/issue_ledger.md` |",
         "| errata | `docs/errata.md` |",
@@ -451,8 +468,8 @@ def main() -> int:
         "",
         "---",
         "",
-        "**Opus independent engineering complete. Awaiting Astra independent review.**",
-        "**No independent approval decision has been made.**",
+        "**Prepared for GPT-5.6 Sol independent review and remediation.**",
+        "**The handoff itself is not an approval decision.**",
         "",
     ]
     OUTPUT.write_text("\n".join(lines), encoding="utf-8")

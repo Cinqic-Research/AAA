@@ -94,6 +94,10 @@ class StrictValidationTests(unittest.TestCase):
     def test_non_finite_number_is_rejected(self):
         self._reject(lambda value: value["world"].update({"dt": float("inf")}))
 
+    def test_negative_tolerances_and_subunit_condition_limits_are_rejected(self):
+        self._reject(lambda value: value["tolerances"].update({"recompute_absolute": -1e-12}))
+        self._reject(lambda value: value["tolerances"].update({"max_condition_number": 0.5}))
+
     def test_zero_and_negative_counts_are_rejected(self):
         self._reject(lambda value: value["confirmation"].update({"replicas": 0}))
         self._reject(lambda value: value["confirmation"].update({"replicas": -5}))

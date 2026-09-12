@@ -554,7 +554,12 @@ class TolerancesSpec:
     @classmethod
     def parse(cls, value: Mapping[str, Any], path: str) -> TolerancesSpec:
         data = _strict(cls, value, path=path)
-        return cls(**{name: _finite(data[name], f"{path}.{name}") for name in _field_names(cls)})
+        parsed = {name: _finite(data[name], f"{path}.{name}") for name in _field_names(cls)}
+        for name, number in parsed.items():
+            minimum = 0.0 if name != "max_condition_number" else 1.0
+            if number < minimum:
+                raise SpecError(f"{path}.{name}: must be >= {minimum:g}")
+        return cls(**parsed)
 
 
 @dataclass(frozen=True)

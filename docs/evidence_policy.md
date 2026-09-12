@@ -6,7 +6,8 @@
 |---|---|
 | compact per-attempt `summary.json` and `report.md` | the result, readable without regenerating anything |
 | `metadata.json`, `benchmark_spec.json` | provenance and the exact resolved specification |
-| `checksums.json` | integrity of everything the attempt produced |
+| `checksums.json` | integrity of every byte retained in the compact archive |
+| `full_attempt_checksums.json`, when present | identity of the complete local attempt, including omitted bytes; not clean-clone verification |
 | `experiment_registry.json` | per-trial state, seeds and completion |
 | selected checkpoints (a few kB of JSON) | the model the claim is about |
 | `benchmarks/freeze_manifest.json`, `benchmarks/confirmation_batches.json` | what was frozen, and which batches were spent |
@@ -22,7 +23,7 @@ it compact evidence; this policy is the correction.
 
 ## How raw evidence stays recoverable
 
-Raw step records are **regenerable**, not archived, from four committed things:
+Raw step records are **semantically regenerable**, not archived, from four committed things:
 
 1. public source at a recorded commit and tree hash;
 2. the immutable specification, identified by hash;
@@ -36,10 +37,25 @@ python -m aaa.cli benchmark --role confirmation_a \
 python -m aaa.cli recompute runs/benchmark-v2_1/<batch id>
 ```
 
-The reproduction must yield the recorded checksums. If it does not, that is a
-finding, and `recompute` exits non-zero.
+`recompute` verifies byte checksums only when the files named by the manifest
+are present. A regenerated run is then compared semantically (schemas, trial
+identities, metrics and gates); byte equality is not promised for timestamps or
+other runtime provenance. Byte integrity and semantic reproducibility are
+deliberately reported as different claims.
 
 CI additionally retains the full attempt directory for 90 days.
+
+`tools/archive_attempt.py` creates the compact Git archive. It omits `raw/` and
+`plots/`, retains the original complete-attempt manifest under the explicit
+`full_attempt_checksums.json` name, and writes a new `checksums.json` that covers
+every retained file. Thus a clean clone can verify the compact bytes without
+pretending the omitted bytes are present.
+
+Formal confirmation is run only in the canonical maintained checkout. The
+manual Actions workflow accepts development and high-replication roles, but
+refuses confirmation batch IDs: independent ephemeral checkouts cannot safely
+persist the repository's single durable batch claim. This prevents two remote
+jobs from spending the same planned stream while both believe they own it.
 
 ## Known limitation
 
@@ -50,6 +66,12 @@ leave the summaries and checksums without the bytes they describe.
 Git LFS, or an external archive with content addresses recorded here, would be
 stronger. Neither is in place. This is stated as a recommendation rather than
 described as done, and it is tracked as `AAA-077` in the issue ledger.
+
+The four historical v2.1 attempt directories committed before the Sol review
+have checksum manifests that name omitted raw and generated files. In a clean
+clone, those manifests therefore fail integrity verification because the named
+bytes are absent. Their summaries remain historical evidence, not currently
+byte-verifiable archives. This reproduced limitation is tracked as `AAA-124`.
 
 ## Failed attempts
 

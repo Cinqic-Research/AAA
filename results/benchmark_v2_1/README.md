@@ -62,5 +62,36 @@ generalization of one selected model set rather than sensitivity to training
 randomness. B's source commit differs from A's only by A's committed evidence;
 no code, specification or checkpoint changed between them.
 
-See [`docs/handoff_astra.md`](../../docs/handoff_astra.md) for the full
+See [`docs/handoff_sol.md`](../../docs/handoff_sol.md) for the full
 cross-attempt table and the interpretation.
+
+## Archive limitation reproduced during Sol review
+
+The four historical checksum manifests name raw, metric, registry, plot and
+verification files that are not committed. Consequently, a clean clone cannot
+verify those manifests: missing bytes are reported, as they should be. The
+tables above accurately summarize the retained JSON, but they are not described
+as fresh byte-integrity or clean-clone recomputation evidence. See `AAA-124`.
+
+### Round 3 — retained review failure
+
+`aaa-v2_1-confirmation-a-0003` exited 1 because the runner's own newly durable
+batch claim made its later Git metadata snapshot appear dirty (`AAA-127`). All
+other 13 required gates passed and the complete local 4,058-entry checksum
+manifest verified before archival. The compact committed archive contains 55
+files covered by its own passing `checksums.json`; the original manifest is
+retained separately as `full_attempt_checksums.json`. The paired B-0003 stream
+was never observed and is explicitly `cancelled`, with no fabricated consumer.
+
+### Round 4 — fresh Sol-review confirmation
+
+| Attempt | Role | Required gates | Original checksums | Semantic replay |
+|---|---|---|---|---|
+| `aaa-v2_1-confirmation-a-0004` | confirmation_a | 14 of 14 PASS | 4,058/4,058 | exact; exit 0 |
+| `aaa-v2_1-confirmation-b-0004` | confirmation_b | 14 of 14 PASS | 4,058/4,058 | exact; exit 0 |
+
+The pair was predeclared and frozen at `11ba061`; A's evidence was committed at
+`dc4a6e1` before B began. The scientific fingerprint, specification, thresholds,
+checkpoint hashes and dependency lock stayed fixed. A and B used independent
+evaluation streams and the declared shared selected checkpoints. Each compact
+archive has 55 retained files and a passing clean-clone checksum manifest.

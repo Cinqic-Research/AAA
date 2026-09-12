@@ -888,19 +888,24 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
 - **Verification** `gh api repos/Cinqic/AAA/branches/main/protection` and
   `gh api repos/Cinqic/AAA --jq '.delete_branch_on_merge, .security_and_analysis'`.
 
-### AAA-112 — the confirmation batch registry's status field is trusted
-- **Source** self (post-repair adversarial probe) · **Status** open
-- Hand-editing a retired batch back to `planned` in
-  `benchmarks/confirmation_batches.json` lets it be claimed again. This is a
-  tamper scenario rather than an accident: the registry is in git, so the edit
-  is visible in the diff and the history, the `consumed_by` list still names
-  the runs that spent the batch, and a confirmation additionally requires a
-  clean tree and agreement with the committed freeze manifest.
-- It is recorded rather than silently hardened because hardening it would have
-  meant changing source between confirmation attempts. The obvious improvement
-  is to refuse any batch whose `consumed_by` list is non-empty regardless of
-  its status label, making the evidence of use the guard rather than a mutable
-  field.
+### AAA-112 — confirmation status edits could erase prior-use eligibility
+- **Source** independent Sol reproduction · **Severity** blocking · **Status** repaired
+- **Reproduction before repair** Changing only a retired batch's serialized
+  status to `planned`, while retaining its prior run and failure, allowed a
+  fresh claim. Conversely, changing a fresh status to `consumed` established
+  reproduction eligibility without execution evidence.
+- **Repair** Loading, saving and claiming validate status against durable
+  consumption and outcome evidence. Planned batches require both an empty
+  consumption list and null outcome; completed states require nonempty unique
+  run identities and their corresponding outcome. Invalid serialized types,
+  empty identities and contradictory in-memory edits are refused.
+- **Regression** `tests/test_batch_integrity.py` reproduces serialized tampering
+  for failed and passed batches, fabricated prior execution, and in-memory
+  tampering. The historical registry loads unchanged. Tests failed before the
+  repair; all 381 tests passed afterward (68.775 seconds).
+- **Boundary** This prevents contradictory records, not malicious rewriting of
+  every field and Git history. Interrupted-run reservation and concurrent use
+  require separate review; this change does not claim to solve them.
 
 ### AAA-113 — multiplicity is scoped to a specification hash
 - **Source** self · **Status** open, deliberate
@@ -924,3 +929,99 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
   rather than scheduling order, so parallelism remains available without a
   reproducibility change if the workload ever grows. Not adopted, and the
   reason is recorded rather than the option being silently dropped.
+
+
+### AAA-121 — frozen source identity was recorded but not enforced
+- **Source** independent Sol reproduction · **Severity** blocking · **Status** repaired
+- **Reproduction** A clean committed implementation edit passed `check_manifest`
+  while the specification, checkpoint hashes, training seeds and lock were
+  unchanged. New regression tests also exposed unguarded test, tool, seed-fixture
+  and batch-identity edits.
+- **Repair** Manifest schema v2 enforces a canonical scientific fingerprint over
+  file paths, executable bits and contents. It covers all tracked and nonignored
+  untracked files, including implementation, tests, tools, workflows, documents,
+  specification and golden seeds. Missing files and symlinks are refused.
+  The runner and freeze CLI bind the root to the loaded AAA implementation;
+  formal confirmation also requires a real Git commit.
+- **Precisely excluded** `results/`, `benchmarks/freeze_manifest.json`,
+  `docs/final_audit.md`, `docs/handoff_sol.md`, and `docs/sol_review.md` contain
+  confirmation evidence or generated final-review bookkeeping.
+  In `benchmarks/confirmation_batches.json`, only each batch's `status`,
+  `consumed_by`, `outcome`, `claimed_by`, and `claim_started_at` fields are
+  omitted; declarations, roles, specification identities and notes remain
+  covered. No implementation may be put in excluded paths. Git commit and
+  full-tree provenance are still recorded separately.
+- **Regression** `tests/test_source_freeze.py` verifies clean committed source,
+  test, tool, seed and declaration drift is rejected, while a legitimate A-to-B
+  evidence/status commit is accepted. Existing manifest tests cover specification,
+  checkpoint, training-stream and undeclared-batch drift. Old v1 manifests are
+  preserved as historical evidence and cannot authorize new confirmation.
+
+### AAA-122 — non-finite recomputation values disappeared behind tolerance arithmetic
+- **Source** independent Sol reproduction · **Severity** blocking · **Status** repaired
+- **Reproduction before repair** `compare_results({"x": NaN}, {"x": 1.0},
+  tolerance=1e-10)` returned `equivalent: true`; matching infinities and malformed
+  tolerances were also accepted or failed with incidental type errors.
+- **Repair** Comparison now requires a finite non-negative numeric tolerance and
+  records every non-finite value as a scientific disagreement, including equal
+  infinities. The CLI compares the full recomputed result and gate trees rather
+  than only gate status labels, so altered numbers that preserve a status fail.
+- **Regression** `CompareResultsTests` covers NaN on either side, equal NaN and
+  infinities, booleans, malformed tolerances and ordinary finite tolerance.
+  `RecomputeCommandTests` exercises the CLI acceptance path with an injected NaN.
+
+### AAA-123 — replica records carried replica 0 training provenance
+- **Source** independent Sol reproduction · **Severity** high · **Status** repaired
+- **Reproduction before repair** A two-replica development run recorded replica
+  0's training seed tuple in every raw trajectory although checkpoint hashes and
+  summary training seeds differed by replica.
+- **Repair** Family runners now receive the complete replica-to-seed mapping and
+  attach the lineage selected by each episode plan's replica id across motion,
+  always-online, changed-law prefix and both changed-law branches.
+- **Regression** A two-replica end-to-end benchmark reloads every compressed raw
+  record and matches its lineage to the corresponding summary checkpoint entry.
+
+### AAA-124 — historical v2.1 checksum manifests name absent evidence
+- **Source** independent Sol reproduction · **Severity** blocking for historical
+  clean-clone recomputation · **Status** documented; new evidence required
+- **Reproduction** `verify_checksums` on each of the four committed v2.1 attempt
+  directories reports thousands of missing paths. The repositories retain the
+  compact summaries and checkpoints but omit the raw, metric, registry, plot and
+  verification bytes that their manifests cover.
+- **Disposition** The historical summaries remain identifiable negative and
+  positive evidence, but are not called byte-verifiable archives or fresh
+  clean-clone recomputations. New confirmation is required after the scientific
+  repairs. The evidence policy now distinguishes original-byte integrity from
+  semantic reproduction and retains the existing `AAA-077` archive limitation.
+
+### AAA-125 — ephemeral remote checkouts could claim one batch concurrently
+- **Source** independent Sol review · **Severity** blocking · **Status** repaired
+- **Finding** A local sidecar lock can serialize processes in one checkout, but
+  two manually dispatched Actions jobs have separate filesystems and cannot
+  persist a shared registry claim. Both could therefore start the same planned
+  formal stream.
+- **Repair** Formal reservation now persists `running`, claimant and claim time
+  under a checkout lock before the first observation. The manual remote workflow
+  accepts only development and high-replication roles and refuses any batch id;
+  formal A/B runs are made in the canonical maintained checkout where the claim
+  and resulting evidence can be committed between attempts.
+
+### AAA-126 — wheel and runtime reported different versions
+- **Source** independent Sol package audit · **Severity** medium · **Status** repaired
+- **Reproduction** A freshly built wheel was named and described as version
+  `0.2.0`, matching `pyproject.toml` and `CITATION.cff`, while importing it
+  reported `aaa.__version__ == "0.1.0"`.
+- **Repair** The runtime constant is `0.2.0`. The wheel is rebuilt, its payload
+  inspected, installed after the exact dependency lock with `--no-deps`, and
+  exercised outside the source checkout before package evidence is accepted.
+
+### AAA-127 — a durable claim made clean confirmation look dirty
+- **Source** fresh Sol confirmation A-0003 · **Severity** blocking · **Status** repaired
+- **Reproduction** The runner correctly verified a clean tree, then persisted
+  its `running` batch claim. Metadata was collected afterward, saw that expected
+  registry edit, and failed `source_tree_clean_when_confirming`. All other 13
+  required gates passed; the batch exited 1 and remains retired evidence.
+- **Repair** Git identity and cleanliness are captured once, before reservation,
+  and that exact pre-observation snapshot is retained in metadata. Reservation
+  remains durable before the first observation. The unobserved paired B stream
+  is cancelled explicitly, without a fabricated consumer or outcome.

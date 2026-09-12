@@ -210,7 +210,7 @@
       ]
     },
     "repeated_input_forget_090": {
-      "covariance_max_abs": Infinity,
+      "covariance_max_abs": "+Infinity (non-finite)",
       "eig_error": "LinAlgError: Eigenvalues did not converge",
       "error": "covariance lost positive semidefiniteness / finiteness",
       "update_index": 6642

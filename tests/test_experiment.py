@@ -232,6 +232,22 @@ class RecordSchemaTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             StepRecord.from_dict(value)
 
+    def test_unknown_fields_and_coercive_scalar_types_are_rejected(self):
+        original = self._records()[0].to_dict()
+        mutations = (
+            lambda value: value.update({"future_truth": 1}),
+            lambda value: value.update({"step": True}),
+            lambda value: value.update({"bounced": 1}),
+            lambda value: value.update({"current_observation": float("nan")}),
+            lambda value: value["predictions"]["persistence"].update({"raw": float("inf")}),
+        )
+        for mutate in mutations:
+            with self.subTest(mutate=mutate):
+                value = json.loads(json.dumps(original))
+                mutate(value)
+                with self.assertRaises(ValueError):
+                    StepRecord.from_dict(value)
+
     def test_invalid_identity_values_are_rejected(self):
         with self.assertRaises(ValueError):
             identity(update_mode="whenever")

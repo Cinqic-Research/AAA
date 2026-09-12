@@ -510,6 +510,7 @@ def _flat_mean(container: dict[str, dict[str, list[float]]], name: str) -> float
 
 
 RecordSink = Callable[[EpisodePlan, Sequence[StepRecord]], None]
+StartSink = Callable[[EpisodePlan], None]
 
 
 # ---------------------------------------------------------------------------
@@ -535,10 +536,11 @@ def run_motion_family(
     *,
     role: str,
     batch_id: str | None,
-    training_lineage: Sequence[int],
+    training_lineage: Mapping[int, Sequence[int]],
     checkpoint_hashes: Sequence[str],
     recovery: RecoveryConfig,
     legacy: Sequence[dict[str, Any]],
+    start_sink: StartSink | None = None,
     sink: RecordSink | None = None,
 ) -> FamilyCollector:
     """Run one motion family with frozen candidate arms (plus an online arm).
@@ -576,11 +578,13 @@ def run_motion_family(
             replica_id=plan.replica,
             episode=plan.episode,
             confirmation_batch=batch_id,
-            training_seed_lineage=tuple(training_lineage),
+            training_seed_lineage=tuple(training_lineage[plan.replica]),
             stratum=plan.stratum,
             checkpoint_hash=checkpoint_hashes[plan.replica],
             update_mode="mixed" if include_online else "frozen",
         )
+        if start_sink is not None:
+            start_sink(plan)
         records = run_episode(build_environment(plan), predictors, identity, learn=include_online)
         if not records:
             raise RuntimeError(f"family {family_name} episode {plan.trial_id} produced no scored transitions")
@@ -597,10 +601,11 @@ def run_always_online_family(
     *,
     role: str,
     batch_id: str | None,
-    training_lineage: Sequence[int],
+    training_lineage: Mapping[int, Sequence[int]],
     checkpoint_hashes: Sequence[str],
     recovery: RecoveryConfig,
     legacy: Sequence[dict[str, Any]],
+    start_sink: StartSink | None = None,
     sink: RecordSink | None = None,
 ) -> FamilyCollector:
     """Continuous deployment track.
@@ -658,11 +663,13 @@ def run_always_online_family(
             replica_id=segment.replica,
             episode=segment.episode,
             confirmation_batch=batch_id,
-            training_seed_lineage=tuple(training_lineage),
+            training_seed_lineage=tuple(training_lineage[segment.replica]),
             stratum=segment.stratum,
             checkpoint_hash=checkpoint_hashes[segment.replica],
             update_mode="mixed",
         )
+        if start_sink is not None:
+            start_sink(segment)
         records = run_episode(build_environment(segment), predictors, identity, learn=True)
         if not records:
             raise RuntimeError(f"always_online episode {segment.trial_id} produced no scored transitions")
@@ -686,11 +693,12 @@ def run_changed_law_family(
     purpose: str,
     role: str,
     batch_id: str | None,
-    training_lineage: Sequence[int],
+    training_lineage: Mapping[int, Sequence[int]],
     checkpoint_hashes: Sequence[str],
     recovery: RecoveryConfig,
     replicas: int,
     episodes: int,
+    start_sink: StartSink | None = None,
     sink: RecordSink | None = None,
 ) -> ChangedLawOutcome:
     """Matched frozen/updating branch experiment at a common intervention point.
@@ -738,30 +746,30 @@ def run_changed_law_family(
                 episode=episode,
                 branch="prefix",
                 confirmation_batch=batch_id,
-                training_seed_lineage=tuple(training_lineage),
+                training_seed_lineage=tuple(training_lineage[replica]),
                 stratum="prefix",
                 checkpoint_hash=checkpoint_hashes[replica],
                 update_mode="mixed",
             )
+            prefix_plan = EpisodePlan(
+                family="changed_law",
+                branch="prefix",
+                replica=replica,
+                episode=episode,
+                stratum="prefix",
+                environment_seed=seed,
+                world=prefix_world,
+                scenario="dynamics_change",
+            )
+            if start_sink is not None:
+                start_sink(prefix_plan)
             prefix_records = run_episode(
                 prefix_env, [*prefix_baselines, prefix_model], prefix_identity, learn=True
             )
             if not prefix_records:
                 raise RuntimeError("changed-law prefix produced no records")
             if sink is not None:
-                sink(
-                    EpisodePlan(
-                        family="changed_law",
-                        branch="prefix",
-                        replica=replica,
-                        episode=episode,
-                        stratum="prefix",
-                        environment_seed=seed,
-                        world=prefix_world,
-                        scenario="dynamics_change",
-                    ),
-                    prefix_records,
-                )
+                sink(prefix_plan, prefix_records)
 
             history = [*prefix_records[-1].history[1:], prefix_records[-1].actual_next_position]
             start_position = prefix_env.position
@@ -813,11 +821,23 @@ def run_changed_law_family(
                     episode=episode,
                     branch=branch_name,
                     confirmation_batch=batch_id,
-                    training_seed_lineage=tuple(training_lineage),
+                    training_seed_lineage=tuple(training_lineage[replica]),
                     stratum=branch_name,
                     checkpoint_hash=checkpoint_hashes[replica],
                     update_mode="mixed",
                 )
+                branch_plan = EpisodePlan(
+                    family="changed_law",
+                    branch=branch_name,
+                    replica=replica,
+                    episode=episode,
+                    stratum=branch_name,
+                    environment_seed=seed,
+                    world=branch_world,
+                    scenario="dynamics_change",
+                )
+                if start_sink is not None:
+                    start_sink(branch_plan)
                 records = continue_episode(
                     environment,
                     [*baseline_predictors(spec), frozen, online],
@@ -832,19 +852,7 @@ def run_changed_law_family(
                     post_change_window=spec.recovery.post_event_horizon,
                 )
                 if sink is not None:
-                    sink(
-                        EpisodePlan(
-                            family="changed_law",
-                            branch=branch_name,
-                            replica=replica,
-                            episode=episode,
-                            stratum=branch_name,
-                            environment_seed=seed,
-                            world=branch_world,
-                            scenario="dynamics_change",
-                        ),
-                        records,
-                    )
+                    sink(branch_plan, records)
                 if branch_name == "changed-law":
                     frozen_after = frozen.state_dict()
                     interventions.append(

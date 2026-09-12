@@ -1,0 +1,9 @@
+{
+  "full_attempt_checksum_entries": 4058,
+  "omitted_directories": [
+    "plots",
+    "raw"
+  ],
+  "schema_version": "aaa.compact_attempt_archive.v1",
+  "semantics": "checksums.json verifies every retained archive byte; full_attempt_checksums.json describes the original complete local attempt"
+}

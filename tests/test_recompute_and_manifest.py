@@ -107,6 +107,19 @@ class RecomputeTests(unittest.TestCase):
         finally:
             holder.cleanup()
 
+    def test_a_duplicate_trial_file_is_refused_even_with_fresh_checksums(self):
+        holder, target = self._copy()
+        try:
+            victim = next(iter(sorted((target / "raw").rglob("*.jsonl.gz"))))
+            duplicate = victim.with_name("duplicate.jsonl.gz")
+            shutil.copyfile(victim, duplicate)
+            _rewrite_checksums(target)
+            with self.assertRaises(ValueError) as caught:
+                recompute_run(target)
+            self.assertIn("duplicate raw trial identity", str(caught.exception))
+        finally:
+            holder.cleanup()
+
     def test_a_specification_hash_mismatch_is_refused(self):
         holder, target = self._copy()
         try:
@@ -160,6 +173,24 @@ class CompareResultsTests(unittest.TestCase):
     def test_a_boolean_flip_is_never_absorbed_by_a_numeric_tolerance(self):
         result = compare_results({"ok": True}, {"ok": False}, tolerance=1e9)
         self.assertFalse(result["equivalent"])
+
+    def test_non_finite_values_are_invalid_even_when_both_sides_match(self):
+        for left, right in (
+            (float("nan"), 1.0),
+            (1.0, float("nan")),
+            (float("nan"), float("nan")),
+            (float("inf"), float("inf")),
+            (float("-inf"), float("-inf")),
+        ):
+            with self.subTest(left=left, right=right):
+                result = compare_results({"x": left}, {"x": right}, tolerance=1e-10)
+                self.assertFalse(result["equivalent"])
+                self.assertEqual(result["differences"][0]["reason"], "non-finite numeric value")
+
+    def test_tolerance_must_be_a_finite_non_negative_number(self):
+        for tolerance in (True, -1.0, float("nan"), float("inf"), "0.1", None):
+            with self.subTest(tolerance=tolerance), self.assertRaises(ValueError):
+                compare_results({"x": 1.0}, {"x": 1.0}, tolerance=tolerance)
 
     def test_a_missing_key_is_reported(self):
         result = compare_results({"a": 1, "b": 2}, {"a": 1}, tolerance=0.0)

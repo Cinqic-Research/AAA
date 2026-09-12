@@ -167,6 +167,32 @@ class ChecksumTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             self.assertFalse(verify_checksums(Path(directory))["ok"])
 
+    def test_unsafe_manifest_paths_and_digests_are_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            run = Path(directory)
+            json_dump(
+                run / "checksums.json",
+                {
+                    "../../outside": "0" * 64,
+                    "/absolute": "0" * 64,
+                    "raw/file": "not-a-digest",
+                },
+            )
+            result = verify_checksums(run)
+            self.assertFalse(result["ok"])
+            self.assertEqual(sorted(result["unsafe"]), ["../../outside", "/absolute", "raw/file"])
+
+    def test_checksum_symlinks_are_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            run = Path(directory)
+            outside = run.parent / "outside-checksum-target"
+            outside.write_text("secret", encoding="utf-8")
+            (run / "raw").mkdir()
+            (run / "raw" / "link").symlink_to(outside)
+            json_dump(run / "checksums.json", {"raw/link": sha256_file(outside)})
+            self.assertEqual(verify_checksums(run)["unsafe"], ["raw/link"])
+            outside.unlink()
+
     def test_text_and_file_digests_agree(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "a.txt"
@@ -197,6 +223,18 @@ class RawRecordTests(unittest.TestCase):
                 handle.write("\n".join(lines[:2]) + "\n" + lines[3][:20])
             with self.assertRaises((json.JSONDecodeError, EOFError, OSError, ValueError)):
                 list(iter_raw_records(run))
+
+    def test_compressed_raw_bytes_are_deterministic(self):
+        records = [record(step, 0.01) for step in range(5)]
+        with tempfile.TemporaryDirectory() as directory:
+            first = Path(directory) / "first.jsonl.gz"
+            second = Path(directory) / "second.jsonl.gz"
+            self.assertEqual(write_jsonl_gz(first, records), write_jsonl_gz(second, records))
+            self.assertEqual(first.read_bytes(), second.read_bytes())
+
+    def test_json_dump_refuses_non_finite_numbers(self):
+        with tempfile.TemporaryDirectory() as directory, self.assertRaises(ValueError):
+            json_dump(Path(directory) / "invalid.json", {"value": float("nan")})
 
 
 class StructuralVerificationTests(unittest.TestCase):

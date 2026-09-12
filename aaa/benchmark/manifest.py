@@ -16,9 +16,10 @@ from pathlib import Path
 from typing import Any
 
 from .evidence import dependency_lock, git_metadata, json_dump, sha256_text
+from .source_identity import scientific_fingerprint
 from .spec import BenchmarkSpec, spec_hash
 
-MANIFEST_SCHEMA = "aaa.freeze_manifest.v1"
+MANIFEST_SCHEMA = "aaa.freeze_manifest.v2"
 
 
 class FreezeMismatch(RuntimeError):
@@ -64,7 +65,12 @@ def build_manifest(
         "protocol_version": spec.spec_version,
         "protocol_status": spec.status,
         "spec_hash": spec_hash(spec),
-        "source": {"commit": git["commit"], "tree_hash": git["tree_hash"], "dirty": git["dirty"]},
+        "source": {
+            "commit": git["commit"],
+            "tree_hash": git["tree_hash"],
+            "dirty": git["dirty"],
+            "scientific_fingerprint": scientific_fingerprint(project_root),
+        },
         "dependency_lock": dependency_lock(project_root),
         "candidate": {
             "model": spec.candidate.model,
@@ -184,6 +190,15 @@ def check_manifest(
     """Reject any confirmation attempt that drifted from the frozen manifest."""
 
     problems: list[str] = []
+    frozen_source = manifest.payload.get("source", {}).get("scientific_fingerprint")
+    try:
+        current_source = scientific_fingerprint(project_root)
+    except ValueError as exc:
+        raise FreezeMismatch(str(exc)) from exc
+    if not frozen_source or frozen_source != current_source:
+        problems.append(
+            "scientific source fingerprint differs from the frozen implementation and verification contract"
+        )
     resolved = spec_hash(spec)
     if manifest.spec_hash != resolved:
         problems.append(

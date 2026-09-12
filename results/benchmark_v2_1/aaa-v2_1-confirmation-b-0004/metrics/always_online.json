@@ -1,0 +1,517 @@
+{
+  "bounce_events": 164,
+  "bounce_transitions": 164,
+  "bounce_walls": {
+    "lower": 90,
+    "upper": 74
+  },
+  "branch": "main",
+  "episodes": 500,
+  "event_episodes": 164,
+  "family": "always_online",
+  "no_event_episodes": 336,
+  "predictors": {
+    "candidate_frozen": {
+      "best_replica_mae": 5.273900780801918e-06,
+      "episode_balanced_mae": 6.239677458667117e-06,
+      "event_episode_balanced_mae": 4.686665514225599e-11,
+      "event_p95": 9.993211813608123e-11,
+      "event_p99": 1.1776629386950343e-10,
+      "event_pooled_mae": 4.686665514225599e-11,
+      "median": 3.792996472462562e-11,
+      "non_event_pooled_mae": 8.639889088147156e-06,
+      "p95": 7.530745749217972e-11,
+      "p99": 1.0555098073350403e-10,
+      "pooled_transition_mae": 8.620016239278647e-06,
+      "post_change_cumulative_mean": 0.001764493309703154,
+      "post_change_window_mae": 3.528986619406307e-05,
+      "recovery_status_counts": {
+        "no_intervention": 335,
+        "recovered": 165
+      },
+      "recovery_time_steps": {
+        "count": 165,
+        "max": 8.0,
+        "median": 8.0,
+        "p90": 8.0,
+        "p95": 8.0
+      },
+      "replica_mae": {
+        "0": 5.625649477106126e-06,
+        "1": 5.273900780801918e-06,
+        "2": 6.231116632469718e-06,
+        "3": 6.512759474334037e-06,
+        "4": 7.554960928623789e-06
+      },
+      "replica_mae_mean": 6.239677458667117e-06,
+      "signed_bias": -3.490914533728501e-07,
+      "strata": {
+        "segment:bouncing": {
+          "episodes": 165,
+          "mae": 5.342848042788154e-06,
+          "p95": 6.612113079285109e-11,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:changed": {
+          "episodes": 165,
+          "mae": 1.3565224869152217e-05,
+          "p95": 8.95719498572589e-11,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:straight": {
+          "episodes": 170,
+          "mae": 3.940507880815431e-11,
+          "p95": 6.427922361051941e-11,
+          "replicas": 5,
+          "transitions": 6290
+        }
+      },
+      "worst_replica_mae": 7.554960928623789e-06
+    },
+    "candidate_no_reflect": {
+      "best_replica_mae": 1.2095087307931404e-05,
+      "episode_balanced_mae": 1.4568646662180448e-05,
+      "event_episode_balanced_mae": 0.0034995690941972994,
+      "event_p95": 0.009179398737949852,
+      "event_p99": 0.011062046243434143,
+      "event_pooled_mae": 0.0034995690941972994,
+      "median": 3.796624126195525e-11,
+      "non_event_pooled_mae": 1.2104719030565024e-05,
+      "p95": 7.655364796937958e-11,
+      "p99": 1.125285417624688e-10,
+      "pooled_transition_mae": 2.0126376218886824e-05,
+      "post_change_cumulative_mean": 0.0023853071184298967,
+      "post_change_window_mae": 4.770614236859792e-05,
+      "recovery_status_counts": {
+        "no_intervention": 335,
+        "recovered": 165
+      },
+      "recovery_time_steps": {
+        "count": 165,
+        "max": 8.0,
+        "median": 8.0,
+        "p90": 8.0,
+        "p95": 8.0
+      },
+      "replica_mae": {
+        "0": 1.2995539292771942e-05,
+        "1": 1.2095087307931404e-05,
+        "2": 1.4620100932719831e-05,
+        "3": 1.3863351677781945e-05,
+        "4": 1.9269154099697126e-05
+      },
+      "replica_mae_mean": 1.456864666218045e-05,
+      "signed_bias": -5.940220344613643e-07,
+      "strata": {
+        "segment:bouncing": {
+          "episodes": 165,
+          "mae": 1.6366154453992882e-05,
+          "p95": 6.645128891591412e-11,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:changed": {
+          "episodes": 165,
+          "mae": 2.778121907465456e-05,
+          "p95": 9.063584327506643e-11,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:straight": {
+          "episodes": 170,
+          "mae": 3.940507880815431e-11,
+          "p95": 6.427922361051941e-11,
+          "replicas": 5,
+          "transitions": 6290
+        }
+      },
+      "worst_replica_mae": 1.9269154099697126e-05
+    },
+    "candidate_online": {
+      "best_replica_mae": 5.7483652254524785e-06,
+      "episode_balanced_mae": 6.840956252313806e-06,
+      "event_episode_balanced_mae": 2.6044004514456203e-07,
+      "event_p95": 6.016306481670951e-07,
+      "event_p99": 2.1829917760749013e-06,
+      "event_pooled_mae": 2.6044004514456203e-07,
+      "median": 7.623052375449468e-08,
+      "non_event_pooled_mae": 9.268181660786008e-06,
+      "p95": 2.5749033098079044e-06,
+      "p99": 1.651780947781475e-05,
+      "pooled_transition_mae": 9.247462591712162e-06,
+      "post_change_cumulative_mean": 0.00191906803344572,
+      "post_change_window_mae": 3.83813606689144e-05,
+      "recovery_status_counts": {
+        "no_intervention": 335,
+        "recovered": 165
+      },
+      "recovery_time_steps": {
+        "count": 165,
+        "max": 13.0,
+        "median": 10.0,
+        "p90": 11.0,
+        "p95": 11.0
+      },
+      "replica_mae": {
+        "0": 6.120936706245828e-06,
+        "1": 5.7483652254524785e-06,
+        "2": 7.011931496140762e-06,
+        "3": 7.237092323504893e-06,
+        "4": 8.086455510225066e-06
+      },
+      "replica_mae_mean": 6.840956252313806e-06,
+      "signed_bias": -4.3880044559026006e-07,
+      "strata": {
+        "segment:bouncing": {
+          "episodes": 165,
+          "mae": 5.571611111156861e-06,
+          "p95": 1.1090504647537335e-06,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:changed": {
+          "episodes": 165,
+          "mae": 1.4609691620709491e-05,
+          "p95": 4.295114781305286e-06,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:straight": {
+          "episodes": 170,
+          "mae": 5.327245611703195e-07,
+          "p95": 2.0160731394880385e-06,
+          "replicas": 5,
+          "transitions": 6290
+        }
+      },
+      "worst_replica_mae": 8.086455510225066e-06
+    },
+    "constant_motion": {
+      "best_replica_mae": 1.2095048534976805e-05,
+      "episode_balanced_mae": 1.4568607333367984e-05,
+      "event_episode_balanced_mae": 0.003499569141063958,
+      "event_p95": 0.009179398826958184,
+      "event_p99": 0.011062046305025218,
+      "event_pooled_mae": 0.003499569141063958,
+      "median": 0.0,
+      "non_event_pooled_mae": 1.2104679532195397e-05,
+      "p95": 0.0,
+      "p99": 2.7755575615628914e-17,
+      "pooled_transition_mae": 2.0126336919168878e-05,
+      "post_change_cumulative_mean": 0.0023853049507356347,
+      "post_change_window_mae": 4.770609901471269e-05,
+      "recovery_status_counts": {
+        "no_intervention": 335,
+        "recovered": 165
+      },
+      "recovery_time_steps": {
+        "count": 165,
+        "max": 8.0,
+        "median": 8.0,
+        "p90": 8.0,
+        "p95": 8.0
+      },
+      "replica_mae": {
+        "0": 1.299550785875043e-05,
+        "1": 1.2095048534976805e-05,
+        "2": 1.4620061254345011e-05,
+        "3": 1.3863314756444154e-05,
+        "4": 1.9269104262323518e-05
+      },
+      "replica_mae_mean": 1.4568607333367984e-05,
+      "signed_bias": -5.940194208950838e-07,
+      "strata": {
+        "segment:bouncing": {
+          "episodes": 165,
+          "mae": 1.636611701786614e-05,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:changed": {
+          "episodes": 165,
+          "mae": 2.7781177931733597e-05,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:straight": {
+          "episodes": 170,
+          "mae": 2.0112036484198515e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 6290
+        }
+      },
+      "worst_replica_mae": 1.9269104262323518e-05
+    },
+    "constant_motion_reflected": {
+      "best_replica_mae": 5.273861821661614e-06,
+      "episode_balanced_mae": 6.2396379363701525e-06,
+      "event_episode_balanced_mae": 2.030895776753335e-17,
+      "event_p95": 2.220446049250313e-16,
+      "event_p99": 2.220446049250313e-16,
+      "event_pooled_mae": 2.030895776753335e-17,
+      "median": 0.0,
+      "non_event_pooled_mae": 8.639849537961808e-06,
+      "p95": 0.0,
+      "p99": 6.938893903907228e-18,
+      "pooled_transition_mae": 8.61997667226444e-06,
+      "post_change_cumulative_mean": 0.0017644911300440341,
+      "post_change_window_mae": 3.528982260088068e-05,
+      "recovery_status_counts": {
+        "no_intervention": 335,
+        "recovered": 165
+      },
+      "recovery_time_steps": {
+        "count": 165,
+        "max": 8.0,
+        "median": 8.0,
+        "p90": 8.0,
+        "p95": 8.0
+      },
+      "replica_mae": {
+        "0": 5.625617952305139e-06,
+        "1": 5.273861821661614e-06,
+        "2": 6.2310767600309505e-06,
+        "3": 6.512722423411515e-06,
+        "4": 7.554910724441543e-06
+      },
+      "replica_mae_mean": 6.2396379363701525e-06,
+      "signed_bias": -3.490888483524508e-07,
+      "strata": {
+        "segment:bouncing": {
+          "episodes": 165,
+          "mae": 5.3428103503483325e-06,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:changed": {
+          "episodes": 165,
+          "mae": 1.356518339622768e-05,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:straight": {
+          "episodes": 170,
+          "mae": 2.0112036484198515e-19,
+          "p95": 0.0,
+          "replicas": 5,
+          "transitions": 6290
+        }
+      },
+      "worst_replica_mae": 7.554910724441543e-06
+    },
+    "legacy_linear_sgd": {
+      "best_replica_mae": 0.0036938926394256386,
+      "episode_balanced_mae": 0.0046089792217694665,
+      "event_episode_balanced_mae": 0.004929594948125553,
+      "event_p95": 0.01125423949546349,
+      "event_p99": 0.014020067929092462,
+      "event_pooled_mae": 0.004929594948125553,
+      "median": 0.004722850787676064,
+      "non_event_pooled_mae": 0.004681672344266654,
+      "p95": 0.010240920111408824,
+      "p99": 0.012294990648653723,
+      "pooled_transition_mae": 0.004682242601027284,
+      "post_change_cumulative_mean": 0.26604501257311025,
+      "post_change_window_mae": 0.005320900251462206,
+      "recovery_status_counts": {
+        "no_intervention": 335,
+        "no_measured_shock": 148,
+        "unrecovered": 17
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 0.004794560344079222,
+        "1": 0.003917748582770544,
+        "2": 0.006512077418309929,
+        "3": 0.0036938926394256386,
+        "4": 0.0041266171242619965
+      },
+      "replica_mae_mean": 0.0046089792217694665,
+      "signed_bias": 0.0016944929283188447,
+      "strata": {
+        "segment:bouncing": {
+          "episodes": 165,
+          "mae": 0.004525479773939355,
+          "p95": 0.009970019394674243,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:changed": {
+          "episodes": 165,
+          "mae": 0.004890345296155728,
+          "p95": 0.010437391029564591,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:straight": {
+          "episodes": 170,
+          "mae": 0.004416932201876732,
+          "p95": 0.01006362928529175,
+          "replicas": 5,
+          "transitions": 6290
+        }
+      },
+      "worst_replica_mae": 0.006512077418309929
+    },
+    "persistence": {
+      "best_replica_mae": 0.002710752020130317,
+      "episode_balanced_mae": 0.002847370961602572,
+      "event_episode_balanced_mae": 0.0020259881341503244,
+      "event_p95": 0.00469742427999042,
+      "event_p99": 0.005758547755159481,
+      "event_pooled_mae": 0.0020259881341503244,
+      "median": 0.0027828587420720696,
+      "non_event_pooled_mae": 0.002860508277442337,
+      "p95": 0.005185699258433041,
+      "p99": 0.006303647545077451,
+      "pooled_transition_mae": 0.0028585887640692666,
+      "post_change_cumulative_mean": 0.16008338533405395,
+      "post_change_window_mae": 0.0032016677066810787,
+      "recovery_status_counts": {
+        "no_intervention": 335,
+        "no_measured_shock": 165
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 0.0028103742906065397,
+        "1": 0.002710752020130317,
+        "2": 0.0027789025119051114,
+        "3": 0.002836272660985789,
+        "4": 0.003100553324385104
+      },
+      "replica_mae_mean": 0.0028473709616025724,
+      "signed_bias": 3.2204856391171105e-05,
+      "strata": {
+        "segment:bouncing": {
+          "episodes": 165,
+          "mae": 0.0027499456712689065,
+          "p95": 0.0038472089779449936,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:changed": {
+          "episodes": 165,
+          "mae": 0.002975092816931515,
+          "p95": 0.005916105222470113,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:straight": {
+          "episodes": 170,
+          "mae": 0.0028179654720483327,
+          "p95": 0.0038041585179830195,
+          "replicas": 5,
+          "transitions": 6290
+        }
+      },
+      "worst_replica_mae": 0.003100553324385104
+    },
+    "zero_control": {
+      "best_replica_mae": 0.002710752020130317,
+      "episode_balanced_mae": 0.002847370961602572,
+      "event_episode_balanced_mae": 0.0020259881341503244,
+      "event_p95": 0.00469742427999042,
+      "event_p99": 0.005758547755159481,
+      "event_pooled_mae": 0.0020259881341503244,
+      "median": 0.0027828587420720696,
+      "non_event_pooled_mae": 0.002860508277442337,
+      "p95": 0.005185699258433041,
+      "p99": 0.006303647545077451,
+      "pooled_transition_mae": 0.0028585887640692666,
+      "post_change_cumulative_mean": 0.16008338533405395,
+      "post_change_window_mae": 0.0032016677066810787,
+      "recovery_status_counts": {
+        "no_intervention": 335,
+        "no_measured_shock": 165
+      },
+      "recovery_time_steps": {
+        "count": 0,
+        "max": null,
+        "median": null,
+        "p90": null,
+        "p95": null
+      },
+      "replica_mae": {
+        "0": 0.0028103742906065397,
+        "1": 0.002710752020130317,
+        "2": 0.0027789025119051114,
+        "3": 0.002836272660985789,
+        "4": 0.003100553324385104
+      },
+      "replica_mae_mean": 0.0028473709616025724,
+      "signed_bias": 3.2204856391171105e-05,
+      "strata": {
+        "segment:bouncing": {
+          "episodes": 165,
+          "mae": 0.0027499456712689065,
+          "p95": 0.0038472089779449936,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:changed": {
+          "episodes": 165,
+          "mae": 0.002975092816931515,
+          "p95": 0.005916105222470113,
+          "replicas": 5,
+          "transitions": 32505
+        },
+        "segment:straight": {
+          "episodes": 170,
+          "mae": 0.0028179654720483327,
+          "p95": 0.0038041585179830195,
+          "replicas": 5,
+          "transitions": 6290
+        }
+      },
+      "worst_replica_mae": 0.003100553324385104
+    }
+  },
+  "replicas": 5,
+  "stratum_episodes": {
+    "segment:bouncing": 165,
+    "segment:changed": 165,
+    "segment:straight": 170
+  },
+  "stratum_replicas": {
+    "segment:bouncing": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "segment:changed": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "segment:straight": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  }
+}

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gzip
 import hashlib
+import io
 import json
 import os
 import platform
@@ -28,7 +29,8 @@ def json_dump(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(
-        json.dumps(value, indent=2, sort_keys=True, default=_default) + "\n", encoding="utf-8"
+        json.dumps(value, indent=2, sort_keys=True, default=_default, allow_nan=False) + "\n",
+        encoding="utf-8",
     )
     temporary.replace(path)
 
@@ -58,9 +60,13 @@ def sha256_text(text: str) -> str:
 def write_jsonl_gz(path: Path, records: Sequence[StepRecord]) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
-    with gzip.open(temporary, "wt", encoding="utf-8", compresslevel=6) as handle:
+    with (
+        temporary.open("wb") as raw,
+        gzip.GzipFile(filename="", mode="wb", fileobj=raw, compresslevel=6, mtime=0) as compressed,
+        io.TextIOWrapper(compressed, encoding="utf-8", newline="\n") as handle,
+    ):
         for record in records:
-            handle.write(json.dumps(record.to_dict(), sort_keys=True) + "\n")
+            handle.write(json.dumps(record.to_dict(), sort_keys=True, allow_nan=False) + "\n")
     temporary.replace(path)
     return sha256_file(path)
 
@@ -399,18 +405,40 @@ def verify_checksums(run_dir: Path) -> dict[str, Any]:
     stored = json.loads(checksum_path.read_text(encoding="utf-8"))
     mismatched: list[str] = []
     missing: list[str] = []
+    unsafe: list[str] = []
     for relative, digest in stored.items():
-        target = run_dir / relative
+        if (
+            not isinstance(relative, str)
+            or not isinstance(digest, str)
+            or len(digest) != 64
+            or any(character not in "0123456789abcdef" for character in digest.lower())
+        ):
+            unsafe.append(str(relative))
+            continue
+        candidate = Path(relative)
+        if candidate.is_absolute() or ".." in candidate.parts or not candidate.parts:
+            unsafe.append(relative)
+            continue
+        target = run_dir / candidate
+        try:
+            target.resolve(strict=False).relative_to(run_dir.resolve())
+        except ValueError:
+            unsafe.append(relative)
+            continue
+        if target.is_symlink():
+            unsafe.append(relative)
+            continue
         if not target.exists():
             missing.append(relative)
             continue
         if sha256_file(target) != digest:
             mismatched.append(relative)
     return {
-        "ok": not mismatched and not missing,
+        "ok": not mismatched and not missing and not unsafe,
         "files": len(stored),
         "missing": missing,
         "mismatched": mismatched,
+        "unsafe": unsafe,
     }
 
 

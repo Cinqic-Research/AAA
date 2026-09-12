@@ -18,6 +18,7 @@ from unittest import mock
 
 from aaa import cli
 from aaa.benchmark import runner as runner_module
+from aaa.benchmark.evidence import iter_raw_records
 from aaa.benchmark.gates import FAIL, INSUFFICIENT_EVIDENCE, NOT_VERIFIED, PASS
 from aaa.benchmark.runner import ConfirmationError, RunOutcome, run_benchmark
 from aaa.benchmark.seeds import ConfirmationBatchRegistry
@@ -216,6 +217,28 @@ class RunnerEnforcementTests(unittest.TestCase):
                 project_root=PROJECT,
             )
 
+    def test_trial_start_is_persisted_before_observation_can_fail(self):
+        def fail_after_start(*args, **kwargs):
+            kwargs["start_sink"](args[2][0])
+            raise RuntimeError("simulated observation failure")
+
+        with (
+            mock.patch.object(runner_module, "run_motion_family", side_effect=fail_after_start),
+            self.assertRaisesRegex(RuntimeError, "simulated observation failure"),
+        ):
+            run_benchmark(
+                role="development",
+                output_root=self.root / "runs",
+                attempt_label="interrupted",
+                replicas=1,
+                episodes=1,
+                project_root=PROJECT,
+            )
+        registry = runner_module.ExperimentRegistry.load(
+            self.root / "runs" / "benchmark-v2_1" / "interrupted" / "experiment_registry.json"
+        )
+        self.assertEqual(registry.counts()["RUNNING"], 1)
+
 
 class InformationalCommandTests(unittest.TestCase):
     def test_spec_hash_prints_the_canonical_identity(self):
@@ -273,6 +296,48 @@ class RecomputeCommandTests(unittest.TestCase):
     def test_recompute_of_a_missing_run_fails(self):
         with tempfile.TemporaryDirectory() as directory, self.assertRaises(FileNotFoundError):
             invoke(["recompute", str(Path(directory) / "nothing")])
+
+    def test_recompute_rejects_non_finite_stored_scientific_results(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = run_benchmark(
+                role="development",
+                output_root=Path(directory) / "runs",
+                attempt_label="non-finite-recompute",
+                replicas=1,
+                episodes=1,
+                project_root=PROJECT,
+            )
+            summary_path = result.directory / "summary.json"
+            summary = json.loads(summary_path.read_text())
+            summary["results"]["constant_velocity"]["predictors"]["candidate_frozen"][
+                "episode_balanced_mae"
+            ] = float("nan")
+            summary_path.write_text(json.dumps(summary))
+            code, _, _ = invoke(["recompute", str(result.directory), "--no-verify-checksums"])
+        self.assertNotEqual(code, 0)
+
+    def test_each_raw_record_names_its_own_replicas_training_lineage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = run_benchmark(
+                role="development",
+                output_root=Path(directory) / "runs",
+                attempt_label="replica-lineage",
+                replicas=2,
+                episodes=1,
+                project_root=PROJECT,
+            )
+            expected = result.summary["checkpoints"]["training_seeds"]
+            seen = set()
+            for _, records in iter_raw_records(result.directory):
+                if not records:
+                    continue
+                replica = records[0].identity.replica_id
+                seen.add(replica)
+                self.assertEqual(
+                    records[0].identity.training_seed_lineage,
+                    tuple(expected[str(replica)]),
+                )
+        self.assertEqual(seen, {0, 1})
 
 
 if __name__ == "__main__":

@@ -27,9 +27,10 @@ from typing import Any
 import numpy as np
 
 DEVELOPMENT_PURPOSE = "development"
-REGISTRY_SCHEMA = "aaa.confirmation_batches.v1"
+REGISTRY_SCHEMA = "aaa.confirmation_batches.v2"
+LEGACY_REGISTRY_SCHEMA = "aaa.confirmation_batches.v1"
 
-BATCH_STATUSES = ("planned", "consumed", "retired")
+BATCH_STATUSES = ("planned", "running", "consumed", "retired", "cancelled")
 CONFIRMATION_ROLES = ("confirmation_a", "confirmation_b")
 ROLES = ("development", "high_replication", *CONFIRMATION_ROLES)
 
@@ -110,6 +111,45 @@ class ConfirmationBatch:
     notes: str = ""
     consumed_by: list[str] = field(default_factory=list)
     outcome: str | None = None
+    claimed_by: str | None = None
+    claim_started_at: str | None = None
+
+    def validate(self) -> None:
+        """Status is a summary of durable evidence, never authority to erase it."""
+        if self.status not in BATCH_STATUSES or self.role not in CONFIRMATION_ROLES:
+            raise BatchRegistryError("invalid confirmation status or role")
+        if not isinstance(self.consumed_by, list) or any(
+            not isinstance(item, str) or not item.strip() for item in self.consumed_by
+        ):
+            raise BatchRegistryError("consumed_by must be a list of non-empty run identities")
+        if len(set(self.consumed_by)) != len(self.consumed_by):
+            raise BatchRegistryError("duplicate confirmation consumption records")
+        if self.status == "planned":
+            if self.consumed_by or self.outcome is not None or self.claimed_by or self.claim_started_at:
+                raise BatchRegistryError("planned batch contradicts durable evidence of prior use")
+        elif self.status == "running":
+            if (
+                self.consumed_by
+                or self.outcome is not None
+                or not self.claimed_by
+                or not self.claim_started_at
+            ):
+                raise BatchRegistryError("running batch requires one durable claim and no completed outcome")
+        elif self.status == "cancelled":
+            if (
+                self.consumed_by
+                or self.claimed_by
+                or self.claim_started_at
+                or self.outcome != "superseded_before_observation"
+            ):
+                raise BatchRegistryError("cancelled batch must have no execution evidence")
+        elif not self.consumed_by:
+            raise BatchRegistryError("consumed or retired batch has no evidence of execution")
+        elif (
+            self.outcome
+            != {"consumed": "all_required_gates_pass", "retired": "required_gate_failure"}[self.status]
+        ):
+            raise BatchRegistryError("confirmation status and outcome contradict one another")
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -121,26 +161,37 @@ class ConfirmationBatch:
             "notes": self.notes,
             "consumed_by": list(self.consumed_by),
             "outcome": self.outcome,
+            "claimed_by": self.claimed_by,
+            "claim_started_at": self.claim_started_at,
         }
 
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> ConfirmationBatch:
+        consumed = value.get("consumed_by", [])
+        if not isinstance(consumed, list) or any(not isinstance(item, str) for item in consumed):
+            raise BatchRegistryError("consumed_by must be a list of run identities")
         status = str(value["status"])
         if status not in BATCH_STATUSES:
             raise ValueError(f"batch status must be one of {BATCH_STATUSES}, got {status!r}")
         role = str(value["role"])
         if role not in CONFIRMATION_ROLES:
             raise ValueError(f"batch role must be one of {CONFIRMATION_ROLES}, got {role!r}")
-        return cls(
+        batch = cls(
             batch_id=str(value["batch_id"]),
             role=role,
             status=status,
             declared_at=str(value["declared_at"]),
             spec_hash=str(value["spec_hash"]),
             notes=str(value.get("notes", "")),
-            consumed_by=[str(item) for item in value.get("consumed_by", [])],
+            consumed_by=list(consumed),
             outcome=None if value.get("outcome") is None else str(value["outcome"]),
+            claimed_by=None if value.get("claimed_by") is None else str(value["claimed_by"]),
+            claim_started_at=(
+                None if value.get("claim_started_at") is None else str(value["claim_started_at"])
+            ),
         )
+        batch.validate()
+        return batch
 
 
 class BatchRegistryError(RuntimeError):
@@ -161,7 +212,7 @@ class ConfirmationBatchRegistry:
         if not source.exists():
             return cls(source)
         value = json.loads(source.read_text(encoding="utf-8"))
-        if value.get("schema_version") != REGISTRY_SCHEMA:
+        if value.get("schema_version") not in (REGISTRY_SCHEMA, LEGACY_REGISTRY_SCHEMA):
             raise BatchRegistryError(
                 f"unsupported confirmation batch registry schema {value.get('schema_version')!r}"
             )
@@ -172,6 +223,8 @@ class ConfirmationBatchRegistry:
         return cls(source, batches)
 
     def save(self) -> None:
+        for batch in self._batches.values():
+            batch.validate()
         payload = {
             "schema_version": REGISTRY_SCHEMA,
             "batches": [
@@ -221,6 +274,7 @@ class ConfirmationBatchRegistry:
         """Check that a batch may be used now, before any result is produced."""
 
         batch = self.get(batch_id)
+        batch.validate()
         if batch.role != role:
             raise BatchRegistryError(
                 f"confirmation batch {batch_id!r} was declared for role {batch.role!r}, not {role!r}"
@@ -231,26 +285,75 @@ class ConfirmationBatchRegistry:
                 f"but the resolved specification is {spec_hash[:12]}...; declare a new batch instead"
             )
         if reproduction:
-            if batch.status == "planned":
+            if not batch.consumed_by or batch.outcome is None:
                 raise BatchRegistryError(
                     f"confirmation batch {batch_id!r} has never been run; reproduction mode requires a consumed batch"
                 )
             return batch
-        if batch.status != "planned":
+        if batch.status != "planned" or batch.consumed_by or batch.outcome is not None:
             raise BatchRegistryError(
                 f"confirmation batch {batch_id!r} has status {batch.status!r}. A fresh confirmation requires an "
                 "unused batch. Use --reproduce to re-run an existing batch, or declare a new batch."
             )
         return batch
 
+    def reserve(
+        self,
+        batch_id: str,
+        role: str,
+        spec_hash: str,
+        *,
+        run_id: str,
+        resume: bool = False,
+    ) -> ConfirmationBatch:
+        """Persist exclusive local ownership before any confirmation observation."""
+
+        # Reload while holding a separate lock so two stale registry objects in
+        # one checkout cannot both turn the same planned batch into a fresh run.
+        import fcntl
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = self.path.with_suffix(self.path.suffix + ".lock")
+        with lock_path.open("a+", encoding="utf-8") as lock:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            fresh = type(self).load(self.path)
+            batch = fresh.get(batch_id)
+            if batch.role != role or batch.spec_hash != spec_hash:
+                fresh.claim(batch_id, role, spec_hash)
+            if resume and batch.status == "running" and batch.claimed_by == run_id:
+                self._batches = fresh._batches
+                return batch
+            fresh.claim(batch_id, role, spec_hash)
+            batch.status = "running"
+            batch.claimed_by = run_id
+            batch.claim_started_at = datetime.now(timezone.utc).isoformat()
+            fresh.save()
+            self._batches = fresh._batches
+            return batch
+
     def record_outcome(self, batch_id: str, run_id: str, *, passed: bool) -> ConfirmationBatch:
         """Record a completed confirmation. A failed batch is retired for good."""
 
         batch = self.get(batch_id)
+        if batch.status != "running" or batch.claimed_by != run_id:
+            raise BatchRegistryError("confirmation outcome requires the matching durable running claim")
         if run_id not in batch.consumed_by:
             batch.consumed_by.append(run_id)
         batch.outcome = "all_required_gates_pass" if passed else "required_gate_failure"
         batch.status = "consumed" if passed else "retired"
+        return batch
+
+    def cancel_unobserved(self, batch_id: str, *, reason: str) -> ConfirmationBatch:
+        """Permanently cancel a planned stream without pretending it ran."""
+
+        batch = self.get(batch_id)
+        batch.validate()
+        if batch.status != "planned":
+            raise BatchRegistryError("only an unobserved planned batch may be cancelled")
+        batch.status = "cancelled"
+        batch.outcome = "superseded_before_observation"
+        batch.notes = f"{batch.notes} Cancelled unobserved: {reason}".strip()
+        batch.validate()
         return batch
 
 

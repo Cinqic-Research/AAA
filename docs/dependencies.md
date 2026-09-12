@@ -12,6 +12,8 @@ installed set with `tools/check_lock.py`.
 | ruff | formatter and linter | MIT |
 | mypy | static type checking | MIT |
 | coverage | coverage measurement | Apache-2.0 |
+| build | wheel build frontend | MIT |
+| setuptools | pinned PEP 517 build backend | MIT |
 | Python standard library | JSON/JSONL, gzip, hashing, timing, CLI, platform metadata | PSF License |
 
 `psutil` is optional metadata enrichment only. When it is absent the run records
@@ -28,3 +30,8 @@ python -m pip install -e '.[dev]'
 python -m pip list --format=freeze
 python tools/check_lock.py
 ```
+
+`pyproject.toml` pins the PEP 517 backend itself to `setuptools==84.0.0`.
+The locked CI job installs the matching lock and builds with
+`python -m build --no-isolation`; `--no-deps` applies only when installing the
+already-built AAA wheel and is not presented as build-backend pinning.

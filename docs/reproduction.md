@@ -21,7 +21,7 @@ means the environment that was actually exercised.
 ## Verification suite
 
 ```bash
-python -m unittest discover -s tests -t . -v     # 377 tests
+python -m unittest discover -s tests -t . -v
 python -m ruff check .
 python -m ruff format --check .
 python -m mypy
@@ -62,18 +62,21 @@ batch, weakened minimums, a dirty source tree, or drift from the committed
 freeze manifest. It exits non-zero if any required gate is not `PASS`.
 
 ```bash
-python -m aaa.cli declare-batch aaa-v2_1-confirmation-a-0001 --role confirmation_a
-python -m aaa.cli declare-batch aaa-v2_1-confirmation-b-0001 --role confirmation_b
+python -m aaa.cli declare-batch <unused-a-id> --role confirmation_a
+python -m aaa.cli declare-batch <unused-b-id> --role confirmation_b
 python -m aaa.cli freeze \
-  --batch aaa-v2_1-confirmation-a-0001 \
-  --batch aaa-v2_1-confirmation-b-0001
+  --batch <unused-a-id> \
+  --batch <unused-b-id>
 git add benchmarks/freeze_manifest.json benchmarks/confirmation_batches.json
 git commit -m "Freeze the confirmation plan"
 
 python -m aaa.cli benchmark --role confirmation_a \
-  --batch-id aaa-v2_1-confirmation-a-0001 --output-root runs
+  --batch-id <unused-a-id> --output-root runs
+git add benchmarks/confirmation_batches.json results/benchmark_v2_1/<unused-a-id>
+git commit -m "Record confirmation A evidence"
+
 python -m aaa.cli benchmark --role confirmation_b \
-  --batch-id aaa-v2_1-confirmation-b-0001 --output-root runs
+  --batch-id <unused-b-id> --output-root runs
 ```
 
 Nothing may be tuned between A and B. A failed attempt is kept, its batch is
@@ -112,7 +115,10 @@ python -m aaa.cli benchmark --role confirmation_a \
 python -m aaa.cli recompute runs/benchmark-v2_1/<recorded batch id>
 ```
 
-The reproduction must match the recorded checksums.
+The original manifest verifies the original bytes only while all named files
+are available. A regenerated attempt must instead match the recorded scientific
+identity, trial design, metrics and gates. Runtime timestamps and provenance can
+differ, so regenerated whole-directory checksums are not claimed to be equal.
 
 ## Historical v1 track
 

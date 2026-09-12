@@ -1,12 +1,12 @@
 # Engineering handoff for independent review
 
-**Status: Opus engineering complete. Awaiting independent Astra review.**
+**Status: Prepared for GPT-5.6 Sol independent review and remediation.**
 **This document does not grant approval.**
 
 Every status below is a measured engineering outcome. None of it is an
-approval decision, and none of it should be read as one. GPT-6 Astra is the
-designated independent reviewer and is the only reviewer authorized to issue
-an APPROVED or DECLINED decision.
+approval decision, and none of it should be read as one. GPT-5.6 Sol is the
+current designated independent reviewer and remediation owner. Sol's verdict
+is recorded separately in `sol_review.md` only after the final evidence qualifies.
 
 ## 1. Identity
 
@@ -14,13 +14,14 @@ an APPROVED or DECLINED decision.
 |---|---|
 | starting `main` | `235ce28518ca4ec3a9a240066154090a33b33470` |
 | engineering branch | `opus/aaa-complete-engineering-repair` |
-| merge commit on `main` | `7c11639656267787045c2a849ff51426bba9a4d7` |
-| tag | `opus-independent-engineering-complete-awaiting-astra-review` |
-| tag target | `61bd516ee475b8f21f56235875faf47ebda363f9` |
+| merge commit on `main` | `03923083ed1619cde01816922e6c9968031d59ba` |
+| review baseline | `03923083ed1619cde01816922e6c9968031d59ba` |
+| historical handoff tag | `opus-independent-engineering-complete-awaiting-astra-review` (provenance only) |
+| historical tag target | `03923083ed1619cde01816922e6c9968031d59ba` |
 | protocol | `aaa.benchmark.v2.1` |
 | specification hash | `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
-| dependency lock hash | `6370808d7f23a04fce4f86b136210e1669063d6ef8113509381eec6655730ec3` |
-| freeze manifest source | `2fe2f2f3704c0194d233d5a6f9f135d401f0ddd9`, dirty: no |
+| dependency lock hash | `2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7` |
+| freeze manifest source | `fadf9af0281dc71e1659e357218a18fd3af067c8`, dirty: yes |
 | A/B relationship | `shared_frozen_checkpoints` |
 
 ### Selected candidate
@@ -47,31 +48,31 @@ Frozen checkpoint hashes (shared by A and B, by declared design):
 
 | | Confirmation A | Confirmation B |
 |---|---|---|
-| batch id | `aaa-v2_1-confirmation-a-0002` | `aaa-v2_1-confirmation-b-0002` |
+| batch id | `aaa-v2_1-confirmation-a-0004` | `aaa-v2_1-confirmation-b-0004` |
 | all required gates pass | **yes** | **yes** |
 | unmet required gates | none | none |
-| source commit | `f1b94cc4084e` | `936b6bec6ef1` |
+| source commit | `11ba061d2c33` | `dc4a6e1988c0` |
 | source dirty | no | no |
-| runtime | 288.1 s | 291.7 s |
+| runtime | 666.2 s | 666.6 s |
 
 ### Every gate, both attempts
 
 | Gate | Required | A | A observed | B | B observed |
 |---|---|---|---:|---|---:|
-| `stratum_coverage` | yes | **PASS** | 820 | **PASS** | 826 |
-| `constant_velocity_identification` | yes | **PASS** | 3.904e-11 | **PASS** | 3.888e-11 |
+| `stratum_coverage` | yes | **PASS** | 829 | **PASS** | 830 |
+| `constant_velocity_identification` | yes | **PASS** | 3.908e-11 | **PASS** | 3.895e-11 |
 | `learning_progress` | yes | **PASS** | 1 | **PASS** | 1 |
-| `frozen_prediction_accuracy` | yes | **PASS** | 5.347e-06 | **PASS** | 5.480e-06 |
-| `bounce_event_accuracy` | yes | **PASS** | 3.396e-11 | **PASS** | 3.381e-11 |
-| `speed_change_frozen_robustness` | yes | **PASS** | 4.450e-05 | **PASS** | 4.273e-05 |
-| `changed_law_adaptation` | yes | **PASS** | 0.7635 | **PASS** | 0.7517 |
-| `unchanged_control` | yes | **PASS** | -4.906e-08 | **PASS** | -6.766e-08 |
-| `recovery` | yes | **PASS** | 0.9679 | **PASS** | 0.9688 |
-| `always_online_stability` | yes | **PASS** | 6.712e-06 | **PASS** | 7.308e-06 |
-| `speed_extrapolation_report` | no | **PASS** | 1.113e-10 | **PASS** | 1.111e-10 |
+| `frozen_prediction_accuracy` | yes | **PASS** | 5.536e-06 | **PASS** | 5.467e-06 |
+| `bounce_event_accuracy` | yes | **PASS** | 3.377e-11 | **PASS** | 3.396e-11 |
+| `speed_change_frozen_robustness` | yes | **PASS** | 4.136e-05 | **PASS** | 4.063e-05 |
+| `changed_law_adaptation` | yes | **PASS** | 0.7514 | **PASS** | 0.7542 |
+| `unchanged_control` | yes | **PASS** | -5.705e-08 | **PASS** | -5.341e-08 |
+| `recovery` | yes | **PASS** | 0.9746 | **PASS** | 0.9658 |
+| `always_online_stability` | yes | **PASS** | 6.880e-06 | **PASS** | 6.841e-06 |
+| `speed_extrapolation_report` | no | **PASS** | 1.102e-10 | **PASS** | 1.084e-10 |
 | `correctness` | yes | **PASS** | 0 | **PASS** | 0 |
 | `reproducibility` | yes | **PASS** | 0 | **PASS** | 0 |
-| `cpu_usability` | yes | **PASS** | 0.03093 | **PASS** | 0.03424 |
+| `cpu_usability` | yes | **PASS** | 0.03245 | **PASS** | 0.03319 |
 
 ## 2b. Round 1 — the confirmation that failed
 
@@ -131,8 +132,8 @@ confirmation batch was generated.
 Measured decomposition in confirmation A:
 
 - versus raw constant motion: 1 [1, 1]
-- versus reflected constant motion: -1.233e+06 [-1.896e+06, -8.283e+05]
-- candidate without reflection versus raw constant motion: 1.198e-08 [8.181e-09, 1.565e-08]
+- versus reflected constant motion: -1.141e+06 [-1.626e+06, -7.357e+05]
+- candidate without reflection versus raw constant motion: 1.209e-08 [8.192e-09, 1.582e-08]
 
 The middle row is the honest one.
 
@@ -163,10 +164,10 @@ without trusting the runtime.
 
 | Comparison | A | B |
 |---|---|---|
-| online vs identical frozen copy | 0.7635 [0.7515, 0.7735] | 0.7517 [0.7376, 0.7626] |
-| online vs persistence | 0.9617 [0.9593, 0.9643] | 0.9601 [0.9579, 0.9621] |
-| online vs constant motion (non-regression margin) | -0.01581 [-0.01771, -0.01405] | -0.0146 [-0.01612, -0.01313] |
-| unchanged-world control margin | -1.012e-05 [-1.017e-05, -1.009e-05] | -1.016e-05 [-1.021e-05, -1.012e-05] |
+| online vs identical frozen copy | 0.7514 [0.7401, 0.7613] | 0.7542 [0.7434, 0.765] |
+| online vs persistence | 0.9594 [0.957, 0.9617] | 0.9599 [0.9579, 0.9617] |
+| online vs constant motion (non-regression margin) | -0.01504 [-0.01653, -0.0137] | -0.01501 [-0.01657, -0.0135] |
+| unchanged-world control margin | -1.015e-05 [-1.020e-05, -1.012e-05] | -1.014e-05 [-1.018e-05, -1.010e-05] |
 
 The v2 result reported roughly 55% improvement over the frozen copy. That
 signal survives the repaired statistics, the stabilized learner, the corrected
@@ -180,15 +181,15 @@ denominator entirely. Unrecovered events are counted.
 
 | | A | B |
 |---|---:|---:|
-| eligible | 467 | 480 |
-| recovered | 452 | 465 |
-| unrecovered within horizon | 15 | 15 |
-| rate | 0.9679 | 0.9688 |
-| ineligible reasons (A) | {"no_measured_shock": 33} | |
-| ineligible reasons (B) | {"no_measured_shock": 20} | |
-| recovery time median / p90 / p95 | 19 / 25 / 29.45 | 19 / 25 / 30 |
+| eligible | 473 | 468 |
+| recovered | 461 | 452 |
+| unrecovered within horizon | 12 | 16 |
+| rate | 0.9746 | 0.9658 |
+| ineligible reasons (A) | {"no_measured_shock": 27} | |
+| ineligible reasons (B) | {"no_measured_shock": 32} | |
+| recovery time median / p90 / p95 | 20 / 26 / 30 | 19 / 26 / 32 |
 
-Per-replica recovery rates, confirmation A: `r0` 0.9783, `r1` 0.9785, `r2` 0.9588, `r3` 0.9785, `r4` 0.9457.
+Per-replica recovery rates, confirmation A: `r0` 0.9684, `r1` 0.9681, `r2` 0.9688, `r3` 0.9787, `r4` 0.9894.
 
 ### Reproducibility
 
@@ -217,9 +218,9 @@ Per-replica recovery rates, confirmation A: `r0` 0.9783, `r1` 0.9785, `r2` 0.958
 
 | Operation | p50 (ms) | p95 (ms) | p99 (ms) |
 |---|---:|---:|---:|
-| predict | 0.00416 | 0.00452 | 0.00532 |
-| update | 0.02485 | 0.02621 | 0.03262 |
-| predict+update | 0.02902 | 0.03093 | 0.0373 |
+| predict | 0.00431 | 0.00497 | 0.005871 |
+| update | 0.02523 | 0.02726 | 0.03632 |
+| predict+update | 0.02956 | 0.03245 | 0.04175 |
 
 Samples 2,000, warm-up 200 excluded, failures 0, on the selected candidate itself (forgetting 0.3).
 
@@ -278,7 +279,7 @@ Samples 2,000, warm-up 200 excluded, failures 0, on the selected candidate itsel
 
 ```bash
 git clone https://github.com/Cinqic/AAA.git && cd AAA
-git checkout opus-independent-engineering-complete-awaiting-astra-review
+git checkout 03923083ed1619cde01816922e6c9968031d59ba
 python3 -m venv .venv && . .venv/bin/activate
 python -m pip install -r requirements-lock.txt
 python -m pip install -e . --no-deps
@@ -293,14 +294,14 @@ python tools/check_exit_codes.py
 python -m aaa.cli spec-hash
 
 # regenerate a confirmation attempt from its recorded batch identity
-python -m aaa.cli benchmark --role confirmation_a --batch-id aaa-v2_1-confirmation-a-0002 \
+python -m aaa.cli benchmark --role confirmation_a --batch-id aaa-v2_1-confirmation-a-0004 \
   --reproduce --output-root runs
 ```
 
 ### Recompute every metric and gate without retraining or re-simulating
 
 ```bash
-python -m aaa.cli recompute runs/benchmark-v2_1/aaa-v2_1-confirmation-a-0002
+python -m aaa.cli recompute runs/benchmark-v2_1/aaa-v2_1-confirmation-a-0004
 ```
 
 This verifies checksums and the specification hash first and exits non-zero if
@@ -310,14 +311,13 @@ any stored gate status fails to reproduce.
 
 | What | Where |
 |---|---|
-| confirmation A summary and report | `results/benchmark_v2_1/aaa-v2_1-confirmation-a-0002/` |
-| confirmation B summary and report | `results/benchmark_v2_1/aaa-v2_1-confirmation-b-0002/` |
+| confirmation A summary and report | `results/benchmark_v2_1/aaa-v2_1-confirmation-a-0004/` |
+| confirmation B summary and report | `results/benchmark_v2_1/aaa-v2_1-confirmation-b-0004/` |
 | freeze manifest | `benchmarks/freeze_manifest.json` |
 | batch registry | `benchmarks/confirmation_batches.json` |
 | golden seed fixture | `benchmarks/golden_seeds.json` |
 | canonical specification | `aaa/benchmark/data/benchmark_v2_1.json` |
 | pre-repair defect reproduction | `docs/evidence/pre_repair_probes.json` |
-| learner diagnosis | `docs/evidence/diagnosis/` |
 | candidate selection | `docs/evidence/candidate_selection.json` |
 | issue ledger | `docs/issue_ledger.md` |
 | errata | `docs/errata.md` |
@@ -344,5 +344,5 @@ what was found, not as a verdict.
 
 ---
 
-**Opus independent engineering complete. Awaiting Astra independent review.**
-**No independent approval decision has been made.**
+**Prepared for GPT-5.6 Sol independent review and remediation.**
+**The handoff itself is not an approval decision.**
