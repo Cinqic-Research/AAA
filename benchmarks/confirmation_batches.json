@@ -43,6 +43,18 @@
       "status": "retired"
     },
     {
+      "batch_id": "aaa-v2_1-confirmation-a-0004",
+      "claim_started_at": null,
+      "claimed_by": null,
+      "consumed_by": [],
+      "declared_at": "2026-09-12T20:39:06.473151+00:00",
+      "notes": "Fresh Sol-review A after AAA-127 repair; predeclared before observation",
+      "outcome": null,
+      "role": "confirmation_a",
+      "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
+      "status": "planned"
+    },
+    {
       "batch_id": "aaa-v2_1-confirmation-b-0001",
       "claim_started_at": null,
       "claimed_by": null,
@@ -81,6 +93,18 @@
       "role": "confirmation_b",
       "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
       "status": "cancelled"
+    },
+    {
+      "batch_id": "aaa-v2_1-confirmation-b-0004",
+      "claim_started_at": null,
+      "claimed_by": null,
+      "consumed_by": [],
+      "declared_at": "2026-09-12T20:39:06.603959+00:00",
+      "notes": "Fresh Sol-review B; shared frozen checkpoints and independent evaluation stream; predeclared before observation",
+      "outcome": null,
+      "role": "confirmation_b",
+      "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
+      "status": "planned"
     }
   ],
   "schema_version": "aaa.confirmation_batches.v2"

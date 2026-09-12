@@ -67,7 +67,7 @@
       "factor_low": 0.45
     }
   },
-  "frozen_at_utc": "2026-09-12T20:21:43.940914+00:00",
+  "frozen_at_utc": "2026-09-12T20:39:07.874258+00:00",
   "gates": [
     {
       "evaluator": "coverage",
@@ -207,10 +207,10 @@
       "threshold": {}
     }
   ],
-  "notes": "Frozen for untuned Sol-review confirmation pair after all scientific repairs",
+  "notes": "Untuned fresh pair after preserving failed A-0003 and repairing AAA-127",
   "planned_confirmation_batches": [
-    "aaa-v2_1-confirmation-a-0003",
-    "aaa-v2_1-confirmation-b-0003"
+    "aaa-v2_1-confirmation-a-0004",
+    "aaa-v2_1-confirmation-b-0004"
   ],
   "protocol_status": "active",
   "protocol_version": "aaa.benchmark.v2.1",
@@ -235,7 +235,7 @@
   },
   "schema_version": "aaa.freeze_manifest.v2",
   "source": {
-    "commit": "2e54cc3696baf52dd4edc544090d5861dec5cccc",
+    "commit": "fadf9af0281dc71e1659e357218a18fd3af067c8",
     "dirty": true,
     "scientific_fingerprint": {
       "files": {
@@ -325,11 +325,11 @@
         },
         "aaa/benchmark/runner.py": {
           "executable": false,
-          "sha256": "2ee5646c419c7f553ca7a41038122fab1e20a0a78fa70f656c100ddad6575ea9"
+          "sha256": "99ed136f98660ad54c035423c51fbff55d361f4b3123c685e68687bef6c4d39e"
         },
         "aaa/benchmark/seeds.py": {
           "executable": false,
-          "sha256": "0031773ac35aa92dba58f439d2e563e17cc0ddcf3bd29c46dd00ae77b417aabb"
+          "sha256": "7894637cd8455c293e9a003023f6f84cd91f1d5e59386da5b99d2f97e9f0bdc8"
         },
         "aaa/benchmark/source_identity.py": {
           "executable": false,
@@ -397,7 +397,7 @@
         },
         "benchmarks/confirmation_batches.json": {
           "executable": false,
-          "sha256": "a2df0315b0403ace73d0c2ea2c0023fb5f216a51a7f459c6780bc0e4caa20b83"
+          "sha256": "3e4b25f4fb3076598b07bd5fa969c0d228a657d47f3c4db632a25ca2129e8952"
         },
         "benchmarks/golden_seeds.json": {
           "executable": false,
@@ -445,7 +445,7 @@
         },
         "docs/evidence_policy.md": {
           "executable": false,
-          "sha256": "512e9b099820af00d698932b0746851739e95d342d756e9fa52a2d9718f2eca9"
+          "sha256": "78c695e7f6d8830a854707f671fd59e3884033c605b7eff01849e279c1737172"
         },
         "docs/experiment_registry.md": {
           "executable": false,
@@ -453,7 +453,7 @@
         },
         "docs/issue_ledger.md": {
           "executable": false,
-          "sha256": "35041e6cd177dbd393300fdde18f3c7b54d3c7d590cfedf6035372f259688a6d"
+          "sha256": "bf4a0ee48c60483656c04efac041249a91a57df9bc9da8cd284856ec806bc085"
         },
         "docs/limitations.md": {
           "executable": false,
@@ -541,7 +541,7 @@
         },
         "tests/test_seeds.py": {
           "executable": false,
-          "sha256": "00a6d56ad7de142fccce4f00ea3b28001fef3f635b0218111c4a77bf407bcf19"
+          "sha256": "fc208ca0323c868da366a672ab8c66b510124e5869febb0a9dba705a586b8b8a"
         },
         "tests/test_source_freeze.py": {
           "executable": false,
@@ -558,6 +558,10 @@
         "tests/test_visualization.py": {
           "executable": false,
           "sha256": "1c8078ae4516e69d78f7c111099e8646dfc07363362d0009f5dce5f9839a87b9"
+        },
+        "tools/archive_attempt.py": {
+          "executable": false,
+          "sha256": "9afadf9f4a6450c1d9b0bc680217221aee5e7473f0cb5f42ae6440e2a5bc9dc2"
         },
         "tools/check_exit_codes.py": {
           "executable": false,
@@ -577,13 +581,13 @@
         },
         "tools/write_handoff.py": {
           "executable": false,
-          "sha256": "b5051177215bc7cd8d10bf36005bd4db5b5b28ea92a07a116dacbf23cd5b6810"
+          "sha256": "7715d51834914655d07a5117d3cca1bd2bd5c24969f9da8a8a4e88cf15ec7aec"
         }
       },
       "schema": "aaa.scientific_source.v1",
-      "sha256": "c9c7755601172438c3d7d5d98ceb7d577442b737ebecef77bcb2dbeb1c4ba1a1"
+      "sha256": "b4a4c0abd66c4aee844c9bdf70372ad1f9831f83da30fec115d8650251dbd357"
     },
-    "tree_hash": "dbbcec31ae90f999f44baedb19bc2978904d5167f5069dc92a16de49f585658d"
+    "tree_hash": "c4c63ed0bde3c9293e360584ab130ffe06087f3e4e2e026503179abba02cf601"
   },
   "spec_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
   "statistics": {
