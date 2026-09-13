@@ -59,6 +59,16 @@ jobs:
       - name: Canonical specification identity
         run: python -m aaa.cli spec-hash
 
+      - name: Observation-noise protocol identity
+        run: python -m aaa.cli observation-noise-protocol-hash
+
+      - name: Observation-noise development smoke
+        run: |
+          python -m aaa.cli observation-noise --role development --quick \
+            --attempt-label ci-observation-noise --output-root "${RUNNER_TEMP}/aaa-noise-runs"
+          python -m aaa.cli observation-noise-recompute \
+            "${RUNNER_TEMP}/aaa-noise-runs/observation-noise-v1/ci-observation-noise"
+
       - name: Development benchmark smoke
         run: |
           python -m aaa.cli benchmark --role development --attempt-label ci-smoke \
@@ -139,6 +149,11 @@ jobs:
           print('packaged specification:', path)
           print('version:', load_spec().spec_version)
           "
+          aaa observation-noise-protocol-hash
           aaa benchmark --role development --attempt-label installed \
             --replicas 1 --episodes 1 --output-root "${RUNNER_TEMP}/elsewhere/runs"
           aaa recompute "${RUNNER_TEMP}/elsewhere/runs/benchmark-v2_1/installed"
+          aaa observation-noise --role development --quick \
+            --attempt-label installed-noise --output-root "${RUNNER_TEMP}/elsewhere/noise-runs"
+          aaa observation-noise-recompute \
+            "${RUNNER_TEMP}/elsewhere/noise-runs/observation-noise-v1/installed-noise"

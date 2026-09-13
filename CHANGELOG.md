@@ -3,6 +3,16 @@
 Dates are the dates of the work, not of any release. Nothing here is a product
 announcement.
 
+## Observation-noise v1 design freeze (2026-09-13)
+
+Added the separately versioned `aaa.observation_noise.v1` protocol and a
+controlled sensor channel for next-position prediction. The implementation
+keeps latent truth and noisy observations separate, caches one schedule sample
+per timestamp, updates only from the revealed noisy observation, records full
+primitive evidence, and independently recomputes its arithmetic. Development
+smoke output is explicitly inconclusive; no refinement or capability promotion
+is claimed.
+
 ## v2.1 — benchmark protocol repair (2026-09-10 / 2026-09-11)
 
 A full engineering and scientific-methodology repair following independent

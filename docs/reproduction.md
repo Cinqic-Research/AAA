@@ -36,7 +36,41 @@ Set `MPLBACKEND=Agg` in a headless environment.
 ```bash
 python -m aaa.cli spec-hash          # canonical specification path, version, hash
 python -m aaa.cli batches            # declared confirmation batches and their status
+python -m aaa.cli observation-noise-protocol-hash  # separate v1 noise protocol identity
 ```
+
+The v2.1 command and its specification are unchanged. Observation-noise runs
+use a separate namespace and output root:
+
+```bash
+python -m aaa.cli observation-noise --role development --quick \
+  --attempt-label noise-smoke-001 --output-root runs
+python -m aaa.cli observation-noise-recompute \
+  runs/observation-noise-v1/noise-smoke-001
+```
+
+The quick command exercises every registered stationary channel and scale,
+both training conditions, direct realized stratum identities, matched
+changed-law branches, unchanged/changed-dynamics sensor-shift controls at both
+predeclared timings and directions, schedule hashes, primitive records, plots,
+and the independent reference verifier. Its scientific endpoints remain
+`INSUFFICIENT_EVIDENCE`; it is an engineering smoke fixture, not confirmation.
+Formal A/B execution requires the separate source-freeze manifest, declared
+batch identities, the exact lock, the fixed ten-lineage plan, durable full
+archive retention, and independent review.
+
+The design/source freeze is written only after the implementation is committed:
+
+```bash
+python -m aaa.cli observation-noise-freeze \
+  --batch observation-noise-a-0001 --batch observation-noise-b-0001 \
+  --notes "design freeze for observation-noise v1"
+```
+
+After bounded development, a confirmation freeze is a separate file and must
+name the selected candidate explicitly. The command refuses to create that
+file without a candidate identity; this branch has no selected refinement, so
+no confirmation freeze or confirmation result is claimed.
 
 ## Development work
 

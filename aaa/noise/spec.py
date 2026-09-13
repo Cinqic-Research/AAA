@@ -194,7 +194,10 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
             raise ProtocolError(f"protocol.observation_model.{key} must be true")
     if observation["update_target"] != "newly_revealed_noisy_observation":
         raise ProtocolError("predictors must update from the newly revealed noisy observation")
-    all_scales = tuple(_number(item, f"protocol.observation_model.all_scales", nonnegative=True) for item in observation["all_scales"])
+    all_scales = tuple(
+        _number(item, "protocol.observation_model.all_scales", nonnegative=True)
+        for item in observation["all_scales"]
+    )
     if all_scales != (0.0, 0.0005, 0.002, 0.01):
         raise ProtocolError("protocol.observation_model.all_scales must be the frozen four-level scale set")
     for key in ("latent_truth_field", "raw_observation_field", "predictor_visible_field"):
@@ -203,15 +206,26 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
 
     channels: list[NoiseChannel] = []
     channel_map = raw["noise_channels"]
-    if not isinstance(channel_map, Mapping) or set(channel_map) != {"gaussian", "uniform", "correlated", "impulsive"}:
+    if not isinstance(channel_map, Mapping) or set(channel_map) != {
+        "gaussian",
+        "uniform",
+        "correlated",
+        "impulsive",
+    }:
         raise ProtocolError("protocol.noise_channels must contain exactly the four frozen channels")
     for name in ("gaussian", "uniform", "correlated", "impulsive"):
-        item = _strict(channel_map[name], {"definition", "variance", "primary", "stress"}, f"protocol.noise_channels.{name}")
+        item = _strict(
+            channel_map[name],
+            {"definition", "variance", "primary", "stress"},
+            f"protocol.noise_channels.{name}",
+        )
         if not isinstance(item["definition"], str) or not isinstance(item["variance"], str):
             raise ProtocolError(f"protocol.noise_channels.{name}: definitions must be strings")
         if not isinstance(item["primary"], bool) or not isinstance(item["stress"], bool):
             raise ProtocolError(f"protocol.noise_channels.{name}: primary/stress must be booleans")
-        channels.append(NoiseChannel(name, item["definition"], item["variance"], item["primary"], item["stress"]))
+        channels.append(
+            NoiseChannel(name, item["definition"], item["variance"], item["primary"], item["stress"])
+        )
     if tuple(observation["primary_channels"]) != ("gaussian", "uniform"):
         raise ProtocolError("primary channel declaration drifted")
     if tuple(observation["stress_channels"]) != ("correlated", "impulsive"):
@@ -220,10 +234,19 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
         raise ProtocolError("primary scale declaration drifted")
 
     families = raw["families"]
-    if not isinstance(families, Mapping) or set(families) != {"constant_velocity", "bouncing", "speed_change", "changed_law"}:
+    if not isinstance(families, Mapping) or set(families) != {
+        "constant_velocity",
+        "bouncing",
+        "speed_change",
+        "changed_law",
+    }:
         raise ProtocolError("protocol.families must cover the four declared latent environment families")
     for name, item in families.items():
-        data = _strict(item, {"simulator_family", "steps", "prefix_steps", "branch_steps", "stratified", "description"}, f"protocol.families.{name}")
+        data = _strict(
+            item,
+            {"simulator_family", "steps", "prefix_steps", "branch_steps", "stratified", "description"},
+            f"protocol.families.{name}",
+        )
         if not isinstance(data["simulator_family"], str) or not isinstance(data["description"], str):
             raise ProtocolError(f"protocol.families.{name}: description fields must be strings")
         _integer(data["steps"], f"protocol.families.{name}.steps", minimum=1)
@@ -236,28 +259,73 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
 
     schedules = _strict(
         raw["schedules"],
-        {"generator", "stream_derivation", "floating_point_encoding", "stationary", "sensor_shifts", "event_times", "correlated_shift_rule", "pairing"},
+        {
+            "generator",
+            "stream_derivation",
+            "floating_point_encoding",
+            "stationary",
+            "sensor_shifts",
+            "event_times",
+            "correlated_shift_rule",
+            "pairing",
+        },
         "protocol.schedules",
     )
-    for key in ("generator", "stream_derivation", "floating_point_encoding", "correlated_shift_rule", "pairing"):
+    for key in (
+        "generator",
+        "stream_derivation",
+        "floating_point_encoding",
+        "correlated_shift_rule",
+        "pairing",
+    ):
         if not isinstance(schedules[key], str) or not schedules[key]:
             raise ProtocolError(f"protocol.schedules.{key}: required nonempty string")
-    stationary = _strict(schedules["stationary"], {"channels", "scales", "save_actual_values", "hash_before_execution"}, "protocol.schedules.stationary")
-    if tuple(stationary["channels"]) != ("gaussian", "uniform", "correlated", "impulsive") or tuple(stationary["scales"]) != (0.0, 0.0005, 0.002, 0.01):
+    stationary = _strict(
+        schedules["stationary"],
+        {"channels", "scales", "save_actual_values", "hash_before_execution"},
+        "protocol.schedules.stationary",
+    )
+    if tuple(stationary["channels"]) != ("gaussian", "uniform", "correlated", "impulsive") or tuple(
+        stationary["scales"]
+    ) != (0.0, 0.0005, 0.002, 0.01):
         raise ProtocolError("stationary schedule declaration drifted")
     if stationary["save_actual_values"] is not True or stationary["hash_before_execution"] is not True:
         raise ProtocolError("actual schedules must be saved and hashed before execution")
     shifts = schedules["sensor_shifts"]
     if shifts != [{"from": 0.0005, "to": 0.002}, {"from": 0.002, "to": 0.0005}]:
         raise ProtocolError("both predeclared sensor shifts are required")
-    event_times = _strict(schedules["event_times"], {"law_change", "sensor_aligned", "sensor_staggered", "post_event_window"}, "protocol.schedules.event_times")
-    if event_times != {"law_change": 300, "sensor_aligned": 300, "sensor_staggered": 340, "post_event_window": 50}:
+    event_times = _strict(
+        schedules["event_times"],
+        {"law_change", "sensor_aligned", "sensor_staggered", "post_event_window"},
+        "protocol.schedules.event_times",
+    )
+    if event_times != {
+        "law_change": 300,
+        "sensor_aligned": 300,
+        "sensor_staggered": 340,
+        "post_event_window": 50,
+    }:
         raise ProtocolError("event timing declaration drifted")
 
-    training = _strict(raw["training"], {"conditions", "noise_mixture", "episodes_per_lineage", "updates_per_episode", "calibration_policy", "calibration_allocation", "freeze_parameters_vs_filter_state"}, "protocol.training")
+    training = _strict(
+        raw["training"],
+        {
+            "conditions",
+            "noise_mixture",
+            "episodes_per_lineage",
+            "updates_per_episode",
+            "calibration_policy",
+            "calibration_allocation",
+            "freeze_parameters_vs_filter_state",
+        },
+        "protocol.training",
+    )
     if tuple(training["conditions"]) != ("clean_trained", "noise_trained"):
         raise ProtocolError("both clean-trained and noise-trained conditions are required")
-    if not isinstance(training["noise_mixture"], Mapping) or set(training["noise_mixture"]) != {"gaussian", "uniform"}:
+    if not isinstance(training["noise_mixture"], Mapping) or set(training["noise_mixture"]) != {
+        "gaussian",
+        "uniform",
+    }:
         raise ProtocolError("noise-trained mixture must be fixed to the two primary channels")
     for channel, levels in training["noise_mixture"].items():
         if tuple(levels) != (0.0005, 0.002):
@@ -271,24 +339,74 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
         raise ProtocolError("protocol.training.calibration_allocation: required nonempty string")
 
     baselines = raw["baselines"]
-    required_baselines = {"persistence", "constant_motion", "constant_motion_reflected", "causal_smoothing_motion", "alpha_beta_filter", "incumbent_square_root_rls", "no_learning_control", "primary_deployable_baseline"}
+    required_baselines = {
+        "persistence",
+        "constant_motion",
+        "constant_motion_reflected",
+        "causal_smoothing_motion",
+        "alpha_beta_filter",
+        "incumbent_square_root_rls",
+        "no_learning_control",
+        "primary_deployable_baseline",
+    }
     if set(baselines) != required_baselines:
         raise ProtocolError(f"protocol.baselines must contain exactly {sorted(required_baselines)}")
     if any(not isinstance(item, str) or not item for item in baselines.values()):
         raise ProtocolError("protocol.baselines descriptions must be nonempty strings")
 
-    replication = _strict(raw["replication"], {"lineages", "episodes_per_family_per_lineage", "sensor_realizations_per_episode", "existing_strata", "a_batch", "b_batch", "shared_training_lineages", "disjoint_evaluation_streams", "independent_retraining_required_for_claim"}, "protocol.replication")
-    for key in ("lineages", "episodes_per_family_per_lineage", "sensor_realizations_per_episode", "existing_strata"):
+    replication = _strict(
+        raw["replication"],
+        {
+            "lineages",
+            "episodes_per_family_per_lineage",
+            "sensor_realizations_per_episode",
+            "existing_strata",
+            "a_batch",
+            "b_batch",
+            "shared_training_lineages",
+            "disjoint_evaluation_streams",
+            "independent_retraining_required_for_claim",
+        },
+        "protocol.replication",
+    )
+    for key in (
+        "lineages",
+        "episodes_per_family_per_lineage",
+        "sensor_realizations_per_episode",
+        "existing_strata",
+    ):
         _integer(replication[key], f"protocol.replication.{key}", minimum=1)
-    if replication["lineages"] != 10 or replication["episodes_per_family_per_lineage"] != 32 or replication["sensor_realizations_per_episode"] != 3 or replication["existing_strata"] != 32:
+    if (
+        replication["lineages"] != 10
+        or replication["episodes_per_family_per_lineage"] != 32
+        or replication["sensor_realizations_per_episode"] != 3
+        or replication["existing_strata"] != 32
+    ):
         raise ProtocolError("minimum replication plan drifted")
-    for key in ("shared_training_lineages", "disjoint_evaluation_streams", "independent_retraining_required_for_claim"):
+    for key in (
+        "shared_training_lineages",
+        "disjoint_evaluation_streams",
+        "independent_retraining_required_for_claim",
+    ):
         if not isinstance(replication[key], bool):
             raise ProtocolError(f"protocol.replication.{key} must be boolean")
     for key in ("a_batch", "b_batch"):
         _strict(replication[key], {"id", "namespace", "role"}, f"protocol.replication.{key}")
 
-    statistics = _strict(raw["statistics"], {"primary_metric", "secondary_metrics", "resampling_units", "draws", "intervals", "multiplicity_family", "null_validation", "undefined_ratio_rule"}, "protocol.statistics")
+    statistics = _strict(
+        raw["statistics"],
+        {
+            "primary_metric",
+            "secondary_metrics",
+            "resampling_units",
+            "draws",
+            "intervals",
+            "multiplicity_family",
+            "null_validation",
+            "undefined_ratio_rule",
+        },
+        "protocol.statistics",
+    )
     if statistics["primary_metric"] != "latent_next_position_mae_normalized_by_line_length":
         raise ProtocolError("primary metric declaration drifted")
     if tuple(statistics["resampling_units"]) != ("training_lineage", "latent_episode", "sensor_realization"):
@@ -302,21 +420,83 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
     if not isinstance(statistics["secondary_metrics"], list) or not statistics["secondary_metrics"]:
         raise ProtocolError("secondary metrics must be explicitly listed")
 
-    acceptance = _strict(raw["acceptance"], {"reference_preservation", "evidence_integrity", "numerical_stability", "moderate_noise_adaptation", "baseline_competitiveness", "unchanged_law_retention", "absolute_utility", "added_mechanism_promotion", "outcome_vocabulary"}, "protocol.acceptance")
-    for key in ("reference_preservation", "evidence_integrity", "numerical_stability", "moderate_noise_adaptation", "baseline_competitiveness", "unchanged_law_retention", "absolute_utility", "added_mechanism_promotion"):
+    acceptance = _strict(
+        raw["acceptance"],
+        {
+            "reference_preservation",
+            "evidence_integrity",
+            "numerical_stability",
+            "moderate_noise_adaptation",
+            "baseline_competitiveness",
+            "unchanged_law_retention",
+            "absolute_utility",
+            "added_mechanism_promotion",
+            "outcome_vocabulary",
+        },
+        "protocol.acceptance",
+    )
+    for key in (
+        "reference_preservation",
+        "evidence_integrity",
+        "numerical_stability",
+        "moderate_noise_adaptation",
+        "baseline_competitiveness",
+        "unchanged_law_retention",
+        "absolute_utility",
+        "added_mechanism_promotion",
+    ):
         if not isinstance(acceptance[key], str) or not acceptance[key]:
             raise ProtocolError(f"protocol.acceptance.{key}: required rule")
-    if tuple(acceptance["outcome_vocabulary"]) != ("engineering_complete", "scientifically_supported", "negative", "inconclusive", "blocked_by_missing_evidence"):
+    if tuple(acceptance["outcome_vocabulary"]) != (
+        "engineering_complete",
+        "scientifically_supported",
+        "negative",
+        "inconclusive",
+        "blocked_by_missing_evidence",
+    ):
         raise ProtocolError("outcome vocabulary drifted")
 
-    search = _strict(raw["search_budget"], {"max_candidate_configurations", "max_substantive_mechanism_changes", "baseline_search_separate", "candidate_ledger_file", "design_freeze", "confirmation_freeze"}, "protocol.search_budget")
-    if search["max_candidate_configurations"] != 12 or search["max_substantive_mechanism_changes"] != 3 or search["baseline_search_separate"] is not True:
+    search = _strict(
+        raw["search_budget"],
+        {
+            "max_candidate_configurations",
+            "max_substantive_mechanism_changes",
+            "baseline_search_separate",
+            "candidate_ledger_file",
+            "design_freeze",
+            "confirmation_freeze",
+        },
+        "protocol.search_budget",
+    )
+    if (
+        search["max_candidate_configurations"] != 12
+        or search["max_substantive_mechanism_changes"] != 3
+        or search["baseline_search_separate"] is not True
+    ):
         raise ProtocolError("candidate search budget drifted")
     for key in ("candidate_ledger_file", "design_freeze", "confirmation_freeze"):
         if not isinstance(search[key], str) or not search[key]:
             raise ProtocolError(f"protocol.search_budget.{key}: required path")
 
-    artifacts = _strict(raw["artifacts"], {"root", "protocol", "schedule_dir", "records", "reports", "registry", "freeze_manifest", "source_freeze_manifest", "checksum_manifest", "candidate_ledger", "full_archive_required", "durable_storage_policy", "raw_record_encoding"}, "protocol.artifacts")
+    artifacts = _strict(
+        raw["artifacts"],
+        {
+            "root",
+            "protocol",
+            "schedule_dir",
+            "records",
+            "reports",
+            "registry",
+            "freeze_manifest",
+            "source_freeze_manifest",
+            "checksum_manifest",
+            "candidate_ledger",
+            "full_archive_required",
+            "durable_storage_policy",
+            "raw_record_encoding",
+        },
+        "protocol.artifacts",
+    )
     for key, value in artifacts.items():
         if not isinstance(value, (str, bool)) or value == "":
             raise ProtocolError(f"protocol.artifacts.{key}: invalid value")
@@ -324,19 +504,34 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
         raise ProtocolError("full archive is mandatory for an independent-verification claim")
 
     namespaces = raw["seed_namespaces"]
-    if not isinstance(namespaces, Mapping) or set(namespaces) != {"training", "development", "calibration", "confirmation_a", "confirmation_b", "generator_validation"}:
+    if not isinstance(namespaces, Mapping) or set(namespaces) != {
+        "training",
+        "development",
+        "calibration",
+        "confirmation_a",
+        "confirmation_b",
+        "generator_validation",
+    }:
         raise ProtocolError("all disjoint seed namespaces must be declared")
     if any(not isinstance(value, str) or not value for value in namespaces.values()):
         raise ProtocolError("seed namespace labels must be nonempty strings")
 
-    compute = _strict(raw["compute_storage"], {"platform", "lock_required", "estimate", "raw_record_encoding", "retention"}, "protocol.compute_storage")
+    compute = _strict(
+        raw["compute_storage"],
+        {"platform", "lock_required", "estimate", "raw_record_encoding", "retention"},
+        "protocol.compute_storage",
+    )
     for key in ("platform", "estimate", "raw_record_encoding", "retention"):
         if not isinstance(compute[key], str) or not compute[key]:
             raise ProtocolError(f"protocol.compute_storage.{key}: required nonempty string")
     if compute["lock_required"] is not True:
         raise ProtocolError("formal execution must require the repository lock")
     for section in ("hypotheses", "endpoints"):
-        if not isinstance(raw[section], Mapping) or not raw[section] or any(not isinstance(v, str) or not v for v in raw[section].values()):
+        if (
+            not isinstance(raw[section], Mapping)
+            or not raw[section]
+            or any(not isinstance(v, str) or not v for v in raw[section].values())
+        ):
             raise ProtocolError(f"protocol.{section}: every declared item needs readable text")
     return NoiseProtocol(raw=dict(raw), channels=tuple(channels))
 

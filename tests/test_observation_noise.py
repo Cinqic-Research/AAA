@@ -1,0 +1,346 @@
+"""Adversarial and lifecycle tests for the separately versioned noise phase."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from aaa.noise.observation import (
+    NoiseSchedule,
+    NoisyObservationEnvironment,
+    generate_schedule,
+    generator_validation,
+)
+from aaa.noise.runner import build_latent_environment, run_noisy_episode, train_model
+from aaa.noise.spec import ProtocolError, canonical_protocol_hash, load_protocol
+from aaa.noise.verifier import (
+    CHECK_NAMES,
+    VerificationError,
+    _metric_rows,
+    _schedule_payload_digest,
+    validate_record,
+    verify_attempt,
+)
+from aaa.predictors import Predictor
+
+
+class ObservationNoiseProtocolTests(unittest.TestCase):
+    def test_protocol_identity_and_frozen_choices(self):
+        protocol = load_protocol()
+        self.assertEqual(protocol.protocol_version, "aaa.observation_noise.v1")
+        self.assertEqual(protocol.status, "design_frozen")
+        self.assertEqual(
+            [channel.name for channel in protocol.channels],
+            ["gaussian", "uniform", "correlated", "impulsive"],
+        )
+        self.assertEqual(canonical_protocol_hash(), protocol.hash())
+        self.assertEqual(protocol.replication["lineages"], 10)
+        self.assertEqual(protocol.replication["episodes_per_family_per_lineage"], 32)
+
+    def test_unknown_protocol_fields_fail_closed(self):
+        protocol = load_protocol().to_dict()
+        protocol["unexpected"] = True
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.json"
+            path.write_text(json.dumps(protocol), encoding="utf-8")
+            with self.assertRaises(ProtocolError):
+                load_protocol(path)
+
+    def test_generator_validation_is_separate_from_benchmark_draws(self):
+        result = generator_validation(991)
+        self.assertEqual(result["sample_count"], 20_000)
+        for channel in ("gaussian", "uniform", "correlated", "impulsive"):
+            self.assertTrue(result["channels"][channel]["finite"])
+            self.assertAlmostEqual(result["channels"][channel]["variance"], 1.0, delta=0.08)
+
+    def test_confirmation_roles_reuse_training_lineage_seeds(self):
+        protocol = load_protocol()
+        model_a, metadata_a = train_model(protocol, "noise_trained", 0, role="confirmation_a", quick=True)
+        model_b, metadata_b = train_model(protocol, "noise_trained", 0, role="confirmation_b", quick=True)
+        self.assertEqual(model_a.state_dict(), model_b.state_dict())
+        self.assertEqual(metadata_a["schedule_digests"], metadata_b["schedule_digests"])
+
+    def test_factorial_control_can_disable_the_law_change(self):
+        unchanged = build_latent_environment("changed_law", 91, 400, include_law_change=False)
+        changed = build_latent_environment("changed_law", 91, 400, include_law_change=True)
+        self.assertIsNone(unchanged.change_step)
+        self.assertEqual(changed.change_step, 300)
+
+
+class ObservationBoundaryTests(unittest.TestCase):
+    def test_schedule_is_deterministic_and_zero_noise_is_exact(self):
+        first = generate_schedule("correlated", 0.002, 20, seed=41)
+        second = generate_schedule("correlated", 0.002, 20, seed=41)
+        self.assertEqual(first, second)
+        clean = generate_schedule("impulsive", 0.0, 20, seed=41)
+        self.assertTrue(all(value == 0.0 for value in clean.values))
+
+    def test_sensor_is_cached_and_is_not_clipped_at_the_physical_boundary(self):
+        latent = build_latent_environment("constant_velocity", 5, 4)
+        schedule = NoiseSchedule("gaussian", 2.0, (2.0,) * 5, 5)
+        environment = NoisyObservationEnvironment(latent, schedule)
+        observation = environment.reset()
+        self.assertEqual(observation, environment.observe())
+        self.assertGreater(observation, environment.config.upper_bound)
+
+    def test_temporal_boundary_updates_after_target_reveal(self):
+        class Spy(Predictor):
+            name = "spy"
+            update_enabled = True
+
+            def __init__(self):
+                self.events: list[str] = []
+                self.targets: list[float] = []
+
+            def predict(self, history):
+                self.events.append("predict")
+                return float(history[-1])
+
+            def update(self, history, target_position):
+                self.events.append("update")
+                self.targets.append(float(target_position))
+
+        latent = build_latent_environment("constant_velocity", 6, 8)
+        schedule = generate_schedule("gaussian", 0.002, 9, seed=6)
+        environment = NoisyObservationEnvironment(latent, schedule)
+        spy = Spy()
+        records = run_noisy_episode(
+            environment,
+            [spy],
+            {
+                "trial_id": "spy",
+                "condition": "clean_trained",
+                "family": "constant_velocity",
+                "channel": "gaussian",
+                "scale": 0.002,
+                "lineage": 0,
+                "episode": 0,
+                "realization": 0,
+                "role": "development",
+                "branch": "stationary",
+            },
+            schedule,
+        )
+        self.assertEqual(len(records), 5)
+        self.assertEqual(spy.events, ["predict", "update"] * 5)
+        self.assertEqual(spy.targets, [record["available_training_target"] for record in records])
+        self.assertNotEqual(spy.targets[0], records[0]["latent_position"])
+
+
+def _valid_record() -> dict[str, object]:
+    return {
+        "schema_version": "aaa.observation_noise_step.v2",
+        "trial": {
+            "trial_id": "fixture",
+            "condition": "clean_trained",
+            "family": "constant_velocity",
+            "channel": "gaussian",
+            "scale": 0.002,
+            "lineage": 0,
+            "episode": 0,
+            "realization": 0,
+            "role": "development",
+            "branch": "stationary",
+            "stratum": "unstratified",
+        },
+        "step": 3,
+        "target_step": 4,
+        "observed_history": [0.1, 0.2, 0.3, 0.4],
+        "current_observation": 0.4,
+        "latent_position": 0.5,
+        "raw_observation": 0.51,
+        "available_training_target": 0.51,
+        "line_width": 1.0,
+        "effective_noise_scale": 0.002,
+        "predictions": {
+            "fixture_predictor": {
+                "raw": 0.6,
+                "scored": 0.6,
+                "latent_absolute_error": 0.1,
+                "latent_normalized_absolute_error": 0.1,
+                "noisy_observation_absolute_error": 0.09,
+                "signed_latent_error": 0.1,
+            }
+        },
+        "update_decisions": {"fixture_predictor": True},
+        "diagnostics": {},
+        "schedule_index": 4,
+        "noise_channel": "gaussian",
+        "noise_scale": 0.002,
+        "noise_innovation": 0.01,
+        "bounced": False,
+        "changed": False,
+    }
+
+
+def _write_verifier_fixture(directory: Path, record: dict[str, object]) -> None:
+    schedule_identity = {
+        "channel": "gaussian",
+        "scale": 0.002,
+        "seed": 17,
+        "scale_path": None,
+        "values": [0.0, 0.0, 0.0, 0.0, 0.01],
+    }
+    schedule = {
+        "schema_version": "aaa.observation_noise_schedule.v1",
+        **schedule_identity,
+        "digest": _schedule_payload_digest(schedule_identity),
+    }
+    schedules = directory / "schedules"
+    schedules.mkdir()
+    schedule_path = schedules / "fixture.json"
+    schedule_path.write_text(json.dumps(schedule, sort_keys=True) + "\n", encoding="utf-8")
+    schedule_sha = hashlib.sha256(schedule_path.read_bytes()).hexdigest()
+    (schedules / "index.json").write_text(
+        json.dumps(
+            [
+                {
+                    "trial_id": "fixture",
+                    "path": "schedules/fixture.json",
+                    "file_sha256": schedule_sha,
+                    "schedule_digest": schedule["digest"],
+                }
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    record_path = directory / "records.jsonl"
+    record_path.write_text(json.dumps(record, sort_keys=True) + "\n", encoding="utf-8")
+    record_sha = hashlib.sha256(record_path.read_bytes()).hexdigest()
+    (directory / "metadata.json").write_text(json.dumps({"attempt_id": "fixture"}) + "\n", encoding="utf-8")
+    (directory / "run_manifest.json").write_text(
+        json.dumps(
+            {
+                "attempt_id": "fixture",
+                "expected_scored_records": 1,
+                "records_sha256": record_sha,
+                "schedule_count": 1,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    checks = {name: {"status": "PASS", "detail": "fixture"} for name in CHECK_NAMES}
+    gates = [
+        {
+            "name": name,
+            "status": "PASS",
+            "required": True,
+            "detail": "fixture",
+        }
+        for name in (
+            "reference_preservation",
+            "evidence_integrity",
+            "numerical_stability",
+            "scientific_primary_endpoints",
+            "confirmation_reproducibility",
+        )
+    ]
+    (directory / "summary.json").write_text(
+        json.dumps(
+            {
+                "attempt_id": "fixture",
+                "metrics": _metric_rows([record]),
+                "checks": checks,
+                "gates": gates,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+class ObservationNoiseVerifierTests(unittest.TestCase):
+    def test_valid_primitive_record_is_accepted(self):
+        validate_record(_valid_record())
+
+    def test_boolean_integer_substitution_is_rejected(self):
+        record = _valid_record()
+        record["step"] = True
+        with self.assertRaises(VerificationError):
+            validate_record(record)
+
+    def test_stale_cached_error_is_rejected(self):
+        record = _valid_record()
+        predictions = record["predictions"]
+        assert isinstance(predictions, dict)
+        fixture = predictions["fixture_predictor"]
+        assert isinstance(fixture, dict)
+        fixture["latent_absolute_error"] = 0.0
+        with self.assertRaises(VerificationError):
+            validate_record(record)
+
+    def test_unknown_record_field_is_rejected(self):
+        record = _valid_record()
+        record["latent_velocity"] = 0.1
+        with self.assertRaises(VerificationError):
+            validate_record(record)
+
+    def test_cached_normalized_or_noisy_error_is_rejected(self):
+        record = _valid_record()
+        predictions = record["predictions"]
+        assert isinstance(predictions, dict)
+        fixture = predictions["fixture_predictor"]
+        assert isinstance(fixture, dict)
+        fixture["latent_normalized_absolute_error"] = 0.2
+        with self.assertRaises(VerificationError):
+            validate_record(record)
+
+        record = _valid_record()
+        predictions = record["predictions"]
+        assert isinstance(predictions, dict)
+        fixture = predictions["fixture_predictor"]
+        assert isinstance(fixture, dict)
+        fixture["noisy_observation_absolute_error"] = 0.0
+        with self.assertRaises(VerificationError):
+            validate_record(record)
+
+    def test_sensor_equation_and_schedule_index_are_checked(self):
+        record = _valid_record()
+        record["raw_observation"] = 0.52
+        record["available_training_target"] = 0.52
+        with self.assertRaises(VerificationError):
+            validate_record(record)
+
+    def test_rehashed_corrupt_evidence_fails_independent_arithmetic(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            record = _valid_record()
+            _write_verifier_fixture(root, record)
+            self.assertEqual(verify_attempt(root)["verdict"], "PASS")
+
+            predictions = record["predictions"]
+            assert isinstance(predictions, dict)
+            fixture = predictions["fixture_predictor"]
+            assert isinstance(fixture, dict)
+            fixture["latent_absolute_error"] = 0.0
+            fixture["latent_normalized_absolute_error"] = 0.0
+            record_path = root / "records.jsonl"
+            record_path.write_text(json.dumps(record, sort_keys=True) + "\n", encoding="utf-8")
+            manifest = json.loads((root / "run_manifest.json").read_text(encoding="utf-8"))
+            manifest["records_sha256"] = hashlib.sha256(record_path.read_bytes()).hexdigest()
+            (root / "run_manifest.json").write_text(json.dumps(manifest) + "\n", encoding="utf-8")
+            summary = json.loads((root / "summary.json").read_text(encoding="utf-8"))
+            summary["metrics"] = _metric_rows([record])
+            (root / "summary.json").write_text(json.dumps(summary) + "\n", encoding="utf-8")
+            with self.assertRaises(VerificationError):
+                verify_attempt(root)
+
+    def test_missing_scientific_gate_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _write_verifier_fixture(root, _valid_record())
+            summary = json.loads((root / "summary.json").read_text(encoding="utf-8"))
+            summary.pop("gates")
+            (root / "summary.json").write_text(json.dumps(summary) + "\n", encoding="utf-8")
+            with self.assertRaises(VerificationError):
+                verify_attempt(root)
+
+        record = _valid_record()
+        record["schedule_index"] = 3
+        with self.assertRaises(VerificationError):
+            validate_record(record)

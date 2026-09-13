@@ -90,3 +90,21 @@ round-2 pair.
 `results/final/` and `results/benchmark_v2/` are preserved unchanged. They are
 historical provenance. See [`errata.md`](errata.md) for which of their claims
 were affected and why.
+
+## Observation-noise v1
+
+The observation-noise phase is additive and separately addressed. Its protocol,
+source-freeze manifest, candidate ledger, registry, attempt metadata, schedule
+files, primitive records, plots, reports, and checksums live under the names
+declared in [`observation_noise_protocol.md`](observation_noise_protocol.md).
+The full `records.jsonl` and compressed copy are both retained by an attempt;
+the uncompressed bytes are what the reference verifier hashes through its
+record-level arithmetic. A compact summary without the full schedule and
+primitive archive cannot support an independent-reproduction claim.
+
+Noise records contain both latent truth and predictor-visible observations, but
+the predictor-generation boundary receives only the latter. The presence of a
+truth field in evaluator evidence is not permission for a predictor or
+calibration callback to read it. A report must state whether a result is
+engineering complete, scientifically supported, negative, inconclusive, or
+blocked by missing evidence.

@@ -82,6 +82,10 @@ alongside everything else. No threshold was touched. See `AAA-120` in
   and a freeze manifest; an experiment registry with safe resume; and
   independent recomputation of every metric and gate from retained raw
   evidence.
+- Observation-noise v1: a separately versioned, design-frozen sensor model
+  with cached schedules, latent/observed field separation, causal noisy-target
+  updates, matched intervention branches, and a small reference verifier. Its
+  development smoke evidence is not a confirmation result.
 
 ## The learner
 
@@ -129,6 +133,10 @@ external API, no pretrained model, no paid service.
 ```bash
 python -m unittest discover -s tests -t .        # the test suite
 python -m aaa.cli spec-hash                      # canonical specification identity
+python -m aaa.cli observation-noise-protocol-hash # separate noise protocol identity
+python -m aaa.cli observation-noise --role development --quick \
+    --attempt-label noise-smoke-001 --output-root runs
+python -m aaa.cli observation-noise-recompute runs/observation-noise-v1/noise-smoke-001
 python -m aaa.cli benchmark --role development --attempt-label dev-001 \
     --replicas 2 --episodes 3 --output-root runs
 python -m aaa.cli recompute runs/benchmark-v2_1/dev-001
@@ -160,6 +168,7 @@ result, and this repository is built to report that rather than to avoid it.
 | Document | What it covers |
 |---|---|
 | [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
+| [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
 | [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |
 | [Errata](docs/errata.md) | which earlier claims were affected, and why |
 | [Candidate selection](docs/candidate_selection.md) | why this candidate, with the full table including what lost |

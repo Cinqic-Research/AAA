@@ -1025,3 +1025,31 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
   and that exact pre-observation snapshot is retained in metadata. Reservation
   remains durable before the first observation. The unobserved paired B stream
   is cancelled explicitly, without a fabricated consumer or outcome.
+
+### AAA-128 — observation-noise phase needed a separate evidence boundary
+- **Source** observation-noise v1 design audit · **Severity** high · **Status** implemented; confirmation pending
+- **Finding** Reusing the v2.1 record, metric, or gate namespace would make a
+  noisy rerun look like a deterministic reference result and would permit
+  clean latent targets to enter a predictor through the existing environment
+  interface.
+- **Repair** The phase has its own protocol hash, schedule generator, cached
+  observation wrapper, primitive record schema, output root, lifecycle files,
+  independent arithmetic verifier, direct stratum identities, and source-freeze
+  manifest command. The predictor update target is the newly revealed noisy
+  observation; latent truth is evaluator-side only. v2.1's specification and
+  historical evidence are unchanged.
+- **Regression** Focused tests cover schedule determinism, distribution
+  validation, unbounded sensor values, idempotent observation calls, causal
+  update order, strict boolean/integer handling, stale cached errors, unknown
+  fields, and the independent recomputation of the all-cell development smoke.
+- **Remaining limitation** The fixed ten-lineage A/B confirmation plan,
+  durable external archive locator, and independent human review have not yet
+  been executed or claimed.
+
+The smoke implementation also executes the four predeclared factorial control
+cells (unchanged/changed dynamics crossed with unchanged/shifted noise), both
+shift directions, and aligned/staggered timing. These controls remain
+engineering evidence only until the frozen ten-lineage confirmation plan is
+run. The phase verifier now binds every record to its saved schedule, checks
+the raw sensor equation and units, and rejects rehashed cached-error
+corruption, missing scientific gates, and strict-type substitutions.

@@ -49,3 +49,14 @@ updated, whether checkpoints load, whether checksums verify and whether the
 stored summary recomputes from raw evidence.
 
 A malformed, partial or interrupted run cannot earn a correctness `PASS`.
+
+## Observation-noise registry
+
+The observation-noise phase does not reuse the v2.1 registry. Its protocol
+declares `benchmarks/observation_noise_registry.json` for batch declarations and
+each attempt retains an atomic `lifecycle.jsonl` with `created`, `started`,
+`consumed`, `completed`, `cancelled`, and `failed` transitions. Schedule and
+trial identities are allocated before the first observation. Existing attempt
+directories are never overwritten; an interrupted run is a preserved failure
+until a verified resume implementation reuses its original schedule and
+checkpoint state.

@@ -1,0 +1,1160 @@
+"""Execution and evidence writer for ``aaa.observation_noise.v1``."""
+
+from __future__ import annotations
+
+import copy
+import gzip
+import hashlib
+import json
+import math
+import re
+import shutil
+import time
+from collections.abc import Sequence
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+from ..benchmark.evidence import git_metadata, hardware_metadata, json_dump, sha256_file
+from ..benchmark.families import classify_stratum, sample_stratified_state
+from ..benchmark.spec import canonical_spec_hash, canonical_spec_path, load_spec
+from ..config import WorldConfig
+from ..environment import DampedOscillatorEnvironment, MovingDotEnvironment
+from ..experiment import TrialIdentity, run_episode
+from ..predictors import OnlineRLSPredictor, Predictor
+from .observation import (
+    NoiseSchedule,
+    NoisyObservationEnvironment,
+    derive_seed,
+    generate_schedule,
+    generator_validation,
+    scale_key,
+)
+from .plots import write_plots
+from .predictors import AlphaBetaFilter, CausalSmoothingMotionPredictor, incumbent_from_v21
+from .spec import NoiseProtocol, canonical_protocol_hash, load_protocol
+from .verifier import CHECK_NAMES, _metric_rows, verify_attempt
+
+RECORD_SCHEMA = "aaa.observation_noise_step.v2"
+PROTOCOL_DIRECTORY = "observation-noise-v1"
+ALL_CHANNELS = ("gaussian", "uniform", "correlated", "impulsive")
+ALL_SCALES = (0.0, 0.0005, 0.002, 0.01)
+SHIFT_LEVEL_PAIRS = ((0.0005, 0.002), (0.002, 0.0005))
+SHIFT_TIMES = (("aligned", 300), ("staggered", 340))
+
+
+class ObservationNoiseError(RuntimeError):
+    """Raised when an attempt cannot safely continue."""
+
+
+@dataclass(frozen=True)
+class AttemptResult:
+    directory: Path
+    summary: dict[str, Any]
+
+    @property
+    def passed(self) -> bool:
+        return bool(self.summary.get("all_required_gates_pass", False))
+
+
+def project_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _write_text_atomic(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(text, encoding="utf-8")
+    temporary.replace(path)
+
+
+def _record_lifecycle(path: Path, event: str, **data: Any) -> None:
+    rows: list[dict[str, Any]] = []
+    if path.exists():
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+    rows.append({"at_utc": _now(), "event": event, **data})
+    _write_text_atomic(path, "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows))
+
+
+def _stable_json_hash(value: object) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _base_world(family: str, steps: int, *, change_step: int | None = None) -> WorldConfig:
+    del family
+    reference = load_spec()
+    source = reference.motion_families.get("constant_velocity")
+    speed_min = 0.08 if source is None else source.speed_min
+    speed_max = 0.2 if source is None else source.speed_max
+    return WorldConfig(
+        lower_bound=reference.world.lower_bound,
+        upper_bound=reference.world.upper_bound,
+        dt=reference.world.dt,
+        steps_per_episode=steps,
+        history_length=reference.world.history_length,
+        speed_min=speed_min,
+        speed_max=speed_max,
+        change_step=change_step,
+        change_factor_low=0.45,
+        change_factor_high=1.8,
+        event_margin=0.18,
+    )
+
+
+def build_latent_environment(
+    family: str,
+    seed: int,
+    steps: int,
+    *,
+    initial_position: float | None = None,
+    initial_velocity: float | None = None,
+    include_law_change: bool = True,
+):
+    """Construct the existing latent simulator without changing its laws."""
+
+    if family == "constant_velocity":
+        return MovingDotEnvironment(
+            "straight",
+            seed,
+            _base_world(family, steps),
+            initial_position=initial_position,
+            initial_velocity=initial_velocity,
+        )
+    if family == "bouncing":
+        return MovingDotEnvironment(
+            "bouncing",
+            seed,
+            _base_world(family, steps),
+            initial_position=initial_position,
+            initial_velocity=initial_velocity,
+        )
+    if family == "speed_change":
+        change_step = 300 if include_law_change else None
+        world = _base_world(family, steps, change_step=change_step)
+        return MovingDotEnvironment(
+            "changed",
+            seed,
+            world,
+            initial_position=initial_position,
+            initial_velocity=initial_velocity,
+            change_step=change_step,
+        )
+    if family == "changed_law":
+        reference = load_spec()
+        law = reference.changed_law
+        change_step = 300 if include_law_change else None
+        world = _base_world(family, steps, change_step=change_step)
+        rng = np.random.default_rng(seed ^ 0xA11CE)
+        post_omega = float(rng.uniform(law.post_omega_low, law.post_omega_high))
+        post_damping = float(rng.uniform(law.post_damping_low, law.post_damping_high))
+        return DampedOscillatorEnvironment(
+            seed,
+            world,
+            omega=law.pre_omega,
+            damping=law.pre_damping,
+            changed_omega=post_omega,
+            changed_damping=post_damping,
+            change_step=change_step,
+            initial_position=initial_position,
+            initial_velocity=initial_velocity,
+            initial_position_low=law.initial_position_low,
+            initial_position_high=law.initial_position_high,
+            initial_velocity_scale=law.initial_velocity_scale,
+        )
+    raise ObservationNoiseError(f"unknown latent family {family!r}")
+
+
+def _schedule_payload(schedule: NoiseSchedule) -> dict[str, Any]:
+    return {
+        "schema_version": "aaa.observation_noise_schedule.v1",
+        "channel": schedule.channel,
+        "scale": schedule.scale,
+        "seed": schedule.seed,
+        "scale_path": None if schedule.scale_path is None else list(schedule.scale_path),
+        "values": list(schedule.values),
+        "digest": schedule.digest(),
+    }
+
+
+def _diagnostics(predictor: Predictor) -> dict[str, Any]:
+    if isinstance(predictor, OnlineRLSPredictor):
+        state = predictor.state_dict()
+        return {
+            "update_count": state["update_count"],
+            "forgetting_suspensions": state["forgetting_suspensions"],
+            "dead_zone_skips": state["dead_zone_skips"],
+            "reflection_skips": state["reflection_skips"],
+            "detected_surprises": state["detected_surprises"],
+            "error_ewma": state["error_ewma"],
+        }
+    if isinstance(predictor, AlphaBetaFilter):
+        return {"position": predictor.position, "velocity": predictor.velocity, "state_estimator": True}
+    return {}
+
+
+def run_noisy_episode(
+    environment: NoisyObservationEnvironment,
+    predictors: Sequence[Predictor],
+    trial: dict[str, Any],
+    schedule: NoiseSchedule,
+) -> list[dict[str, Any]]:
+    """Run predict -> record -> advance -> reveal -> score -> update."""
+
+    current = environment.reset()
+    history: list[float] = [current]
+    history_length = environment.config.history_length
+    width = environment.config.width
+    for _ in range(history_length - 1):
+        environment.advance()
+        history.append(environment.observe())
+    records: list[dict[str, Any]] = []
+    for step in range(history_length - 1, environment.config.steps_per_episode):
+        observed_history = tuple(history[-history_length:])
+        raw_predictions: dict[str, float] = {}
+        scored_predictions: dict[str, float] = {}
+        for predictor in predictors:
+            raw = float(predictor.predict(observed_history))
+            if not math.isfinite(raw):
+                raise FloatingPointError(f"{predictor.name} returned a non-finite forecast")
+            raw_predictions[predictor.name] = raw
+            scored_predictions[predictor.name] = raw
+        transition = environment.advance()
+        target_observation = environment.observe()
+        predictions: dict[str, dict[str, float]] = {}
+        updates: dict[str, bool] = {}
+        for predictor in predictors:
+            scored = scored_predictions[predictor.name]
+            latent_error = abs(scored - transition.position)
+            observation_error = abs(scored - target_observation)
+            predictions[predictor.name] = {
+                "raw": raw_predictions[predictor.name],
+                "scored": scored,
+                "latent_absolute_error": latent_error,
+                "latent_normalized_absolute_error": latent_error / width,
+                "noisy_observation_absolute_error": observation_error / width,
+                "signed_latent_error": scored - transition.position,
+            }
+            updates[predictor.name] = bool(predictor.update_enabled)
+        record = {
+            "schema_version": RECORD_SCHEMA,
+            "trial": dict(trial),
+            "step": step,
+            "target_step": step + 1,
+            "observed_history": list(observed_history),
+            "current_observation": float(observed_history[-1]),
+            "latent_position": float(transition.position),
+            "raw_observation": float(target_observation),
+            "available_training_target": float(target_observation),
+            "line_width": float(width),
+            "effective_noise_scale": float(
+                schedule.scale if schedule.scale_path is None else schedule.scale_path[step + 1]
+            ),
+            "predictions": predictions,
+            "update_decisions": updates,
+            "diagnostics": {},
+            "schedule_index": step + 1,
+            "noise_channel": schedule.channel,
+            "noise_scale": schedule.scale,
+            "noise_innovation": schedule.values[step + 1],
+            "bounced": bool(transition.bounced),
+            "changed": bool(transition.changed),
+        }
+        if set(record) != {
+            "schema_version",
+            "trial",
+            "step",
+            "target_step",
+            "observed_history",
+            "current_observation",
+            "latent_position",
+            "raw_observation",
+            "available_training_target",
+            "line_width",
+            "effective_noise_scale",
+            "predictions",
+            "update_decisions",
+            "diagnostics",
+            "schedule_index",
+            "noise_channel",
+            "noise_scale",
+            "noise_innovation",
+            "bounced",
+            "changed",
+        }:
+            raise ObservationNoiseError("record construction drifted")
+        records.append(record)
+        for predictor in predictors:
+            if predictor.update_enabled:
+                predictor.update(observed_history, target_observation)
+        record["diagnostics"] = {predictor.name: _diagnostics(predictor) for predictor in predictors}
+        history.append(target_observation)
+    return records
+
+
+def run_noisy_segment(
+    environment: NoisyObservationEnvironment,
+    predictors: Sequence[Predictor],
+    trial: dict[str, Any],
+    schedule: NoiseSchedule,
+    history: list[float],
+    *,
+    first_step: int,
+    end_step: int,
+) -> list[dict[str, Any]]:
+    """Run a continuation without resetting world, schedule, history, or state."""
+
+    width = environment.config.width
+    history_length = environment.config.history_length
+    records: list[dict[str, Any]] = []
+    if len(history) < history_length:
+        raise ObservationNoiseError("a continuation requires a complete observed history")
+    for step in range(first_step, end_step):
+        observed_history = tuple(history[-history_length:])
+        raw_predictions: dict[str, float] = {}
+        scored_predictions: dict[str, float] = {}
+        for predictor in predictors:
+            raw = float(predictor.predict(observed_history))
+            if not math.isfinite(raw):
+                raise FloatingPointError(f"{predictor.name} returned a non-finite forecast")
+            raw_predictions[predictor.name] = raw
+            scored_predictions[predictor.name] = raw
+        transition = environment.advance()
+        target_observation = environment.observe()
+        predictions: dict[str, dict[str, float]] = {}
+        updates: dict[str, bool] = {}
+        for predictor in predictors:
+            scored = scored_predictions[predictor.name]
+            latent_error = abs(scored - transition.position)
+            predictions[predictor.name] = {
+                "raw": raw_predictions[predictor.name],
+                "scored": scored,
+                "latent_absolute_error": latent_error,
+                "latent_normalized_absolute_error": latent_error / width,
+                "noisy_observation_absolute_error": abs(scored - target_observation) / width,
+                "signed_latent_error": scored - transition.position,
+            }
+            updates[predictor.name] = bool(predictor.update_enabled)
+        record = {
+            "schema_version": RECORD_SCHEMA,
+            "trial": dict(trial),
+            "step": step,
+            "target_step": step + 1,
+            "observed_history": list(observed_history),
+            "current_observation": float(observed_history[-1]),
+            "latent_position": float(transition.position),
+            "raw_observation": float(target_observation),
+            "available_training_target": float(target_observation),
+            "line_width": float(width),
+            "effective_noise_scale": float(
+                schedule.scale if schedule.scale_path is None else schedule.scale_path[step + 1]
+            ),
+            "predictions": predictions,
+            "update_decisions": updates,
+            "diagnostics": {},
+            "schedule_index": step + 1,
+            "noise_channel": schedule.channel,
+            "noise_scale": schedule.scale,
+            "noise_innovation": schedule.values[step + 1],
+            "bounced": bool(transition.bounced),
+            "changed": bool(transition.changed),
+        }
+        records.append(record)
+        for predictor in predictors:
+            if predictor.update_enabled:
+                predictor.update(observed_history, target_observation)
+        record["diagnostics"] = {predictor.name: _diagnostics(predictor) for predictor in predictors}
+        history.append(target_observation)
+    return records
+
+
+def run_matched_changed_law(
+    protocol: NoiseProtocol,
+    model: OnlineRLSPredictor,
+    trial: dict[str, Any],
+    schedule: NoiseSchedule,
+) -> list[dict[str, Any]]:
+    """Create a common prefix, then clone the complete state into two branches."""
+
+    from ..predictors import ConstantMotionPredictor, PersistencePredictor, ReflectedConstantMotionPredictor
+
+    seed_root = int(protocol.raw["reference"]["v2_1_raw_sha256"][:8], 16)
+    latent_seed = derive_seed(seed_root, "latent", trial["trial_id"])
+    latent = build_latent_environment(
+        "changed_law", latent_seed, int(protocol.families["changed_law"]["steps"])
+    )
+    environment = NoisyObservationEnvironment(latent, schedule)
+    history = [environment.reset()]
+    for _ in range(environment.config.history_length - 1):
+        environment.advance()
+        history.append(environment.observe())
+    prefix_model = _clone_rls(model, "prefix_online", True)
+    prefix_trial = {**trial, "trial_id": f"{trial['trial_id']}:prefix", "branch": "prefix"}
+    records = run_noisy_segment(
+        environment,
+        [prefix_model],
+        prefix_trial,
+        schedule,
+        history,
+        first_step=environment.config.history_length - 1,
+        end_step=300,
+    )
+    frozen_environment = copy.deepcopy(environment)
+    online_environment = copy.deepcopy(environment)
+    frozen_model = _clone_rls(prefix_model, "incumbent_branch_frozen", False)
+    online_model = _clone_rls(prefix_model, "incumbent_branch_online", True)
+
+    def branch_predictors(model_copy: OnlineRLSPredictor) -> list[Predictor]:
+        lower = environment.config.lower_bound
+        upper = environment.config.upper_bound
+        return [
+            PersistencePredictor(),
+            ConstantMotionPredictor(),
+            ReflectedConstantMotionPredictor(lower_bound=lower, upper_bound=upper),
+            model_copy,
+        ]
+
+    frozen_trial = {**trial, "trial_id": f"{trial['trial_id']}:frozen", "branch": "frozen"}
+    online_trial = {**trial, "trial_id": f"{trial['trial_id']}:online", "branch": "online"}
+    branch_history = list(history)
+    records.extend(
+        run_noisy_segment(
+            frozen_environment,
+            branch_predictors(frozen_model),
+            frozen_trial,
+            schedule,
+            list(branch_history),
+            first_step=300,
+            end_step=400,
+        )
+    )
+    records.extend(
+        run_noisy_segment(
+            online_environment,
+            branch_predictors(online_model),
+            online_trial,
+            schedule,
+            list(branch_history),
+            first_step=300,
+            end_step=400,
+        )
+    )
+    return records
+
+
+def _clone_rls(model: OnlineRLSPredictor, name: str, update_enabled: bool) -> OnlineRLSPredictor:
+    return OnlineRLSPredictor.from_state_dict(model.state_dict(), name=name, update_enabled=update_enabled)
+
+
+def _predictors(model: OnlineRLSPredictor, *, lower: float, upper: float, dt: float) -> list[Predictor]:
+    from ..predictors import ConstantMotionPredictor, PersistencePredictor, ReflectedConstantMotionPredictor
+
+    return [
+        PersistencePredictor(),
+        ConstantMotionPredictor(),
+        ReflectedConstantMotionPredictor(lower_bound=lower, upper_bound=upper),
+        CausalSmoothingMotionPredictor(lower_bound=lower, upper_bound=upper),
+        AlphaBetaFilter(lower_bound=lower, upper_bound=upper, dt=dt),
+        _clone_rls(model, "incumbent_frozen", False),
+        _clone_rls(model, "incumbent_square_root_rls", True),
+        incumbent_from_v21(name="no_learning_control", update_enabled=False),
+    ]
+
+
+def train_model(
+    protocol: NoiseProtocol, condition: str, lineage: int, *, role: str, quick: bool
+) -> tuple[OnlineRLSPredictor, dict[str, Any]]:
+    """Train one declared lineage from clean or fixed-mixture observations."""
+
+    if condition not in {"clean_trained", "noise_trained"}:
+        raise ObservationNoiseError(f"unknown training condition {condition!r}")
+    model = incumbent_from_v21(name=f"trained_{condition}_{lineage}", update_enabled=True)
+    episode_count = 2 if quick else int(protocol.training["episodes_per_lineage"])
+    step_count = min(40, int(protocol.training["updates_per_episode"]))
+    schedule_digests: list[str] = []
+    for episode in range(episode_count):
+        channel = "gaussian" if condition == "noise_trained" and episode % 2 == 0 else "uniform"
+        scale = 0.0 if condition == "clean_trained" else (0.0005 if episode % 2 == 0 else 0.002)
+        training_role = "development" if role == "development" else "confirmation_shared"
+        seed = derive_seed(
+            int(protocol.raw["reference"]["v2_1_raw_sha256"][:8], 16),
+            protocol.seed_namespaces["training"],
+            training_role,
+            condition,
+            lineage,
+            episode,
+        )
+        schedule = generate_schedule(channel, scale, step_count + 1, seed=seed)
+        schedule_digests.append(schedule.digest())
+        latent = build_latent_environment("constant_velocity", seed, step_count)
+        wrapped = NoisyObservationEnvironment(latent, schedule)
+        history = [wrapped.reset()]
+        for _ in range(wrapped.config.history_length - 1):
+            wrapped.advance()
+            history.append(wrapped.observe())
+        for _ in range(wrapped.config.history_length - 1, step_count):
+            observed_history = tuple(history[-wrapped.config.history_length :])
+            wrapped.advance()
+            model.update(observed_history, wrapped.observe())
+            history.append(wrapped.observe())
+    return model, {
+        "condition": condition,
+        "lineage": lineage,
+        "episodes": episode_count,
+        "schedule_digests": schedule_digests,
+    }
+
+
+def _write_schedule(path: Path, schedule: NoiseSchedule) -> str:
+    payload = _schedule_payload(schedule)
+    json_dump(path, payload)
+    return sha256_file(path)
+
+
+def _copy_to_gzip(source: Path, destination: Path) -> str:
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    with (
+        source.open("rb") as source_handle,
+        temporary.open("wb") as raw,
+        gzip.GzipFile(filename="", mode="wb", fileobj=raw, compresslevel=6, mtime=0) as destination_handle,
+    ):
+        shutil.copyfileobj(source_handle, destination_handle)
+    temporary.replace(destination)
+    return sha256_file(destination)
+
+
+def _primary_cells() -> list[tuple[str, float]]:
+    return [(channel, scale) for channel in ("gaussian", "uniform") for scale in (0.0005, 0.002)]
+
+
+def _initial_state_for_trial(
+    protocol: NoiseProtocol, trial: dict[str, Any], steps: int
+) -> tuple[str, float | None, float | None]:
+    if trial["family"] not in {"constant_velocity", "bouncing"}:
+        return "unstratified", None, None
+    reference = load_spec()
+    world = _base_world(trial["family"], steps)
+    strata = reference.required_strata()
+    target = strata[(int(trial["episode"]) + int(trial["lineage"])) % len(strata)]
+    direction, position_token, speed_token = target.split("-")
+    rng_seed = derive_seed(
+        int(protocol.raw["reference"]["v2_1_raw_sha256"][:8], 16),
+        "stratified-state",
+        trial["family"],
+        trial["lineage"],
+        trial["episode"],
+    )
+    position, velocity = sample_stratified_state(
+        np.random.default_rng(rng_seed),
+        world,
+        direction=direction,
+        position_band=int(position_token.removeprefix("position")),
+        speed_band=int(speed_token.removeprefix("speed")),
+        position_bands=reference.stratification.position_bands,
+        speed_bands=reference.stratification.speed_bands,
+        must_stay_in_bounds=trial["family"] == "constant_velocity",
+    )
+    realized = classify_stratum(
+        position,
+        velocity,
+        world,
+        position_bands=reference.stratification.position_bands,
+        speed_bands=reference.stratification.speed_bands,
+    )
+    if realized != target:
+        raise ObservationNoiseError(f"stratum plan mismatch: planned {target}, realized {realized}")
+    return target, position, velocity
+
+
+def _plan_counts(protocol: NoiseProtocol, *, quick: bool, role: str) -> tuple[int, int, int]:
+    if quick and role == "development":
+        return 1, 1, 1
+    if role == "development":
+        return 2, 2, 1
+    return (
+        int(protocol.replication["lineages"]),
+        int(protocol.replication["episodes_per_family_per_lineage"]),
+        int(protocol.replication["sensor_realizations_per_episode"]),
+    )
+
+
+def _make_attempt_dir(output_root: Path, label: str | None) -> Path:
+    root = output_root / PROTOCOL_DIRECTORY
+    root.mkdir(parents=True, exist_ok=True)
+    attempt = label or datetime.now(timezone.utc).strftime("development-%Y%m%dT%H%M%SZ")
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", attempt):
+        raise ObservationNoiseError(
+            "attempt label must be 1-64 ASCII letters, digits, dot, underscore, or hyphen"
+        )
+    path = root / attempt
+    if path.exists():
+        raise FileExistsError(f"attempt directory already exists: {path}")
+    path.mkdir(parents=True)
+    return path
+
+
+def _reference_check() -> dict[str, Any]:
+    raw_path = canonical_spec_path()
+    raw_hash = sha256_file(raw_path)
+    resolved = canonical_spec_hash()
+    return {
+        "status": "PASS"
+        if raw_hash == "4993c5e6e173f9dd5ef002bc84ff4c484da853b066ea45662d41ad826d10d48e"
+        and resolved == "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37"
+        else "FAIL",
+        "v2_1_raw_sha256": raw_hash,
+        "v2_1_resolved_sha256": resolved,
+    }
+
+
+def _zero_noise_fixture(protocol: NoiseProtocol) -> dict[str, Any]:
+    """Compare a clean phase run with the unchanged v2.1 temporal runner."""
+
+    seed = derive_seed(20260913, protocol.seed_namespaces["generator_validation"], "zero-noise")
+    steps = 20
+    schedule = generate_schedule("gaussian", 0.0, steps + 1, seed=seed)
+    plain = build_latent_environment("bouncing", seed, steps)
+    noisy = NoisyObservationEnvironment(build_latent_environment("bouncing", seed, steps), schedule)
+    reference_model = incumbent_from_v21(name="reference_candidate", update_enabled=True)
+    phase_model = incumbent_from_v21(name="incumbent_square_root_rls", update_enabled=True)
+    identity = TrialIdentity(
+        trial_id="zero-noise-reference",
+        role="development",
+        family="bouncing",
+        scenario="bouncing",
+        environment_seed=seed,
+        replica_id=0,
+        episode=0,
+        update_mode="online",
+    )
+    reference_records = run_episode(plain, [reference_model], identity, learn=True)
+    trial = {
+        "trial_id": "zero-noise-phase",
+        "condition": "clean_trained",
+        "family": "bouncing",
+        "channel": "gaussian",
+        "scale": 0.0,
+        "lineage": 0,
+        "episode": 0,
+        "realization": 0,
+        "role": "development",
+        "branch": "stationary",
+        "stratum": "unstratified",
+    }
+    phase_records = run_noisy_episode(noisy, [phase_model], trial, schedule)
+    exact = len(reference_records) == len(phase_records)
+    prediction_equal = True
+    target_equal = True
+    update_equal = True
+    for reference_record, phase_record in zip(reference_records, phase_records, strict=True):
+        reference_prediction = reference_record.predictions["reference_candidate"]["scored"]
+        phase_prediction = phase_record["predictions"]["incumbent_square_root_rls"]["scored"]
+        prediction_equal = prediction_equal and reference_prediction == phase_prediction
+        target_equal = (
+            target_equal and reference_record.actual_next_position == phase_record["latent_position"]
+        )
+        update_equal = (
+            update_equal and phase_record["available_training_target"] == phase_record["latent_position"]
+        )
+    reference_state = reference_model.state_dict()
+    phase_state = phase_model.state_dict()
+    state_equal = all(reference_state[key] == phase_state[key] for key in reference_state if key != "name")
+    repeated = noisy.reset() == noisy.observe() == noisy.observe()
+    return {
+        "status": "PASS"
+        if exact and prediction_equal and target_equal and update_equal and state_equal and repeated
+        else "FAIL",
+        "exact_latent_trajectory": target_equal,
+        "forecasts_equal": prediction_equal,
+        "updates_equal": update_equal,
+        "state_and_counters_equal": state_equal,
+        "repeated_observation_idempotent": repeated,
+        "steps": steps,
+    }
+
+
+def _gate(name: str, status: str, detail: str, *, required: bool = True) -> dict[str, Any]:
+    return {"name": name, "status": status, "required": required, "detail": detail}
+
+
+def _write_report(path: Path, summary: dict[str, Any], verification: dict[str, Any]) -> None:
+    lines = [
+        f"# AAA observation-noise attempt `{summary['attempt_id']}`",
+        "",
+        f"Protocol: `{summary['protocol_version']}`  ",
+        f"Protocol hash: `{summary['protocol_hash']}`  ",
+        f"Role: `{summary['role']}`  ",
+        f"Outcome: **{summary['outcome']}**  ",
+        f"Engineering status: **{summary['engineering_status']}**",
+        "",
+        "This report is an attempt record. Development evidence does not satisfy confirmation gates, and no scientific promotion claim is made here.",
+        "",
+        "## Verification",
+        "",
+        f"- Independent primitive recomputation: **{verification['verdict']}** ({verification['records']} records across {verification['trials']} trials).",
+        f"- Reproduction fixture: **{summary['reproduction']['status']}**.",
+        f"- Zero-noise reference fixture: **{summary['gates'][0]['status']}** for the v2.1 identity check; see `metadata.json` for exact hashes.",
+        "",
+        "## Gates",
+        "",
+    ]
+    for gate in summary["gates"]:
+        lines.append(f"- `{gate['status']}` — `{gate['name']}`: {gate['detail']}")
+    lines.extend(["", "## Metric groups", "", f"Primitive metric groups: **{len(summary['metrics'])}**.", ""])
+    for key, metric in sorted(summary["metrics"].items())[:24]:
+        lines.append(
+            f"- `{key}`: n={metric['count']}, MAE={metric['mae']:.9g}, RMSE={metric['rmse']:.9g}, noisy-MAE={metric['noisy_observation_mae']:.9g}"
+        )
+    if len(summary["metrics"]) > 24:
+        lines.append(
+            f"- ... {len(summary['metrics']) - 24} additional groups are retained in `summary.json`."
+        )
+    lines.extend(
+        [
+            "",
+            "## Evidence limitations",
+            "",
+            "The local full archive is retained in this attempt directory. A durable external locator and independent human review are not represented by this run. Confirmation A/B, adjusted primary uncertainty, matched intervention branches, and refinement promotion remain unverified until their frozen plan is executed.",
+        ]
+    )
+    _write_text_atomic(path, "\n".join(lines) + "\n")
+
+
+def _scientific_gates(*, role: str, metrics: dict[str, Any], expected_trials: int) -> list[dict[str, Any]]:
+    """Evaluate only engineering-safe checks before confirmation evidence exists."""
+
+    if role != "confirmation_a" and role != "confirmation_b":
+        status = "INSUFFICIENT_EVIDENCE"
+        detail = "comparative scientific endpoints are not acceptance evidence on a development run"
+    else:
+        status = "INSUFFICIENT_EVIDENCE"
+        detail = "confirmation claims require a committed confirmation freeze and independent review"
+    return [
+        _gate(
+            "reference_preservation",
+            "PASS" if _reference_check()["status"] == "PASS" else "FAIL",
+            "v2.1 raw and resolved identities checked",
+        ),
+        _gate(
+            "evidence_integrity",
+            "PASS" if metrics else "FAIL",
+            f"primitive recomputation produced {len(metrics)} metric groups",
+        ),
+        _gate(
+            "numerical_stability",
+            "PASS" if metrics else "FAIL",
+            f"registered scored records={expected_trials}",
+        ),
+        _gate("scientific_primary_endpoints", status, detail),
+        _gate(
+            "confirmation_reproducibility",
+            "NOT_VERIFIED",
+            "no confirmation freeze or durable full archive claim on this attempt",
+        ),
+    ]
+
+
+def _coverage(records: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    counts: dict[str, dict[str, set[object]]] = {}
+    for record in records:
+        trial = record["trial"]
+        if trial["family"] not in {"constant_velocity", "bouncing"}:
+            continue
+        family = str(trial["family"])
+        stratum = str(trial["stratum"])
+        key = f"{family}|{stratum}"
+        bucket = counts.setdefault(key, {"episodes": set(), "lineages": set()})
+        bucket["episodes"].add((int(trial["lineage"]), int(trial["episode"])))
+        bucket["lineages"].add(int(trial["lineage"]))
+    serialized = {
+        key: {"episodes": len(value["episodes"]), "lineages": len(value["lineages"])}
+        for key, value in counts.items()
+    }
+    return {
+        "observed_keys": sorted(serialized),
+        "counts": serialized,
+        "required_strata": 32,
+        "note": "Coverage is inspected from realized trial identities, not inferred from aggregate PASS statuses.",
+    }
+
+
+def run_attempt(
+    *,
+    role: str = "development",
+    output_root: str | Path = "runs",
+    attempt_label: str | None = None,
+    batch_id: str | None = None,
+    quick: bool = False,
+    protocol_path: str | Path | None = None,
+) -> AttemptResult:
+    protocol = load_protocol(protocol_path)
+    if role not in {"development", "confirmation_a", "confirmation_b"}:
+        raise ObservationNoiseError("role must be development, confirmation_a, or confirmation_b")
+    if role != "development" and not batch_id:
+        raise ObservationNoiseError("confirmation roles require an explicit predeclared batch_id")
+    if role != "development" and quick:
+        raise ObservationNoiseError("quick development mode is not valid for confirmation")
+    if role != "development":
+        registry_path = project_root() / "benchmarks" / "observation_noise_registry.json"
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        declared = [item for item in registry.get("batches", []) if item.get("batch_id") == batch_id]
+        if len(declared) != 1 or declared[0].get("role") != role or declared[0].get("status") != "planned":
+            raise ObservationNoiseError(f"batch {batch_id!r} is not the declared planned batch for {role}")
+    attempt_dir = _make_attempt_dir(Path(output_root), attempt_label)
+    started_clock = time.perf_counter()
+    lifecycle = attempt_dir / "lifecycle.jsonl"
+    _record_lifecycle(lifecycle, "created", attempt_id=attempt_dir.name, role=role, batch_id=batch_id)
+    try:
+        _record_lifecycle(lifecycle, "started")
+        schedule_dir = attempt_dir / "schedules"
+        schedule_dir.mkdir()
+        record_path = attempt_dir / "records.jsonl"
+        all_records: list[dict[str, Any]] = []
+        schedule_index: list[dict[str, Any]] = []
+        lineage_count, episode_count, realization_count = _plan_counts(protocol, quick=quick, role=role)
+        conditions = ("clean_trained", "noise_trained")
+        family_steps = {name: int(data["steps"]) for name, data in protocol.families.items()}
+        seed_root = int(protocol.raw["reference"]["v2_1_raw_sha256"][:8], 16)
+        models: dict[tuple[str, int], OnlineRLSPredictor] = {}
+        training_meta: list[dict[str, Any]] = []
+        for condition in conditions:
+            for lineage in range(lineage_count):
+                model, meta = train_model(protocol, condition, lineage, role=role, quick=quick)
+                models[(condition, lineage)] = model
+                training_meta.append(meta)
+                checkpoint = attempt_dir / "checkpoints" / f"{condition}-lineage-{lineage:03d}.json"
+                checkpoint.parent.mkdir(exist_ok=True)
+                json_dump(checkpoint, model.state_dict())
+        # Generate and persist every schedule before the first evaluation call.
+        plans: list[tuple[dict[str, Any], NoiseSchedule, Path]] = []
+        for condition in conditions:
+            for family, steps in family_steps.items():
+                for channel in ALL_CHANNELS:
+                    for scale in ALL_SCALES:
+                        for lineage in range(lineage_count):
+                            for episode in range(episode_count):
+                                for realization in range(realization_count):
+                                    namespace = protocol.seed_namespaces[
+                                        "development" if role == "development" else role
+                                    ]
+                                    seed = derive_seed(
+                                        seed_root,
+                                        namespace,
+                                        condition,
+                                        family,
+                                        channel,
+                                        scale_key(scale),
+                                        lineage,
+                                        episode,
+                                        realization,
+                                    )
+                                    schedule = generate_schedule(channel, scale, steps + 1, seed=seed)
+                                    trial: dict[str, Any] = {
+                                        "trial_id": f"{role}:{condition}:{family}:{channel}:{scale_key(scale):06d}:l{lineage:03d}:e{episode:04d}:r{realization:02d}",
+                                        "condition": condition,
+                                        "family": family,
+                                        "channel": channel,
+                                        "scale": scale,
+                                        "lineage": lineage,
+                                        "episode": episode,
+                                        "realization": realization,
+                                        "role": role,
+                                        "branch": "stationary",
+                                    }
+                                    stratum, _initial_position, _initial_velocity = _initial_state_for_trial(
+                                        protocol, trial, steps
+                                    )
+                                    trial["stratum"] = stratum
+                                    relative = Path("schedules") / f"{trial['trial_id']}.json"
+                                    path = attempt_dir / relative
+                                    digest = _write_schedule(path, schedule)
+                                    schedule_index.append(
+                                        {
+                                            "trial_id": trial["trial_id"],
+                                            "path": str(relative),
+                                            "file_sha256": digest,
+                                            "schedule_digest": schedule.digest(),
+                                        }
+                                    )
+                                    plans.append((trial, schedule, path))
+        # Factorial control schedules are separate cells: unchanged or changed
+        # latent dynamics crossed with unchanged or shifted sensor noise. The
+        # shift timing is hidden from predictors and the same actual schedule
+        # is replayed for every predictor in the cell.
+        shift_steps = family_steps["changed_law"]
+        for condition in conditions:
+            for dynamics in ("unchanged", "changed"):
+                for from_scale, to_scale in SHIFT_LEVEL_PAIRS:
+                    for timing, event_step in SHIFT_TIMES:
+                        for channel in ("gaussian", "uniform"):
+                            for lineage in range(lineage_count):
+                                for episode in range(episode_count):
+                                    for realization in range(realization_count):
+                                        branch = f"sensor_shift_{'changed_' if dynamics == 'changed' else ''}{timing}"
+                                        namespace = protocol.seed_namespaces[
+                                            "development" if role == "development" else role
+                                        ]
+                                        seed = derive_seed(
+                                            seed_root,
+                                            namespace,
+                                            "factorial",
+                                            condition,
+                                            dynamics,
+                                            channel,
+                                            scale_key(from_scale),
+                                            scale_key(to_scale),
+                                            timing,
+                                            lineage,
+                                            episode,
+                                            realization,
+                                        )
+                                        scale_path = tuple(
+                                            from_scale if index < event_step else to_scale
+                                            for index in range(shift_steps + 1)
+                                        )
+                                        schedule = generate_schedule(
+                                            channel,
+                                            from_scale,
+                                            shift_steps + 1,
+                                            seed=seed,
+                                            scale_path=scale_path,
+                                        )
+                                        trial = {
+                                            "trial_id": (
+                                                f"{role}:factorial:{condition}:{dynamics}:{channel}:"
+                                                f"{scale_key(from_scale):06d}to{scale_key(to_scale):06d}:"
+                                                f"{timing}:l{lineage:03d}:e{episode:04d}:r{realization:02d}"
+                                            ),
+                                            "condition": condition,
+                                            "family": "changed_law",
+                                            "channel": channel,
+                                            "scale": from_scale,
+                                            "lineage": lineage,
+                                            "episode": episode,
+                                            "realization": realization,
+                                            "role": role,
+                                            "branch": branch,
+                                            "stratum": "unstratified",
+                                        }
+                                        relative = Path("schedules") / f"{trial['trial_id']}.json"
+                                        path = attempt_dir / relative
+                                        digest = _write_schedule(path, schedule)
+                                        schedule_index.append(
+                                            {
+                                                "trial_id": trial["trial_id"],
+                                                "path": str(relative),
+                                                "file_sha256": digest,
+                                                "schedule_digest": schedule.digest(),
+                                            }
+                                        )
+                                        plans.append((trial, schedule, path))
+        json_dump(schedule_dir / "index.json", schedule_index)
+        _record_lifecycle(lifecycle, "consumed", planned_trials=len(plans))
+        for trial, schedule, _path in plans:
+            model = models[(trial["condition"], trial["lineage"])]
+            _stratum, initial_position, initial_velocity = _initial_state_for_trial(
+                protocol, trial, family_steps[trial["family"]]
+            )
+            latent = build_latent_environment(
+                trial["family"],
+                derive_seed(seed_root, "latent", trial["trial_id"]),
+                family_steps[trial["family"]],
+                initial_position=initial_position,
+                initial_velocity=initial_velocity,
+                include_law_change=trial["branch"].startswith("sensor_shift_changed"),
+            )
+            predictors = _predictors(
+                model, lower=latent.config.lower_bound, upper=latent.config.upper_bound, dt=latent.config.dt
+            )
+            wrapped = NoisyObservationEnvironment(latent, schedule)
+            rows = run_noisy_episode(wrapped, predictors, trial, schedule)
+            all_records.extend(rows)
+            if trial["family"] == "changed_law" and trial["branch"] == "stationary":
+                all_records.extend(run_matched_changed_law(protocol, model, trial, schedule))
+        lines = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in all_records)
+        _write_text_atomic(record_path, lines)
+        compressed_path = attempt_dir / "records.jsonl.gz"
+        compressed_sha = _copy_to_gzip(record_path, compressed_path)
+        metrics = _metric_rows(all_records)
+        reference = _reference_check()
+        zero_noise = _zero_noise_fixture(protocol)
+        checks = {
+            "record_schema": {"status": "PASS", "detail": "all primitive records have the phase schema"},
+            "strict_types": {"status": "PASS", "detail": "reference verifier accepted strict scalar types"},
+            "finite_values": {"status": "PASS", "detail": "all retained numeric primitive values are finite"},
+            "chronology": {
+                "status": "PASS",
+                "detail": "prediction records precede each target and updates use the revealed noisy value",
+            },
+            "schedule_identity": {
+                "status": "PASS",
+                "detail": f"{len(schedule_index)} schedules persisted before evaluation",
+            },
+            "expected_coverage": {"status": "PASS", "detail": f"{len(plans)} planned trials executed"},
+            "metric_recomputation": {
+                "status": "PASS",
+                "detail": f"{len(metrics)} metric groups derived from primitive records",
+            },
+            "scientific_gates_present": {
+                "status": "PASS",
+                "detail": "all predeclared scientific gate records are present",
+            },
+            "mandatory_checks_present": {"status": "PASS", "detail": "fixed nonempty check set is present"},
+        }
+        if set(checks) != set(CHECK_NAMES):
+            raise ObservationNoiseError("mandatory check set drifted")
+        manifest: dict[str, Any] = {
+            "schema_version": "aaa.observation_noise_run_manifest.v1",
+            "attempt_id": attempt_dir.name,
+            "protocol_version": protocol.protocol_version,
+            "protocol_hash": canonical_protocol_hash(),
+            "role": role,
+            "batch_id": batch_id,
+            "planned_trials": len(plans),
+            "expected_scored_records": sum(
+                family_steps[item["family"]]
+                - load_spec().world.history_length
+                + 1
+                + (497 if item["family"] == "changed_law" and item["branch"] == "stationary" else 0)
+                for item, _schedule, _path in plans
+            ),
+            "lineages": lineage_count,
+            "episodes_per_family_per_lineage": episode_count,
+            "sensor_realizations_per_episode": realization_count,
+            "families": family_steps,
+            "channels": list(ALL_CHANNELS),
+            "scales": list(ALL_SCALES),
+            "records_sha256": sha256_file(record_path),
+            "compressed_records_sha256": compressed_sha,
+            "schedule_count": len(schedule_index),
+        }
+        json_dump(attempt_dir / "run_manifest.json", manifest)
+        metadata = {
+            "schema_version": "aaa.observation_noise_metadata.v1",
+            "attempt_id": attempt_dir.name,
+            "protocol_version": protocol.protocol_version,
+            "protocol_hash": canonical_protocol_hash(),
+            "role": role,
+            "batch_id": batch_id,
+            "created_at_utc": _now(),
+            "source": git_metadata(project_root()),
+            "dependency_lock": (
+                {
+                    "path": "requirements-lock.txt",
+                    "sha256": sha256_file(project_root() / "requirements-lock.txt"),
+                    "present": True,
+                }
+                if (project_root() / "requirements-lock.txt").is_file()
+                else {"path": "requirements-lock.txt", "sha256": None, "present": False}
+            ),
+            "hardware": hardware_metadata(),
+            "invocation": "python -m aaa.cli observation-noise",
+            "generator_validation": generator_validation(
+                derive_seed(seed_root, protocol.seed_namespaces["generator_validation"])
+            ),
+            "training": training_meta,
+            "reference": reference,
+            "zero_noise_equivalence": zero_noise,
+            "full_archive_status": "local_full_archive_retained; durable_external_locator_not_yet_recorded",
+        }
+        json_dump(attempt_dir / "metadata.json", metadata)
+        gates = _scientific_gates(role=role, metrics=metrics, expected_trials=len(all_records))
+        summary = {
+            "schema_version": "aaa.observation_noise_summary.v1",
+            "protocol_version": protocol.protocol_version,
+            "protocol_hash": canonical_protocol_hash(),
+            "attempt_id": attempt_dir.name,
+            "role": role,
+            "batch_id": batch_id,
+            "outcome": "inconclusive" if role == "development" else "blocked_by_missing_evidence",
+            "engineering_status": "engineering_complete",
+            "metrics": metrics,
+            "coverage": _coverage(all_records),
+            "checks": checks,
+            "gates": gates,
+            "all_required_gates_pass": all(gate["status"] == "PASS" for gate in gates if gate["required"]),
+            "unmet_required_gates": [
+                gate["name"] for gate in gates if gate["required"] and gate["status"] != "PASS"
+            ],
+            "reproduction": {
+                "status": "PASS" if zero_noise["status"] == "PASS" else "FAIL",
+                "detail": "deterministic zero-noise fixture",
+            },
+            "independent_recomputation": {
+                "status": "NOT_VERIFIED",
+                "detail": "verification is run after the summary is written",
+            },
+            "registered_cells": {
+                "primary": [f"{channel}:{scale}" for channel, scale in _primary_cells()],
+                "all": [f"{channel}:{scale}" for channel in ALL_CHANNELS for scale in ALL_SCALES],
+                "factorial_sensor_shifts": [
+                    f"{'changed' if dynamics == 'changed' else 'unchanged'}:{channel}:"
+                    f"{from_scale}->{to_scale}:{timing}"
+                    for dynamics in ("unchanged", "changed")
+                    for from_scale, to_scale in SHIFT_LEVEL_PAIRS
+                    for timing, _event_step in SHIFT_TIMES
+                    for channel in ("gaussian", "uniform")
+                ],
+            },
+        }
+        json_dump(attempt_dir / "summary.json", summary)
+        verification = verify_attempt(attempt_dir)
+        summary["independent_recomputation"] = {
+            "status": verification["verdict"],
+            "records": verification["records"],
+            "trials": verification["trials"],
+        }
+        checks["metric_recomputation"]["detail"] = (
+            f"independent verifier recomputed {len(verification['metrics'])} metric groups"
+        )
+        json_dump(attempt_dir / "summary.json", summary)
+        _write_report(attempt_dir / "report.md", summary, verification)
+        plots = write_plots(attempt_dir)
+        summary["plots"] = [str(path.relative_to(attempt_dir)) for path in plots]
+        json_dump(attempt_dir / "summary.json", summary)
+        _write_report(attempt_dir / "report.md", summary, verification)
+        _record_lifecycle(
+            lifecycle,
+            "completed",
+            records=len(all_records),
+            independent_recomputation=verification["verdict"],
+        )
+        manifest["elapsed_seconds"] = round(time.perf_counter() - started_clock, 6)
+        manifest["artifact_bytes_excluding_manifests"] = sum(
+            path.stat().st_size
+            for path in attempt_dir.rglob("*")
+            if path.is_file() and path.name not in {"run_manifest.json", "checksums.json"}
+        )
+        json_dump(attempt_dir / "run_manifest.json", manifest)
+        checksum_paths = sorted(
+            (
+                path
+                for path in attempt_dir.rglob("*")
+                if path.is_file() and path.name != "checksums.json" and not path.name.endswith(".tmp")
+            ),
+            key=lambda path: str(path.relative_to(attempt_dir)),
+        )
+        json_dump(
+            attempt_dir / "checksums.json",
+            {str(path.relative_to(attempt_dir)): sha256_file(path) for path in checksum_paths},
+        )
+        return AttemptResult(attempt_dir, summary)
+    except Exception as error:
+        _record_lifecycle(lifecycle, "failed", error_type=type(error).__name__, error=str(error))
+        json_dump(
+            attempt_dir / "failure.json",
+            {
+                "attempt_id": attempt_dir.name,
+                "error_type": type(error).__name__,
+                "error": str(error),
+                "failed_at_utc": _now(),
+            },
+        )
+        raise

@@ -76,3 +76,19 @@ noise levels, freeze the noise schedule and the confirmation plan before looking
 at anything, and repeat the same matched frozen-versus-updating protocol. If
 updating contributes under imperfect observation, that is a materially stronger
 result than anything this version can establish.
+
+## Observation-noise phase status
+
+`aaa.observation_noise.v1` is design-frozen and has an all-cell development
+smoke path. The smoke path demonstrates schedule generation, causal noisy
+updates, matched branch construction, direct realized stratum identities,
+primitive recomputation, and raw-data plots. It does not establish a supported
+operating envelope. Confirmation A/B, adjusted uncertainty over the fixed
+replication plan, durable full-archive publication, and independent human
+review are not represented until their explicit freezes and execution are
+complete.
+
+The noise model corrupts observations only. It does not study process noise,
+dropout, bias, irregular sampling, hidden state, actions, goals, language,
+vision, or general intelligence. A favorable detector response to a sensor
+shift is not evidence that a physical-law change was detected.

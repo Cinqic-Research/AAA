@@ -1,0 +1,29 @@
+{
+  "schema_version": "aaa.observation_noise_registry.v1",
+  "protocol_version": "aaa.observation_noise.v1",
+  "protocol_hash": "e340d5c0a08a402dd70acb56664645039f71333c64c0934d15427aaddc2858eb",
+  "batches": [
+    {
+      "batch_id": "observation-noise-a-0001",
+      "role": "confirmation_a",
+      "status": "planned",
+      "namespace": "observation_noise_confirmation_a",
+      "declared_at": "2026-09-13",
+      "notes": "Predeclared A stream. Shared training lineages; disjoint latent and sensor evaluation stream."
+    },
+    {
+      "batch_id": "observation-noise-b-0001",
+      "role": "confirmation_b",
+      "status": "planned",
+      "namespace": "observation_noise_confirmation_b",
+      "declared_at": "2026-09-13",
+      "notes": "Predeclared B stream. Must not be changed after A is observed."
+    }
+  ],
+  "rules": {
+    "immutable_attempt_ids": true,
+    "failed_attempts_are_retained": true,
+    "no_replacement_randomness": true,
+    "a_and_b_are_not_independent_retraining": true
+  }
+}
