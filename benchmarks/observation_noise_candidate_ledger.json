@@ -1,0 +1,11 @@
+{
+  "schema_version": "aaa.observation_noise_candidate_ledger.v1",
+  "protocol_version": "aaa.observation_noise.v1",
+  "status": "design_frozen",
+  "maximum_evaluated_configurations": 12,
+  "maximum_substantive_mechanism_changes": 3,
+  "baseline_search_is_separate": true,
+  "entries": [],
+  "notes": "No comparative candidate outcome has been observed at the design-freeze commit. Future entries must preserve rejected and inconclusive configurations.",
+  "frozen_before_comparative_development": true
+}
