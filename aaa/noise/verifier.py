@@ -16,7 +16,8 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any, TextIO
 
-RECORD_SCHEMA = "aaa.observation_noise_step.v2"
+RECORD_SCHEMA = "aaa.observation_noise_step.v3"
+LEGACY_RECORD_SCHEMAS = {"aaa.observation_noise_step.v2"}
 CHECK_NAMES = (
     "record_schema",
     "strict_types",
@@ -102,12 +103,15 @@ def validate_record(record: dict[str, Any]) -> None:
         "bounced",
         "changed",
     }
+    schema_version = record.get("schema_version")
+    if schema_version == RECORD_SCHEMA:
+        required.add("prediction_intervals")
+    elif schema_version not in LEGACY_RECORD_SCHEMAS:
+        raise VerificationError("unsupported observation-noise record schema")
     unknown = sorted(set(record) - required)
     missing = sorted(required - set(record))
     if unknown or missing:
         raise VerificationError(f"record fields invalid: unknown={unknown}, missing={missing}")
-    if record["schema_version"] != RECORD_SCHEMA:
-        raise VerificationError("unsupported observation-noise record schema")
     trial = record["trial"]
     if not isinstance(trial, dict):
         raise VerificationError("trial identity must be an object")
@@ -223,6 +227,22 @@ def validate_record(record: dict[str, Any]) -> None:
         expected_noisy = abs(metrics["scored"] - raw_observation) / line_width
         if abs(metrics["noisy_observation_absolute_error"] - expected_noisy) > 1e-15:
             raise VerificationError(f"cached noisy-observation error disagrees for {name}")
+    if schema_version == RECORD_SCHEMA:
+        intervals = record["prediction_intervals"]
+        if not isinstance(intervals, dict) or set(intervals) != set(predictions):
+            raise VerificationError("prediction intervals must cover every predictor")
+        for name, levels in intervals.items():
+            if not isinstance(levels, dict) or set(levels) != {"0.9", "0.95"}:
+                raise VerificationError(f"invalid interval levels for predictor {name!r}")
+            for level, interval in levels.items():
+                if interval is None:
+                    continue
+                if not isinstance(interval, dict) or set(interval) != {"lower", "upper"}:
+                    raise VerificationError(f"invalid {level} interval for predictor {name!r}")
+                lower = _finite(interval["lower"], f"prediction_intervals.{name}.{level}.lower")
+                upper = _finite(interval["upper"], f"prediction_intervals.{name}.{level}.upper")
+                if lower > upper:
+                    raise VerificationError(f"interval bounds are reversed for predictor {name!r}")
     diagnostics = record.get("diagnostics", {})
     if not isinstance(diagnostics, dict):
         raise VerificationError("diagnostics must be an object")
@@ -269,6 +289,62 @@ def _metric_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
             "noisy_observation_mae": float(sum(noisy) / len(noisy)),
             "p95": float(sorted(errors)[min(len(errors) - 1, math.ceil(0.95 * len(errors)) - 1)]),
             "p99": float(sorted(errors)[min(len(errors) - 1, math.ceil(0.99 * len(errors)) - 1)]),
+        }
+    return output
+
+
+def _interval_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Recompute interval coverage and scores with verifier-owned arithmetic."""
+
+    grouped: dict[tuple[str, str, str, float, str, str, str, str], list[tuple[bool, float, float]]] = (
+        defaultdict(list)
+    )
+    for record in records:
+        intervals = record.get("prediction_intervals")
+        if intervals is None:
+            continue
+        trial = record["trial"]
+        target = _finite(record["raw_observation"], "raw_observation")
+        for predictor, levels in intervals.items():
+            for level, interval in levels.items():
+                if interval is None:
+                    continue
+                lower = _finite(interval["lower"], "interval.lower")
+                upper = _finite(interval["upper"], "interval.upper")
+                alpha = 1.0 - float(level)
+                penalty = 0.0
+                if target < lower:
+                    penalty += 2.0 * (lower - target) / alpha
+                if target > upper:
+                    penalty += 2.0 * (target - upper) / alpha
+                key = (
+                    str(trial["condition"]),
+                    str(trial["family"]),
+                    str(trial["channel"]),
+                    float(trial["scale"]),
+                    str(trial["role"]),
+                    str(trial["branch"]),
+                    str(predictor),
+                    str(level),
+                )
+                grouped[key].append((lower <= target <= upper, upper - lower, upper - lower + penalty))
+    output: dict[str, Any] = {}
+    for key, values in sorted(grouped.items(), key=str):
+        label = "|".join((*map(str, key[:3]), f"{key[3]:.7g}", *map(str, key[4:])))
+        output[label] = {
+            "condition": key[0],
+            "family": key[1],
+            "channel": key[2],
+            "scale": key[3],
+            "role": key[4],
+            "branch": key[5],
+            "predictor": key[6],
+            "level": key[7],
+            "count": len(values),
+            "coverage": float(sum(float(item[0]) for item in values) / len(values)),
+            "width": float(sum(item[1] for item in values) / len(values)),
+            "interval_score": float(sum(item[2] for item in values) / len(values)),
+            "evidence_status": "PASS",
         }
     return output
 
@@ -433,6 +509,46 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
                     raise VerificationError(f"metric {key} count mismatch")
             elif abs(float(stored[field]) - float(recomputed[field])) > 1e-12:
                 raise VerificationError(f"metric {key} {field} mismatch")
+    if any(record["schema_version"] == RECORD_SCHEMA for record in records):
+        statistics = summary.get("statistics")
+        if not isinstance(statistics, dict):
+            raise VerificationError("v3 evidence requires a statistics artifact")
+        declared_draws = statistics.get("declared_draws")
+        executed_draws = statistics.get("executed_draws")
+        if (
+            isinstance(declared_draws, bool)
+            or not isinstance(declared_draws, int)
+            or declared_draws < 1
+            or isinstance(executed_draws, bool)
+            or not isinstance(executed_draws, int)
+            or executed_draws < 1
+            or executed_draws > declared_draws
+        ):
+            raise VerificationError("statistics draw declarations are invalid")
+        if statistics.get("hierarchical", {}).get("method") != "hierarchical_bootstrap":
+            raise VerificationError("hierarchical statistics method is missing")
+        if statistics.get("paired_comparisons", {}).get("method") != "paired_hierarchical_bootstrap":
+            raise VerificationError("paired statistics method is missing")
+        interval_artifact = statistics.get("intervals")
+        if (
+            not isinstance(interval_artifact, dict)
+            or interval_artifact.get("method") != "causal_residual_quantile"
+        ):
+            raise VerificationError("causal interval statistics are missing")
+        recomputed_intervals = _interval_rows(records)
+        stored_intervals = interval_artifact.get("cells")
+        if not isinstance(stored_intervals, dict) or set(stored_intervals) != set(recomputed_intervals):
+            raise VerificationError("stored interval cells do not match primitive recomputation")
+        for key, recomputed in recomputed_intervals.items():
+            stored = stored_intervals[key]
+            for field in ("count", "coverage", "width", "interval_score"):
+                if field not in stored:
+                    raise VerificationError(f"interval cell {key} is missing {field}")
+                if field == "count":
+                    if stored[field] != recomputed[field]:
+                        raise VerificationError(f"interval cell {key} count mismatch")
+                elif abs(float(stored[field]) - float(recomputed[field])) > 1e-12:
+                    raise VerificationError(f"interval cell {key} {field} mismatch")
     checks = summary.get("checks")
     if not isinstance(checks, dict) or set(checks) != set(CHECK_NAMES):
         raise VerificationError("mandatory verifier checks are missing or unknown")

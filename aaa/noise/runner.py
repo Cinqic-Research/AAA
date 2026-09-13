@@ -10,7 +10,7 @@ import math
 import re
 import shutil
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,6 +25,7 @@ from ..config import WorldConfig
 from ..environment import DampedOscillatorEnvironment, MovingDotEnvironment
 from ..experiment import TrialIdentity, run_episode
 from ..predictors import OnlineRLSPredictor, Predictor
+from .calibration import CausalResidualCalibrator
 from .observation import (
     NoiseSchedule,
     NoisyObservationEnvironment,
@@ -36,9 +37,10 @@ from .observation import (
 from .plots import write_plots
 from .predictors import AlphaBetaFilter, CausalSmoothingMotionPredictor, incumbent_from_v21
 from .spec import NoiseProtocol, canonical_protocol_hash, load_protocol
+from .statistics import hierarchical_bootstrap, interval_statistics, paired_hierarchical_comparisons
 from .verifier import CHECK_NAMES, _metric_rows, verify_attempt
 
-RECORD_SCHEMA = "aaa.observation_noise_step.v2"
+RECORD_SCHEMA = "aaa.observation_noise_step.v3"
 PROTOCOL_DIRECTORY = "observation-noise-v1"
 ALL_CHANNELS = ("gaussian", "uniform", "correlated", "impulsive")
 ALL_SCALES = (0.0, 0.0005, 0.002, 0.01)
@@ -200,6 +202,10 @@ def _diagnostics(predictor: Predictor) -> dict[str, Any]:
     return {}
 
 
+def _new_calibrators(predictors: Sequence[Predictor]) -> dict[str, CausalResidualCalibrator]:
+    return {predictor.name: CausalResidualCalibrator() for predictor in predictors}
+
+
 def run_noisy_episode(
     environment: NoisyObservationEnvironment,
     predictors: Sequence[Predictor],
@@ -216,6 +222,7 @@ def run_noisy_episode(
         environment.advance()
         history.append(environment.observe())
     records: list[dict[str, Any]] = []
+    calibrators = _new_calibrators(predictors)
     for step in range(history_length - 1, environment.config.steps_per_episode):
         observed_history = tuple(history[-history_length:])
         raw_predictions: dict[str, float] = {}
@@ -229,6 +236,7 @@ def run_noisy_episode(
         transition = environment.advance()
         target_observation = environment.observe()
         predictions: dict[str, dict[str, float]] = {}
+        prediction_intervals: dict[str, dict[str, dict[str, float] | None]] = {}
         updates: dict[str, bool] = {}
         for predictor in predictors:
             scored = scored_predictions[predictor.name]
@@ -242,6 +250,7 @@ def run_noisy_episode(
                 "noisy_observation_absolute_error": observation_error / width,
                 "signed_latent_error": scored - transition.position,
             }
+            prediction_intervals[predictor.name] = calibrators[predictor.name].intervals(scored)
             updates[predictor.name] = bool(predictor.update_enabled)
         record = {
             "schema_version": RECORD_SCHEMA,
@@ -258,6 +267,7 @@ def run_noisy_episode(
                 schedule.scale if schedule.scale_path is None else schedule.scale_path[step + 1]
             ),
             "predictions": predictions,
+            "prediction_intervals": prediction_intervals,
             "update_decisions": updates,
             "diagnostics": {},
             "schedule_index": step + 1,
@@ -280,6 +290,7 @@ def run_noisy_episode(
             "line_width",
             "effective_noise_scale",
             "predictions",
+            "prediction_intervals",
             "update_decisions",
             "diagnostics",
             "schedule_index",
@@ -294,6 +305,7 @@ def run_noisy_episode(
         for predictor in predictors:
             if predictor.update_enabled:
                 predictor.update(observed_history, target_observation)
+            calibrators[predictor.name].update(scored_predictions[predictor.name], target_observation)
         record["diagnostics"] = {predictor.name: _diagnostics(predictor) for predictor in predictors}
         history.append(target_observation)
     return records
@@ -308,12 +320,15 @@ def run_noisy_segment(
     *,
     first_step: int,
     end_step: int,
+    calibrators: dict[str, CausalResidualCalibrator] | None = None,
 ) -> list[dict[str, Any]]:
     """Run a continuation without resetting world, schedule, history, or state."""
 
     width = environment.config.width
     history_length = environment.config.history_length
     records: list[dict[str, Any]] = []
+    if calibrators is None:
+        calibrators = _new_calibrators(predictors)
     if len(history) < history_length:
         raise ObservationNoiseError("a continuation requires a complete observed history")
     for step in range(first_step, end_step):
@@ -329,6 +344,7 @@ def run_noisy_segment(
         transition = environment.advance()
         target_observation = environment.observe()
         predictions: dict[str, dict[str, float]] = {}
+        prediction_intervals: dict[str, dict[str, dict[str, float] | None]] = {}
         updates: dict[str, bool] = {}
         for predictor in predictors:
             scored = scored_predictions[predictor.name]
@@ -341,6 +357,7 @@ def run_noisy_segment(
                 "noisy_observation_absolute_error": abs(scored - target_observation) / width,
                 "signed_latent_error": scored - transition.position,
             }
+            prediction_intervals[predictor.name] = calibrators[predictor.name].intervals(scored)
             updates[predictor.name] = bool(predictor.update_enabled)
         record = {
             "schema_version": RECORD_SCHEMA,
@@ -357,6 +374,7 @@ def run_noisy_segment(
                 schedule.scale if schedule.scale_path is None else schedule.scale_path[step + 1]
             ),
             "predictions": predictions,
+            "prediction_intervals": prediction_intervals,
             "update_decisions": updates,
             "diagnostics": {},
             "schedule_index": step + 1,
@@ -370,6 +388,7 @@ def run_noisy_segment(
         for predictor in predictors:
             if predictor.update_enabled:
                 predictor.update(observed_history, target_observation)
+            calibrators[predictor.name].update(scored_predictions[predictor.name], target_observation)
         record["diagnostics"] = {predictor.name: _diagnostics(predictor) for predictor in predictors}
         history.append(target_observation)
     return records
@@ -396,6 +415,7 @@ def run_matched_changed_law(
         environment.advance()
         history.append(environment.observe())
     prefix_model = _clone_rls(model, "prefix_online", True)
+    prefix_calibrators = _new_calibrators([prefix_model])
     prefix_trial = {**trial, "trial_id": f"{trial['trial_id']}:prefix", "branch": "prefix"}
     records = run_noisy_segment(
         environment,
@@ -405,11 +425,14 @@ def run_matched_changed_law(
         history,
         first_step=environment.config.history_length - 1,
         end_step=300,
+        calibrators=prefix_calibrators,
     )
     frozen_environment = copy.deepcopy(environment)
     online_environment = copy.deepcopy(environment)
     frozen_model = _clone_rls(prefix_model, "incumbent_branch_frozen", False)
     online_model = _clone_rls(prefix_model, "incumbent_branch_online", True)
+    frozen_calibrators = copy.deepcopy(prefix_calibrators)
+    online_calibrators = copy.deepcopy(prefix_calibrators)
 
     def branch_predictors(model_copy: OnlineRLSPredictor) -> list[Predictor]:
         lower = environment.config.lower_bound
@@ -424,26 +447,36 @@ def run_matched_changed_law(
     frozen_trial = {**trial, "trial_id": f"{trial['trial_id']}:frozen", "branch": "frozen"}
     online_trial = {**trial, "trial_id": f"{trial['trial_id']}:online", "branch": "online"}
     branch_history = list(history)
+    frozen_predictor_set = branch_predictors(frozen_model)
+    online_predictor_set = branch_predictors(online_model)
+    frozen_calibrators = _new_calibrators(frozen_predictor_set) | {
+        frozen_model.name: copy.deepcopy(prefix_calibrators[prefix_model.name])
+    }
+    online_calibrators = _new_calibrators(online_predictor_set) | {
+        online_model.name: copy.deepcopy(prefix_calibrators[prefix_model.name])
+    }
     records.extend(
         run_noisy_segment(
             frozen_environment,
-            branch_predictors(frozen_model),
+            frozen_predictor_set,
             frozen_trial,
             schedule,
             list(branch_history),
             first_step=300,
             end_step=400,
+            calibrators=frozen_calibrators,
         )
     )
     records.extend(
         run_noisy_segment(
             online_environment,
-            branch_predictors(online_model),
+            online_predictor_set,
             online_trial,
             schedule,
             list(branch_history),
             first_step=300,
             end_step=400,
+            calibrators=online_calibrators,
         )
     )
     return records
@@ -514,8 +547,72 @@ def train_model(
 
 def _write_schedule(path: Path, schedule: NoiseSchedule) -> str:
     payload = _schedule_payload(schedule)
+    if path.exists():
+        existing = json.loads(path.read_text(encoding="utf-8"))
+        if existing != payload:
+            raise ObservationNoiseError(f"existing schedule differs for {path}")
+        return sha256_file(path)
     json_dump(path, payload)
     return sha256_file(path)
+
+
+def _record_shard_path(attempt_dir: Path, trial_id: str) -> Path:
+    digest = hashlib.sha256(trial_id.encode("utf-8")).hexdigest()
+    return attempt_dir / "trial_records" / f"{digest}.jsonl"
+
+
+def _read_jsonl(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        value = json.loads(line)
+        if not isinstance(value, dict):
+            raise ObservationNoiseError(f"{path}:{line_number}: record must be an object")
+        rows.append(value)
+    return rows
+
+
+def _persist_trial_rows(attempt_dir: Path, rows: Sequence[dict[str, Any]]) -> None:
+    """Persist completed trial groups atomically and refuse divergent replays."""
+
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        trial_id = str(row["trial"]["trial_id"])
+        grouped.setdefault(trial_id, []).append(row)
+    shard_dir = attempt_dir / "trial_records"
+    shard_dir.mkdir(exist_ok=True)
+    for trial_id, trial_rows in grouped.items():
+        path = _record_shard_path(attempt_dir, trial_id)
+        encoded = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in trial_rows)
+        if path.exists():
+            if path.read_text(encoding="utf-8") != encoded:
+                raise ObservationNoiseError(f"replayed trial {trial_id} differs from retained evidence")
+            continue
+        _write_text_atomic(path, encoded)
+
+
+def _load_trial_shards(attempt_dir: Path) -> list[dict[str, Any]]:
+    shard_dir = attempt_dir / "trial_records"
+    if not shard_dir.is_dir():
+        return []
+    rows: list[dict[str, Any]] = []
+    for path in sorted(shard_dir.glob("*.jsonl")):
+        rows.extend(_read_jsonl(path))
+    return rows
+
+
+def _record_ids_for_plan(trial: Mapping[str, Any]) -> set[str]:
+    trial_id = str(trial["trial_id"])
+    result = {trial_id}
+    if trial["family"] == "changed_law" and trial["branch"] == "stationary":
+        result.update(f"{trial_id}:{branch}" for branch in ("prefix", "frozen", "online"))
+    return result
+
+
+def _write_combined_records(attempt_dir: Path, rows: Sequence[dict[str, Any]]) -> None:
+    encoded = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in rows)
+    _write_text_atomic(attempt_dir / "records.jsonl", encoded)
 
 
 def _copy_to_gzip(source: Path, destination: Path) -> str:
@@ -600,6 +697,20 @@ def _make_attempt_dir(output_root: Path, label: str | None) -> Path:
     return path
 
 
+def _open_attempt_dir(output_root: Path, label: str | None, *, resume: bool) -> Path:
+    if not resume:
+        return _make_attempt_dir(output_root, label)
+    if not label:
+        raise ObservationNoiseError("--resume requires the existing --attempt-label")
+    root = output_root / PROTOCOL_DIRECTORY
+    path = root / label
+    if not path.is_dir():
+        raise ObservationNoiseError(f"cannot resume missing attempt directory: {path}")
+    if (path / "checksums.json").is_file() and (path / "summary.json").is_file():
+        raise ObservationNoiseError(f"attempt is already finalized; use observation-noise-recompute: {path}")
+    return path
+
+
 def _reference_check() -> dict[str, Any]:
     raw_path = canonical_spec_path()
     raw_hash = sha256_file(raw_path)
@@ -612,6 +723,43 @@ def _reference_check() -> dict[str, Any]:
         "v2_1_raw_sha256": raw_hash,
         "v2_1_resolved_sha256": resolved,
     }
+
+
+def _require_confirmation_freeze(protocol: NoiseProtocol, batch_id: str) -> None:
+    """Refuse A/B execution until the separately committed confirmation freeze matches."""
+
+    if protocol.hash() != canonical_protocol_hash():
+        raise ObservationNoiseError("confirmation requires the canonical observation-noise protocol")
+    freeze_path = project_root() / "benchmarks" / "observation_noise_freeze.json"
+    if not freeze_path.is_file():
+        raise ObservationNoiseError(
+            "confirmation requires benchmarks/observation_noise_freeze.json; no confirmation freeze exists"
+        )
+    freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
+    if not isinstance(freeze, dict) or freeze.get("stage") != "confirmation_freeze":
+        raise ObservationNoiseError("confirmation freeze has the wrong lifecycle stage")
+    if freeze.get("protocol_hash") != canonical_protocol_hash():
+        raise ObservationNoiseError("confirmation freeze protocol hash does not match the canonical protocol")
+    if batch_id not in freeze.get("planned_batches", []):
+        raise ObservationNoiseError(f"batch {batch_id!r} is not listed in the confirmation freeze")
+    if not isinstance(freeze.get("selected_candidate"), str) or not freeze["selected_candidate"]:
+        raise ObservationNoiseError("confirmation freeze does not identify a selected candidate")
+    source = freeze.get("source")
+    current = git_metadata(project_root())
+    if (
+        not isinstance(source, dict)
+        or source.get("dirty") is not False
+        or source.get("commit") != current.get("commit")
+        or source.get("tree_hash") != current.get("tree_hash")
+        or current.get("dirty") is not False
+    ):
+        raise ObservationNoiseError(
+            "confirmation source identity is not the clean, exact checkout recorded by the freeze"
+        )
+    lock = freeze.get("dependency_lock")
+    lock_path = project_root() / "requirements-lock.txt"
+    if not isinstance(lock, dict) or lock.get("sha256") != sha256_file(lock_path) or not lock_path.is_file():
+        raise ObservationNoiseError("confirmation dependency lock differs from the freeze")
 
 
 def _zero_noise_fixture(protocol: NoiseProtocol) -> dict[str, Any]:
@@ -707,7 +855,23 @@ def _write_report(path: Path, summary: dict[str, Any], verification: dict[str, A
     ]
     for gate in summary["gates"]:
         lines.append(f"- `{gate['status']}` — `{gate['name']}`: {gate['detail']}")
-    lines.extend(["", "## Metric groups", "", f"Primitive metric groups: **{len(summary['metrics'])}**.", ""])
+    statistics = summary.get("statistics", {})
+    lines.extend(
+        [
+            "",
+            "## Statistical analysis",
+            "",
+            f"- Hierarchical resampling: **{statistics.get('hierarchical', {}).get('method', 'NOT_RUN')}**.",
+            f"- Draws: **{statistics.get('executed_draws', 'NOT_RUN')}** executed of **{statistics.get('declared_draws', 'NOT_DECLARED')}** declared.",
+            f"- Causal interval cells with available calibration: **{len(statistics.get('intervals', {}).get('cells', {}))}**.",
+            "- Any development or reduced-draw result remains non-confirmatory; latent truth is used only for evaluator metrics.",
+            "",
+            "## Metric groups",
+            "",
+            f"Primitive metric groups: **{len(summary['metrics'])}**.",
+            "",
+        ]
+    )
     for key, metric in sorted(summary["metrics"].items())[:24]:
         lines.append(
             f"- `{key}`: n={metric['count']}, MAE={metric['mae']:.9g}, RMSE={metric['rmse']:.9g}, noisy-MAE={metric['noisy_observation_mae']:.9g}"
@@ -793,6 +957,7 @@ def run_attempt(
     batch_id: str | None = None,
     quick: bool = False,
     protocol_path: str | Path | None = None,
+    resume: bool = False,
 ) -> AttemptResult:
     protocol = load_protocol(protocol_path)
     if role not in {"development", "confirmation_a", "confirmation_b"}:
@@ -802,21 +967,32 @@ def run_attempt(
     if role != "development" and quick:
         raise ObservationNoiseError("quick development mode is not valid for confirmation")
     if role != "development":
+        if protocol_path is not None:
+            raise ObservationNoiseError("confirmation roles cannot use a protocol override")
+        assert batch_id is not None
+        _require_confirmation_freeze(protocol, batch_id)
         registry_path = project_root() / "benchmarks" / "observation_noise_registry.json"
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        if registry.get("protocol_hash") != canonical_protocol_hash():
+            raise ObservationNoiseError("observation-noise registry protocol hash is not canonical")
         declared = [item for item in registry.get("batches", []) if item.get("batch_id") == batch_id]
         if len(declared) != 1 or declared[0].get("role") != role or declared[0].get("status") != "planned":
             raise ObservationNoiseError(f"batch {batch_id!r} is not the declared planned batch for {role}")
-    attempt_dir = _make_attempt_dir(Path(output_root), attempt_label)
+    attempt_dir = _open_attempt_dir(Path(output_root), attempt_label, resume=resume)
     started_clock = time.perf_counter()
     lifecycle = attempt_dir / "lifecycle.jsonl"
-    _record_lifecycle(lifecycle, "created", attempt_id=attempt_dir.name, role=role, batch_id=batch_id)
+    if not resume:
+        _record_lifecycle(lifecycle, "created", attempt_id=attempt_dir.name, role=role, batch_id=batch_id)
     try:
-        _record_lifecycle(lifecycle, "started")
+        _record_lifecycle(lifecycle, "resumed" if resume else "started")
         schedule_dir = attempt_dir / "schedules"
-        schedule_dir.mkdir()
+        schedule_dir.mkdir(exist_ok=True)
         record_path = attempt_dir / "records.jsonl"
-        all_records: list[dict[str, Any]] = []
+        all_records = _load_trial_shards(attempt_dir)
+        if not all_records and record_path.is_file():
+            all_records = _read_jsonl(record_path)
+            _persist_trial_rows(attempt_dir, all_records)
+        completed_record_ids = {str(row["trial"]["trial_id"]) for row in all_records}
         schedule_index: list[dict[str, Any]] = []
         lineage_count, episode_count, realization_count = _plan_counts(protocol, quick=quick, role=role)
         conditions = ("clean_trained", "noise_trained")
@@ -831,7 +1007,12 @@ def run_attempt(
                 training_meta.append(meta)
                 checkpoint = attempt_dir / "checkpoints" / f"{condition}-lineage-{lineage:03d}.json"
                 checkpoint.parent.mkdir(exist_ok=True)
-                json_dump(checkpoint, model.state_dict())
+                checkpoint_payload = model.state_dict()
+                if checkpoint.is_file():
+                    if json.loads(checkpoint.read_text(encoding="utf-8")) != checkpoint_payload:
+                        raise ObservationNoiseError(f"retained checkpoint differs for {checkpoint}")
+                else:
+                    json_dump(checkpoint, checkpoint_payload)
         # Generate and persist every schedule before the first evaluation call.
         plans: list[tuple[dict[str, Any], NoiseSchedule, Path]] = []
         for condition in conditions:
@@ -956,33 +1137,74 @@ def run_attempt(
                                         )
                                         plans.append((trial, schedule, path))
         json_dump(schedule_dir / "index.json", schedule_index)
-        _record_lifecycle(lifecycle, "consumed", planned_trials=len(plans))
+        _record_lifecycle(
+            lifecycle,
+            "consumed",
+            planned_trials=len(plans),
+            completed_trials=len(completed_record_ids),
+        )
         for trial, schedule, _path in plans:
+            expected_record_ids = _record_ids_for_plan(trial)
+            if expected_record_ids.issubset(completed_record_ids):
+                continue
             model = models[(trial["condition"], trial["lineage"])]
-            _stratum, initial_position, initial_velocity = _initial_state_for_trial(
-                protocol, trial, family_steps[trial["family"]]
-            )
-            latent = build_latent_environment(
-                trial["family"],
-                derive_seed(seed_root, "latent", trial["trial_id"]),
-                family_steps[trial["family"]],
-                initial_position=initial_position,
-                initial_velocity=initial_velocity,
-                include_law_change=trial["branch"].startswith("sensor_shift_changed"),
-            )
-            predictors = _predictors(
-                model, lower=latent.config.lower_bound, upper=latent.config.upper_bound, dt=latent.config.dt
-            )
-            wrapped = NoisyObservationEnvironment(latent, schedule)
-            rows = run_noisy_episode(wrapped, predictors, trial, schedule)
-            all_records.extend(rows)
+            if trial["trial_id"] not in completed_record_ids:
+                _stratum, initial_position, initial_velocity = _initial_state_for_trial(
+                    protocol, trial, family_steps[trial["family"]]
+                )
+                latent = build_latent_environment(
+                    trial["family"],
+                    derive_seed(seed_root, "latent", trial["trial_id"]),
+                    family_steps[trial["family"]],
+                    initial_position=initial_position,
+                    initial_velocity=initial_velocity,
+                    include_law_change=trial["branch"].startswith("sensor_shift_changed"),
+                )
+                predictors = _predictors(
+                    model,
+                    lower=latent.config.lower_bound,
+                    upper=latent.config.upper_bound,
+                    dt=latent.config.dt,
+                )
+                wrapped = NoisyObservationEnvironment(latent, schedule)
+                rows = run_noisy_episode(wrapped, predictors, trial, schedule)
+                _persist_trial_rows(attempt_dir, rows)
+                all_records.extend(rows)
+                completed_record_ids.add(trial["trial_id"])
             if trial["family"] == "changed_law" and trial["branch"] == "stationary":
-                all_records.extend(run_matched_changed_law(protocol, model, trial, schedule))
-        lines = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in all_records)
-        _write_text_atomic(record_path, lines)
+                branch_ids = {f"{trial['trial_id']}:{branch}" for branch in ("prefix", "frozen", "online")}
+                if not branch_ids.issubset(completed_record_ids):
+                    branch_rows = run_matched_changed_law(protocol, model, trial, schedule)
+                    _persist_trial_rows(attempt_dir, branch_rows)
+                    for row in branch_rows:
+                        trial_id = str(row["trial"]["trial_id"])
+                        if trial_id not in completed_record_ids:
+                            all_records.append(row)
+                            completed_record_ids.add(trial_id)
+        all_records = _load_trial_shards(attempt_dir)
+        if not all_records:
+            raise ObservationNoiseError("no completed trial shards were retained")
+        all_records = sorted(all_records, key=lambda row: (str(row["trial"]["trial_id"]), int(row["step"])))
+        _write_combined_records(attempt_dir, all_records)
         compressed_path = attempt_dir / "records.jsonl.gz"
         compressed_sha = _copy_to_gzip(record_path, compressed_path)
         metrics = _metric_rows(all_records)
+        declared_draws = int(protocol.statistics["draws"])
+        analysis_draws = 128 if quick else declared_draws
+        statistics_seed = derive_seed(seed_root, protocol.seed_namespaces["calibration"], role, "statistics")
+        hierarchical = hierarchical_bootstrap(
+            all_records,
+            draws=analysis_draws,
+            seed=statistics_seed,
+            levels=tuple(float(level) for level in protocol.statistics["intervals"]),
+        )
+        paired = paired_hierarchical_comparisons(
+            all_records,
+            draws=analysis_draws,
+            seed=statistics_seed ^ 0x5EED,
+            levels=tuple(float(level) for level in protocol.statistics["intervals"]),
+        )
+        interval_summary = interval_statistics(all_records)
         reference = _reference_check()
         zero_noise = _zero_noise_fixture(protocol)
         checks = {
@@ -1076,6 +1298,15 @@ def run_attempt(
             "outcome": "inconclusive" if role == "development" else "blocked_by_missing_evidence",
             "engineering_status": "engineering_complete",
             "metrics": metrics,
+            "statistics": {
+                "status": "INSUFFICIENT_EVIDENCE" if quick else "COMPUTED",
+                "declared_draws": declared_draws,
+                "executed_draws": analysis_draws,
+                "seed": statistics_seed,
+                "hierarchical": hierarchical,
+                "paired_comparisons": paired,
+                "intervals": interval_summary,
+            },
             "coverage": _coverage(all_records),
             "checks": checks,
             "gates": gates,

@@ -153,6 +153,15 @@ recomputation reads primitive artifacts without importing the production metric
 collector or gate evaluator. Reproduction reruns generation from declared
 inputs; recomputation verifies retained evidence. They are distinct verdicts.
 
+The current primitive record schema is `aaa.observation_noise_step.v3`. In
+addition to latent and noisy point-prediction fields, it stores the causal
+prediction intervals available before each reveal. Intervals are calibrated
+from past noisy residuals only; warmup rows carry an explicit unavailable
+value. The statistical artifact reports coverage, width, and interval score
+separately from point-prediction adaptation. Completed trials are first written
+to atomic `trial_records/` shards, which makes an interrupted attempt safely
+resumable without replacing retained evidence.
+
 The phase uses five separate outcomes: engineering complete, scientifically
 supported, negative, inconclusive, and blocked by missing evidence. Only an
 explicit `PASS` satisfies a required engineering gate. A valid negative result

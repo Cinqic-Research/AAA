@@ -8,14 +8,26 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from aaa.noise.calibration import CausalResidualCalibrator, interval_score
 from aaa.noise.observation import (
     NoiseSchedule,
     NoisyObservationEnvironment,
     generate_schedule,
     generator_validation,
 )
-from aaa.noise.runner import build_latent_environment, run_noisy_episode, train_model
+from aaa.noise.runner import (
+    ObservationNoiseError,
+    build_latent_environment,
+    run_attempt,
+    run_noisy_episode,
+    train_model,
+)
 from aaa.noise.spec import ProtocolError, canonical_protocol_hash, load_protocol
+from aaa.noise.statistics import (
+    hierarchical_bootstrap,
+    interval_statistics,
+    paired_hierarchical_comparisons,
+)
 from aaa.noise.verifier import (
     CHECK_NAMES,
     VerificationError,
@@ -69,6 +81,15 @@ class ObservationNoiseProtocolTests(unittest.TestCase):
         self.assertIsNone(unchanged.change_step)
         self.assertEqual(changed.change_step, 300)
 
+    def test_confirmation_requires_a_separate_confirmation_freeze(self):
+        with tempfile.TemporaryDirectory() as directory, self.assertRaises(ObservationNoiseError):
+            run_attempt(
+                role="confirmation_a",
+                batch_id="observation-noise-a-0001",
+                attempt_label="must-not-run",
+                output_root=directory,
+            )
+
 
 class ObservationBoundaryTests(unittest.TestCase):
     def test_schedule_is_deterministic_and_zero_noise_is_exact(self):
@@ -121,6 +142,7 @@ class ObservationBoundaryTests(unittest.TestCase):
                 "realization": 0,
                 "role": "development",
                 "branch": "stationary",
+                "stratum": "unstratified",
             },
             schedule,
         )
@@ -128,6 +150,85 @@ class ObservationBoundaryTests(unittest.TestCase):
         self.assertEqual(spy.events, ["predict", "update"] * 5)
         self.assertEqual(spy.targets, [record["available_training_target"] for record in records])
         self.assertNotEqual(spy.targets[0], records[0]["latent_position"])
+        self.assertIn("prediction_intervals", records[0])
+        validate_record(records[0])
+
+
+class ObservationStatisticsTests(unittest.TestCase):
+    @staticmethod
+    def _records() -> list[dict[str, object]]:
+        records: list[dict[str, object]] = []
+        for lineage in range(2):
+            for episode in range(2):
+                for realization in range(2):
+                    trial = {
+                        "trial_id": f"l{lineage}-e{episode}-r{realization}",
+                        "condition": "clean_trained",
+                        "family": "constant_velocity",
+                        "channel": "gaussian",
+                        "scale": 0.002,
+                        "lineage": lineage,
+                        "episode": episode,
+                        "realization": realization,
+                        "role": "development",
+                        "branch": "stationary",
+                        "stratum": "unstratified",
+                    }
+                    predictions = {}
+                    for name, error in (
+                        ("constant_motion_reflected", 0.20 + 0.01 * episode),
+                        ("incumbent_square_root_rls", 0.10 + 0.01 * lineage),
+                    ):
+                        predictions[name] = {
+                            "latent_normalized_absolute_error": error,
+                        }
+                    records.append({"trial": trial, "predictions": predictions})
+        return records
+
+    def test_hierarchy_retains_all_three_resampling_levels(self):
+        result = hierarchical_bootstrap(self._records(), draws=16, seed=4)
+        cell = result["cells"][
+            "clean_trained|constant_velocity|gaussian|0.002|development|stationary|incumbent_square_root_rls"
+        ]
+        self.assertEqual(cell["lineages"], 2)
+        self.assertEqual(cell["episodes"], 4)
+        self.assertEqual(cell["sensor_realizations"], 8)
+        self.assertEqual(cell["draws"], 16)
+        self.assertEqual(set(cell["intervals"]), {"0.9", "0.95"})
+
+    def test_paired_comparison_and_holm_adjustment_are_recorded(self):
+        result = paired_hierarchical_comparisons(self._records(), draws=16, seed=9)
+        key = (
+            "clean_trained|constant_velocity|gaussian|0.002|development|stationary|incumbent_square_root_rls"
+        )
+        self.assertIn(key, result["cells"])
+        self.assertIn("holm_adjusted_p_value", result["cells"][key])
+        self.assertEqual(result["multiplicity"], "holm_bonferroni")
+
+    def test_calibration_uses_only_past_noisy_residuals(self):
+        calibrator = CausalResidualCalibrator(minimum_samples=2)
+        self.assertIsNone(calibrator.intervals(0.5)["0.9"])
+        calibrator.update(0.5, 0.6)
+        calibrator.update(0.5, 0.7)
+        interval = calibrator.intervals(0.5)["0.9"]
+        self.assertIsNotNone(interval)
+        assert interval is not None
+        self.assertAlmostEqual(interval["lower"], 0.3)
+        self.assertAlmostEqual(interval["upper"], 0.7)
+        self.assertAlmostEqual(interval_score(interval, 0.7, 0.9), 0.4)
+
+    def test_interval_summary_excludes_unavailable_warmup(self):
+        record = self._records()[0]
+        record["raw_observation"] = 0.5
+        record["prediction_intervals"] = {
+            "incumbent_square_root_rls": {"0.9": None, "0.95": {"lower": 0.4, "upper": 0.6}},
+            "constant_motion_reflected": {"0.9": None, "0.95": None},
+        }
+        result = interval_statistics([record])
+        self.assertEqual(len(result["cells"]), 1)
+        row = next(iter(result["cells"].values()))
+        self.assertEqual(row["count"], 1)
+        self.assertEqual(row["coverage"], 1.0)
 
 
 def _valid_record() -> dict[str, object]:

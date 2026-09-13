@@ -99,6 +99,9 @@ def build_parser() -> argparse.ArgumentParser:
     noise_parser.add_argument(
         "--quick", action="store_true", help="Small development smoke plan; never valid for confirmation."
     )
+    noise_parser.add_argument(
+        "--resume", action="store_true", help="Continue an interrupted observation-noise attempt."
+    )
 
     noise_recompute_parser = subparsers.add_parser(
         "observation-noise-recompute",
@@ -240,6 +243,7 @@ def main(argv: list[str] | None = None) -> int:
                 batch_id=args.batch_id,
                 quick=args.quick,
                 protocol_path=args.protocol,
+                resume=args.resume,
             )
         except Exception as error:
             print(f"observation-noise failed: {error}", file=sys.stderr)

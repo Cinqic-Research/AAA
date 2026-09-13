@@ -49,6 +49,21 @@ python -m aaa.cli observation-noise-recompute \
   runs/observation-noise-v1/noise-smoke-001
 ```
 
+An observation-noise attempt writes each completed trial to an immutable
+`trial_records/` shard before moving to the next trial. If the process is
+interrupted, resume the same attempt with its exact label:
+
+```bash
+python -m aaa.cli observation-noise --role development --quick \
+  --resume --attempt-label noise-smoke-001 --output-root runs
+```
+
+Resume refuses a finalized attempt, requires the existing label, regenerates
+only deterministic missing inputs, and compares any replayed trial byte for
+byte with the retained shard. A divergent replay is an error; it is never
+silently merged into the archive. Failed attempts and their lifecycle records
+remain in place for inspection.
+
 The quick command exercises every registered stationary channel and scale,
 both training conditions, direct realized stratum identities, matched
 changed-law branches, unchanged/changed-dynamics sensor-shift controls at both
