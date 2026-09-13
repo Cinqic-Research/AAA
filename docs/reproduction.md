@@ -68,7 +68,10 @@ The quick command exercises every registered stationary channel and scale,
 both training conditions, direct realized stratum identities, matched
 changed-law branches, unchanged/changed-dynamics sensor-shift controls at both
 predeclared timings and directions, schedule hashes, primitive records, plots,
-and the independent reference verifier. Its scientific endpoints remain
+and the independent reference verifier. The plot bundle includes uncertainty,
+matched first-error trajectories, noise-only controls, worst realized strata,
+detector/update diagnostics, and `plot_provenance.json` binding each figure to
+the retained primitive record hash. Its scientific endpoints remain
 `INSUFFICIENT_EVIDENCE`; it is an engineering smoke fixture, not confirmation.
 Formal A/B execution requires the separate source-freeze manifest, declared
 batch identities, the exact lock, the fixed ten-lineage plan, durable full

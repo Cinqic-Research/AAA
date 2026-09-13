@@ -349,6 +349,115 @@ def _interval_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
     return output
 
 
+def _verify_training_evidence(root: Path, metadata: dict[str, Any], manifest: dict[str, Any]) -> int:
+    """Verify the retained training primitive rows without using latent truth."""
+
+    artifact = metadata.get("training_evidence")
+    if not isinstance(artifact, dict) or artifact.get("path") != "training_records.jsonl":
+        raise VerificationError("training evidence metadata is missing")
+    path = root / "training_records.jsonl"
+    if not path.is_file() or manifest.get("training_records_sha256") != _schedule_digest(path):
+        raise VerificationError("training evidence checksum is missing or incorrect")
+    with path.open("r", encoding="utf-8") as handle:
+        rows = list(_decode_lines(handle, path))
+    if artifact.get("records") != len(rows) or manifest.get("training_record_count") != len(rows):
+        raise VerificationError("training evidence record count disagrees with metadata")
+    required = {
+        "schema_version",
+        "condition",
+        "lineage",
+        "episode",
+        "step",
+        "channel",
+        "scale",
+        "schedule_index",
+        "schedule_path",
+        "schedule_digest",
+        "observed_history",
+        "forecast",
+        "available_training_target",
+        "update_decision",
+    }
+    for row in rows:
+        if set(row) != required or row["schema_version"] != "aaa.observation_noise_training_step.v1":
+            raise VerificationError("training primitive schema is invalid")
+        if row["condition"] not in {"clean_trained", "noise_trained"}:
+            raise VerificationError("training primitive condition is invalid")
+        if row["channel"] not in {"gaussian", "uniform"}:
+            raise VerificationError("training primitive channel is invalid")
+        if _finite(row["scale"], "training.scale") < 0:
+            raise VerificationError("training scale must be non-negative")
+        schedule_path = row["schedule_path"]
+        if not isinstance(schedule_path, str) or not schedule_path:
+            raise VerificationError("training schedule path is invalid")
+        schedule_file = (root / schedule_path).resolve()
+        if root.resolve() not in schedule_file.parents or not schedule_file.is_file():
+            raise VerificationError("training schedule path escapes the attempt or is missing")
+        schedule = json.loads(schedule_file.read_text(encoding="utf-8"))
+        if not isinstance(row["schedule_digest"], str) or schedule.get("digest") != row["schedule_digest"]:
+            raise VerificationError("training schedule digest is not bound to the primitive row")
+        for name in ("lineage", "episode", "step", "schedule_index"):
+            if isinstance(row[name], bool) or not isinstance(row[name], int) or row[name] < 0:
+                raise VerificationError(f"training.{name} must be a non-negative integer")
+        history = row["observed_history"]
+        if not isinstance(history, list) or len(history) < 2:
+            raise VerificationError("training history is invalid")
+        for value in history:
+            _finite(value, "training.observed_history")
+        _finite(row["forecast"], "training.forecast")
+        _finite(row["available_training_target"], "training.available_training_target")
+        if not isinstance(row["update_decision"], bool) or not row["update_decision"]:
+            raise VerificationError("training update decision must be true")
+    return len(rows)
+
+
+def _resource_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Recompute latency, update-norm and counter aggregates independently."""
+
+    grouped: dict[tuple[str, str, str, float, str, str, str], dict[str, list[float]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    for record in records:
+        trial = record["trial"]
+        diagnostics = record["diagnostics"]
+        for predictor, diagnostic in diagnostics.items():
+            key = (
+                str(trial["condition"]),
+                str(trial["family"]),
+                str(trial["channel"]),
+                float(trial["scale"]),
+                str(trial["role"]),
+                str(trial["branch"]),
+                str(predictor),
+            )
+            bucket = grouped[key]
+            for name in ("update_norm", "predict_latency_ns", "update_latency_ns", "detected_surprises"):
+                bucket[name].append(_finite(diagnostic.get(name, 0.0), f"diagnostics.{name}"))
+            for name in ("dead_zone_skips", "reflection_skips", "forgetting_suspensions"):
+                bucket[name].append(_finite(diagnostic.get(name, 0.0), f"diagnostics.{name}"))
+    output: dict[str, Any] = {}
+    for key, values in sorted(grouped.items(), key=str):
+        label = "|".join((*map(str, key[:3]), f"{key[3]:.7g}", *map(str, key[4:])))
+        output[label] = {
+            "condition": key[0],
+            "family": key[1],
+            "channel": key[2],
+            "scale": key[3],
+            "role": key[4],
+            "branch": key[5],
+            "predictor": key[6],
+            "count": len(values["update_norm"]),
+            "mean_update_norm": sum(values["update_norm"]) / len(values["update_norm"]),
+            "mean_predict_latency_ns": sum(values["predict_latency_ns"]) / len(values["predict_latency_ns"]),
+            "mean_update_latency_ns": sum(values["update_latency_ns"]) / len(values["update_latency_ns"]),
+            "max_detected_surprises": max(values["detected_surprises"]),
+            "max_dead_zone_skips": max(values["dead_zone_skips"]),
+            "max_reflection_skips": max(values["reflection_skips"]),
+            "max_forgetting_suspensions": max(values["forgetting_suspensions"]),
+        }
+    return output
+
+
 def _schedule_digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -395,6 +504,17 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
         raise VerificationError("no primitive records retained")
     for record in records:
         validate_record(record)
+    training_records = 0
+    if any(record["schema_version"] == RECORD_SCHEMA for record in records):
+        training_records = _verify_training_evidence(root, metadata, manifest)
+        for directory_name, manifest_key in (
+            ("training_schedules", "training_schedule_count"),
+            ("calibration_schedules", "calibration_schedule_count"),
+        ):
+            directory = root / directory_name
+            count = len(list(directory.glob("*.json"))) if directory.is_dir() else 0
+            if manifest.get(manifest_key) != count or count == 0:
+                raise VerificationError(f"{directory_name} count is missing or inconsistent")
     trial_steps = [(record["trial"]["trial_id"], record["step"]) for record in records]
     if len(set(trial_steps)) != len(trial_steps):
         raise VerificationError("duplicate trial/step primitive evidence")
@@ -525,10 +645,22 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
             or executed_draws > declared_draws
         ):
             raise VerificationError("statistics draw declarations are invalid")
-        if statistics.get("hierarchical", {}).get("method") != "hierarchical_bootstrap":
+        hierarchical = statistics.get("hierarchical")
+        paired = statistics.get("paired_comparisons")
+        if not isinstance(hierarchical, dict) or hierarchical.get("method") != "hierarchical_bootstrap":
             raise VerificationError("hierarchical statistics method is missing")
-        if statistics.get("paired_comparisons", {}).get("method") != "paired_hierarchical_bootstrap":
+        if not isinstance(paired, dict) or paired.get("method") != "paired_hierarchical_bootstrap":
             raise VerificationError("paired statistics method is missing")
+        null_validation = statistics.get("null_validation")
+        if (
+            not isinstance(null_validation, dict)
+            or null_validation.get("status") != "DIAGNOSTIC_ONLY"
+            or not isinstance(null_validation.get("simulations"), int)
+            or null_validation["simulations"] < 1
+            or not isinstance(null_validation.get("bootstrap_draws"), int)
+            or null_validation["bootstrap_draws"] < 1
+        ):
+            raise VerificationError("known-null finite-sample diagnostic is missing")
         interval_artifact = statistics.get("intervals")
         if (
             not isinstance(interval_artifact, dict)
@@ -549,6 +681,35 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
                         raise VerificationError(f"interval cell {key} count mismatch")
                 elif abs(float(stored[field]) - float(recomputed[field])) > 1e-12:
                     raise VerificationError(f"interval cell {key} {field} mismatch")
+        resource_artifact = statistics.get("resources")
+        if (
+            not isinstance(resource_artifact, dict)
+            or resource_artifact.get("method") != "primitive_diagnostic_aggregation"
+        ):
+            raise VerificationError("resource diagnostics are missing")
+        recomputed_resources = _resource_rows(records)
+        stored_resources = resource_artifact.get("cells")
+        if not isinstance(stored_resources, dict) or set(stored_resources) != set(recomputed_resources):
+            raise VerificationError("stored resource cells do not match primitive recomputation")
+        for key, recomputed in recomputed_resources.items():
+            stored = stored_resources[key]
+            for field in (
+                "count",
+                "mean_update_norm",
+                "mean_predict_latency_ns",
+                "mean_update_latency_ns",
+                "max_detected_surprises",
+                "max_dead_zone_skips",
+                "max_reflection_skips",
+                "max_forgetting_suspensions",
+            ):
+                if field not in stored:
+                    raise VerificationError(f"resource cell {key} is missing {field}")
+                if field == "count":
+                    if stored[field] != recomputed[field]:
+                        raise VerificationError(f"resource cell {key} count mismatch")
+                elif abs(float(stored[field]) - float(recomputed[field])) > 1e-12:
+                    raise VerificationError(f"resource cell {key} {field} mismatch")
     checks = summary.get("checks")
     if not isinstance(checks, dict) or set(checks) != set(CHECK_NAMES):
         raise VerificationError("mandatory verifier checks are missing or unknown")
@@ -603,6 +764,7 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
         "records": len(records),
         "trials": len({record["trial"]["trial_id"] for record in records}),
         "metrics": metrics,
+        "training_records": training_records,
         "metadata_attempt_id": metadata.get("attempt_id"),
         "reproduction_verdict": summary.get("reproduction", {"status": "NOT_VERIFIED"}),
     }

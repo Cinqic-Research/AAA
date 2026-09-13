@@ -35,9 +35,20 @@ from .observation import (
     scale_key,
 )
 from .plots import write_plots
-from .predictors import AlphaBetaFilter, CausalSmoothingMotionPredictor, incumbent_from_v21
+from .predictors import (
+    AlphaBetaFilter,
+    CausalSmoothingMotionPredictor,
+    clone_predictor,
+    incumbent_from_v21,
+)
 from .spec import NoiseProtocol, canonical_protocol_hash, load_protocol
-from .statistics import hierarchical_bootstrap, interval_statistics, paired_hierarchical_comparisons
+from .statistics import (
+    hierarchical_bootstrap,
+    interval_statistics,
+    paired_hierarchical_comparisons,
+    resource_statistics,
+    validate_null_behavior,
+)
 from .verifier import CHECK_NAMES, _metric_rows, verify_attempt
 
 RECORD_SCHEMA = "aaa.observation_noise_step.v3"
@@ -75,6 +86,14 @@ def _write_text_atomic(path: Path, text: str) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(text, encoding="utf-8")
     temporary.replace(path)
+
+
+def _write_text_if_identical(path: Path, text: str) -> None:
+    if path.exists():
+        if path.read_text(encoding="utf-8") != text:
+            raise ObservationNoiseError(f"retained artifact differs for {path}")
+        return
+    _write_text_atomic(path, text)
 
 
 def _record_lifecycle(path: Path, event: str, **data: Any) -> None:
@@ -202,6 +221,76 @@ def _diagnostics(predictor: Predictor) -> dict[str, Any]:
     return {}
 
 
+def _state_payload(predictor: Predictor) -> dict[str, Any]:
+    state_method = getattr(predictor, "state_dict", None)
+    if state_method is None:
+        return {}
+    value = state_method()
+    return value if isinstance(value, dict) else {}
+
+
+def _numeric_state_values(value: object) -> list[float]:
+    if isinstance(value, bool):
+        return []
+    if isinstance(value, (int, float)):
+        return [float(value)] if math.isfinite(float(value)) else []
+    if isinstance(value, (list, tuple)):
+        result: list[float] = []
+        for item in value:
+            result.extend(_numeric_state_values(item))
+        return result
+    return []
+
+
+def _state_delta_norm(before: dict[str, Any], after: dict[str, Any]) -> float:
+    keys = {"weights", "sqrt_factor", "position", "velocity"}
+    delta: list[float] = []
+    for key in keys:
+        left = _numeric_state_values(before.get(key))
+        right = _numeric_state_values(after.get(key))
+        if len(left) == len(right):
+            delta.extend(
+                after_value - before_value for before_value, after_value in zip(left, right, strict=True)
+            )
+    return float(math.sqrt(sum(value * value for value in delta)))
+
+
+def _predictor_inventory(predictors: Sequence[Predictor]) -> list[dict[str, Any]]:
+    """Record comparable retained-state size and a fixed local cost probe."""
+
+    history = (0.20, 0.30, 0.40, 0.50)
+    target = 0.51
+    inventory: list[dict[str, Any]] = []
+    for predictor in predictors:
+        state = _state_payload(predictor)
+        clone = clone_predictor(predictor, update_enabled=predictor.update_enabled)
+        predict_start = time.perf_counter_ns()
+        for _ in range(32):
+            clone.predict(history)
+        predict_elapsed = time.perf_counter_ns() - predict_start
+        update_start = time.perf_counter_ns()
+        for _ in range(32):
+            if clone.update_enabled:
+                clone.update(history, target)
+        update_elapsed = time.perf_counter_ns() - update_start
+        trainable = state.get("weights")
+        parameter_count = len(_numeric_state_values(trainable)) if trainable is not None else 0
+        inventory.append(
+            {
+                "name": predictor.name,
+                "update_enabled": bool(predictor.update_enabled),
+                "parameter_count": parameter_count,
+                "retained_state_bytes": len(
+                    json.dumps(state, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+                ),
+                "predict_latency_ns_per_step": float(predict_elapsed / 32.0),
+                "update_latency_ns_per_step": float(update_elapsed / 32.0),
+                "cost_probe_steps": 32,
+            }
+        )
+    return inventory
+
+
 def _new_calibrators(predictors: Sequence[Predictor]) -> dict[str, CausalResidualCalibrator]:
     return {predictor.name: CausalResidualCalibrator() for predictor in predictors}
 
@@ -211,6 +300,8 @@ def run_noisy_episode(
     predictors: Sequence[Predictor],
     trial: dict[str, Any],
     schedule: NoiseSchedule,
+    *,
+    initial_calibrators: dict[str, CausalResidualCalibrator] | None = None,
 ) -> list[dict[str, Any]]:
     """Run predict -> record -> advance -> reveal -> score -> update."""
 
@@ -222,13 +313,18 @@ def run_noisy_episode(
         environment.advance()
         history.append(environment.observe())
     records: list[dict[str, Any]] = []
-    calibrators = _new_calibrators(predictors)
+    calibrators = (
+        _new_calibrators(predictors) if initial_calibrators is None else copy.deepcopy(initial_calibrators)
+    )
     for step in range(history_length - 1, environment.config.steps_per_episode):
         observed_history = tuple(history[-history_length:])
         raw_predictions: dict[str, float] = {}
         scored_predictions: dict[str, float] = {}
+        predict_latencies: dict[str, int] = {}
         for predictor in predictors:
+            predict_start = time.perf_counter_ns()
             raw = float(predictor.predict(observed_history))
+            predict_latencies[predictor.name] = time.perf_counter_ns() - predict_start
             if not math.isfinite(raw):
                 raise FloatingPointError(f"{predictor.name} returned a non-finite forecast")
             raw_predictions[predictor.name] = raw
@@ -302,11 +398,24 @@ def run_noisy_episode(
         }:
             raise ObservationNoiseError("record construction drifted")
         records.append(record)
+        diagnostics: dict[str, dict[str, Any]] = {}
         for predictor in predictors:
+            state_before_update = _state_payload(predictor)
+            update_start = time.perf_counter_ns()
             if predictor.update_enabled:
                 predictor.update(observed_history, target_observation)
+            update_elapsed = time.perf_counter_ns() - update_start
             calibrators[predictor.name].update(scored_predictions[predictor.name], target_observation)
-        record["diagnostics"] = {predictor.name: _diagnostics(predictor) for predictor in predictors}
+            diagnostic = _diagnostics(predictor)
+            diagnostic.update(
+                {
+                    "update_norm": _state_delta_norm(state_before_update, _state_payload(predictor)),
+                    "predict_latency_ns": predict_latencies[predictor.name],
+                    "update_latency_ns": update_elapsed,
+                }
+            )
+            diagnostics[predictor.name] = diagnostic
+        record["diagnostics"] = diagnostics
         history.append(target_observation)
     return records
 
@@ -335,8 +444,11 @@ def run_noisy_segment(
         observed_history = tuple(history[-history_length:])
         raw_predictions: dict[str, float] = {}
         scored_predictions: dict[str, float] = {}
+        predict_latencies: dict[str, int] = {}
         for predictor in predictors:
+            predict_start = time.perf_counter_ns()
             raw = float(predictor.predict(observed_history))
+            predict_latencies[predictor.name] = time.perf_counter_ns() - predict_start
             if not math.isfinite(raw):
                 raise FloatingPointError(f"{predictor.name} returned a non-finite forecast")
             raw_predictions[predictor.name] = raw
@@ -385,11 +497,24 @@ def run_noisy_segment(
             "changed": bool(transition.changed),
         }
         records.append(record)
+        diagnostics: dict[str, dict[str, Any]] = {}
         for predictor in predictors:
+            state_before_update = _state_payload(predictor)
+            update_start = time.perf_counter_ns()
             if predictor.update_enabled:
                 predictor.update(observed_history, target_observation)
+            update_elapsed = time.perf_counter_ns() - update_start
             calibrators[predictor.name].update(scored_predictions[predictor.name], target_observation)
-        record["diagnostics"] = {predictor.name: _diagnostics(predictor) for predictor in predictors}
+            diagnostic = _diagnostics(predictor)
+            diagnostic.update(
+                {
+                    "update_norm": _state_delta_norm(state_before_update, _state_payload(predictor)),
+                    "predict_latency_ns": predict_latencies[predictor.name],
+                    "update_latency_ns": update_elapsed,
+                }
+            )
+            diagnostics[predictor.name] = diagnostic
+        record["diagnostics"] = diagnostics
         history.append(target_observation)
     return records
 
@@ -399,6 +524,8 @@ def run_matched_changed_law(
     model: OnlineRLSPredictor,
     trial: dict[str, Any],
     schedule: NoiseSchedule,
+    *,
+    initial_calibrators: dict[str, CausalResidualCalibrator] | None = None,
 ) -> list[dict[str, Any]]:
     """Create a common prefix, then clone the complete state into two branches."""
 
@@ -416,6 +543,10 @@ def run_matched_changed_law(
         history.append(environment.observe())
     prefix_model = _clone_rls(model, "prefix_online", True)
     prefix_calibrators = _new_calibrators([prefix_model])
+    if initial_calibrators is not None and "incumbent_square_root_rls" in initial_calibrators:
+        prefix_calibrators[prefix_model.name] = copy.deepcopy(
+            initial_calibrators["incumbent_square_root_rls"]
+        )
     prefix_trial = {**trial, "trial_id": f"{trial['trial_id']}:prefix", "branch": "prefix"}
     records = run_noisy_segment(
         environment,
@@ -449,12 +580,17 @@ def run_matched_changed_law(
     branch_history = list(history)
     frozen_predictor_set = branch_predictors(frozen_model)
     online_predictor_set = branch_predictors(online_model)
-    frozen_calibrators = _new_calibrators(frozen_predictor_set) | {
-        frozen_model.name: copy.deepcopy(prefix_calibrators[prefix_model.name])
-    }
-    online_calibrators = _new_calibrators(online_predictor_set) | {
-        online_model.name: copy.deepcopy(prefix_calibrators[prefix_model.name])
-    }
+    frozen_calibrators = _new_calibrators(frozen_predictor_set)
+    online_calibrators = _new_calibrators(online_predictor_set)
+    if initial_calibrators is not None:
+        for name in frozen_calibrators:
+            if name in initial_calibrators:
+                frozen_calibrators[name] = copy.deepcopy(initial_calibrators[name])
+        for name in online_calibrators:
+            if name in initial_calibrators:
+                online_calibrators[name] = copy.deepcopy(initial_calibrators[name])
+    frozen_calibrators[frozen_model.name] = copy.deepcopy(prefix_calibrators[prefix_model.name])
+    online_calibrators[online_model.name] = copy.deepcopy(prefix_calibrators[prefix_model.name])
     records.extend(
         run_noisy_segment(
             frozen_environment,
@@ -502,7 +638,14 @@ def _predictors(model: OnlineRLSPredictor, *, lower: float, upper: float, dt: fl
 
 
 def train_model(
-    protocol: NoiseProtocol, condition: str, lineage: int, *, role: str, quick: bool
+    protocol: NoiseProtocol,
+    condition: str,
+    lineage: int,
+    *,
+    role: str,
+    quick: bool,
+    evidence: list[dict[str, Any]] | None = None,
+    schedule_dir: Path | None = None,
 ) -> tuple[OnlineRLSPredictor, dict[str, Any]]:
     """Train one declared lineage from clean or fixed-mixture observations."""
 
@@ -526,17 +669,43 @@ def train_model(
         )
         schedule = generate_schedule(channel, scale, step_count + 1, seed=seed)
         schedule_digests.append(schedule.digest())
+        schedule_relative: str | None = None
+        if schedule_dir is not None:
+            schedule_path = schedule_dir / f"{condition}-lineage-{lineage:03d}-episode-{episode:04d}.json"
+            _write_schedule(schedule_path, schedule)
+            schedule_relative = str(Path("training_schedules") / schedule_path.name)
         latent = build_latent_environment("constant_velocity", seed, step_count)
         wrapped = NoisyObservationEnvironment(latent, schedule)
         history = [wrapped.reset()]
         for _ in range(wrapped.config.history_length - 1):
             wrapped.advance()
             history.append(wrapped.observe())
-        for _ in range(wrapped.config.history_length - 1, step_count):
+        for step in range(wrapped.config.history_length - 1, step_count):
             observed_history = tuple(history[-wrapped.config.history_length :])
+            forecast = float(model.predict(observed_history))
             wrapped.advance()
-            model.update(observed_history, wrapped.observe())
-            history.append(wrapped.observe())
+            target = wrapped.observe()
+            if evidence is not None:
+                evidence.append(
+                    {
+                        "schema_version": "aaa.observation_noise_training_step.v1",
+                        "condition": condition,
+                        "lineage": lineage,
+                        "episode": episode,
+                        "step": step,
+                        "channel": channel,
+                        "scale": scale,
+                        "schedule_index": step + 1,
+                        "schedule_path": schedule_relative,
+                        "schedule_digest": schedule.digest(),
+                        "observed_history": list(observed_history),
+                        "forecast": forecast,
+                        "available_training_target": float(target),
+                        "update_decision": True,
+                    }
+                )
+            model.update(observed_history, target)
+            history.append(target)
     return model, {
         "condition": condition,
         "lineage": lineage,
@@ -554,6 +723,77 @@ def _write_schedule(path: Path, schedule: NoiseSchedule) -> str:
         return sha256_file(path)
     json_dump(path, payload)
     return sha256_file(path)
+
+
+def _calibrate_predictors(
+    protocol: NoiseProtocol,
+    predictors: Sequence[Predictor],
+    *,
+    condition: str,
+    lineage: int,
+    schedule_dir: Path,
+) -> tuple[dict[str, CausalResidualCalibrator], list[dict[str, Any]]]:
+    """Build the fixed calibration prefix from the declared training mixture."""
+
+    schedule_dir.mkdir(parents=True, exist_ok=True)
+    seed_root = int(protocol.raw["reference"]["v2_1_raw_sha256"][:8], 16)
+    world = _base_world("constant_velocity", 40)
+    calibrators = _new_calibrators(predictors)
+    schedule_index: list[dict[str, Any]] = []
+    mixture = (
+        ("gaussian", 0.0005),
+        ("gaussian", 0.002),
+        ("uniform", 0.0005),
+        ("uniform", 0.002),
+    )
+    for mixture_index, (channel, scale) in enumerate(mixture):
+        seed = derive_seed(
+            seed_root,
+            protocol.seed_namespaces["calibration"],
+            condition,
+            lineage,
+            mixture_index,
+            channel,
+            scale_key(scale),
+        )
+        schedule = generate_schedule(channel, scale, world.steps_per_episode + 1, seed=seed)
+        relative = Path(f"{condition}-lineage-{lineage:03d}-mixture-{mixture_index:02d}.json")
+        path = schedule_dir / relative
+        digest = _write_schedule(path, schedule)
+        schedule_index.append(
+            {
+                "path": str(Path("calibration_schedules") / relative),
+                "file_sha256": digest,
+                "schedule_digest": schedule.digest(),
+                "channel": channel,
+                "scale": scale,
+                "seed": seed,
+            }
+        )
+        latent = build_latent_environment("constant_velocity", seed, world.steps_per_episode)
+        wrapped = NoisyObservationEnvironment(latent, schedule)
+        clones = {
+            predictor.name: clone_predictor(predictor, update_enabled=predictor.update_enabled)
+            for predictor in predictors
+        }
+        history = [wrapped.reset()]
+        for _ in range(world.history_length - 1):
+            wrapped.advance()
+            history.append(wrapped.observe())
+        for _step in range(world.history_length - 1, world.steps_per_episode):
+            observed_history = tuple(history[-world.history_length :])
+            forecasts = {
+                name: float(predictor.predict(observed_history)) for name, predictor in clones.items()
+            }
+            wrapped.advance()
+            target = wrapped.observe()
+            for name, forecast in forecasts.items():
+                calibrators[name].update(forecast, target)
+            for predictor in clones.values():
+                if predictor.update_enabled:
+                    predictor.update(observed_history, target)
+            history.append(target)
+    return calibrators, schedule_index
 
 
 def _record_shard_path(attempt_dir: Path, trial_id: str) -> Path:
@@ -612,7 +852,7 @@ def _record_ids_for_plan(trial: Mapping[str, Any]) -> set[str]:
 
 def _write_combined_records(attempt_dir: Path, rows: Sequence[dict[str, Any]]) -> None:
     encoded = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in rows)
-    _write_text_atomic(attempt_dir / "records.jsonl", encoded)
+    _write_text_if_identical(attempt_dir / "records.jsonl", encoded)
 
 
 def _copy_to_gzip(source: Path, destination: Path) -> str:
@@ -846,7 +1086,7 @@ def _write_report(path: Path, summary: dict[str, Any], verification: dict[str, A
         "",
         "## Verification",
         "",
-        f"- Independent primitive recomputation: **{verification['verdict']}** ({verification['records']} records across {verification['trials']} trials).",
+        f"- Independent primitive recomputation: **{verification['verdict']}** ({verification['records']} evaluation records across {verification['trials']} trials; {verification['training_records']} training records).",
         f"- Reproduction fixture: **{summary['reproduction']['status']}**.",
         f"- Zero-noise reference fixture: **{summary['gates'][0]['status']}** for the v2.1 identity check; see `metadata.json` for exact hashes.",
         "",
@@ -864,6 +1104,7 @@ def _write_report(path: Path, summary: dict[str, Any], verification: dict[str, A
             f"- Hierarchical resampling: **{statistics.get('hierarchical', {}).get('method', 'NOT_RUN')}**.",
             f"- Draws: **{statistics.get('executed_draws', 'NOT_RUN')}** executed of **{statistics.get('declared_draws', 'NOT_DECLARED')}** declared.",
             f"- Causal interval cells with available calibration: **{len(statistics.get('intervals', {}).get('cells', {}))}**.",
+            f"- Resource diagnostic cells with latency/update counters: **{len(statistics.get('resources', {}).get('cells', {}))}**.",
             "- Any development or reduced-draw result remains non-confirmatory; latent truth is used only for evaluator metrics.",
             "",
             "## Metric groups",
@@ -999,12 +1240,58 @@ def run_attempt(
         family_steps = {name: int(data["steps"]) for name, data in protocol.families.items()}
         seed_root = int(protocol.raw["reference"]["v2_1_raw_sha256"][:8], 16)
         models: dict[tuple[str, int], OnlineRLSPredictor] = {}
+        initial_calibrators: dict[tuple[str, int], dict[str, CausalResidualCalibrator]] = {}
         training_meta: list[dict[str, Any]] = []
+        training_evidence: list[dict[str, Any]] = []
+        calibration_meta: list[dict[str, Any]] = []
+        predictor_inventory: list[dict[str, Any]] = []
+        training_schedule_dir = attempt_dir / "training_schedules"
+        calibration_schedule_dir = attempt_dir / "calibration_schedules"
         for condition in conditions:
             for lineage in range(lineage_count):
-                model, meta = train_model(protocol, condition, lineage, role=role, quick=quick)
+                model, meta = train_model(
+                    protocol,
+                    condition,
+                    lineage,
+                    role=role,
+                    quick=quick,
+                    evidence=training_evidence,
+                    schedule_dir=training_schedule_dir,
+                )
                 models[(condition, lineage)] = model
                 training_meta.append(meta)
+                calibration_predictors = _predictors(
+                    model,
+                    lower=_base_world("constant_velocity", 40).lower_bound,
+                    upper=_base_world("constant_velocity", 40).upper_bound,
+                    dt=_base_world("constant_velocity", 40).dt,
+                )
+                predictor_inventory.append(
+                    {
+                        "condition": condition,
+                        "lineage": lineage,
+                        "predictors": _predictor_inventory(calibration_predictors),
+                    }
+                )
+                calibrators, calibration_schedules = _calibrate_predictors(
+                    protocol,
+                    calibration_predictors,
+                    condition=condition,
+                    lineage=lineage,
+                    schedule_dir=calibration_schedule_dir,
+                )
+                initial_calibrators[(condition, lineage)] = calibrators
+                calibration_meta.append(
+                    {
+                        "condition": condition,
+                        "lineage": lineage,
+                        "schedule_count": len(calibration_schedules),
+                        "schedules": calibration_schedules,
+                        "samples_per_predictor": {
+                            name: calibrator.sample_count for name, calibrator in calibrators.items()
+                        },
+                    }
+                )
                 checkpoint = attempt_dir / "checkpoints" / f"{condition}-lineage-{lineage:03d}.json"
                 checkpoint.parent.mkdir(exist_ok=True)
                 checkpoint_payload = model.state_dict()
@@ -1013,6 +1300,10 @@ def run_attempt(
                         raise ObservationNoiseError(f"retained checkpoint differs for {checkpoint}")
                 else:
                     json_dump(checkpoint, checkpoint_payload)
+        training_record_text = "".join(
+            json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in training_evidence
+        )
+        _write_text_if_identical(attempt_dir / "training_records.jsonl", training_record_text)
         # Generate and persist every schedule before the first evaluation call.
         plans: list[tuple[dict[str, Any], NoiseSchedule, Path]] = []
         for condition in conditions:
@@ -1167,14 +1458,26 @@ def run_attempt(
                     dt=latent.config.dt,
                 )
                 wrapped = NoisyObservationEnvironment(latent, schedule)
-                rows = run_noisy_episode(wrapped, predictors, trial, schedule)
+                rows = run_noisy_episode(
+                    wrapped,
+                    predictors,
+                    trial,
+                    schedule,
+                    initial_calibrators=initial_calibrators[(trial["condition"], trial["lineage"])],
+                )
                 _persist_trial_rows(attempt_dir, rows)
                 all_records.extend(rows)
                 completed_record_ids.add(trial["trial_id"])
             if trial["family"] == "changed_law" and trial["branch"] == "stationary":
                 branch_ids = {f"{trial['trial_id']}:{branch}" for branch in ("prefix", "frozen", "online")}
                 if not branch_ids.issubset(completed_record_ids):
-                    branch_rows = run_matched_changed_law(protocol, model, trial, schedule)
+                    branch_rows = run_matched_changed_law(
+                        protocol,
+                        model,
+                        trial,
+                        schedule,
+                        initial_calibrators=initial_calibrators[(trial["condition"], trial["lineage"])],
+                    )
                     _persist_trial_rows(attempt_dir, branch_rows)
                     for row in branch_rows:
                         trial_id = str(row["trial"]["trial_id"])
@@ -1205,6 +1508,12 @@ def run_attempt(
             levels=tuple(float(level) for level in protocol.statistics["intervals"]),
         )
         interval_summary = interval_statistics(all_records)
+        resource_summary = resource_statistics(all_records)
+        null_validation = validate_null_behavior(
+            seed=statistics_seed ^ 0xC0FFEE,
+            simulations=32 if quick else 128,
+            bootstrap_draws=analysis_draws,
+        )
         reference = _reference_check()
         zero_noise = _zero_noise_fixture(protocol)
         checks = {
@@ -1256,6 +1565,14 @@ def run_attempt(
             "records_sha256": sha256_file(record_path),
             "compressed_records_sha256": compressed_sha,
             "schedule_count": len(schedule_index),
+            "training_record_count": len(training_evidence),
+            "training_records_sha256": sha256_file(attempt_dir / "training_records.jsonl"),
+            "training_schedule_count": len(list(training_schedule_dir.glob("*.json")))
+            if training_schedule_dir.is_dir()
+            else 0,
+            "calibration_schedule_count": len(list(calibration_schedule_dir.glob("*.json")))
+            if calibration_schedule_dir.is_dir()
+            else 0,
         }
         json_dump(attempt_dir / "run_manifest.json", manifest)
         metadata = {
@@ -1282,6 +1599,13 @@ def run_attempt(
                 derive_seed(seed_root, protocol.seed_namespaces["generator_validation"])
             ),
             "training": training_meta,
+            "training_evidence": {
+                "path": "training_records.jsonl",
+                "records": len(training_evidence),
+                "sha256": sha256_file(attempt_dir / "training_records.jsonl"),
+            },
+            "calibration": calibration_meta,
+            "predictor_inventory": predictor_inventory,
             "reference": reference,
             "zero_noise_equivalence": zero_noise,
             "full_archive_status": "local_full_archive_retained; durable_external_locator_not_yet_recorded",
@@ -1303,9 +1627,11 @@ def run_attempt(
                 "declared_draws": declared_draws,
                 "executed_draws": analysis_draws,
                 "seed": statistics_seed,
+                "null_validation": null_validation,
                 "hierarchical": hierarchical,
                 "paired_comparisons": paired,
                 "intervals": interval_summary,
+                "resources": resource_summary,
             },
             "coverage": _coverage(all_records),
             "checks": checks,
@@ -1341,6 +1667,7 @@ def run_attempt(
             "status": verification["verdict"],
             "records": verification["records"],
             "trials": verification["trials"],
+            "training_records": verification["training_records"],
         }
         checks["metric_recomputation"]["detail"] = (
             f"independent verifier recomputed {len(verification['metrics'])} metric groups"

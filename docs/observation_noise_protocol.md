@@ -162,6 +162,14 @@ separately from point-prediction adaptation. Completed trials are first written
 to atomic `trial_records/` shards, which makes an interrupted attempt safely
 resumable without replacing retained evidence.
 
+Training updates are retained in `training_records.jsonl` and are bound to the
+saved training schedules. Each evaluated lineage also receives a fixed four-cell
+Gaussian/Uniform calibration prefix from the declared training mixture; its
+schedule files, sample counts, and cold-start policy are recorded separately.
+Primitive diagnostics include update norm, detector/counter activity, measured
+predict/update latency, and a static parameter/state-cost inventory. These are
+resource diagnostics, not evidence that a predictor is scientifically better.
+
 The phase uses five separate outcomes: engineering complete, scientifically
 supported, negative, inconclusive, and blocked by missing evidence. Only an
 explicit `PASS` satisfies a required engineering gate. A valid negative result

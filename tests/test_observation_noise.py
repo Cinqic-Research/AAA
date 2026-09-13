@@ -27,6 +27,7 @@ from aaa.noise.statistics import (
     hierarchical_bootstrap,
     interval_statistics,
     paired_hierarchical_comparisons,
+    validate_null_behavior,
 )
 from aaa.noise.verifier import (
     CHECK_NAMES,
@@ -203,7 +204,7 @@ class ObservationStatisticsTests(unittest.TestCase):
         )
         self.assertIn(key, result["cells"])
         self.assertIn("holm_adjusted_p_value", result["cells"][key])
-        self.assertEqual(result["multiplicity"], "holm_bonferroni")
+        self.assertEqual(result["multiplicity"], "holm_bonferroni_with_familywise_bounds")
 
     def test_calibration_uses_only_past_noisy_residuals(self):
         calibrator = CausalResidualCalibrator(minimum_samples=2)
@@ -229,6 +230,12 @@ class ObservationStatisticsTests(unittest.TestCase):
         row = next(iter(result["cells"].values()))
         self.assertEqual(row["count"], 1)
         self.assertEqual(row["coverage"], 1.0)
+
+    def test_known_null_validation_is_separate_diagnostic_evidence(self):
+        result = validate_null_behavior(seed=13, simulations=4, bootstrap_draws=8)
+        self.assertEqual(result["status"], "DIAGNOSTIC_ONLY")
+        self.assertEqual(result["simulations"], 4)
+        self.assertAlmostEqual(result["zero_in_interval_rate"] + result["false_positive_rate"], 1.0)
 
 
 def _valid_record() -> dict[str, object]:

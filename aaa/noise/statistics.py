@@ -264,10 +264,24 @@ def _draw_paired(
     return _draw_hierarchical(nested, rng)
 
 
-def _two_sided_zero_pvalue(sample: np.ndarray) -> float:
-    lower = float(np.mean(sample <= 0.0))
-    upper = float(np.mean(sample >= 0.0))
-    return min(1.0, 2.0 * min(lower, upper))
+def _lineage_sign_flip_pvalue(
+    values: Mapping[tuple[int, int, int], Mapping[str, float]],
+    baseline: str,
+    target: str,
+    rng: np.random.Generator,
+    draws: int,
+) -> float:
+    """Test zero paired effect by flipping complete independent lineages."""
+
+    by_lineage: dict[int, list[float]] = defaultdict(list)
+    for (lineage, _episode, _realization), row in values.items():
+        by_lineage[lineage].append(row[target] - row[baseline])
+    lineage_means = np.asarray([np.mean(by_lineage[lineage]) for lineage in sorted(by_lineage)], dtype=float)
+    observed = float(np.mean(lineage_means))
+    signs = rng.choice(np.asarray([-1.0, 1.0]), size=(draws, len(lineage_means)))
+    null = np.mean(signs * lineage_means, axis=1)
+    exceedances = int(np.sum(np.abs(null) >= abs(observed)))
+    return float((exceedances + 1) / (draws + 1))
 
 
 def holm_bonferroni(pvalues: Mapping[str, float]) -> dict[str, float]:
@@ -300,12 +314,17 @@ def paired_hierarchical_comparisons(
     rng = np.random.default_rng(seed)
     rows: dict[str, Any] = {}
     pvalues: dict[str, float] = {}
+    bootstrap_samples: dict[str, np.ndarray] = {}
     for cell, values in sorted(paired.items(), key=str):
         for target in targets:
             sample = np.asarray([_draw_paired(values, baseline, target, rng) for _ in range(draws)])
             key = "|".join((*map(str, cell), target))
-            pvalue = _two_sided_zero_pvalue(sample)
+            pvalue = _lineage_sign_flip_pvalue(values, baseline, target, rng, draws)
             pvalues[key] = pvalue
+            bootstrap_samples[key] = sample
+            nested: dict[int, dict[int, dict[int, float]]] = defaultdict(lambda: defaultdict(dict))
+            for (lineage, episode, realization), row in values.items():
+                nested[lineage][episode][realization] = row[target] - row[baseline]
             rows[key] = {
                 "condition": cell[0],
                 "family": cell[1],
@@ -316,12 +335,13 @@ def paired_hierarchical_comparisons(
                 "baseline": baseline,
                 "target": target,
                 "estimand": "target_minus_baseline_balanced_hierarchical_mean",
-                "point": float(np.mean([row[target] - row[baseline] for row in values.values()])),
+                "point": _hierarchical_mean(nested),
                 "lineages": len({identity[0] for identity in values}),
                 "episodes": len({identity[:2] for identity in values}),
                 "sensor_realizations": len(values),
                 "draws": draws,
                 "p_value": pvalue,
+                "p_value_method": "paired_lineage_sign_flip",
                 "intervals": _intervals(sample, levels),
                 "evidence_status": (
                     "PASS"
@@ -331,13 +351,30 @@ def paired_hierarchical_comparisons(
                 ),
             }
     adjusted = holm_bonferroni(pvalues)
+    family_size = len(pvalues)
     for key, value in adjusted.items():
         rows[key]["holm_adjusted_p_value"] = value
+        rows[key]["family_size"] = family_size
+        rows[key]["familywise_intervals"] = {
+            f"{level:g}": {
+                "lower": float(
+                    np.quantile(bootstrap_samples[key], (1.0 - level) / (2.0 * family_size), method="linear")
+                ),
+                "upper": float(
+                    np.quantile(
+                        bootstrap_samples[key],
+                        1.0 - (1.0 - level) / (2.0 * family_size),
+                        method="linear",
+                    )
+                ),
+            }
+            for level in levels
+        }
     return {
         "method": "paired_hierarchical_bootstrap",
         "baseline": baseline,
         "draws": draws,
-        "multiplicity": "holm_bonferroni",
+        "multiplicity": "holm_bonferroni_with_familywise_bounds",
         "cells": rows,
     }
 
@@ -395,3 +432,77 @@ def interval_statistics(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
             "evidence_status": "PASS" if len(values) >= 1 else "INSUFFICIENT_EVIDENCE",
         }
     return {"method": "causal_residual_quantile", "cells": rows}
+
+
+def validate_null_behavior(*, seed: int, simulations: int = 64, bootstrap_draws: int = 128) -> dict[str, Any]:
+    """Exercise finite-sample zero-effect behavior on synthetic data only."""
+
+    if simulations < 1 or bootstrap_draws < 1:
+        raise StatisticsError("null-validation counts must be positive")
+    rng = np.random.default_rng(seed)
+    excludes_zero = 0
+    contains_zero = 0
+    for _ in range(simulations):
+        nested: dict[int, dict[int, dict[int, float]]] = defaultdict(lambda: defaultdict(dict))
+        for lineage in range(8):
+            for episode in range(4):
+                for realization in range(2):
+                    nested[lineage][episode][realization] = float(rng.normal(0.0, 1.0))
+        sample = np.asarray([_draw_hierarchical(nested, rng) for _ in range(bootstrap_draws)])
+        lower = float(np.quantile(sample, 0.025, method="linear"))
+        upper = float(np.quantile(sample, 0.975, method="linear"))
+        if lower <= 0.0 <= upper:
+            contains_zero += 1
+        else:
+            excludes_zero += 1
+    return {
+        "status": "DIAGNOSTIC_ONLY",
+        "simulations": simulations,
+        "bootstrap_draws": bootstrap_draws,
+        "nominal_interval": 0.95,
+        "zero_in_interval_rate": float(contains_zero / simulations),
+        "false_positive_rate": float(excludes_zero / simulations),
+        "note": "Synthetic zero-effect diagnostic; it is not benchmark evidence or an acceptance gate.",
+    }
+
+
+def resource_statistics(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
+    """Aggregate measured per-step cost and state diagnostics by comparison cell."""
+
+    grouped: dict[tuple[str, str, str, float, str, str, str], dict[str, list[float]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    for record in records:
+        trial = record["trial"]
+        diagnostics = record.get("diagnostics", {})
+        if not isinstance(diagnostics, Mapping):
+            raise StatisticsError("diagnostics must be an object")
+        for predictor, values in diagnostics.items():
+            if not isinstance(values, Mapping):
+                raise StatisticsError("predictor diagnostics must be an object")
+            key = _cell_key(trial, str(predictor))
+            bucket = grouped[key]
+            for name in ("update_norm", "predict_latency_ns", "update_latency_ns", "detected_surprises"):
+                bucket[name].append(_finite(values.get(name, 0.0), f"diagnostics.{name}"))
+            for name in ("dead_zone_skips", "reflection_skips", "forgetting_suspensions"):
+                bucket[name].append(_finite(values.get(name, 0.0), f"diagnostics.{name}"))
+    output: dict[str, Any] = {}
+    for key, values in sorted(grouped.items(), key=str):
+        output[_cell_label(key)] = {
+            "condition": key[0],
+            "family": key[1],
+            "channel": key[2],
+            "scale": key[3],
+            "role": key[4],
+            "branch": key[5],
+            "predictor": key[6],
+            "count": len(values["update_norm"]),
+            "mean_update_norm": float(np.mean(values["update_norm"])),
+            "mean_predict_latency_ns": float(np.mean(values["predict_latency_ns"])),
+            "mean_update_latency_ns": float(np.mean(values["update_latency_ns"])),
+            "max_detected_surprises": float(max(values["detected_surprises"])),
+            "max_dead_zone_skips": float(max(values["dead_zone_skips"])),
+            "max_reflection_skips": float(max(values["reflection_skips"])),
+            "max_forgetting_suspensions": float(max(values["forgetting_suspensions"])),
+        }
+    return {"method": "primitive_diagnostic_aggregation", "cells": output}
