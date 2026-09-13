@@ -5,7 +5,7 @@
     "sha256": "2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7"
   },
   "manifest_identity": "d73382605cdaf0bc7ac5027a634828c225f4365c8e53ac21b24eef7688f94ebd",
-  "notes": "design freeze for controlled observation-noise v1; confirmation remains pending",
+  "notes": "design freeze for controlled observation-noise v1; executable statistics, calibration, and resume path recorded",
   "planned_batches": [
     "observation-noise-a-0001",
     "observation-noise-b-0001"
@@ -22,10 +22,10 @@
   "selected_candidate": null,
   "source": {
     "branch": "codex/aaa-observation-noise-v1",
-    "commit": "64ceeac2d20d1494540282d0a7edc27759bd7bb6",
+    "commit": "883f72d25018fa3fc1448a1e81ae0c32f1ced4e2",
     "dirty": false,
     "status": [],
-    "tree_hash": "3ba516a7727a2616ed82cafc4d0e4b00e55a04e98e420f2fdd51aff10d29fdc1"
+    "tree_hash": "b9cfda9697cffdd8b1df280130fd470889595143f841e9c059c8b31843bf1ec8"
   },
   "stage": "design_freeze"
 }
