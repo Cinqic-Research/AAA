@@ -1,0 +1,31 @@
+{
+  "candidate_ledger_sha256": "c32d2827df48dc47eb484fbfc2664809dbd6730b22f347190282448485ebd0af",
+  "dependency_lock": {
+    "path": "requirements-lock.txt",
+    "sha256": "2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7"
+  },
+  "manifest_identity": "d73382605cdaf0bc7ac5027a634828c225f4365c8e53ac21b24eef7688f94ebd",
+  "notes": "design freeze for controlled observation-noise v1; confirmation remains pending",
+  "planned_batches": [
+    "observation-noise-a-0001",
+    "observation-noise-b-0001"
+  ],
+  "protocol_file_sha256": "266460987aed901fe1db28b24a002db6762ca9ec86e85ec38de0b316ebba6375",
+  "protocol_hash": "e340d5c0a08a402dd70acb56664645039f71333c64c0934d15427aaddc2858eb",
+  "protocol_version": "aaa.observation_noise.v1",
+  "reference": {
+    "path": "aaa/benchmark/data/benchmark_v2_1.json",
+    "raw_sha256": "4993c5e6e173f9dd5ef002bc84ff4c484da853b066ea45662d41ad826d10d48e",
+    "resolved_sha256": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37"
+  },
+  "schema_version": "aaa.observation_noise_source_freeze.v1",
+  "selected_candidate": null,
+  "source": {
+    "branch": "codex/aaa-observation-noise-v1",
+    "commit": "64ceeac2d20d1494540282d0a7edc27759bd7bb6",
+    "dirty": false,
+    "status": [],
+    "tree_hash": "3ba516a7727a2616ed82cafc4d0e4b00e55a04e98e420f2fdd51aff10d29fdc1"
+  },
+  "stage": "design_freeze"
+}
