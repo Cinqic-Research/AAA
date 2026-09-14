@@ -92,7 +92,7 @@ def main() -> None:
         "practical-gain, and adjusted-evidence condition. This is a development",
         "decision only; it establishes no formal endpoint.",
         "",
-        f"Each of four candidate archives contained {full['records_per_candidate']:,} scored records,",
+        f"Each of four candidate archives contained {full['scored_records_per_candidate']:,} scored records,",
         f"{full['trials_per_candidate']:,} trials, and {full['training_records_per_candidate']:,} training",
         "records and independently verified `PASS` before selection.",
         "",
