@@ -108,11 +108,11 @@ class ObservationNoiseProtocolTests(unittest.TestCase):
         self.assertIsNone(unchanged.change_step)
         self.assertEqual(changed.change_step, 300)
 
-    def test_confirmation_requires_a_separate_confirmation_freeze(self):
+    def test_confirmation_rejects_a_batch_outside_the_confirmation_freeze(self):
         with tempfile.TemporaryDirectory() as directory, self.assertRaises(ObservationNoiseError):
             run_attempt(
                 role="confirmation_a",
-                batch_id="observation-noise-a-0002",
+                batch_id="unfrozen-confirmation-batch",
                 attempt_label="must-not-run",
                 output_root=directory,
             )
