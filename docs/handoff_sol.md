@@ -110,9 +110,10 @@ joint evaluator must be independently recomputed before a scientific verdict.
 
 ## CI and remaining blocker
 
-The PR head was pushed to GitHub and the CPU workflow run identity was
-`34807070748` (run number 49; status must be re-queried at the final PR head).
-Local validation before this documentation refresh was 429 tests passed. The
+The CPU workflow run for the final source-bound PR head was
+`34807703716` (run number 51), and all jobs completed successfully; the
+earlier pre-final-head run `34807070748` is retained as historical CI
+provenance. Local validation was 429 tests passed. The
 remaining blocker is the absence of an approved durable archive mechanism for
 the full observation-noise A/B primitive records; this is tracked as
 `AAA-134`. The PR is engineering-complete for the controlled phase boundary
