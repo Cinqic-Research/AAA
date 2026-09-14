@@ -11,20 +11,20 @@ claim.
 |---|---|
 | PR | [#11](https://github.com/Cinqic/AAA/pull/11), `[AAA] Add controlled observation-noise v1 phase` |
 | engineering branch | `codex/aaa-observation-noise-v1` |
-| source-bound head | `2939c2bad40412b253e27ce3efb05ca1a8aa9877` |
+| source-bound head | `2d1f619b4dbe7a86d9f2818002575faf67844f21` |
 | exact base | `main` at `25b6c32c9040d0f934314a2139993d12763afc99` |
-| scientific source fingerprint | `10a88d74af7aa8e79cf57ccf94018c03723caf0986e06014587de7d6c31f5e71` |
+| scientific source fingerprint | `ddcbed59d8c0c223e5fbc546832c8e6d385c40c232abd6c70c1025b15b9082e0` |
 | protocol | `aaa.observation_noise.v1` |
 | protocol hash | `d5466983b358175ac4f33f4d7450953573721159c34fec4660bbb38b5c9f88ff` |
 | v2.1 reference raw identity | `4993c5e6e173f9dd5ef002bc84ff4c484da853b066ea45662d41ad826d10d48e` |
 | v2.1 reference resolved identity | `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
 | dependency lock | `2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7` |
-| source-freeze manifest | `benchmarks/observation_noise_source_freeze.json`, identity `d3f6950e2a20e9402649956fde4cfd32a315b504362cfbd34ce9b19508efd3ad` |
+| source-freeze manifest | `benchmarks/observation_noise_source_freeze.json`, identity `5d59e82b2707330552535055dd985f65a5a513c500a2eb79aeeabaaed92dd838` |
 
 The source fingerprint is the non-self-referential identity used by future
 confirmation admission. The source freeze records the protocol, preserved
 v2.1 reference identities, lock, candidate ledger hash
-`e53e76ee18222d7589a54e4e6d2745721096f8db759d2a79c2e48dff0712455b`, and the
+`4f049abf580b12c3a6a1718af16ab09d4c36ba05099c539efc87d311145d7be7`, and the
 two planned batch IDs below. Generated results and review documents are
 excluded from that fingerprint by design.
 

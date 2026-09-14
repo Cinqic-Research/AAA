@@ -57,11 +57,22 @@ def _dense(values: dict[tuple[int, int, int], float], label: str) -> np.ndarray:
     realizations = sorted({identity[2] for identity in values})
     if lineages != list(range(10)) or episodes != list(range(32)) or realizations != list(range(3)):
         raise JointEvaluationError(f"{label}: expected 10 lineages x 32 episodes x 3 realizations")
-    expected = {(lineage, episode, realization) for lineage in lineages for episode in episodes for realization in realizations}
+    expected = {
+        (lineage, episode, realization)
+        for lineage in lineages
+        for episode in episodes
+        for realization in realizations
+    }
     if set(values) != expected:
         raise JointEvaluationError(f"{label}: hierarchy has missing or unexpected identities")
     return np.asarray(
-        [[[values[(lineage, episode, realization)] for realization in realizations] for episode in episodes] for lineage in lineages],
+        [
+            [
+                [values[(lineage, episode, realization)] for realization in realizations]
+                for episode in episodes
+            ]
+            for lineage in lineages
+        ],
         dtype=float,
     )
 
@@ -122,8 +133,13 @@ def _archive(path: str | Path, expected_role: str, expected_batch: str) -> dict[
     metadata = json.loads((directory / "metadata.json").read_text(encoding="utf-8"))
     manifest = json.loads((directory / "run_manifest.json").read_text(encoding="utf-8"))
     if metadata.get("role") != expected_role or metadata.get("batch_id") != expected_batch:
-        raise JointEvaluationError(f"{directory}: role or batch identity does not match the requested archive")
-    if metadata.get("protocol_hash") != canonical_protocol_hash() or manifest.get("protocol_hash") != canonical_protocol_hash():
+        raise JointEvaluationError(
+            f"{directory}: role or batch identity does not match the requested archive"
+        )
+    if (
+        metadata.get("protocol_hash") != canonical_protocol_hash()
+        or manifest.get("protocol_hash") != canonical_protocol_hash()
+    ):
         raise JointEvaluationError(f"{directory}: protocol hash is not canonical")
     candidate_id = metadata.get("selected_candidate")
     if not isinstance(candidate_id, str):
@@ -169,7 +185,13 @@ def _claims_for_archive(archive: dict[str, Any], protocol: Any) -> list[_Claim]:
         for family in PRIMARY_FAMILIES:
             for channel in PRIMARY_CHANNELS:
                 for scale in PRIMARY_SCALES:
-                    cell = {"condition": condition, "family": family, "channel": channel, "scale": scale, "branch": "stationary"}
+                    cell = {
+                        "condition": condition,
+                        "family": family,
+                        "channel": channel,
+                        "scale": scale,
+                        "branch": "stationary",
+                    }
                     key = (condition, family, channel, scale)
                     candidate_array = _dense(candidate_values.get(key, {}), f"{batch_id} candidate {key}")
                     baseline_array = _dense(baseline_values.get(key, {}), f"{batch_id} baseline {key}")
@@ -209,12 +231,18 @@ def _claims_for_archive(archive: dict[str, Any], protocol: Any) -> list[_Claim]:
                             )
                         )
                     if family == "changed_law":
-                        online = _trial_values(records, "selected_candidate_branch_online", branch="online", first50=True)
-                        frozen = _trial_values(records, "selected_candidate_branch_frozen", branch="frozen", first50=True)
+                        online = _trial_values(
+                            records, "selected_candidate_branch_online", branch="online", first50=True
+                        )
+                        frozen = _trial_values(
+                            records, "selected_candidate_branch_frozen", branch="frozen", first50=True
+                        )
                         online_array = _dense(online.get(key, {}), f"{batch_id} branch online {key}")
                         frozen_array = _dense(frozen.get(key, {}), f"{batch_id} branch frozen {key}")
                         if np.any(frozen_array == 0.0):
-                            raise JointEvaluationError(f"{batch_id} adaptation {key}: zero denominator is undefined")
+                            raise JointEvaluationError(
+                                f"{batch_id} adaptation {key}: zero denominator is undefined"
+                            )
                         claims.append(
                             _Claim(
                                 f"{batch_id}|moderate_noise_adaptation|{condition}|{family}|{channel}|{scale:.7g}",
@@ -250,12 +278,15 @@ def evaluate_joint_archives(
         "selected_candidate_configuration_hash"
     ):
         raise JointEvaluationError("A and B candidate configuration hashes differ")
-    if a["metadata"].get("scientific_fingerprint_sha256") != b["metadata"].get("scientific_fingerprint_sha256"):
+    if a["metadata"].get("scientific_fingerprint_sha256") != b["metadata"].get(
+        "scientific_fingerprint_sha256"
+    ):
         raise JointEvaluationError("A and B scientific fingerprints differ")
     checkpoints_a = sorted((a["directory"] / "checkpoints").glob("*.json"))
     checkpoints_b = sorted((b["directory"] / "checkpoints").glob("*.json"))
     if [path.name for path in checkpoints_a] != [path.name for path in checkpoints_b] or any(
-        left.read_bytes() != right.read_bytes() for left, right in zip(checkpoints_a, checkpoints_b, strict=True)
+        left.read_bytes() != right.read_bytes()
+        for left, right in zip(checkpoints_a, checkpoints_b, strict=True)
     ):
         raise JointEvaluationError("A and B shared training checkpoint archives differ")
     claims = _claims_for_archive(a, protocol) + _claims_for_archive(b, protocol)
@@ -265,7 +296,11 @@ def evaluate_joint_archives(
     samples: dict[str, np.ndarray] = {}
     for claim in claims:
         sample = _hierarchical_draws(claim.values, draw_count, rng)
-        raw_p = float((np.count_nonzero(sample >= claim.threshold) + 1) / (draw_count + 1)) if claim.direction == "upper" else float((np.count_nonzero(sample <= claim.threshold) + 1) / (draw_count + 1))
+        raw_p = (
+            float((np.count_nonzero(sample >= claim.threshold) + 1) / (draw_count + 1))
+            if claim.direction == "upper"
+            else float((np.count_nonzero(sample <= claim.threshold) + 1) / (draw_count + 1))
+        )
         raw_pvalues[claim.claim_id] = raw_p
         samples[claim.claim_id] = sample
         rows[claim.claim_id] = {
@@ -316,9 +351,13 @@ def evaluate_joint_archives(
             {
                 "name": endpoint,
                 "required": True,
-                "status": "PASS" if endpoint_rows and all(row["status"] == "PASS" for row in endpoint_rows) else "FAIL",
+                "status": "PASS"
+                if endpoint_rows and all(row["status"] == "PASS" for row in endpoint_rows)
+                else "FAIL",
                 "claim_count": len(endpoint_rows),
-                "detail": "Every enumerated primary A+B claim passed the joint Holm-adjusted bound." if endpoint_rows and all(row["status"] == "PASS" for row in endpoint_rows) else "At least one enumerated primary A+B claim failed its preregistered bound.",
+                "detail": "Every enumerated primary A+B claim passed the joint Holm-adjusted bound."
+                if endpoint_rows and all(row["status"] == "PASS" for row in endpoint_rows)
+                else "At least one enumerated primary A+B claim failed its preregistered bound.",
             }
         )
     definition = a["candidate_definition"]
@@ -328,7 +367,9 @@ def evaluate_joint_archives(
             "required": definition.mechanism_change_count > 0,
             "status": "PASS" if definition.mechanism_change_count == 0 else "INSUFFICIENT_EVIDENCE",
             "claim_count": 0,
-            "detail": "Not applicable: the selected candidate is the preregistered unchanged-incumbent control." if definition.mechanism_change_count == 0 else "Promotion claims were not reconstructed.",
+            "detail": "Not applicable: the selected candidate is the preregistered unchanged-incumbent control."
+            if definition.mechanism_change_count == 0
+            else "Promotion claims were not reconstructed.",
         }
     )
     all_required_pass = all(gate["status"] == "PASS" for gate in gates if gate["required"])
@@ -338,8 +379,16 @@ def evaluate_joint_archives(
         "protocol_version": protocol.protocol_version,
         "protocol_hash": canonical_protocol_hash(),
         "archives": {
-            "A": {"path": str(a["directory"]), "batch_id": a["metadata"]["batch_id"], "verification": a["verification"]},
-            "B": {"path": str(b["directory"]), "batch_id": b["metadata"]["batch_id"], "verification": b["verification"]},
+            "A": {
+                "path": str(a["directory"]),
+                "batch_id": a["metadata"]["batch_id"],
+                "verification": a["verification"],
+            },
+            "B": {
+                "path": str(b["directory"]),
+                "batch_id": b["metadata"]["batch_id"],
+                "verification": b["verification"],
+            },
         },
         "candidate_id": a["candidate_id"],
         "candidate_configuration_hash": definition.configuration_hash,

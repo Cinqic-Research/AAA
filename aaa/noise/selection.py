@@ -25,9 +25,7 @@ def _candidate_metrics(attempt: AttemptResult) -> dict[str, Any]:
     by_cell: dict[tuple[str, str, str, float, str], dict[str, list[float]]] = defaultdict(
         lambda: defaultdict(list)
     )
-    adaptation: dict[tuple[str, str, float], dict[str, list[float]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
+    adaptation: dict[tuple[str, str, float], dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
     for record in records:
         trial = record["trial"]
         if trial["channel"] not in {"gaussian", "uniform"} or float(trial["scale"]) not in {
@@ -41,16 +39,20 @@ def _candidate_metrics(attempt: AttemptResult) -> dict[str, Any]:
             "changed_law",
             "speed_change",
         }:
-            key = (
+            cell_key = (
                 str(trial["condition"]),
                 str(trial["family"]),
                 str(trial["channel"]),
                 float(trial["scale"]),
                 str(trial["branch"]),
             )
-            for predictor in ("selected_candidate_online", "constant_motion_reflected", "incumbent_square_root_rls"):
+            for predictor in (
+                "selected_candidate_online",
+                "constant_motion_reflected",
+                "incumbent_square_root_rls",
+            ):
                 if predictor in record["predictions"]:
-                    by_cell[key][predictor].append(
+                    by_cell[cell_key][predictor].append(
                         float(record["predictions"][predictor]["latent_normalized_absolute_error"])
                     )
         if (
@@ -58,24 +60,28 @@ def _candidate_metrics(attempt: AttemptResult) -> dict[str, Any]:
             and trial["branch"] in {"frozen", "online"}
             and int(record["step"]) < 350
         ):
-            key = (str(trial["condition"]), str(trial["channel"]), float(trial["scale"]))
-            predictor = "selected_candidate_branch_online" if trial["branch"] == "online" else "selected_candidate_branch_frozen"
+            adaptation_key = (str(trial["condition"]), str(trial["channel"]), float(trial["scale"]))
+            predictor = (
+                "selected_candidate_branch_online"
+                if trial["branch"] == "online"
+                else "selected_candidate_branch_frozen"
+            )
             if predictor in record["predictions"]:
-                adaptation[key][predictor].append(
+                adaptation[adaptation_key][predictor].append(
                     float(record["predictions"][predictor]["latent_normalized_absolute_error"])
                 )
-    cell_rows = []
-    for key, values in sorted(by_cell.items(), key=str):
-        candidate = _mean(values.get("selected_candidate_online", []))
-        baseline = _mean(values.get("constant_motion_reflected", []))
-        incumbent = _mean(values.get("incumbent_square_root_rls", []))
+    cell_rows: list[dict[str, Any]] = []
+    for cell_key, cell_values in sorted(by_cell.items(), key=str):
+        candidate = _mean(cell_values.get("selected_candidate_online", []))
+        baseline = _mean(cell_values.get("constant_motion_reflected", []))
+        incumbent = _mean(cell_values.get("incumbent_square_root_rls", []))
         cell_rows.append(
             {
-                "condition": key[0],
-                "family": key[1],
-                "channel": key[2],
-                "scale": key[3],
-                "branch": key[4],
+                "condition": cell_key[0],
+                "family": cell_key[1],
+                "channel": cell_key[2],
+                "scale": cell_key[3],
+                "branch": cell_key[4],
                 "candidate_mae": candidate,
                 "reflected_baseline_mae": baseline,
                 "incumbent_mae": incumbent,
@@ -87,15 +93,15 @@ def _candidate_metrics(attempt: AttemptResult) -> dict[str, Any]:
                 ),
             }
         )
-    adaptation_rows = []
-    for key, values in sorted(adaptation.items(), key=str):
-        frozen = _mean(values.get("selected_candidate_branch_frozen", []))
-        online = _mean(values.get("selected_candidate_branch_online", []))
+    adaptation_rows: list[dict[str, Any]] = []
+    for adaptation_key, adaptation_values in sorted(adaptation.items(), key=str):
+        frozen = _mean(adaptation_values.get("selected_candidate_branch_frozen", []))
+        online = _mean(adaptation_values.get("selected_candidate_branch_online", []))
         adaptation_rows.append(
             {
-                "condition": key[0],
-                "channel": key[1],
-                "scale": key[2],
+                "condition": adaptation_key[0],
+                "channel": adaptation_key[1],
+                "scale": adaptation_key[2],
                 "frozen_first50_mae": frozen,
                 "online_first50_mae": online,
                 "point_reduction": (
@@ -104,8 +110,14 @@ def _candidate_metrics(attempt: AttemptResult) -> dict[str, Any]:
             }
         )
     candidates = [row["candidate_mae"] for row in cell_rows if row["candidate_mae"] is not None]
-    baselines = [row["candidate_minus_1_10_baseline"] for row in cell_rows if row["candidate_minus_1_10_baseline"] is not None]
-    incumbent_gains = [row["incumbent_minus_candidate"] for row in cell_rows if row["incumbent_minus_candidate"] is not None]
+    baselines = [
+        row["candidate_minus_1_10_baseline"]
+        for row in cell_rows
+        if row["candidate_minus_1_10_baseline"] is not None
+    ]
+    incumbent_gains = [
+        row["incumbent_minus_candidate"] for row in cell_rows if row["incumbent_minus_candidate"] is not None
+    ]
     reductions = [row["point_reduction"] for row in adaptation_rows if row["point_reduction"] is not None]
     return {
         "primary_candidate_mae_mean": _mean(candidates),
@@ -160,7 +172,10 @@ def run_development_selection(
     protocol = load_protocol()
     plan_path = project_root() / "benchmarks/observation_noise_development_selection.json"
     plan = json.loads(plan_path.read_text(encoding="utf-8"))
-    if plan.get("status") != "selection_plan_frozen" or plan.get("frozen_before_comparative_development") is not True:
+    if (
+        plan.get("status") != "selection_plan_frozen"
+        or plan.get("frozen_before_comparative_development") is not True
+    ):
         raise ValueError("development selection plan is not frozen")
     catalog = candidate_catalog()
     if list(catalog) != plan.get("candidates"):
@@ -179,15 +194,13 @@ def run_development_selection(
                 candidate_id=candidate_id,
             )
         else:
-            directory = (
-                Path(reuse_root)
-                / "observation-noise-v1"
-                / f"selection-{candidate_id}"
-            )
+            directory = Path(reuse_root) / "observation-noise-v1" / f"selection-{candidate_id}"
             summary_path = directory / "summary.json"
             if not summary_path.is_file():
                 raise ValueError(f"cannot reuse incomplete selection attempt: {directory}")
-            attempt = AttemptResult(directory=directory, summary=json.loads(summary_path.read_text(encoding="utf-8")))
+            attempt = AttemptResult(
+                directory=directory, summary=json.loads(summary_path.read_text(encoding="utf-8"))
+            )
         attempts[candidate_id] = attempt
         metrics_by_candidate[candidate_id] = _candidate_metrics(attempt)
     # The incumbent is the no-refinement control. A refinement is eligible only

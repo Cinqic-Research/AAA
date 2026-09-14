@@ -15,7 +15,13 @@ from pathlib import Path
 from typing import Any
 
 from ..benchmark.spec import BenchmarkSpec, load_spec
-from ..predictors import OnlineRLSPredictor
+from ..predictors import (
+    MAX_CONDITION_NUMBER,
+    PSD_TOLERANCE,
+    SYMMETRY_TOLERANCE,
+    OnlineRLSPredictor,
+)
+from .spec import load_protocol
 
 INCUMBENT_CANDIDATE_ID = "incumbent-no-refinement-v1"
 CLIP_CANDIDATE_IDS = (
@@ -93,7 +99,7 @@ def _definition(
     mechanism_description: str,
     mechanism_change_count: int,
 ) -> CandidateDefinition:
-    config = {
+    config: dict[str, Any] = {
         "candidate_id": candidate_id,
         "parent_candidate_id": "v2.1-incumbent",
         "mechanism_description": mechanism_description,
@@ -228,11 +234,17 @@ class InnovationClipRLSPredictor(OnlineRLSPredictor):
         update_enabled: bool,
         candidate_id: str,
         max_normalized_innovation: float,
+        symmetry_tolerance: float = SYMMETRY_TOLERANCE,
+        psd_tolerance: float = PSD_TOLERANCE,
+        max_condition_number: float = MAX_CONDITION_NUMBER,
     ) -> InnovationClipRLSPredictor:
         state = model.state_dict()
         return cls(
             candidate_id=candidate_id,
             max_normalized_innovation=max_normalized_innovation,
+            symmetry_tolerance=symmetry_tolerance,
+            psd_tolerance=psd_tolerance,
+            max_condition_number=max_condition_number,
             lower_bound=float(state["lower_bound"]),
             upper_bound=float(state["upper_bound"]),
             displacement_scale=float(state["displacement_scale"]),
@@ -269,6 +281,9 @@ class InnovationClipRLSPredictor(OnlineRLSPredictor):
         *,
         name: str | None = None,
         update_enabled: bool = False,
+        symmetry_tolerance: float = SYMMETRY_TOLERANCE,
+        psd_tolerance: float = PSD_TOLERANCE,
+        max_condition_number: float = MAX_CONDITION_NUMBER,
     ) -> InnovationClipRLSPredictor:
         if state.get("format_version") != cls.format_version:
             raise ValueError("unsupported innovation-clip checkpoint")
@@ -276,19 +291,27 @@ class InnovationClipRLSPredictor(OnlineRLSPredictor):
         base_state["format_version"] = OnlineRLSPredictor.format_version
         return cls.from_model(
             OnlineRLSPredictor.from_state_dict(
-                base_state, name=name or str(state.get("name", cls.name)), update_enabled=update_enabled
+                base_state,
+                name=name or str(state.get("name", cls.name)),
+                update_enabled=update_enabled,
+                symmetry_tolerance=symmetry_tolerance,
+                psd_tolerance=psd_tolerance,
+                max_condition_number=max_condition_number,
             ),
             name=name or str(state.get("name", cls.name)),
             update_enabled=update_enabled,
             candidate_id=str(state["candidate_id"]),
             max_normalized_innovation=float(state["max_normalized_innovation"]),
+            symmetry_tolerance=symmetry_tolerance,
+            psd_tolerance=psd_tolerance,
+            max_condition_number=max_condition_number,
         )
 
 
 def selected_candidate_from_freeze() -> str:
     """Resolve the selected ID from the committed confirmation freeze only."""
 
-    path = load_spec().artifacts["freeze_manifest"]
+    path = load_protocol().artifacts["freeze_manifest"]
     freeze_path = Path(path)
     if not freeze_path.is_absolute():
         freeze_path = Path(__file__).resolve().parents[2] / freeze_path

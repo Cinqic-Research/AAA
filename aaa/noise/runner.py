@@ -1019,9 +1019,15 @@ def _require_confirmation_freeze(protocol: NoiseProtocol, batch_id: str) -> str:
         and entry.get("candidate_id") == selected_candidate
         and entry.get("outcome") == "selected"
     ]
-    if ledger.get("status") != "development_complete" or ledger.get("selected_candidate") != selected_candidate:
+    if (
+        ledger.get("status") != "development_complete"
+        or ledger.get("selected_candidate") != selected_candidate
+    ):
         raise ObservationNoiseError("candidate ledger has no committed development selection")
-    if len(selected_entries) != 1 or selected_entries[0].get("configuration_hash") != definition.configuration_hash:
+    if (
+        len(selected_entries) != 1
+        or selected_entries[0].get("configuration_hash") != definition.configuration_hash
+    ):
         raise ObservationNoiseError("candidate ledger selected entry is not the canonical candidate identity")
     frozen_fingerprint = freeze.get("scientific_fingerprint")
     if not isinstance(frozen_fingerprint, dict):

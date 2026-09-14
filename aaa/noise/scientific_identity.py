@@ -30,9 +30,7 @@ GENERATED_FILES = frozenset(
         "docs/evidence/observation_noise_development_selection.json",
     }
 )
-MUTABLE_BATCH_FIELDS = frozenset(
-    {"status", "consumed_by", "outcome", "claimed_by", "claim_started_at"}
-)
+MUTABLE_BATCH_FIELDS = frozenset({"status", "consumed_by", "outcome", "claimed_by", "claim_started_at"})
 REQUIRED_SCIENTIFIC_PATHS = frozenset(
     {
         ".github/workflows/ci.yml",

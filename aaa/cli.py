@@ -121,7 +121,9 @@ def build_parser() -> argparse.ArgumentParser:
         "observation-noise-development-select",
         help="Evaluate the frozen bounded observation-noise candidate catalog on development data.",
     )
-    noise_selection_parser.add_argument("--output", type=Path, default=Path("docs/evidence/observation_noise_development_selection.json"))
+    noise_selection_parser.add_argument(
+        "--output", type=Path, default=Path("docs/evidence/observation_noise_development_selection.json")
+    )
     noise_selection_parser.add_argument("--runs-root", type=Path, default=Path("runs/development-selection"))
     noise_selection_parser.add_argument(
         "--reuse-root", type=Path, help="Recompute and relabel already completed selection attempts."

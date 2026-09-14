@@ -95,7 +95,9 @@ class ScientificIdentityTests(unittest.TestCase):
             )
             payload["batches"][0]["namespace"] = "changed-namespace"
             path.write_text(json.dumps(payload), encoding="utf-8")
-            self.assertNotEqual(first["sha256"], scientific_fingerprint(root, require_project_shape=False)["sha256"])
+            self.assertNotEqual(
+                first["sha256"], scientific_fingerprint(root, require_project_shape=False)["sha256"]
+            )
 
     def test_generated_and_exact_freeze_files_do_not_self_invalidate(self):
         temporary, root = self._repo()
@@ -135,12 +137,8 @@ class ScientificIdentityTests(unittest.TestCase):
         self.assertEqual(list(catalog), [INCUMBENT_CANDIDATE_ID, *CLIP_CANDIDATE_IDS])
         self.assertEqual(len({entry.configuration_hash for entry in catalog.values()}), 4)
         model = incumbent_from_v21(name="base", update_enabled=True)
-        incumbent = candidate_from_model(
-            model, INCUMBENT_CANDIDATE_ID, name="incumbent", update_enabled=True
-        )
-        clipped = candidate_from_model(
-            model, CLIP_CANDIDATE_IDS[0], name="clipped", update_enabled=True
-        )
+        incumbent = candidate_from_model(model, INCUMBENT_CANDIDATE_ID, name="incumbent", update_enabled=True)
+        clipped = candidate_from_model(model, CLIP_CANDIDATE_IDS[0], name="clipped", update_enabled=True)
         history = (0.20, 0.30, 0.40, 0.50)
         incumbent.predict(history)
         clipped.predict(history)

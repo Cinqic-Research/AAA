@@ -487,10 +487,14 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
         if criterion["confidence_level"] != 0.95:
             raise ProtocolError(f"protocol.acceptance.machine_criteria.{name} must use 95% bounds")
         if not isinstance(criterion["adjustment"], str) or "Holm once" not in criterion["adjustment"]:
-            raise ProtocolError(f"protocol.acceptance.machine_criteria.{name} must declare joint Holm adjustment")
+            raise ProtocolError(
+                f"protocol.acceptance.machine_criteria.{name} must declare joint Holm adjustment"
+            )
         if criterion["operator"] not in {"<=", ">"}:
             raise ProtocolError(f"protocol.acceptance.machine_criteria.{name}.operator is invalid")
-        _number(criterion["threshold"], f"protocol.acceptance.machine_criteria.{name}.threshold", nonnegative=True)
+        _number(
+            criterion["threshold"], f"protocol.acceptance.machine_criteria.{name}.threshold", nonnegative=True
+        )
 
     search = _strict(
         raw["search_budget"],
