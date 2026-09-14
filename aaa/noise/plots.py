@@ -11,37 +11,16 @@ from typing import Any
 from .verifier import iter_records
 
 
-def _summary(values: list[float]) -> tuple[float, float, float]:
-    """Return a mean and empirical 5th/95th percentiles for plotted rows."""
+def _add(bucket: dict[Any, list[float]], key: Any, value: float) -> None:
+    aggregate = bucket.setdefault(key, [0.0, 0.0])
+    aggregate[0] += value
+    aggregate[1] += 1.0
 
-    import numpy as np
 
-    if not values:
+def _mean(aggregate: list[float]) -> float:
+    if aggregate[1] == 0.0:
         raise ValueError("cannot summarize an empty plotted group")
-    quantiles = np.quantile(values, (0.05, 0.95), method="linear")
-    return float(np.mean(values)), float(quantiles[0]), float(quantiles[1])
-
-
-def _bar_summary(values: list[float]) -> tuple[float, float, float]:
-    """Return a median-centered interval so asymmetric outliers remain visible."""
-
-    import numpy as np
-
-    _mean, lower, upper = _summary(values)
-    return float(np.median(values)), lower, upper
-
-
-def _errorbar(axis: Any, x: float, values: list[float], *, label: str, color: str) -> None:
-    center, lower, upper = _bar_summary(values)
-    axis.errorbar(
-        x,
-        center,
-        yerr=[[center - lower], [upper - center]],
-        fmt="o",
-        capsize=3,
-        color=color,
-        label=label,
-    )
+    return aggregate[0] / aggregate[1]
 
 
 def _save(figure: Any, path: Path) -> Path:
@@ -68,37 +47,41 @@ def write_plots(run_dir: str | Path) -> list[Path]:
     import matplotlib.pyplot as plt
 
     root = Path(run_dir)
-    rows = list(iter_records(root))
     output: list[Path] = []
-    by_scale: dict[tuple[str, float], list[float]] = defaultdict(list)
-    by_step: dict[tuple[str, int], list[float]] = defaultdict(list)
-    surprises: dict[int, list[float]] = defaultdict(list)
-    update_norms: dict[tuple[str, int], list[float]] = defaultdict(list)
-    latencies: dict[tuple[str, int], list[float]] = defaultdict(list)
-    controls: dict[str, list[float]] = defaultdict(list)
-    strata: dict[tuple[str, str], list[float]] = defaultdict(list)
-    for row in rows:
+    by_scale: dict[tuple[str, float], list[float]] = {}
+    by_step: dict[tuple[str, int], list[float]] = {}
+    surprises: dict[int, float] = defaultdict(float)
+    update_norms: dict[tuple[str, int], list[float]] = {}
+    latencies: dict[tuple[str, int], list[float]] = {}
+    controls: dict[str, list[float]] = {}
+    strata: dict[tuple[str, str], list[float]] = {}
+    row_count = 0
+    for row in iter_records(root):
+        row_count += 1
         trial = row["trial"]
         branch = str(trial["branch"])
         for name, prediction in row["predictions"].items():
             error = float(prediction["latent_normalized_absolute_error"])
             if name == "incumbent_square_root_rls" and branch == "stationary":
-                by_scale[(str(trial["channel"]), float(trial["scale"]))].append(error)
+                _add(by_scale, (str(trial["channel"]), float(trial["scale"])), error)
             if name in {"incumbent_branch_frozen", "incumbent_branch_online"}:
-                by_step[(name, int(row["step"]))].append(error)
+                _add(by_step, (name, int(row["step"])), error)
             if name == "incumbent_square_root_rls":
                 diagnostics = row.get("diagnostics", {}).get(name, {})
-                surprises[int(row["step"])].append(float(diagnostics.get("detected_surprises", 0)))
-                update_norms[(name, int(row["step"]))].append(float(diagnostics.get("update_norm", 0)))
-                latencies[(name, int(row["step"]))].append(
+                step = int(row["step"])
+                surprises[step] = max(surprises[step], float(diagnostics.get("detected_surprises", 0)))
+                _add(update_norms, (name, step), float(diagnostics.get("update_norm", 0)))
+                _add(
+                    latencies,
+                    (name, step),
                     float(diagnostics.get("predict_latency_ns", 0))
-                    + float(diagnostics.get("update_latency_ns", 0))
+                    + float(diagnostics.get("update_latency_ns", 0)),
                 )
                 if branch.startswith("sensor_shift_"):
-                    controls[branch].append(error)
+                    _add(controls, branch, error)
                 stratum = str(trial.get("stratum", "unstratified"))
                 if branch == "stationary" and stratum != "unstratified":
-                    strata[(str(trial["family"]), stratum)].append(error)
+                    _add(strata, (str(trial["family"]), stratum), error)
 
     figure, axis = plt.subplots(figsize=(8, 4.5))
     colors = {
@@ -107,16 +90,10 @@ def write_plots(run_dir: str | Path) -> list[Path]:
         "correlated": "tab:green",
         "impulsive": "tab:red",
     }
-    labeled_channels: set[str] = set()
-    for (channel, scale), values in sorted(by_scale.items()):
+    for (channel, scale), aggregate in sorted(by_scale.items()):
         color = colors.get(channel, "tab:gray")
-        axis.scatter([scale] * len(values), values, s=4, alpha=0.10, color=color)
-        label = f"{channel} median, 5-95%" if channel not in labeled_channels else "_nolegend_"
-        _errorbar(axis, scale, values, label=label, color=color)
-        labeled_channels.add(channel)
-    axis.set_title(
-        "Incumbent latent error by observed-noise scale\n(points: primitive rows; bars: median with empirical 5-95%)"
-    )
+        axis.scatter([scale], [_mean(aggregate)], s=24, color=color, label=channel)
+    axis.set_title("Incumbent mean latent error by observed-noise scale")
     axis.set_xlabel("RMS noise scale")
     axis.set_ylabel("normalized absolute error")
     axis.set_yscale("symlog", linthresh=1e-6)
@@ -129,9 +106,7 @@ def write_plots(run_dir: str | Path) -> list[Path]:
         ("incumbent_branch_frozen", "tab:gray"),
         ("incumbent_branch_online", "tab:blue"),
     ):
-        points = sorted(
-            (step, _summary(values)[0]) for (label, step), values in by_step.items() if label == name
-        )
+        points = sorted((step, _mean(values)) for (label, step), values in by_step.items() if label == name)
         if points:
             axis.plot([point[0] for point in points], [point[1] for point in points], label=name, color=color)
             first_step, first_error = points[0]
@@ -156,64 +131,33 @@ def write_plots(run_dir: str | Path) -> list[Path]:
     labels = sorted(controls)
     if labels:
         positions = list(range(len(labels)))
-        means = []
-        lowers = []
-        uppers = []
-        for label in labels:
-            center, lower, upper = _bar_summary(controls[label])
-            means.append(center)
-            lowers.append(lower)
-            uppers.append(upper)
-        axis.errorbar(
-            positions,
-            means,
-            yerr=[
-                [mean - lower for mean, lower in zip(means, lowers, strict=True)],
-                [upper - mean for mean, upper in zip(means, uppers, strict=True)],
-            ],
-            fmt="o",
-            capsize=3,
-        )
+        means = [_mean(controls[label]) for label in labels]
+        axis.scatter(positions, means)
         axis.set_xticks(positions, labels, rotation=25, ha="right")
-    axis.set_title(
-        "Sensor-shift controls: unchanged and changed latent dynamics\n(median with empirical primitive 5-95% bars)"
-    )
+    axis.set_title("Sensor-shift controls: unchanged and changed latent dynamics\n(primitive-record means)")
     axis.set_xlabel("factorial branch")
     axis.set_ylabel("incumbent normalized latent absolute error")
     output.append(_save(figure, root / "noise_shift_controls.png"))
 
     figure, axis = plt.subplots(figsize=(9, 4.8))
     worst = sorted(
-        ((key, _summary(values)[0], values) for key, values in strata.items()),
+        ((key, _mean(values)) for key, values in strata.items()),
         key=lambda item: item[1],
         reverse=True,
     )[:12]
     if worst:
-        labels = [f"{family}\n{stratum}" for (family, stratum), _mean, _values in worst]
-        means = [_bar_summary(values)[0] for _key, _mean, values in worst]
-        stratum_lowers = [_bar_summary(values)[1] for _key, _mean, values in worst]
-        stratum_uppers = [_bar_summary(values)[2] for _key, _mean, values in worst]
+        labels = [f"{family}\n{stratum}" for (family, stratum), _value in worst]
+        means = [value for _key, value in worst]
         positions = list(range(len(worst)))
-        axis.errorbar(
-            positions,
-            means,
-            yerr=[
-                [mean - lo for mean, lo in zip(means, stratum_lowers, strict=True)],
-                [hi - mean for mean, hi in zip(means, stratum_uppers, strict=True)],
-            ],
-            fmt="o",
-            capsize=3,
-        )
+        axis.scatter(positions, means)
         axis.set_xticks(positions, labels, rotation=35, ha="right")
-    axis.set_title(
-        "Worst realized incumbent strata\n(top strata by primitive-row mean; bars are median with empirical 5-95%)"
-    )
+    axis.set_title("Worst realized incumbent strata\n(top strata by primitive-record mean)")
     axis.set_xlabel("predeclared family and stratum")
     axis.set_ylabel("normalized latent absolute error")
     output.append(_save(figure, root / "worst_stratum.png"))
 
     figure, axis = plt.subplots(figsize=(8, 4.5))
-    points = sorted((step, max(values)) for step, values in surprises.items())
+    points = sorted(surprises.items())
     if points:
         axis.plot([point[0] for point in points], [point[1] for point in points], color="tab:red")
     axis.set_title("Incumbent detector activity")
@@ -223,12 +167,12 @@ def write_plots(run_dir: str | Path) -> list[Path]:
 
     figure, axes = plt.subplots(1, 2, figsize=(10, 4.2))
     update_points = sorted(
-        (step, _summary(values)[0])
+        (step, _mean(values))
         for (name, step), values in update_norms.items()
         if name == "incumbent_square_root_rls"
     )
     latency_points = sorted(
-        (step, _summary(values)[0])
+        (step, _mean(values))
         for (name, step), values in latencies.items()
         if name == "incumbent_square_root_rls"
     )
@@ -253,12 +197,16 @@ def write_plots(run_dir: str | Path) -> list[Path]:
     output.append(_save(figure, root / "update_resource_diagnostics.png"))
 
     records_path = root / "records.jsonl"
+    if not records_path.is_file():
+        records_path = root / "records.jsonl.gz"
+    if not records_path.is_file():
+        records_path = root / "records" / "index.json"
     provenance = {
         "schema_version": "aaa.observation_noise_plot_provenance.v1",
-        "source": "records.jsonl",
+        "source": records_path.name,
         "source_sha256": hashlib.sha256(records_path.read_bytes()).hexdigest(),
-        "source_rows": len(rows),
-        "uncertainty_in_figures": "median-centered empirical primitive-row 5th/95th percentiles",
+        "source_rows": row_count,
+        "uncertainty_in_figures": "none; figures show bounded-memory primitive-record means",
         "authoritative_aggregate_uncertainty": "summary.json statistics hierarchical and paired artifacts",
         "figures": [path.name for path in output],
     }

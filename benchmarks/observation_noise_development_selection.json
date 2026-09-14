@@ -1,6 +1,6 @@
 {
   "schema_version": "aaa.observation_noise_development_selection.v1",
-  "protocol_version": "aaa.observation_noise.v1",
+  "protocol_version": "aaa.observation_noise.v1.1",
   "status": "selection_plan_frozen",
   "frozen_before_comparative_development": true,
   "candidate_ledger_file": "benchmarks/observation_noise_candidate_ledger.json",

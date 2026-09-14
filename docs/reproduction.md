@@ -36,7 +36,7 @@ Set `MPLBACKEND=Agg` in a headless environment.
 ```bash
 python -m aaa.cli spec-hash          # canonical specification path, version, hash
 python -m aaa.cli batches            # declared confirmation batches and their status
-python -m aaa.cli observation-noise-protocol-hash  # separate v1 noise protocol identity
+python -m aaa.cli observation-noise-protocol-hash  # separate v1.1 noise protocol identity
 ```
 
 The v2.1 command and its specification are unchanged. Observation-noise runs
@@ -46,11 +46,13 @@ use a separate namespace and output root:
 python -m aaa.cli observation-noise --role development --quick \
   --attempt-label noise-smoke-001 --output-root runs
 python -m aaa.cli observation-noise-recompute \
-  runs/observation-noise-v1/noise-smoke-001
+  runs/observation-noise-v1_1/noise-smoke-001
 ```
 
-An observation-noise attempt writes each completed trial to an immutable
-`trial_records/` shard before moving to the next trial. If the process is
+An observation-noise attempt writes each completed trial to an immutable,
+deterministic gzip shard under `trial_records/` before moving to the next trial.
+Finalization atomically renames that directory to `records/`, writes the
+canonical shard index, and retains no duplicate combined primitive file. If the process is
 interrupted, resume the same attempt with its exact label:
 
 ```bash
@@ -75,7 +77,17 @@ the retained primitive record hash. Its scientific endpoints remain
 `INSUFFICIENT_EVIDENCE`; it is an engineering smoke fixture, not confirmation.
 Formal A/B execution requires the separate source-freeze manifest, declared
 batch identities, the exact lock, the fixed ten-lineage plan, durable full
-archive retention, and independent review.
+archive retention/retrieval, and independent recomputation.
+
+## Installed-wheel boundary
+
+The wheel contains both protocol files and supports development mechanics from
+outside a checkout. The isolated zero-noise comparison against the pinned v2.1
+Git commit necessarily requires the maintained repository history. An installed
+development smoke records that check and its reference gate as `NOT_VERIFIED`;
+it never substitutes an in-process comparison or reports a false `PASS`.
+Formal confirmation is maintained-checkout-only and refuses an installed
+package without the committed freeze and Git provenance.
 
 The non-self-referential scientific identity can be inspected before a freeze:
 
@@ -92,7 +104,7 @@ Before any candidate comparison, run the committed bounded development plan:
 
 ```bash
 python -m aaa.cli observation-noise-development-select --quick \
-  --output docs/evidence/observation_noise_development_selection.json \
+  --output runs/development-selection/observation_noise_development_smoke.json \
   --runs-root runs/development-selection
 ```
 
@@ -107,8 +119,8 @@ The design/source freeze is written only after the implementation is committed:
 
 ```bash
 python -m aaa.cli observation-noise-freeze \
-  --batch observation-noise-a-0001 --batch observation-noise-b-0001 \
-  --notes "design freeze for observation-noise v1"
+  --batch observation-noise-a-0002 --batch observation-noise-b-0002 \
+  --notes "design freeze for observation-noise v1.1"
 ```
 
 After bounded development, a confirmation freeze is a separate file and must
@@ -173,8 +185,8 @@ exist:
 
 ```bash
 python -m aaa.cli observation-noise-confirmation-evaluate \
-  runs/observation-noise-v1/<confirmation-a-attempt> \
-  runs/observation-noise-v1/<confirmation-b-attempt> \
+  runs/observation-noise-v1_1/<confirmation-a-attempt> \
+  runs/observation-noise-v1_1/<confirmation-b-attempt> \
   --output docs/evidence/observation_noise_joint_evaluation.json
 ```
 

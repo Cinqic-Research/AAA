@@ -1042,9 +1042,9 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
   validation, unbounded sensor values, idempotent observation calls, causal
   update order, strict boolean/integer handling, stale cached errors, unknown
   fields, and the independent recomputation of the all-cell development smoke.
-- **Remaining limitation** The fixed ten-lineage A/B confirmation plan,
-  durable external archive locator, and independent human review have not yet
-  been executed or claimed.
+- **Remaining limitation** The fixed ten-lineage A/B confirmation plan and
+  durable external archive/retrieval workflow have not been executed or
+  claimed. Sol's current AI review is separate from human review.
 
 The smoke implementation also executes the four predeclared factorial control
 cells (unchanged/changed dynamics crossed with unchanged/shifted noise), both
@@ -1056,7 +1056,7 @@ corruption, missing scientific gates, and strict-type substitutions.
 
 ---
 
-## Observation-noise v1 completion audit
+## Observation-noise v1/v1.1 completion audit
 
 ### AAA-129 — confirmation freeze used a self-referential commit equality
 - **Source** fresh observation-noise completion audit · **Severity** critical · **Status** repaired
@@ -1134,3 +1134,193 @@ corruption, missing scientific gates, and strict-type substitutions.
   records transient archive status, while the confirmation boundary remains
   blocked until an approved durable mechanism is supplied and recorded before
   A/B execution.
+
+### AAA-135 — verifier accepted an archive with no checksum manifest
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Reproduction** A complete synthetic attempt with `checksums.json` omitted
+  returned `PASS`. Structural and arithmetic checks therefore did not establish
+  complete byte coverage.
+- **Evidence** `docs/evidence/sol_observation_noise_pre_repair_probes.json`.
+- **Repair** Archive verification now requires `checksums.json`, requires exact
+  coverage of every retained file other than the checksum manifest itself, and
+  rejects missing, extra, or mismatched entries.
+
+### AAA-136 — stored NaN values bypassed verifier comparisons
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Reproduction** Replacing a stored summary MAE with JSON `NaN` left
+  `abs(stored - recomputed) > tolerance` false, and the verifier returned
+  `PASS`.
+- **Evidence** `docs/evidence/sol_observation_noise_pre_repair_probes.json`.
+- **Repair** All stored scalar comparisons pass through a strict finite-number
+  check before tolerance arithmetic; a regression retains the original NaN
+  bypass as a negative fixture.
+
+### AAA-137 — adaptation implementation used the wrong estimand
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Reproduction** For heterogeneous frozen denominators 1 and 3, with online
+  values 1 and 1.5, the implemented mean of per-identity ratios is 0.25 while
+  the declared ratio of means is 0.375.
+- **Evidence** `docs/evidence/sol_observation_noise_pre_repair_probes.json`.
+- **Repair** Adaptation now bootstraps the declared ratio of aggregate frozen
+  and online means at every hierarchy draw. A heterogeneous-denominator
+  regression distinguishes it from the rejected mean-of-ratios implementation.
+
+### AAA-138 — quick smoke was recorded as complete candidate selection
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired and verified in full development selection
+- **Reproduction** The frozen plan requires 2 x 2 x 1 hierarchy counts, but the
+  committed selection evidence records `quick: true` and executed 1 x 1 x 1.
+  Refinement eligibility also omits retention, incumbent practical gain,
+  complete-cell coverage, and stability, and treats legitimate zero values as
+  missing through truthiness fallbacks.
+- **Evidence** `docs/evidence/sol_observation_noise_pre_repair_probes.json`.
+- **Repair** Quick mode is explicitly `development_smoke`, cannot select a
+  candidate or mutate the candidate ledger, and records only a provisional
+  point-estimate ordering. Full selection enforces the frozen 2 x 2 x 1 sample,
+  complete primary coverage, stability, utility, baseline, retention,
+  adaptation, practical incumbent gain, and adjusted positive evidence.
+- **Verification** Four fresh 2 x 2 x 1 archives each retained 235,776 scored
+  records across 1,024 trials plus 3,552 training records and independently
+  verified `PASS`. No refinement met the conjunctive eligibility rule; the
+  incumbent was retained explicitly as the no-refinement control.
+
+### AAA-139 — formal joint evaluation admitted mutable analysis identity
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Reproduction** The public formal evaluator accepts a caller-selected draw
+  count and hard-codes the first A/B batch IDs rather than resolving the frozen
+  registry identities.
+- **Evidence** `docs/evidence/sol_observation_noise_pre_repair_probes.json`.
+- **Repair** The formal evaluator uses the protocol-declared 4,000 draws with no
+  public override and resolves the one A/B pair from the exact committed
+  confirmation freeze and registry rather than hard-coded IDs.
+
+### AAA-140 — batch consumption was local to an output directory
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Reproduction** Confirmation admission reads `planned` from the repository
+  registry, but the visible `consumed` transition is written only to the
+  attempt-local lifecycle. Two output roots or checkouts can therefore spend
+  the same planned batch.
+- **Evidence** `docs/evidence/sol_observation_noise_pre_repair_probes.json`.
+- **Repair** Confirmation claims an append-only remote Git ref before creating
+  an attempt. Normal atomic ref creation permits one owner across separate
+  clones; only that exact owner may resume. No force update or deletion path is
+  provided. A two-clone regression proves that the second claimant is rejected.
+
+### AAA-141 — full plan cannot run through whole-collection materialization
+- **Source** independent Sol measured pilot · **Severity** critical · **Status** repaired in code; formal scale unexecuted
+- **Reproduction** A valid 58,944-record quick run took 103.34 seconds,
+  peaked at 2.67 GiB RSS, and retained about 752 MiB because primitive records
+  were simultaneously materialized in memory and duplicated as trial shards,
+  uncompressed combined JSONL, and gzip. The declared formal plan contains
+  52,945,920 scored records; linear sizing projects about 332 GB of uncompressed
+  combined JSONL, 34.6 GB gzip, and about 706 GB with the current duplicate
+  layout for one batch. Exact plan enumeration yields 153,600 planned trials
+  and 59,043,840 scored records; the corrected linear projection is about
+  370.5 GB uncompressed, 38.5 GB gzip, and 788 GB with current duplication.
+- **Evidence** `docs/evidence/observation_noise_scale_pilot.json` records the
+  exact command, measured manifest values, `/usr/bin/time -v` results, formulas,
+  and the approximately 65 GB available-disk boundary.
+- **Required repair** Stream production, verification, and sufficient-statistic
+  aggregation; avoid retaining duplicate primitive copies; preserve every
+  declared record, cell, formal draw, and scientific estimand.
+- **Repair evidence** A fresh 58,944-record run with deterministic per-trial
+  gzip shards peaked at 155,054,080 bytes RSS and occupied 47,281,979 bytes.
+  Independent verification passed. Its timing-neutral primitive digest,
+  metrics, and coverage exactly match the pre-shard streaming run. Formal
+  runtime, 38.5 GB projected compressed size, and durable transfer remain
+  unverified projections rather than completed evidence.
+
+### AAA-142 — frozen adaptation prose and machine operator disagreed at 10%
+- **Source** independent Sol protocol audit · **Severity** critical · **Status** repaired by protocol supersession
+- **Reproduction** v1 prose admitted an adjusted lower bound equal to 10% by
+  saying "at least", while `machine_criteria` required the bound to be strictly
+  greater than 0.10. A boundary result therefore had two incompatible verdicts.
+- **Repair** v1 is retained in the registry by exact protocol hash and source
+  commit as superseded without observed confirmation data. v1.1 makes the prose
+  and `>` operator identical and allocates fresh unobserved A/B batch IDs.
+
+### AAA-143 — zero-noise reference executed current code instead of a pinned checkout
+- **Source** independent Sol reference-isolation audit · **Severity** critical · **Status** repaired; confirmation pending
+- **Reproduction** The protocol recorded v2.1 file identities but no commit, and
+  `_zero_noise_fixture` imported both sides from the current checkout. Shared
+  drift could therefore pass as reference preservation.
+- **Repair** v1.1 pins v2.1 commit
+  `25b6c32c9040d0f934314a2139993d12763afc99`. The fixture exports that commit
+  into an isolated temporary checkout and compares histories, trajectories,
+  bounce/change behavior, forecasts, update decisions, final state and counters.
+  The isolated fixture passes both recorded v2.1 content identities.
+
+### AAA-144 — formal archive remains without an approved durable destination
+- **Source** independent Sol archive audit · **Severity** blocking · **Status** open
+- **Reproduction** The repaired single-copy format projects one formal batch at
+  about 38.5 GB plus schedules and metadata. The repository has no Git LFS
+  configuration, release asset, or approved object-store credentials, and only
+  about 69.8 GB was available at the measured boundary. A local run could not
+  be truthfully called durably archived or independently retrieved.
+- **Disposition** No locator is fabricated and A/B remain unexecuted. The
+  protocol requires a repository-approved immutable destination and successful
+  retrieval verification before either confirmation claim can pass.
+
+### AAA-145 — scalar bootstrap traversal made the frozen draw count impractical
+- **Source** independent Sol full-selection timing probe · **Severity** critical · **Status** repaired and verified
+- **Reproduction** Candidate one completed its primitive archive, then remained
+  at 100% CPU inside `_draw_hierarchical` for more than 11 minutes without
+  finalizing a summary. The partial unobserved development archive is retained
+  under `/tmp/aaa-noise-v1_1-full-selection-20260914`; it did not update the
+  candidate ledger or produce a selection conclusion.
+- **Repair** Balanced hierarchy draws are vectorized across the declared 4,000
+  samples while retaining lineage, episode-within-lineage, and
+  sensor-realization-within-episode resampling. Ragged inputs retain the scalar
+  fallback. The repaired path computed 1,888 hierarchical cells in 18.71 seconds
+  and 160 paired cells in 15.21 seconds with the draw count unchanged.
+- **Regression** A deterministic 100,000-draw fixture verifies repeatability and
+  agreement between the vectorized sample mean and the exact balanced
+  hierarchical point estimand.
+- **Verification** Four full candidate runs completed concurrently in 470.75 to
+  476.65 seconds each, including their 4,000-draw statistics. Selector-owned
+  independent recomputation completed in 509.82 seconds and wrote the full
+  development evidence and ledger decision.
+
+### AAA-146 — schedule index admitted paths outside the archive
+- **Source** independent Sol final self-review · **Severity** high · **Status** repaired and verified
+- **Reproduction** The verifier joined each schedule-index `path` to the archive
+  root and checked only `is_file()` plus its digest. A rehashed `../` path or a
+  symlink could therefore supply schedule bytes from outside the retained
+  attempt while still passing the local checksum comparison.
+- **Repair** Every flat record, shard-index, shard, and schedule path now passes
+  a shared containment check that rejects absolute paths, parent traversal,
+  symlinks in any path component, missing members, and ambiguous simultaneous
+  flat/sharded record layouts before bytes are accepted.
+- **Regression** `test_schedule_index_cannot_escape_archive_or_follow_symlink`
+  proves both a parent traversal and an in-archive symlink fail independent
+  verification even when the checksum manifest requirement is bypassed for the
+  mutation probe.
+
+### AAA-147 — quick selection could overwrite canonical full evidence
+- **Source** independent Sol documentation self-review · **Severity** high · **Status** repaired and verified
+- **Reproduction** The CLI default and documented quick-selection commands
+  targeted `docs/evidence/observation_noise_development_selection.json`. Quick
+  mode correctly avoided ledger mutation but still wrote its smoke payload over
+  the retained full 2 x 2 x 1 selection evidence.
+- **Repair** Quick output now defaults under ignored `runs/`, active commands use
+  that location, and the selection API refuses a quick write to the canonical
+  full-evidence path even when a caller requests it explicitly.
+- **Regression** `test_quick_selection_cannot_replace_canonical_full_evidence`
+  proves smoke output is rejected at the canonical path while a full selection
+  remains permitted there.
+
+### AAA-148 — installed noise smoke required unavailable Git history
+- **Source** independent Sol fresh-wheel verification · **Severity** high · **Status** repaired and verified
+- **Reproduction** A clean wheel installed outside the checkout loaded both
+  packaged specifications, then failed its advertised development noise smoke
+  because the isolated v2.1 fixture unconditionally ran `git archive` against
+  `site-packages`, which is not a Git repository. No attempt summary was
+  finalized, so recomputation also failed.
+- **Repair** A maintained checkout still requires the exact pinned reference
+  commit and fails loudly if it is missing. An installed-package development
+  run now records the checkout-only isolated replay as `NOT_VERIFIED`, including
+  the reference gate and reproduction field, while continuing the package and
+  mechanics smoke. It never substitutes an in-process comparison or reports a
+  false reference `PASS`.
+- **Regression** `test_installed_package_reports_checkout_only_reference_as_not_verified`
+  exercises the no-checkout boundary. Fresh-wheel execution and recomputation
+  are repeated separately in the final validation record.

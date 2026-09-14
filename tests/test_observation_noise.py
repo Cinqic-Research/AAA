@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
 
 from aaa.noise.calibration import CausalResidualCalibrator, interval_score
 from aaa.noise.observation import (
@@ -17,6 +21,9 @@ from aaa.noise.observation import (
 )
 from aaa.noise.runner import (
     ObservationNoiseError,
+    _finalize_record_shards,
+    _persist_trial_rows,
+    _zero_noise_fixture,
     build_latent_environment,
     run_attempt,
     run_noisy_episode,
@@ -24,6 +31,8 @@ from aaa.noise.runner import (
 )
 from aaa.noise.spec import ProtocolError, canonical_protocol_hash, load_protocol
 from aaa.noise.statistics import (
+    _draw_hierarchical_many,
+    _hierarchical_mean,
     hierarchical_bootstrap,
     interval_statistics,
     paired_hierarchical_comparisons,
@@ -43,7 +52,7 @@ from aaa.predictors import Predictor
 class ObservationNoiseProtocolTests(unittest.TestCase):
     def test_protocol_identity_and_frozen_choices(self):
         protocol = load_protocol()
-        self.assertEqual(protocol.protocol_version, "aaa.observation_noise.v1")
+        self.assertEqual(protocol.protocol_version, "aaa.observation_noise.v1.1")
         self.assertEqual(protocol.status, "design_frozen")
         self.assertEqual(
             [channel.name for channel in protocol.channels],
@@ -52,6 +61,23 @@ class ObservationNoiseProtocolTests(unittest.TestCase):
         self.assertEqual(canonical_protocol_hash(), protocol.hash())
         self.assertEqual(protocol.replication["lineages"], 10)
         self.assertEqual(protocol.replication["episodes_per_family_per_lineage"], 32)
+
+    def test_zero_noise_reference_runs_from_the_pinned_v21_commit(self):
+        protocol = load_protocol()
+        result = _zero_noise_fixture(protocol)
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["reference_commit"], protocol.reference["v2_1_commit"])
+        self.assertTrue(result["reference_identity_equal"])
+
+    def test_installed_package_reports_checkout_only_reference_as_not_verified(self):
+        protocol = load_protocol()
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch("aaa.noise.runner.project_root", return_value=Path(directory)),
+        ):
+            result = _zero_noise_fixture(protocol)
+        self.assertEqual(result["status"], "NOT_VERIFIED")
+        self.assertIn("maintained Git checkout", result["detail"])
 
     def test_unknown_protocol_fields_fail_closed(self):
         protocol = load_protocol().to_dict()
@@ -86,7 +112,7 @@ class ObservationNoiseProtocolTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, self.assertRaises(ObservationNoiseError):
             run_attempt(
                 role="confirmation_a",
-                batch_id="observation-noise-a-0001",
+                batch_id="observation-noise-a-0002",
                 attempt_label="must-not-run",
                 output_root=directory,
             )
@@ -154,8 +180,81 @@ class ObservationBoundaryTests(unittest.TestCase):
         self.assertIn("prediction_intervals", records[0])
         validate_record(records[0])
 
+    def test_interval_is_constructed_before_the_target_advance(self):
+        events: list[str] = []
+
+        class LoggedEnvironment(NoisyObservationEnvironment):
+            def advance(self):
+                events.append("advance")
+                return super().advance()
+
+        class LoggedPredictor(Predictor):
+            name = "logged"
+            update_enabled = True
+
+            def predict(self, history):
+                events.append("predict")
+                return float(history[-1])
+
+            def update(self, history, target_position):
+                events.append("update")
+
+        class LoggedCalibrator:
+            def __deepcopy__(self, memo):
+                return self
+
+            def intervals(self, forecast):
+                events.append("interval")
+                return {"0.9": None, "0.95": None}
+
+            def update(self, forecast, noisy_target):
+                events.append("calibrate")
+
+        latent = build_latent_environment("constant_velocity", 8, 8)
+        schedule = generate_schedule("gaussian", 0.002, 9, seed=8)
+        run_noisy_episode(
+            LoggedEnvironment(latent, schedule),
+            [LoggedPredictor()],
+            {
+                "trial_id": "logged",
+                "condition": "clean_trained",
+                "family": "constant_velocity",
+                "channel": "gaussian",
+                "scale": 0.002,
+                "lineage": 0,
+                "episode": 0,
+                "realization": 0,
+                "role": "development",
+                "branch": "stationary",
+                "stratum": "unstratified",
+            },
+            schedule,
+            initial_calibrators={"logged": LoggedCalibrator()},
+        )
+        first_prediction = events.index("predict")
+        self.assertEqual(
+            events[first_prediction : first_prediction + 5],
+            [
+                "predict",
+                "interval",
+                "advance",
+                "update",
+                "calibrate",
+            ],
+        )
+
 
 class ObservationStatisticsTests(unittest.TestCase):
+    def test_vectorized_balanced_draws_preserve_the_hierarchical_estimand(self):
+        nested = {
+            0: {0: {0: 1.0, 1: 3.0}, 1: {0: 5.0, 1: 7.0}},
+            1: {0: {0: 11.0, 1: 13.0}, 1: {0: 15.0, 1: 17.0}},
+        }
+        first = _draw_hierarchical_many(nested, np.random.default_rng(41), 100_000)
+        second = _draw_hierarchical_many(nested, np.random.default_rng(41), 100_000)
+        self.assertTrue(np.array_equal(first, second))
+        self.assertAlmostEqual(float(first.mean()), _hierarchical_mean(nested), delta=0.05)
+
     @staticmethod
     def _records() -> list[dict[str, object]]:
         records: list[dict[str, object]] = []
@@ -360,6 +459,20 @@ def _write_verifier_fixture(directory: Path, record: dict[str, object]) -> None:
         + "\n",
         encoding="utf-8",
     )
+    checksum_paths = sorted(
+        path for path in directory.rglob("*") if path.is_file() and path.name != "checksums.json"
+    )
+    (directory / "checksums.json").write_text(
+        json.dumps(
+            {
+                str(path.relative_to(directory)): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in checksum_paths
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 class ObservationNoiseVerifierTests(unittest.TestCase):
@@ -437,6 +550,105 @@ class ObservationNoiseVerifierTests(unittest.TestCase):
             (root / "summary.json").write_text(json.dumps(summary) + "\n", encoding="utf-8")
             with self.assertRaises(VerificationError):
                 verify_attempt(root)
+
+    def test_missing_checksum_manifest_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _write_verifier_fixture(root, _valid_record())
+            (root / "checksums.json").unlink()
+            with self.assertRaisesRegex(VerificationError, "checksums.json is required"):
+                verify_attempt(root)
+
+    def test_schedule_index_cannot_escape_archive_or_follow_symlink(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _write_verifier_fixture(root, _valid_record())
+            index_path = root / "schedules" / "index.json"
+            schedule_index = json.loads(index_path.read_text(encoding="utf-8"))
+            schedule_index[0]["path"] = "../outside.json"
+            index_path.write_text(json.dumps(schedule_index) + "\n", encoding="utf-8")
+            with self.assertRaisesRegex(VerificationError, "schedule path is unsafe"):
+                verify_attempt(root, require_checksums=False)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _write_verifier_fixture(root, _valid_record())
+            schedule_path = root / "schedules" / "fixture.json"
+            target = root / "schedule-target.json"
+            schedule_path.replace(target)
+            schedule_path.symlink_to(target)
+            with self.assertRaisesRegex(VerificationError, "schedule path is a symlink"):
+                verify_attempt(root, require_checksums=False)
+
+    def test_nonfinite_stored_metric_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _write_verifier_fixture(root, _valid_record())
+            summary = json.loads((root / "summary.json").read_text(encoding="utf-8"))
+            first_metric = next(iter(summary["metrics"].values()))
+            first_metric["mae"] = float("nan")
+            (root / "summary.json").write_text(json.dumps(summary) + "\n", encoding="utf-8")
+            checksum_rows = json.loads((root / "checksums.json").read_text(encoding="utf-8"))
+            checksum_rows["summary.json"] = hashlib.sha256((root / "summary.json").read_bytes()).hexdigest()
+            (root / "checksums.json").write_text(json.dumps(checksum_rows) + "\n", encoding="utf-8")
+            with self.assertRaisesRegex(VerificationError, "expected a finite number"):
+                verify_attempt(root)
+
+    def test_gzip_only_archive_uses_uncompressed_record_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _write_verifier_fixture(root, _valid_record())
+            record_path = root / "records.jsonl"
+            compressed_path = root / "records.jsonl.gz"
+            with (
+                record_path.open("rb") as source,
+                gzip.GzipFile(filename=str(compressed_path), mode="wb", mtime=0) as target,
+            ):
+                target.write(source.read())
+            record_path.unlink()
+            manifest = json.loads((root / "run_manifest.json").read_text(encoding="utf-8"))
+            manifest["compressed_records_sha256"] = hashlib.sha256(compressed_path.read_bytes()).hexdigest()
+            (root / "run_manifest.json").write_text(json.dumps(manifest) + "\n", encoding="utf-8")
+            checksum_rows = {
+                str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in root.rglob("*")
+                if path.is_file() and path.name != "checksums.json"
+            }
+            (root / "checksums.json").write_text(json.dumps(checksum_rows) + "\n", encoding="utf-8")
+            self.assertEqual(verify_attempt(root)["verdict"], "PASS")
+
+    def test_finalized_record_shards_are_verified_and_tampering_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            record = _valid_record()
+            _write_verifier_fixture(root, record)
+            (root / "records.jsonl").unlink()
+            _persist_trial_rows(root, [record])
+            count, records_sha, index_sha = _finalize_record_shards(root)
+            self.assertEqual(count, 1)
+
+            manifest = json.loads((root / "run_manifest.json").read_text(encoding="utf-8"))
+            manifest.update(
+                {
+                    "records_sha256": records_sha,
+                    "record_shard_index": "records/index.json",
+                    "record_shard_index_sha256": index_sha,
+                }
+            )
+            (root / "run_manifest.json").write_text(json.dumps(manifest) + "\n", encoding="utf-8")
+            checksum_rows = {
+                str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in root.rglob("*")
+                if path.is_file() and path.name != "checksums.json"
+            }
+            (root / "checksums.json").write_text(json.dumps(checksum_rows) + "\n", encoding="utf-8")
+            self.assertEqual(verify_attempt(root)["verdict"], "PASS")
+
+            index = json.loads((root / "records" / "index.json").read_text(encoding="utf-8"))
+            shard = root / index["shards"][0]["path"]
+            shard.write_bytes(shard.read_bytes() + b"tamper")
+            with self.assertRaisesRegex(VerificationError, "record shard compressed checksum mismatch"):
+                verify_attempt(root, require_checksums=False)
 
     def test_missing_scientific_gate_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

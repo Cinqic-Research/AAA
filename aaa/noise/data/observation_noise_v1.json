@@ -4,7 +4,7 @@
     "added_mechanism_promotion": "A refinement is promoted only with a preregistered practical gain over the unchanged incumbent, adjusted evidence of positive gain, and all applicable stability and retention checks passing.",
     "baseline_competitiveness": "In every primary cell and both batches, the upper adjusted bound on MAE_online - 1.10 * MAE_primary_baseline is at most 0.00001.",
     "evidence_integrity": "All expected artifacts, strict mandatory checks, primitive evidence, hashes, and independent arithmetic must be present and passing.",
-    "moderate_noise_adaptation": "For every primary changed-law stationary cell, online cumulative first-50-transition error has at least a 10% point reduction versus its frozen clone with multiplicity-adjusted positive evidence in both A and B.",
+    "moderate_noise_adaptation": "For every primary changed-law stationary cell, the multiplicity-adjusted lower confidence bound on the relative reduction in online cumulative first-50-transition error versus its frozen clone is strictly greater than 10% in both A and B.",
     "numerical_stability": "No registered cell may have an unhandled exception, nonfinite forecast/state, silent sample loss, or unrecorded reset.",
     "outcome_vocabulary": ["engineering_complete", "scientifically_supported", "negative", "inconclusive", "blocked_by_missing_evidence"],
     "reference_preservation": "The v2.1 raw and resolved identities remain unchanged and zero-noise behavioral equivalence passes within the declared tolerance.",
@@ -62,11 +62,11 @@
     "freeze_manifest": "benchmarks/observation_noise_freeze.json",
     "full_archive_required": true,
     "protocol": "aaa/noise/data/observation_noise_v1.json",
-    "raw_record_encoding": "newline-delimited JSON with deterministic UTF-8 encoding, gzip only after the uncompressed hash is recorded",
-    "records": "records.jsonl.gz",
+    "raw_record_encoding": "newline-delimited JSON with deterministic UTF-8 encoding in deterministic per-trial gzip shards, ordered by trial_id then step through records/index.json; the concatenated uncompressed byte stream and every compressed shard are hashed",
+    "records": "records/index.json",
     "registry": "benchmarks/observation_noise_registry.json",
     "reports": "report.md",
-    "root": "runs/observation-noise-v1",
+    "root": "runs/observation-noise-v1_1",
     "schedule_dir": "schedules",
     "source_freeze_manifest": "benchmarks/observation_noise_source_freeze.json"
   },
@@ -126,16 +126,17 @@
     "stress_channels": ["correlated", "impulsive"],
     "update_target": "newly_revealed_noisy_observation"
   },
-  "protocol_version": "aaa.observation_noise.v1",
+  "protocol_version": "aaa.observation_noise.v1.1",
   "reference": {
+    "v2_1_commit": "25b6c32c9040d0f934314a2139993d12763afc99",
     "v2_1_raw_sha256": "4993c5e6e173f9dd5ef002bc84ff4c484da853b066ea45662d41ad826d10d48e",
     "v2_1_resolved_sha256": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
     "v2_1_spec_path": "aaa/benchmark/data/benchmark_v2_1.json",
     "zero_noise_tolerance": 1e-12
   },
   "replication": {
-    "a_batch": {"id": "observation-noise-a-0001", "namespace": "confirmation_a", "role": "confirmation_a"},
-    "b_batch": {"id": "observation-noise-b-0001", "namespace": "confirmation_b", "role": "confirmation_b"},
+    "a_batch": {"id": "observation-noise-a-0002", "namespace": "confirmation_a", "role": "confirmation_a"},
+    "b_batch": {"id": "observation-noise-b-0002", "namespace": "confirmation_b", "role": "confirmation_b"},
     "disjoint_evaluation_streams": true,
     "episodes_per_family_per_lineage": 32,
     "existing_strata": 32,
@@ -182,7 +183,7 @@
     "undefined_ratio_rule": "If the baseline denominator is zero or missing, report the relative ratio as undefined and do not replace it with zero or PASS."
   },
   "status": "design_frozen",
-  "title": "AAA observation_noise_v1 - controlled next-position prediction under observation noise",
+  "title": "AAA observation_noise_v1.1 - controlled next-position prediction under observation noise",
   "training": {
     "calibration_allocation": "A fixed calibration prefix is drawn only from the declared training mixture; no clean target or evaluation-channel parameter is visible to a predictor.",
     "calibration_policy": "Causal residual quantile calibration from past noisy residuals only; calibration adaptation is reported separately from point-predictor adaptation.",

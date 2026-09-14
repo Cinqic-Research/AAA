@@ -1,6 +1,34 @@
 # Research history
 
-## Observation-noise v1 completion boundary (2026-09-14)
+## Observation-noise v1.1 independent repair boundary (2026-09-14)
+
+Sol independently reproduced fourteen observation-noise review findings
+(`AAA-135` through `AAA-148`) before repairing the implementation. The phase is
+now explicitly versioned `aaa.observation_noise.v1.1`; v1 is retained as an
+unobserved superseded protocol because its adaptation prose and machine
+operator disagreed at the exact 10% boundary.
+
+The corrected full 2 x 2 x 1 development selection retained and independently
+verified four 235,776-record candidate archives. None of the three innovation
+clipping refinements met every preregistered constraint, so the unchanged
+`incumbent-no-refinement-v1` control remains selected. This is a development
+decision, not confirmation evidence.
+
+Record production and verification are bounded-memory and use deterministic
+per-trial gzip shards. A measured quick pilot reduced peak RSS from about 2.67
+GiB to 148 MiB and retained one primitive copy with exact timing-neutral
+semantic equivalence. Formal admission now requires a committed freeze, fixed
+4,000 draws, frozen batch identities, and an atomic append-only remote claim.
+The verifier requires complete checksums and rejects non-finite values,
+incomplete cells, unsafe paths, symlinks, ambiguous record layouts, and
+tampered schedules or statistics.
+
+Formal A/B remains deliberately unobserved. One batch is projected at 38.5 GB
+of compressed records plus schedules and metadata, and no approved immutable
+archive/retrieval destination exists. The phase is therefore `BLOCKED`, not
+negative or inconclusive, and PR #11 is not approved for merge at this boundary.
+
+## Observation-noise v1 completion boundary (2026-09-14, superseded)
 
 The observation-noise phase now has a non-self-referential scientific source
 fingerprint. It hashes the tracked scientific source map, rejects untracked

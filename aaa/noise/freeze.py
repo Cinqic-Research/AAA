@@ -39,10 +39,11 @@ def build_freeze_manifest(
     return {
         "schema_version": "aaa.observation_noise_source_freeze.v1",
         "stage": stage,
-        "protocol_version": "aaa.observation_noise.v1",
+        "protocol_version": protocol.protocol_version,
         "protocol_hash": protocol_hash,
         "protocol_file_sha256": sha256_file(protocol_path),
         "reference": {
+            "commit": protocol.reference["v2_1_commit"],
             "path": "aaa/benchmark/data/benchmark_v2_1.json",
             "raw_sha256": sha256_file(reference_path),
             "resolved_sha256": spec_hash(load_spec(reference_path)),

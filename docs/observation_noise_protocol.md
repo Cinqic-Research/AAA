@@ -1,4 +1,4 @@
-# Observation-noise phase: `aaa.observation_noise.v1`
+# Observation-noise phase: `aaa.observation_noise.v1.1`
 
 This is a separately versioned study of one bounded question: how well does
 AAA predict a moving dot's next latent position when only the observation
@@ -14,14 +14,16 @@ in every attempt.
 
 ## Reference boundary
 
-The v2.1 specification remains byte-for-byte unchanged. The phase records both
+The v2.1 specification remains byte-for-byte unchanged and is pinned to commit
+`25b6c32c9040d0f934314a2139993d12763afc99`. The phase records both
 its raw SHA-256 (`4993c5e6e173f9dd5ef002bc84ff4c484da853b066ea45662d41ad826d10d48e`)
 and its resolved specification hash
 (`f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37`). The
 hashes address different representations. A zero-noise equivalence fixture
 compares latent trajectories, observations, forecasts, targets, updates,
 reflection handling, counters, and metrics against an isolated v2.1 reference
-checkout before any confirmation claim.
+checkout before any confirmation claim. The isolated reference is exported
+from the pinned commit rather than imported from the current working tree.
 
 The old v2.1 source fingerprint is not weakened to accommodate this phase.
 Adding a new namespace legitimately changes the current checkout. Historical
@@ -170,7 +172,9 @@ promotion gate not applicable rather than inventing a gain claim.
 
 ## Evidence and outcomes
 
-Every attempt has an immutable ID and atomic lifecycle records. Full primitive
+Every attempt has an immutable ID and atomic lifecycle records. Confirmation
+also atomically reserves an append-only remote Git ref, so separate clones
+cannot claim the same batch. Full primitive
 records, schedule arrays, checkpoint state, source identity, lock identity,
 exact invocation, diagnostics, summaries, plots, exclusions, and checksums are
 retained. Failed and cancelled attempts remain visible. Independent
@@ -183,9 +187,20 @@ addition to latent and noisy point-prediction fields, it stores the causal
 prediction intervals available before each reveal. Intervals are calibrated
 from past noisy residuals only; warmup rows carry an explicit unavailable
 value. The statistical artifact reports coverage, width, and interval score
-separately from point-prediction adaptation. Completed trials are first written
-to atomic `trial_records/` shards, which makes an interrupted attempt safely
-resumable without replacing retained evidence.
+separately from point-prediction adaptation. Completed trials are written to
+deterministic atomic per-trial gzip shards, which makes an interrupted attempt
+safely resumable without replacing retained evidence. Finalization renames the
+shard directory to `records/` and writes a canonical `records/index.json`
+ordered by trial ID then step. The manifest binds the concatenated uncompressed
+semantic stream, the index, and every compressed shard; no duplicate combined
+JSONL copy is retained.
+
+Protocol v1 was superseded before either confirmation batch was executed or
+observed. Its exact hash, source commit, retired batch IDs, and audit reason are
+retained in `benchmarks/observation_noise_registry.json`. v1.1 resolves the
+10%-boundary prose/operator contradiction, pins the v2.1 reference commit, and
+declares the bounded sharded archive. The fresh confirmation IDs are
+`observation-noise-a-0002` and `observation-noise-b-0002`.
 
 Training updates are retained in `training_records.jsonl` and are bound to the
 saved training schedules. Each evaluated lineage also receives a fixed four-cell

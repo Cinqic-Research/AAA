@@ -11,8 +11,9 @@ import gzip
 import hashlib
 import json
 import math
+from array import array
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import Any, TextIO
 
@@ -45,11 +46,74 @@ class VerificationError(ValueError):
     """Raised when primitive evidence is malformed or incomplete."""
 
 
-def _records_path(run_dir: Path) -> Path:
-    for name in ("records.jsonl", "records.jsonl.gz"):
-        candidate = run_dir / name
-        if candidate.is_file():
-            return candidate
+def _safe_archive_file(run_dir: Path, relative: str, label: str) -> Path:
+    """Resolve one archive member without permitting traversal or symlinks."""
+
+    relative_path = Path(relative)
+    if relative_path.is_absolute() or not relative_path.parts or ".." in relative_path.parts:
+        raise VerificationError(f"{label} path is unsafe: {relative}")
+    current = run_dir
+    for part in relative_path.parts:
+        current = current / part
+        if current.is_symlink():
+            raise VerificationError(f"{label} path is a symlink: {relative}")
+    root = run_dir.resolve()
+    resolved = (run_dir / relative_path).resolve()
+    if root not in resolved.parents or not resolved.is_file():
+        raise VerificationError(f"{label} path is unsafe or missing: {relative}")
+    return resolved
+
+
+def _record_paths(run_dir: Path) -> list[Path]:
+    flat = [name for name in ("records.jsonl", "records.jsonl.gz") if (run_dir / name).exists()]
+    index_path = run_dir / "records" / "index.json"
+    if flat and index_path.exists():
+        raise VerificationError("archive ambiguously contains flat and sharded primitive records")
+    if len(flat) > 1:
+        raise VerificationError("archive ambiguously contains compressed and uncompressed primitive records")
+    if flat:
+        return [_safe_archive_file(run_dir, flat[0], "primitive record")]
+    if index_path.is_file():
+        _safe_archive_file(run_dir, "records/index.json", "record shard index")
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(index, dict)
+            or index.get("schema_version") != "aaa.observation_noise_record_shards.v1"
+            or index.get("ordering") != "trial_id ascending, step ascending"
+            or not isinstance(index.get("shards"), list)
+            or not index["shards"]
+        ):
+            raise VerificationError("record shard index is malformed")
+        paths: list[Path] = []
+        prior_trial = ""
+        total = 0
+        for entry in index["shards"]:
+            if not isinstance(entry, dict) or set(entry) != {
+                "trial_id",
+                "path",
+                "records",
+                "compressed_sha256",
+            }:
+                raise VerificationError("record shard index entry is malformed")
+            trial_id = entry["trial_id"]
+            relative = entry["path"]
+            if not isinstance(trial_id, str) or trial_id <= prior_trial or not isinstance(relative, str):
+                raise VerificationError("record shard identities are not strictly ordered")
+            path = _safe_archive_file(run_dir, relative, "record shard")
+            if _schedule_digest(path) != entry["compressed_sha256"]:
+                raise VerificationError("record shard compressed checksum mismatch")
+            if (
+                isinstance(entry["records"], bool)
+                or not isinstance(entry["records"], int)
+                or entry["records"] < 1
+            ):
+                raise VerificationError("record shard count is invalid")
+            total += entry["records"]
+            paths.append(path)
+            prior_trial = trial_id
+        if index.get("records") != total:
+            raise VerificationError("record shard index total is inconsistent")
+        return paths
     raise VerificationError(f"{run_dir}: no primitive records file")
 
 
@@ -67,19 +131,28 @@ def _decode_lines(handle: TextIO, path: Path) -> Iterator[dict[str, Any]]:
 
 
 def iter_records(run_dir: str | Path) -> Iterator[dict[str, Any]]:
-    path = _records_path(Path(run_dir))
-    if path.suffix == ".gz":
-        with gzip.open(path, "rt", encoding="utf-8") as handle:
-            yield from _decode_lines(handle, path)
-    else:
-        with path.open("r", encoding="utf-8") as handle:
-            yield from _decode_lines(handle, path)
+    for path in _record_paths(Path(run_dir)):
+        if path.suffix == ".gz":
+            with gzip.open(path, "rt", encoding="utf-8") as handle:
+                yield from _decode_lines(handle, path)
+        else:
+            with path.open("r", encoding="utf-8") as handle:
+                yield from _decode_lines(handle, path)
 
 
 def _finite(value: Any, path: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)):
         raise VerificationError(f"{path}: expected a finite number")
     return float(value)
+
+
+def _finite_close(stored: Any, recomputed: Any, path: str, *, tolerance: float = 1e-12) -> None:
+    """Reject non-finite cached values before applying tolerance arithmetic."""
+
+    stored_value = _finite(stored, f"{path}.stored")
+    recomputed_value = _finite(recomputed, f"{path}.recomputed")
+    if abs(stored_value - recomputed_value) > tolerance:
+        raise VerificationError(f"{path} mismatch")
 
 
 def validate_record(record: dict[str, Any]) -> None:
@@ -250,8 +323,8 @@ def validate_record(record: dict[str, Any]) -> None:
         raise VerificationError("diagnostics must be an object")
 
 
-def _metric_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
-    grouped: dict[tuple[str, str, str, float, str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
+def _metric_rows(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    grouped: dict[tuple[str, str, str, float, str, str, str, str], dict[str, Any]] = {}
     for record in records:
         trial = record["trial"]
         key = (
@@ -263,19 +336,32 @@ def _metric_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
             trial["branch"],
             trial["stratum"],
         )
-        for name in record["predictions"]:
-            grouped[(key[0], key[1], key[2], key[3], key[4], key[5], key[6], name)].append(record)
+        for name, prediction in record["predictions"].items():
+            identity = (key[0], key[1], key[2], key[3], key[4], key[5], key[6], name)
+            bucket = grouped.setdefault(
+                identity,
+                {
+                    "errors": array("d"),
+                    "sum_squared": 0.0,
+                    "sum_signed": 0.0,
+                    "sum_noisy": 0.0,
+                },
+            )
+            error = float(prediction["latent_normalized_absolute_error"])
+            bucket["errors"].append(error)
+            bucket["sum_squared"] += error * error
+            bucket["sum_signed"] += float(prediction["signed_latent_error"])
+            bucket["sum_noisy"] += float(prediction["noisy_observation_absolute_error"])
     output: dict[str, Any] = {}
-    for (condition, family, channel, scale, role, branch, stratum, predictor), rows in sorted(
+    for (condition, family, channel, scale, role, branch, stratum, predictor), bucket in sorted(
         grouped.items()
     ):
-        errors = [float(row["predictions"][predictor]["latent_normalized_absolute_error"]) for row in rows]
-        noisy = [float(row["predictions"][predictor]["noisy_observation_absolute_error"]) for row in rows]
-        signed = [float(row["predictions"][predictor]["signed_latent_error"]) for row in rows]
+        errors = bucket["errors"]
         if not errors:
             raise VerificationError("empty metric group")
-        group_key = f"{condition}|{family}|{channel}|{scale:.7g}|{role}|{branch}|{stratum}|{predictor}"
-        output[group_key] = {
+        ordered = sorted(errors)
+        label = f"{condition}|{family}|{channel}|{scale:.7g}|{role}|{branch}|{stratum}|{predictor}"
+        output[label] = {
             "condition": condition,
             "family": family,
             "channel": channel,
@@ -286,20 +372,20 @@ def _metric_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
             "predictor": predictor,
             "count": len(errors),
             "mae": float(sum(errors) / len(errors)),
-            "rmse": float(math.sqrt(sum(value * value for value in errors) / len(errors))),
-            "signed_bias": float(sum(signed) / len(signed)),
-            "noisy_observation_mae": float(sum(noisy) / len(noisy)),
-            "p95": float(sorted(errors)[min(len(errors) - 1, math.ceil(0.95 * len(errors)) - 1)]),
-            "p99": float(sorted(errors)[min(len(errors) - 1, math.ceil(0.99 * len(errors)) - 1)]),
+            "rmse": float(math.sqrt(bucket["sum_squared"] / len(errors))),
+            "signed_bias": float(bucket["sum_signed"] / len(errors)),
+            "noisy_observation_mae": float(bucket["sum_noisy"] / len(errors)),
+            "p95": float(ordered[min(len(errors) - 1, math.ceil(0.95 * len(errors)) - 1)]),
+            "p99": float(ordered[min(len(errors) - 1, math.ceil(0.99 * len(errors)) - 1)]),
         }
     return output
 
 
-def _interval_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
+def _interval_rows(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """Recompute interval coverage and scores with verifier-owned arithmetic."""
 
-    grouped: dict[tuple[str, str, str, float, str, str, str, str], list[tuple[bool, float, float]]] = (
-        defaultdict(list)
+    grouped: dict[tuple[str, str, str, float, str, str, str, str], list[float]] = defaultdict(
+        lambda: [0.0, 0.0, 0.0, 0.0]
     )
     for record in records:
         intervals = record.get("prediction_intervals")
@@ -329,9 +415,13 @@ def _interval_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
                     str(predictor),
                     str(level),
                 )
-                grouped[key].append((lower <= target <= upper, upper - lower, upper - lower + penalty))
+                bucket = grouped[key]
+                bucket[0] += 1.0
+                bucket[1] += float(lower <= target <= upper)
+                bucket[2] += upper - lower
+                bucket[3] += upper - lower + penalty
     output: dict[str, Any] = {}
-    for key, values in sorted(grouped.items(), key=str):
+    for key, (count, covered, width, score) in sorted(grouped.items(), key=str):
         label = "|".join((*map(str, key[:3]), f"{key[3]:.7g}", *map(str, key[4:])))
         output[label] = {
             "condition": key[0],
@@ -342,10 +432,10 @@ def _interval_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
             "branch": key[5],
             "predictor": key[6],
             "level": key[7],
-            "count": len(values),
-            "coverage": float(sum(float(item[0]) for item in values) / len(values)),
-            "width": float(sum(item[1] for item in values) / len(values)),
-            "interval_score": float(sum(item[2] for item in values) / len(values)),
+            "count": int(count),
+            "coverage": covered / count,
+            "width": width / count,
+            "interval_score": score / count,
             "evidence_status": "PASS",
         }
     return output
@@ -413,11 +503,11 @@ def _verify_training_evidence(root: Path, metadata: dict[str, Any], manifest: di
     return len(rows)
 
 
-def _resource_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
+def _resource_rows(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """Recompute latency, update-norm and counter aggregates independently."""
 
-    grouped: dict[tuple[str, str, str, float, str, str, str], dict[str, list[float]]] = defaultdict(
-        lambda: defaultdict(list)
+    grouped: dict[tuple[str, str, str, float, str, str, str], dict[str, float]] = defaultdict(
+        lambda: defaultdict(float)
     )
     for record in records:
         trial = record["trial"]
@@ -434,9 +524,13 @@ def _resource_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
             )
             bucket = grouped[key]
             for name in ("update_norm", "predict_latency_ns", "update_latency_ns", "detected_surprises"):
-                bucket[name].append(_finite(diagnostic.get(name, 0.0), f"diagnostics.{name}"))
+                value = _finite(diagnostic.get(name, 0.0), f"diagnostics.{name}")
+                bucket[f"sum_{name}"] += value
+                bucket[f"max_{name}"] = max(bucket[f"max_{name}"], value)
             for name in ("dead_zone_skips", "reflection_skips", "forgetting_suspensions"):
-                bucket[name].append(_finite(diagnostic.get(name, 0.0), f"diagnostics.{name}"))
+                value = _finite(diagnostic.get(name, 0.0), f"diagnostics.{name}")
+                bucket[f"max_{name}"] = max(bucket[f"max_{name}"], value)
+            bucket["count"] += 1.0
     output: dict[str, Any] = {}
     for key, values in sorted(grouped.items(), key=str):
         label = "|".join((*map(str, key[:3]), f"{key[3]:.7g}", *map(str, key[4:])))
@@ -448,20 +542,30 @@ def _resource_rows(records: list[dict[str, Any]]) -> dict[str, Any]:
             "role": key[4],
             "branch": key[5],
             "predictor": key[6],
-            "count": len(values["update_norm"]),
-            "mean_update_norm": sum(values["update_norm"]) / len(values["update_norm"]),
-            "mean_predict_latency_ns": sum(values["predict_latency_ns"]) / len(values["predict_latency_ns"]),
-            "mean_update_latency_ns": sum(values["update_latency_ns"]) / len(values["update_latency_ns"]),
-            "max_detected_surprises": max(values["detected_surprises"]),
-            "max_dead_zone_skips": max(values["dead_zone_skips"]),
-            "max_reflection_skips": max(values["reflection_skips"]),
-            "max_forgetting_suspensions": max(values["forgetting_suspensions"]),
+            "count": int(values["count"]),
+            "mean_update_norm": values["sum_update_norm"] / values["count"],
+            "mean_predict_latency_ns": values["sum_predict_latency_ns"] / values["count"],
+            "mean_update_latency_ns": values["sum_update_latency_ns"] / values["count"],
+            "max_detected_surprises": values["max_detected_surprises"],
+            "max_dead_zone_skips": values["max_dead_zone_skips"],
+            "max_reflection_skips": values["max_reflection_skips"],
+            "max_forgetting_suspensions": values["max_forgetting_suspensions"],
         }
     return output
 
 
 def _schedule_digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _uncompressed_records_digest(paths: Iterable[Path]) -> str:
+    digest = hashlib.sha256()
+    for path in paths:
+        opener = gzip.open if path.suffix == ".gz" else Path.open
+        with opener(path, "rb") as handle:
+            for block in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(block)
+    return digest.hexdigest()
 
 
 def _schedule_payload_digest(payload: dict[str, Any]) -> str:
@@ -476,7 +580,68 @@ def _schedule_payload_digest(payload: dict[str, Any]) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
+def _expected_confirmation_signatures(role: str) -> set[tuple[Any, ...]]:
+    signatures: set[tuple[Any, ...]] = set()
+    for condition in ("clean_trained", "noise_trained"):
+        for family in ("constant_velocity", "bouncing", "speed_change", "changed_law"):
+            for channel in ("gaussian", "uniform", "correlated", "impulsive"):
+                for scale in (0.0, 0.0005, 0.002, 0.01):
+                    for lineage in range(10):
+                        for episode in range(32):
+                            for realization in range(3):
+                                signatures.add(
+                                    (
+                                        condition,
+                                        family,
+                                        channel,
+                                        scale,
+                                        lineage,
+                                        episode,
+                                        realization,
+                                        role,
+                                        "stationary",
+                                    )
+                                )
+                                if family == "changed_law":
+                                    for branch in ("prefix", "frozen", "online"):
+                                        signatures.add(
+                                            (
+                                                condition,
+                                                family,
+                                                channel,
+                                                scale,
+                                                lineage,
+                                                episode,
+                                                realization,
+                                                role,
+                                                branch,
+                                            )
+                                        )
+        for dynamics in ("unchanged", "changed"):
+            for channel in ("gaussian", "uniform"):
+                for from_scale in (0.0005, 0.002):
+                    for timing in ("aligned", "staggered"):
+                        branch = f"sensor_shift_{'changed_' if dynamics == 'changed' else ''}{timing}"
+                        for lineage in range(10):
+                            for episode in range(32):
+                                for realization in range(3):
+                                    signatures.add(
+                                        (
+                                            condition,
+                                            "changed_law",
+                                            channel,
+                                            from_scale,
+                                            lineage,
+                                            episode,
+                                            realization,
+                                            role,
+                                            branch,
+                                        )
+                                    )
+    return signatures
+
+
+def verify_attempt(run_dir: str | Path, *, require_checksums: bool = True) -> dict[str, Any]:
     """Verify primitive records and return a distinct recomputation verdict."""
 
     root = Path(run_dir)
@@ -490,7 +655,7 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     if not all(isinstance(value, dict) for value in (metadata, manifest, summary)):
         raise VerificationError("metadata, manifest, and summary must be objects")
-    is_v3 = metadata.get("protocol_version") == "aaa.observation_noise.v1"
+    is_v3 = metadata.get("protocol_version") == "aaa.observation_noise.v1.1"
     if is_v3:
         candidate_ids = {
             metadata.get("selected_candidate"),
@@ -517,21 +682,57 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
     attempt_ids = {metadata.get("attempt_id"), manifest.get("attempt_id"), summary.get("attempt_id")}
     if len(attempt_ids) != 1 or None in attempt_ids:
         raise VerificationError("metadata, manifest, and summary attempt identities disagree")
-    record_path = _records_path(root)
-    if manifest.get("records_sha256") != _schedule_digest(record_path):
+    record_paths = _record_paths(root)
+    if manifest.get("records_sha256") != _uncompressed_records_digest(record_paths):
         raise VerificationError("primitive record checksum disagrees with run manifest")
     compressed_path = root / "records.jsonl.gz"
     if compressed_path.is_file() and manifest.get("compressed_records_sha256") != _schedule_digest(
         compressed_path
     ):
         raise VerificationError("compressed primitive record checksum disagrees with run manifest")
-    records = list(iter_records(root))
-    if not records:
-        raise VerificationError("no primitive records retained")
-    for record in records:
+    shard_index = root / "records" / "index.json"
+    if shard_index.is_file() and (
+        manifest.get("record_shard_index") != "records/index.json"
+        or manifest.get("record_shard_index_sha256") != _schedule_digest(shard_index)
+    ):
+        raise VerificationError("record shard index identity disagrees with run manifest")
+    if shard_index.is_file():
+        shard_payload = json.loads(shard_index.read_text(encoding="utf-8"))
+        if shard_payload.get("uncompressed_records_sha256") != manifest.get("records_sha256"):
+            raise VerificationError("record shard semantic identity disagrees with run manifest")
+    record_count = 0
+    trial_count = 0
+    previous_identity: tuple[str, int] | None = None
+    has_v3_records = False
+    observed_signatures: set[tuple[Any, ...]] = set()
+    for record in iter_records(root):
         validate_record(record)
+        identity = (str(record["trial"]["trial_id"]), int(record["step"]))
+        if previous_identity is not None and identity <= previous_identity:
+            raise VerificationError("primitive trial/step identities are duplicate or not canonical-sorted")
+        if previous_identity is None or identity[0] != previous_identity[0]:
+            trial_count += 1
+            trial = record["trial"]
+            observed_signatures.add(
+                (
+                    trial["condition"],
+                    trial["family"],
+                    trial["channel"],
+                    float(trial["scale"]),
+                    int(trial["lineage"]),
+                    int(trial["episode"]),
+                    int(trial["realization"]),
+                    trial["role"],
+                    trial["branch"],
+                )
+            )
+        previous_identity = identity
+        record_count += 1
+        has_v3_records = has_v3_records or record["schema_version"] == RECORD_SCHEMA
+    if record_count == 0:
+        raise VerificationError("no primitive records retained")
     training_records = 0
-    if any(record["schema_version"] == RECORD_SCHEMA for record in records):
+    if has_v3_records:
         training_records = _verify_training_evidence(root, metadata, manifest)
         for directory_name, manifest_key in (
             ("training_schedules", "training_schedule_count"),
@@ -541,12 +742,24 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
             count = len(list(directory.glob("*.json"))) if directory.is_dir() else 0
             if manifest.get(manifest_key) != count or count == 0:
                 raise VerificationError(f"{directory_name} count is missing or inconsistent")
-    trial_steps = [(record["trial"]["trial_id"], record["step"]) for record in records]
-    if len(set(trial_steps)) != len(trial_steps):
-        raise VerificationError("duplicate trial/step primitive evidence")
     expected = int(manifest["expected_scored_records"])
-    if len(records) != expected:
-        raise VerificationError(f"record count {len(records)} does not equal expected {expected}")
+    if record_count != expected:
+        raise VerificationError(f"record count {record_count} does not equal expected {expected}")
+    role = metadata.get("role")
+    if role in {"confirmation_a", "confirmation_b"}:
+        expected_manifest = {
+            "lineages": 10,
+            "episodes_per_family_per_lineage": 32,
+            "sensor_realizations_per_episode": 3,
+            "planned_trials": 153600,
+            "schedule_count": 153600,
+            "expected_scored_records": 59043840,
+        }
+        if any(manifest.get(key) != value for key, value in expected_manifest.items()):
+            raise VerificationError("formal confirmation manifest does not match the frozen complete plan")
+        expected_signatures = _expected_confirmation_signatures(str(role))
+        if observed_signatures != expected_signatures:
+            raise VerificationError("formal confirmation trial cells are incomplete or unexpected")
     schedule_index = json.loads((root / "schedules" / "index.json").read_text(encoding="utf-8"))
     if not isinstance(schedule_index, list) or not schedule_index:
         raise VerificationError("schedule index must be a nonempty list")
@@ -566,8 +779,8 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
             raise VerificationError("schedule index identity fields must be nonempty strings")
         if item["trial_id"] in schedules:
             raise VerificationError("duplicate schedule trial identity")
-        path = root / item["path"]
-        if not path.is_file() or _schedule_digest(path) != item["file_sha256"]:
+        path = _safe_archive_file(root, item["path"], "schedule")
+        if _schedule_digest(path) != item["file_sha256"]:
             raise VerificationError(f"schedule checksum mismatch for {item['path']}")
         payload = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict) or set(payload) != {
@@ -613,7 +826,7 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
         schedules[item["trial_id"]] = payload
     if manifest.get("schedule_count") != len(schedules):
         raise VerificationError("manifest schedule count disagrees with schedule index")
-    for record in records:
+    for record in iter_records(root):
         trial = record["trial"]
         schedule_id = (
             trial["trial_id"]
@@ -639,7 +852,7 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
             raise VerificationError("stationary trial unexpectedly has a time-varying scale path")
         if trial["branch"].startswith("sensor_shift") and scale_path is None:
             raise VerificationError("sensor-shift trial is missing its time-varying scale path")
-    metrics = _metric_rows(records)
+    metrics = _metric_rows(iter_records(root))
     stored_metrics = summary.get("metrics")
     if not isinstance(stored_metrics, dict) or set(stored_metrics) != set(metrics):
         raise VerificationError("stored summary metric keys do not match primitive recomputation")
@@ -653,9 +866,9 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
                     raise VerificationError(f"metric {key} count must be a strict integer")
                 if stored[field] != recomputed[field]:
                     raise VerificationError(f"metric {key} count mismatch")
-            elif abs(float(stored[field]) - float(recomputed[field])) > 1e-12:
-                raise VerificationError(f"metric {key} {field} mismatch")
-    if any(record["schema_version"] == RECORD_SCHEMA for record in records):
+            else:
+                _finite_close(stored[field], recomputed[field], f"metric {key} {field}")
+    if has_v3_records:
         statistics = summary.get("statistics")
         if not isinstance(statistics, dict):
             raise VerificationError("v3 evidence requires a statistics artifact")
@@ -693,7 +906,7 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
             or interval_artifact.get("method") != "causal_residual_quantile"
         ):
             raise VerificationError("causal interval statistics are missing")
-        recomputed_intervals = _interval_rows(records)
+        recomputed_intervals = _interval_rows(iter_records(root))
         stored_intervals = interval_artifact.get("cells")
         if not isinstance(stored_intervals, dict) or set(stored_intervals) != set(recomputed_intervals):
             raise VerificationError("stored interval cells do not match primitive recomputation")
@@ -705,15 +918,15 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
                 if field == "count":
                     if stored[field] != recomputed[field]:
                         raise VerificationError(f"interval cell {key} count mismatch")
-                elif abs(float(stored[field]) - float(recomputed[field])) > 1e-12:
-                    raise VerificationError(f"interval cell {key} {field} mismatch")
+                else:
+                    _finite_close(stored[field], recomputed[field], f"interval cell {key} {field}")
         resource_artifact = statistics.get("resources")
         if (
             not isinstance(resource_artifact, dict)
             or resource_artifact.get("method") != "primitive_diagnostic_aggregation"
         ):
             raise VerificationError("resource diagnostics are missing")
-        recomputed_resources = _resource_rows(records)
+        recomputed_resources = _resource_rows(iter_records(root))
         stored_resources = resource_artifact.get("cells")
         if not isinstance(stored_resources, dict) or set(stored_resources) != set(recomputed_resources):
             raise VerificationError("stored resource cells do not match primitive recomputation")
@@ -734,8 +947,8 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
                 if field == "count":
                     if stored[field] != recomputed[field]:
                         raise VerificationError(f"resource cell {key} count mismatch")
-                elif abs(float(stored[field]) - float(recomputed[field])) > 1e-12:
-                    raise VerificationError(f"resource cell {key} {field} mismatch")
+                else:
+                    _finite_close(stored[field], recomputed[field], f"resource cell {key} {field}")
     checks = summary.get("checks")
     if not isinstance(checks, dict) or set(checks) != set(CHECK_NAMES):
         raise VerificationError("mandatory verifier checks are missing or unknown")
@@ -773,6 +986,8 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
     ):
         raise VerificationError("invalid scientific gate result")
     checksum_manifest = root / "checksums.json"
+    if require_checksums and not checksum_manifest.is_file():
+        raise VerificationError("checksums.json is required for archive verification")
     if checksum_manifest.is_file():
         checksum_rows = json.loads(checksum_manifest.read_text(encoding="utf-8"))
         if not isinstance(checksum_rows, dict) or not checksum_rows:
@@ -785,10 +1000,21 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
                 raise VerificationError(f"checksum manifest references an invalid path: {relative}")
             if _schedule_digest(path) != expected_hash:
                 raise VerificationError(f"checksum manifest mismatch for {relative}")
+        expected_paths = {
+            str(path.relative_to(root))
+            for path in root.rglob("*")
+            if path.is_file() and path.name != "checksums.json" and not path.name.endswith(".tmp")
+        }
+        if set(checksum_rows) != expected_paths:
+            missing = sorted(expected_paths - set(checksum_rows))
+            unexpected = sorted(set(checksum_rows) - expected_paths)
+            raise VerificationError(
+                f"checksum manifest coverage mismatch: missing={missing}, unexpected={unexpected}"
+            )
     return {
         "verdict": "PASS",
-        "records": len(records),
-        "trials": len({record["trial"]["trial_id"] for record in records}),
+        "records": record_count,
+        "trials": trial_count,
         "metrics": metrics,
         "training_records": training_records,
         "metadata_attempt_id": metadata.get("attempt_id"),

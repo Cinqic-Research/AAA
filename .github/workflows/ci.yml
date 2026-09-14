@@ -67,7 +67,7 @@ jobs:
           python -m aaa.cli observation-noise --role development --quick \
             --attempt-label ci-observation-noise --output-root "${RUNNER_TEMP}/aaa-noise-runs"
           python -m aaa.cli observation-noise-recompute \
-            "${RUNNER_TEMP}/aaa-noise-runs/observation-noise-v1/ci-observation-noise"
+            "${RUNNER_TEMP}/aaa-noise-runs/observation-noise-v1_1/ci-observation-noise"
 
       - name: Development benchmark smoke
         run: |
@@ -91,6 +91,7 @@ jobs:
           name: ci-locked-evidence
           path: |
             ${{ runner.temp }}/aaa-runs
+            ${{ runner.temp }}/aaa-noise-runs
             coverage.xml
             lock-hash.txt
           retention-days: 14
@@ -156,4 +157,15 @@ jobs:
           aaa observation-noise --role development --quick \
             --attempt-label installed-noise --output-root "${RUNNER_TEMP}/elsewhere/noise-runs"
           aaa observation-noise-recompute \
-            "${RUNNER_TEMP}/elsewhere/noise-runs/observation-noise-v1/installed-noise"
+            "${RUNNER_TEMP}/elsewhere/noise-runs/observation-noise-v1_1/installed-noise"
+
+      - name: Retain fresh-install failure evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ci-fresh-install-evidence
+          path: |
+            ${{ runner.temp }}/elsewhere/runs
+            ${{ runner.temp }}/elsewhere/noise-runs
+          retention-days: 14
+          if-no-files-found: warn

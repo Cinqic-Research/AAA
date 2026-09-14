@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-PROTOCOL_VERSION = "aaa.observation_noise.v1"
+PROTOCOL_VERSION = "aaa.observation_noise.v1.1"
 _REQUIRED_TOP_LEVEL = {
     "protocol_version",
     "status",
@@ -157,12 +157,22 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
 
     reference = _strict(
         raw["reference"],
-        {"v2_1_spec_path", "v2_1_raw_sha256", "v2_1_resolved_sha256", "zero_noise_tolerance"},
+        {
+            "v2_1_commit",
+            "v2_1_spec_path",
+            "v2_1_raw_sha256",
+            "v2_1_resolved_sha256",
+            "zero_noise_tolerance",
+        },
         "protocol.reference",
     )
-    for key in ("v2_1_spec_path", "v2_1_raw_sha256", "v2_1_resolved_sha256"):
+    for key in ("v2_1_commit", "v2_1_spec_path", "v2_1_raw_sha256", "v2_1_resolved_sha256"):
         if not isinstance(reference[key], str) or not reference[key]:
             raise ProtocolError(f"protocol.reference.{key}: required nonempty string")
+    if len(reference["v2_1_commit"]) != 40 or any(
+        character not in "0123456789abcdef" for character in reference["v2_1_commit"]
+    ):
+        raise ProtocolError("protocol.reference.v2_1_commit must be a lowercase 40-character Git SHA")
     _number(reference["zero_noise_tolerance"], "protocol.reference.zero_noise_tolerance", nonnegative=True)
 
     observation = _strict(

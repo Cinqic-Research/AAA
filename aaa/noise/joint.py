@@ -10,7 +10,6 @@ from typing import Any
 
 import numpy as np
 
-from ..benchmark.evidence import sha256_file
 from .candidates import candidate_definition
 from .spec import canonical_protocol_hash, load_protocol
 from .statistics import holm_bonferroni
@@ -47,6 +46,7 @@ class _Claim:
     values: np.ndarray
     threshold: float
     direction: str
+    denominator: np.ndarray | None = None
 
 
 def _dense(values: dict[tuple[int, int, int], float], label: str) -> np.ndarray:
@@ -91,8 +91,44 @@ def _hierarchical_draws(array: np.ndarray, draws: int, rng: np.random.Generator)
     return np.mean(np.mean(np.mean(sampled, axis=3), axis=2), axis=1)
 
 
+def _ratio_of_means(numerator: np.ndarray, denominator: np.ndarray) -> float:
+    if numerator.shape != denominator.shape or numerator.shape != (10, 32, 3):
+        raise JointEvaluationError("ratio-of-means arrays must share the frozen 10 x 32 x 3 hierarchy")
+    denominator_mean = float(np.mean(denominator))
+    if not np.isfinite(numerator).all() or not np.isfinite(denominator).all() or denominator_mean == 0.0:
+        raise JointEvaluationError("adaptation ratio has non-finite values or a zero mean denominator")
+    return float(np.mean(numerator) / denominator_mean)
+
+
+def _hierarchical_ratio_draws(
+    numerator: np.ndarray,
+    denominator: np.ndarray,
+    draws: int,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Bootstrap the declared ratio of means with shared hierarchical indices."""
+
+    if numerator.shape != denominator.shape or numerator.shape != (10, 32, 3):
+        raise JointEvaluationError("ratio-of-means arrays must share the frozen 10 x 32 x 3 hierarchy")
+    selected_lineages = rng.integers(0, 10, size=(draws, 10))
+    selected_episodes = rng.integers(0, 32, size=(draws, 10, 32))
+    selected_realizations = rng.integers(0, 3, size=(draws, 10, 32, 3))
+    indices = (
+        selected_lineages[:, :, None, None],
+        selected_episodes[:, :, :, None],
+        selected_realizations,
+    )
+    numerator_means = np.mean(numerator[indices], axis=(1, 2, 3))
+    denominator_means = np.mean(denominator[indices], axis=(1, 2, 3))
+    if not np.isfinite(numerator_means).all() or not np.isfinite(denominator_means).all():
+        raise JointEvaluationError("adaptation bootstrap produced non-finite means")
+    if np.any(denominator_means == 0.0):
+        raise JointEvaluationError("adaptation bootstrap produced a zero mean denominator")
+    return numerator_means / denominator_means
+
+
 def _trial_values(
-    records: list[dict[str, Any]],
+    records: Any,
     predictor: str,
     *,
     branch: str = "stationary",
@@ -101,7 +137,7 @@ def _trial_values(
     grouped: dict[
         tuple[str, str, str, float],
         dict[tuple[int, int, int], list[float]],
-    ] = defaultdict(lambda: defaultdict(list))
+    ] = defaultdict(lambda: defaultdict(lambda: [0.0, 0.0]))
     for record in records:
         trial = record["trial"]
         if trial["branch"] != branch or predictor not in record["predictions"]:
@@ -115,11 +151,11 @@ def _trial_values(
             float(trial["scale"]),
         )
         identity = (int(trial["lineage"]), int(trial["episode"]), int(trial["realization"]))
-        grouped[cell][identity].append(
-            float(record["predictions"][predictor]["latent_normalized_absolute_error"])
-        )
+        bucket = grouped[cell][identity]
+        bucket[0] += float(record["predictions"][predictor]["latent_normalized_absolute_error"])
+        bucket[1] += 1.0
     return {
-        cell: {identity: float(np.mean(values)) for identity, values in identities.items()}
+        cell: {identity: values[0] / values[1] for identity, values in identities.items()}
         for cell, identities in grouped.items()
     }
 
@@ -132,6 +168,7 @@ def _archive(path: str | Path, expected_role: str, expected_batch: str) -> dict[
         raise JointEvaluationError(f"{directory}: independent archive verification failed: {exc}") from exc
     metadata = json.loads((directory / "metadata.json").read_text(encoding="utf-8"))
     manifest = json.loads((directory / "run_manifest.json").read_text(encoding="utf-8"))
+    summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
     if metadata.get("role") != expected_role or metadata.get("batch_id") != expected_batch:
         raise JointEvaluationError(
             f"{directory}: role or batch identity does not match the requested archive"
@@ -150,14 +187,11 @@ def _archive(path: str | Path, expected_role: str, expected_batch: str) -> dict[
         raise JointEvaluationError(str(exc)) from exc
     if metadata.get("selected_candidate_configuration_hash") != definition.configuration_hash:
         raise JointEvaluationError(f"{directory}: selected candidate configuration hash is not canonical")
-    records = list(iter_records(directory))
-    if not records:
-        raise JointEvaluationError(f"{directory}: archive has no primitive records")
     stationary_record = next(
-        (record for record in records if record["trial"]["branch"] == "stationary"), None
+        (record for record in iter_records(directory) if record["trial"]["branch"] == "stationary"), None
     )
     if stationary_record is None:
-        raise JointEvaluationError(f"{directory}: stationary primary records are missing")
+        raise JointEvaluationError(f"{directory}: archive has no primitive records")
     stationary_predictors = set(stationary_record["predictions"])
     if not MANDATORY_PREDICTORS.issubset(stationary_predictors):
         raise JointEvaluationError(f"{directory}: mandatory predictors are missing")
@@ -166,7 +200,7 @@ def _archive(path: str | Path, expected_role: str, expected_batch: str) -> dict[
         "verification": verification,
         "metadata": metadata,
         "manifest": manifest,
-        "records": records,
+        "summary": summary,
         "candidate_id": candidate_id,
         "candidate_definition": definition,
     }
@@ -174,11 +208,18 @@ def _archive(path: str | Path, expected_role: str, expected_batch: str) -> dict[
 
 def _claims_for_archive(archive: dict[str, Any], protocol: Any) -> list[_Claim]:
     batch_id = str(archive["metadata"]["batch_id"])
-    records = archive["records"]
+    directory = archive["directory"]
     candidate = "selected_candidate_online"
-    candidate_values = _trial_values(records, candidate)
-    baseline_values = _trial_values(records, "constant_motion_reflected")
-    frozen_values = _trial_values(records, "selected_candidate_frozen")
+    candidate_values = _trial_values(iter_records(directory), candidate)
+    incumbent_values = _trial_values(iter_records(directory), "incumbent_square_root_rls")
+    baseline_values = _trial_values(iter_records(directory), "constant_motion_reflected")
+    frozen_values = _trial_values(iter_records(directory), "selected_candidate_frozen")
+    online_branch_values = _trial_values(
+        iter_records(directory), "selected_candidate_branch_online", branch="online", first50=True
+    )
+    frozen_branch_values = _trial_values(
+        iter_records(directory), "selected_candidate_branch_frozen", branch="frozen", first50=True
+    )
     claims: list[_Claim] = []
     criteria = protocol.acceptance["machine_criteria"]
     for condition in ("clean_trained", "noise_trained"):
@@ -195,6 +236,7 @@ def _claims_for_archive(archive: dict[str, Any], protocol: Any) -> list[_Claim]:
                     key = (condition, family, channel, scale)
                     candidate_array = _dense(candidate_values.get(key, {}), f"{batch_id} candidate {key}")
                     baseline_array = _dense(baseline_values.get(key, {}), f"{batch_id} baseline {key}")
+                    incumbent_array = _dense(incumbent_values.get(key, {}), f"{batch_id} incumbent {key}")
                     claims.append(
                         _Claim(
                             f"{batch_id}|absolute_utility|{condition}|{family}|{channel}|{scale:.7g}",
@@ -206,6 +248,18 @@ def _claims_for_archive(archive: dict[str, Any], protocol: Any) -> list[_Claim]:
                             "upper",
                         )
                     )
+                    if archive["candidate_definition"].mechanism_change_count > 0:
+                        claims.append(
+                            _Claim(
+                                f"{batch_id}|added_mechanism_promotion|{condition}|{family}|{channel}|{scale:.7g}",
+                                batch_id,
+                                "added_mechanism_promotion",
+                                cell,
+                                incumbent_array - candidate_array,
+                                float(criteria["added_mechanism_promotion"]["threshold"]),
+                                "lower",
+                            )
+                        )
                     claims.append(
                         _Claim(
                             f"{batch_id}|baseline_competitiveness|{condition}|{family}|{channel}|{scale:.7g}",
@@ -231,30 +285,60 @@ def _claims_for_archive(archive: dict[str, Any], protocol: Any) -> list[_Claim]:
                             )
                         )
                     if family == "changed_law":
-                        online = _trial_values(
-                            records, "selected_candidate_branch_online", branch="online", first50=True
+                        online_array = _dense(
+                            online_branch_values.get(key, {}), f"{batch_id} branch online {key}"
                         )
-                        frozen = _trial_values(
-                            records, "selected_candidate_branch_frozen", branch="frozen", first50=True
+                        frozen_array = _dense(
+                            frozen_branch_values.get(key, {}), f"{batch_id} branch frozen {key}"
                         )
-                        online_array = _dense(online.get(key, {}), f"{batch_id} branch online {key}")
-                        frozen_array = _dense(frozen.get(key, {}), f"{batch_id} branch frozen {key}")
-                        if np.any(frozen_array == 0.0):
-                            raise JointEvaluationError(
-                                f"{batch_id} adaptation {key}: zero denominator is undefined"
-                            )
                         claims.append(
                             _Claim(
                                 f"{batch_id}|moderate_noise_adaptation|{condition}|{family}|{channel}|{scale:.7g}",
                                 batch_id,
                                 "moderate_noise_adaptation",
                                 {**cell, "branch": "first50_online_vs_frozen"},
-                                (frozen_array - online_array) / frozen_array,
+                                frozen_array - online_array,
                                 float(criteria["moderate_noise_adaptation"]["threshold"]),
                                 "lower",
+                                frozen_array,
                             )
                         )
     return claims
+
+
+def _formal_batch_ids() -> dict[str, str]:
+    root = Path(__file__).resolve().parents[2]
+    freeze_path = root / "benchmarks" / "observation_noise_freeze.json"
+    registry_path = root / "benchmarks" / "observation_noise_registry.json"
+    if not freeze_path.is_file():
+        raise JointEvaluationError("formal evaluation requires the committed confirmation freeze")
+    freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    if (
+        freeze.get("stage") != "confirmation_freeze"
+        or freeze.get("protocol_hash") != canonical_protocol_hash()
+        or registry.get("protocol_hash") != canonical_protocol_hash()
+    ):
+        raise JointEvaluationError("confirmation freeze or registry identity is not canonical")
+    frozen_batches = freeze.get("planned_batches")
+    if not isinstance(frozen_batches, list) or len(frozen_batches) != 2:
+        raise JointEvaluationError("confirmation freeze must name exactly one A and one B batch")
+    resolved: dict[str, str] = {}
+    for batch_id in frozen_batches:
+        matches = [
+            row
+            for row in registry.get("batches", [])
+            if isinstance(row, dict) and row.get("batch_id") == batch_id
+        ]
+        if len(matches) != 1 or matches[0].get("role") not in {"confirmation_a", "confirmation_b"}:
+            raise JointEvaluationError(f"frozen batch {batch_id!r} is not uniquely declared")
+        role = str(matches[0]["role"])
+        if role in resolved:
+            raise JointEvaluationError(f"confirmation freeze declares multiple batches for {role}")
+        resolved[role] = str(batch_id)
+    if set(resolved) != {"confirmation_a", "confirmation_b"}:
+        raise JointEvaluationError("confirmation freeze does not declare both A and B roles")
+    return resolved
 
 
 def evaluate_joint_archives(
@@ -262,16 +346,20 @@ def evaluate_joint_archives(
     archive_b: str | Path,
     *,
     output_path: str | Path | None = None,
-    draws: int | None = None,
 ) -> dict[str, Any]:
     """Verify A and B independently, then reconstruct one joint claim family."""
 
     protocol = load_protocol()
-    draw_count = int(protocol.statistics["draws"] if draws is None else draws)
-    if draw_count < 1000:
-        raise JointEvaluationError("joint evaluator requires at least 1000 bootstrap draws")
-    a = _archive(archive_a, "confirmation_a", "observation-noise-a-0001")
-    b = _archive(archive_b, "confirmation_b", "observation-noise-b-0001")
+    draw_count = int(protocol.statistics["draws"])
+    batches = _formal_batch_ids()
+    a = _archive(archive_a, "confirmation_a", batches["confirmation_a"])
+    b = _archive(archive_b, "confirmation_b", batches["confirmation_b"])
+    for archive in (a, b):
+        statistics = archive["summary"].get("statistics", {})
+        if statistics.get("declared_draws") != draw_count or statistics.get("executed_draws") != draw_count:
+            raise JointEvaluationError(
+                f"{archive['directory']}: formal archive did not execute the frozen draw count"
+            )
     if a["candidate_id"] != b["candidate_id"]:
         raise JointEvaluationError("A and B selected candidate IDs differ")
     if a["metadata"].get("selected_candidate_configuration_hash") != b["metadata"].get(
@@ -295,7 +383,11 @@ def evaluate_joint_archives(
     raw_pvalues: dict[str, float] = {}
     samples: dict[str, np.ndarray] = {}
     for claim in claims:
-        sample = _hierarchical_draws(claim.values, draw_count, rng)
+        sample = (
+            _hierarchical_draws(claim.values, draw_count, rng)
+            if claim.denominator is None
+            else _hierarchical_ratio_draws(claim.values, claim.denominator, draw_count, rng)
+        )
         raw_p = (
             float((np.count_nonzero(sample >= claim.threshold) + 1) / (draw_count + 1))
             if claim.direction == "upper"
@@ -308,7 +400,11 @@ def evaluate_joint_archives(
             "endpoint": claim.endpoint,
             "cell": claim.cell,
             "estimand": "hierarchical_mean_of_lineage_episode_sensor_realization_values",
-            "point": float(np.mean(claim.values)),
+            "point": (
+                float(np.mean(claim.values))
+                if claim.denominator is None
+                else _ratio_of_means(claim.values, claim.denominator)
+            ),
             "threshold": claim.threshold,
             "direction": claim.direction,
             "draws": draw_count,
@@ -361,15 +457,27 @@ def evaluate_joint_archives(
             }
         )
     definition = a["candidate_definition"]
+    promotion_rows = [row for row in rows.values() if row["endpoint"] == "added_mechanism_promotion"]
+    promotion_passed = bool(promotion_rows) and all(row["status"] == "PASS" for row in promotion_rows)
     gates.append(
         {
             "name": "added_mechanism_promotion",
             "required": definition.mechanism_change_count > 0,
-            "status": "PASS" if definition.mechanism_change_count == 0 else "INSUFFICIENT_EVIDENCE",
-            "claim_count": 0,
-            "detail": "Not applicable: the selected candidate is the preregistered unchanged-incumbent control."
-            if definition.mechanism_change_count == 0
-            else "Promotion claims were not reconstructed.",
+            "status": (
+                "NOT_APPLICABLE"
+                if definition.mechanism_change_count == 0
+                else ("PASS" if promotion_passed else "FAIL")
+            ),
+            "claim_count": len(promotion_rows),
+            "detail": (
+                "Not applicable: the selected candidate is the preregistered unchanged-incumbent control."
+                if definition.mechanism_change_count == 0
+                else (
+                    "Every promotion claim passed its joint Holm-adjusted practical-gain bound."
+                    if promotion_passed
+                    else "At least one required promotion claim failed its adjusted practical-gain bound."
+                )
+            ),
         }
     )
     all_required_pass = all(gate["status"] == "PASS" for gate in gates if gate["required"])
@@ -393,8 +501,8 @@ def evaluate_joint_archives(
         "candidate_id": a["candidate_id"],
         "candidate_configuration_hash": definition.configuration_hash,
         "records_and_training": {
-            "A_records_sha256": sha256_file(a["directory"] / "records.jsonl"),
-            "B_records_sha256": sha256_file(b["directory"] / "records.jsonl"),
+            "A_records_sha256": a["manifest"]["records_sha256"],
+            "B_records_sha256": b["manifest"]["records_sha256"],
             "shared_training_checkpoints": True,
             "full_state_branch_pairing": True,
         },

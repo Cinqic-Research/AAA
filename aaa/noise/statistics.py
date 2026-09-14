@@ -79,7 +79,7 @@ def _episode_values(
     """Aggregate steps into one value per lineage/episode/realization."""
 
     grouped: dict[tuple[tuple[str, str, str, float, str, str, str], int, int, int], list[float]] = (
-        defaultdict(list)
+        defaultdict(lambda: [0.0, 0.0])
     )
     for record in records:
         trial = record["trial"]
@@ -103,12 +103,14 @@ def _episode_values(
                 f"{predictor}.latent_normalized_absolute_error",
             )
             key = _cell_key(trial, str(predictor))
-            grouped[(key, lineage, episode, realization)].append(value)
+            bucket = grouped[(key, lineage, episode, realization)]
+            bucket[0] += value
+            bucket[1] += 1.0
     output: dict[tuple[str, str, str, float, str, str, str], list[EpisodeValue]] = defaultdict(list)
-    for (key, lineage, episode, realization), values in sorted(grouped.items(), key=str):
-        if not values:
+    for (key, lineage, episode, realization), (total, count) in sorted(grouped.items(), key=str):
+        if count == 0:
             raise StatisticsError("empty episode value")
-        output[key].append(EpisodeValue(*key, lineage, episode, realization, float(np.mean(values))))
+        output[key].append(EpisodeValue(*key, lineage, episode, realization, total / count))
     return dict(output)
 
 
@@ -158,6 +160,47 @@ def _draw_hierarchical(
     return float(np.mean(lineage_means))
 
 
+def _draw_hierarchical_many(
+    nested: Mapping[int, Mapping[int, Mapping[int, float]]],
+    rng: np.random.Generator,
+    draws: int,
+) -> np.ndarray:
+    """Vectorize balanced hierarchical draws without changing the hierarchy."""
+
+    lineage_rows: list[list[list[float]]] = []
+    episode_count: int | None = None
+    realization_count: int | None = None
+    balanced = True
+    for lineage in sorted(nested):
+        episodes = nested[lineage]
+        if episode_count is None:
+            episode_count = len(episodes)
+        balanced = balanced and len(episodes) == episode_count
+        episode_rows: list[list[float]] = []
+        for episode in sorted(episodes):
+            realizations = episodes[episode]
+            if realization_count is None:
+                realization_count = len(realizations)
+            balanced = balanced and len(realizations) == realization_count
+            episode_rows.append([float(realizations[item]) for item in sorted(realizations)])
+        lineage_rows.append(episode_rows)
+    if not balanced or episode_count is None or realization_count is None:
+        return np.asarray([_draw_hierarchical(nested, rng) for _ in range(draws)], dtype=float)
+    values = np.asarray(lineage_rows, dtype=float)
+    lineage_count = values.shape[0]
+    lineage_indices = rng.integers(0, lineage_count, size=(draws, lineage_count))
+    selected_lineages = values[lineage_indices]
+    episode_indices = rng.integers(0, episode_count, size=(draws, lineage_count, episode_count))
+    selected_episodes = np.take_along_axis(selected_lineages, episode_indices[..., np.newaxis], axis=2)
+    realization_indices = rng.integers(
+        0,
+        realization_count,
+        size=(draws, lineage_count, episode_count, realization_count),
+    )
+    selected_realizations = np.take_along_axis(selected_episodes, realization_indices, axis=3)
+    return np.mean(selected_realizations, axis=(1, 2, 3))
+
+
 def _intervals(draws: np.ndarray, levels: Sequence[float]) -> dict[str, dict[str, float]]:
     result: dict[str, dict[str, float]] = {}
     for level in levels:
@@ -189,7 +232,7 @@ def hierarchical_bootstrap(
     output: dict[str, Any] = {}
     for key, values in sorted(cells.items(), key=lambda item: _cell_label(item[0])):
         nested = _nested(values)
-        sample = np.asarray([_draw_hierarchical(nested, rng) for _ in range(draws)], dtype=float)
+        sample = _draw_hierarchical_many(nested, rng, draws)
         output[_cell_label(key)] = {
             "condition": key[0],
             "family": key[1],
@@ -218,7 +261,7 @@ def _paired_values(
     records: Iterable[Mapping[str, Any]], baseline: str, targets: Sequence[str]
 ) -> dict[tuple[str, str, str, float, str, str], dict[tuple[int, int, int], dict[str, float]]]:
     by_trial: dict[tuple[tuple[str, str, str, float, str, str], int, int, int], dict[str, list[float]]] = (
-        defaultdict(lambda: defaultdict(list))
+        defaultdict(lambda: defaultdict(lambda: [0.0, 0.0]))
     )
     for record in records:
         trial = record["trial"]
@@ -234,12 +277,12 @@ def _paired_values(
         identity = (int(trial["lineage"]), int(trial["episode"]), int(trial["realization"]))
         for predictor in (baseline, *targets):
             if predictor in predictions:
-                by_trial[(cell, *identity)][predictor].append(
-                    _finite(
-                        predictions[predictor]["latent_normalized_absolute_error"],
-                        f"{predictor}.latent_normalized_absolute_error",
-                    )
+                bucket = by_trial[(cell, *identity)][predictor]
+                bucket[0] += _finite(
+                    predictions[predictor]["latent_normalized_absolute_error"],
+                    f"{predictor}.latent_normalized_absolute_error",
                 )
+                bucket[1] += 1.0
     output: dict[tuple[str, str, str, float, str, str], dict[tuple[int, int, int], dict[str, float]]] = (
         defaultdict(dict)
     )
@@ -247,21 +290,22 @@ def _paired_values(
         if baseline not in predictors or any(target not in predictors for target in targets):
             continue
         output[cell][(lineage, episode, realization)] = {
-            predictor: float(np.mean(values)) for predictor, values in predictors.items()
+            predictor: values[0] / values[1] for predictor, values in predictors.items()
         }
     return dict(output)
 
 
-def _draw_paired(
+def _draw_paired_many(
     values: Mapping[tuple[int, int, int], Mapping[str, float]],
     baseline: str,
     target: str,
     rng: np.random.Generator,
-) -> float:
+    draws: int,
+) -> np.ndarray:
     nested: dict[int, dict[int, dict[int, float]]] = defaultdict(lambda: defaultdict(dict))
     for (lineage, episode, realization), row in values.items():
         nested[lineage][episode][realization] = row[target] - row[baseline]
-    return _draw_hierarchical(nested, rng)
+    return _draw_hierarchical_many(nested, rng, draws)
 
 
 def _lineage_sign_flip_pvalue(
@@ -317,7 +361,7 @@ def paired_hierarchical_comparisons(
     bootstrap_samples: dict[str, np.ndarray] = {}
     for cell, values in sorted(paired.items(), key=str):
         for target in targets:
-            sample = np.asarray([_draw_paired(values, baseline, target, rng) for _ in range(draws)])
+            sample = _draw_paired_many(values, baseline, target, rng, draws)
             key = "|".join((*map(str, cell), target))
             pvalue = _lineage_sign_flip_pvalue(values, baseline, target, rng, draws)
             pvalues[key] = pvalue
@@ -382,8 +426,8 @@ def paired_hierarchical_comparisons(
 def interval_statistics(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
     """Summarize only intervals that were available before each target reveal."""
 
-    grouped: dict[tuple[str, str, str, float, str, str, str, str], list[tuple[bool, float, float]]] = (
-        defaultdict(list)
+    grouped: dict[tuple[str, str, str, float, str, str, str, str], list[float]] = defaultdict(
+        lambda: [0.0, 0.0, 0.0, 0.0]
     )
     for record in records:
         trial = record["trial"]
@@ -404,18 +448,20 @@ def interval_statistics(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
                 if lower > upper:
                     raise StatisticsError("interval lower bound exceeds upper bound")
                 key = (*_cell_key(trial, str(predictor)), str(level))
-                grouped[key].append((lower <= target <= upper, upper - lower, 0.0))
                 alpha = 1.0 - float(level)
                 penalty = 0.0
                 if target < lower:
                     penalty += 2.0 * (lower - target) / alpha
                 if target > upper:
                     penalty += 2.0 * (target - upper) / alpha
-                grouped[key][-1] = (lower <= target <= upper, upper - lower, upper - lower + penalty)
+                bucket = grouped[key]
+                bucket[0] += 1.0
+                bucket[1] += float(lower <= target <= upper)
+                bucket[2] += upper - lower
+                bucket[3] += upper - lower + penalty
     rows: dict[str, Any] = {}
-    for key, values in sorted(grouped.items(), key=str):
+    for key, (count, covered, width, score) in sorted(grouped.items(), key=str):
         label = f"{_cell_label(key[:-1])}|{key[-1]}"
-        coverage = float(np.mean([float(item[0]) for item in values]))
         rows[label] = {
             "condition": key[0],
             "family": key[1],
@@ -425,11 +471,11 @@ def interval_statistics(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
             "branch": key[5],
             "predictor": key[6],
             "level": key[7],
-            "count": len(values),
-            "coverage": coverage,
-            "width": float(np.mean([item[1] for item in values])),
-            "interval_score": float(np.mean([item[2] for item in values])),
-            "evidence_status": "PASS" if len(values) >= 1 else "INSUFFICIENT_EVIDENCE",
+            "count": int(count),
+            "coverage": covered / count,
+            "width": width / count,
+            "interval_score": score / count,
+            "evidence_status": "PASS" if count >= 1 else "INSUFFICIENT_EVIDENCE",
         }
     return {"method": "causal_residual_quantile", "cells": rows}
 
@@ -448,7 +494,7 @@ def validate_null_behavior(*, seed: int, simulations: int = 64, bootstrap_draws:
             for episode in range(4):
                 for realization in range(2):
                     nested[lineage][episode][realization] = float(rng.normal(0.0, 1.0))
-        sample = np.asarray([_draw_hierarchical(nested, rng) for _ in range(bootstrap_draws)])
+        sample = _draw_hierarchical_many(nested, rng, bootstrap_draws)
         lower = float(np.quantile(sample, 0.025, method="linear"))
         upper = float(np.quantile(sample, 0.975, method="linear"))
         if lower <= 0.0 <= upper:
@@ -469,8 +515,8 @@ def validate_null_behavior(*, seed: int, simulations: int = 64, bootstrap_draws:
 def resource_statistics(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
     """Aggregate measured per-step cost and state diagnostics by comparison cell."""
 
-    grouped: dict[tuple[str, str, str, float, str, str, str], dict[str, list[float]]] = defaultdict(
-        lambda: defaultdict(list)
+    grouped: dict[tuple[str, str, str, float, str, str, str], dict[str, float]] = defaultdict(
+        lambda: defaultdict(float)
     )
     for record in records:
         trial = record["trial"]
@@ -483,9 +529,13 @@ def resource_statistics(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
             key = _cell_key(trial, str(predictor))
             bucket = grouped[key]
             for name in ("update_norm", "predict_latency_ns", "update_latency_ns", "detected_surprises"):
-                bucket[name].append(_finite(values.get(name, 0.0), f"diagnostics.{name}"))
+                value = _finite(values.get(name, 0.0), f"diagnostics.{name}")
+                bucket[f"sum_{name}"] += value
+                bucket[f"max_{name}"] = max(bucket[f"max_{name}"], value)
             for name in ("dead_zone_skips", "reflection_skips", "forgetting_suspensions"):
-                bucket[name].append(_finite(values.get(name, 0.0), f"diagnostics.{name}"))
+                value = _finite(values.get(name, 0.0), f"diagnostics.{name}")
+                bucket[f"max_{name}"] = max(bucket[f"max_{name}"], value)
+            bucket["count"] += 1.0
     output: dict[str, Any] = {}
     for key, values in sorted(grouped.items(), key=str):
         output[_cell_label(key)] = {
@@ -496,13 +546,13 @@ def resource_statistics(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
             "role": key[4],
             "branch": key[5],
             "predictor": key[6],
-            "count": len(values["update_norm"]),
-            "mean_update_norm": float(np.mean(values["update_norm"])),
-            "mean_predict_latency_ns": float(np.mean(values["predict_latency_ns"])),
-            "mean_update_latency_ns": float(np.mean(values["update_latency_ns"])),
-            "max_detected_surprises": float(max(values["detected_surprises"])),
-            "max_dead_zone_skips": float(max(values["dead_zone_skips"])),
-            "max_reflection_skips": float(max(values["reflection_skips"])),
-            "max_forgetting_suspensions": float(max(values["forgetting_suspensions"])),
+            "count": int(values["count"]),
+            "mean_update_norm": values["sum_update_norm"] / values["count"],
+            "mean_predict_latency_ns": values["sum_predict_latency_ns"] / values["count"],
+            "mean_update_latency_ns": values["sum_update_latency_ns"] / values["count"],
+            "max_detected_surprises": values["max_detected_surprises"],
+            "max_dead_zone_skips": values["max_dead_zone_skips"],
+            "max_reflection_skips": values["max_reflection_skips"],
+            "max_forgetting_suspensions": values["max_forgetting_suspensions"],
         }
     return {"method": "primitive_diagnostic_aggregation", "cells": output}

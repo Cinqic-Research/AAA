@@ -122,7 +122,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Evaluate the frozen bounded observation-noise candidate catalog on development data.",
     )
     noise_selection_parser.add_argument(
-        "--output", type=Path, default=Path("docs/evidence/observation_noise_development_selection.json")
+        "--output",
+        type=Path,
+        default=Path("runs/development-selection/observation_noise_development_smoke.json"),
     )
     noise_selection_parser.add_argument("--runs-root", type=Path, default=Path("runs/development-selection"))
     noise_selection_parser.add_argument(

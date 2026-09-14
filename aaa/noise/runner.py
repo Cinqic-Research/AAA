@@ -1,4 +1,4 @@
-"""Execution and evidence writer for ``aaa.observation_noise.v1``."""
+"""Execution and evidence writer for ``aaa.observation_noise.v1.1``."""
 
 from __future__ import annotations
 
@@ -7,10 +7,13 @@ import gzip
 import hashlib
 import json
 import math
+import os
 import re
-import shutil
+import subprocess
+import sys
+import tempfile
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,7 +26,6 @@ from ..benchmark.families import classify_stratum, sample_stratified_state
 from ..benchmark.spec import canonical_spec_hash, canonical_spec_path, load_spec
 from ..config import WorldConfig
 from ..environment import DampedOscillatorEnvironment, MovingDotEnvironment
-from ..experiment import TrialIdentity, run_episode
 from ..predictors import OnlineRLSPredictor, Predictor
 from .calibration import CausalResidualCalibrator
 from .candidates import INCUMBENT_CANDIDATE_ID, candidate_definition, candidate_from_model
@@ -42,6 +44,7 @@ from .predictors import (
     clone_predictor,
     incumbent_from_v21,
 )
+from .reservation import ReservationError, reserve_confirmation_batch
 from .scientific_identity import ScientificIdentityError, fingerprints_equal, scientific_fingerprint
 from .spec import NoiseProtocol, canonical_protocol_hash, load_protocol
 from .statistics import (
@@ -51,10 +54,10 @@ from .statistics import (
     resource_statistics,
     validate_null_behavior,
 )
-from .verifier import CHECK_NAMES, _metric_rows, verify_attempt
+from .verifier import CHECK_NAMES, _metric_rows, iter_records, verify_attempt
 
 RECORD_SCHEMA = "aaa.observation_noise_step.v3"
-PROTOCOL_DIRECTORY = "observation-noise-v1"
+PROTOCOL_DIRECTORY = "observation-noise-v1_1"
 ALL_CHANNELS = ("gaussian", "uniform", "correlated", "impulsive")
 ALL_SCALES = (0.0, 0.0005, 0.002, 0.01)
 SHIFT_LEVEL_PAIRS = ((0.0005, 0.002), (0.002, 0.0005))
@@ -323,6 +326,7 @@ def run_noisy_episode(
         raw_predictions: dict[str, float] = {}
         scored_predictions: dict[str, float] = {}
         predict_latencies: dict[str, int] = {}
+        prediction_intervals: dict[str, dict[str, dict[str, float] | None]] = {}
         for predictor in predictors:
             predict_start = time.perf_counter_ns()
             raw = float(predictor.predict(observed_history))
@@ -331,10 +335,10 @@ def run_noisy_episode(
                 raise FloatingPointError(f"{predictor.name} returned a non-finite forecast")
             raw_predictions[predictor.name] = raw
             scored_predictions[predictor.name] = raw
+            prediction_intervals[predictor.name] = calibrators[predictor.name].intervals(raw)
         transition = environment.advance()
         target_observation = environment.observe()
         predictions: dict[str, dict[str, float]] = {}
-        prediction_intervals: dict[str, dict[str, dict[str, float] | None]] = {}
         updates: dict[str, bool] = {}
         for predictor in predictors:
             scored = scored_predictions[predictor.name]
@@ -348,7 +352,6 @@ def run_noisy_episode(
                 "noisy_observation_absolute_error": observation_error / width,
                 "signed_latent_error": scored - transition.position,
             }
-            prediction_intervals[predictor.name] = calibrators[predictor.name].intervals(scored)
             updates[predictor.name] = bool(predictor.update_enabled)
         record = {
             "schema_version": RECORD_SCHEMA,
@@ -447,6 +450,7 @@ def run_noisy_segment(
         raw_predictions: dict[str, float] = {}
         scored_predictions: dict[str, float] = {}
         predict_latencies: dict[str, int] = {}
+        prediction_intervals: dict[str, dict[str, dict[str, float] | None]] = {}
         for predictor in predictors:
             predict_start = time.perf_counter_ns()
             raw = float(predictor.predict(observed_history))
@@ -455,10 +459,10 @@ def run_noisy_segment(
                 raise FloatingPointError(f"{predictor.name} returned a non-finite forecast")
             raw_predictions[predictor.name] = raw
             scored_predictions[predictor.name] = raw
+            prediction_intervals[predictor.name] = calibrators[predictor.name].intervals(raw)
         transition = environment.advance()
         target_observation = environment.observe()
         predictions: dict[str, dict[str, float]] = {}
-        prediction_intervals: dict[str, dict[str, dict[str, float] | None]] = {}
         updates: dict[str, bool] = {}
         for predictor in predictors:
             scored = scored_predictions[predictor.name]
@@ -471,7 +475,6 @@ def run_noisy_segment(
                 "noisy_observation_absolute_error": abs(scored - target_observation) / width,
                 "signed_latent_error": scored - transition.position,
             }
-            prediction_intervals[predictor.name] = calibrators[predictor.name].intervals(scored)
             updates[predictor.name] = bool(predictor.update_enabled)
         record = {
             "schema_version": RECORD_SCHEMA,
@@ -815,18 +818,20 @@ def _calibrate_predictors(
 
 def _record_shard_path(attempt_dir: Path, trial_id: str) -> Path:
     digest = hashlib.sha256(trial_id.encode("utf-8")).hexdigest()
-    return attempt_dir / "trial_records" / f"{digest}.jsonl"
+    return attempt_dir / "trial_records" / f"{digest}.jsonl.gz"
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        if not line.strip():
-            continue
-        value = json.loads(line)
-        if not isinstance(value, dict):
-            raise ObservationNoiseError(f"{path}:{line_number}: record must be an object")
-        rows.append(value)
+    opener = gzip.open if path.suffix == ".gz" else Path.open
+    with opener(path, "rt", encoding="utf-8") as handle:
+        for line_number, line in enumerate(handle, 1):
+            if not line.strip():
+                continue
+            value = json.loads(line)
+            if not isinstance(value, dict):
+                raise ObservationNoiseError(f"{path}:{line_number}: record must be an object")
+            rows.append(value)
     return rows
 
 
@@ -841,22 +846,44 @@ def _persist_trial_rows(attempt_dir: Path, rows: Sequence[dict[str, Any]]) -> No
     shard_dir.mkdir(exist_ok=True)
     for trial_id, trial_rows in grouped.items():
         path = _record_shard_path(attempt_dir, trial_id)
-        encoded = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in trial_rows)
+        encoded = "".join(
+            json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in trial_rows
+        ).encode("utf-8")
         if path.exists():
-            if path.read_text(encoding="utf-8") != encoded:
+            with gzip.open(path, "rb") as handle:
+                retained = handle.read()
+            if retained != encoded:
                 raise ObservationNoiseError(f"replayed trial {trial_id} differs from retained evidence")
             continue
-        _write_text_atomic(path, encoded)
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        with (
+            temporary.open("wb") as raw,
+            gzip.GzipFile(filename="", mode="wb", fileobj=raw, compresslevel=6, mtime=0) as compressed,
+        ):
+            compressed.write(encoded)
+        temporary.replace(path)
 
 
-def _load_trial_shards(attempt_dir: Path) -> list[dict[str, Any]]:
+def _trial_shard_index(attempt_dir: Path) -> list[tuple[str, Path]]:
     shard_dir = attempt_dir / "trial_records"
     if not shard_dir.is_dir():
+        shard_dir = attempt_dir / "records"
+    if not shard_dir.is_dir():
         return []
-    rows: list[dict[str, Any]] = []
-    for path in sorted(shard_dir.glob("*.jsonl")):
-        rows.extend(_read_jsonl(path))
-    return rows
+    index: list[tuple[str, Path]] = []
+    for path in sorted(shard_dir.glob("*.jsonl.gz")):
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            first = next((line for line in handle if line.strip()), None)
+        if first is None:
+            raise ObservationNoiseError(f"empty retained trial shard: {path}")
+        row = json.loads(first)
+        index.append((str(row["trial"]["trial_id"]), path))
+    return sorted(index)
+
+
+def _iter_trial_shards(attempt_dir: Path):
+    for _trial_id, path in _trial_shard_index(attempt_dir):
+        yield from _read_jsonl(path)
 
 
 def _record_ids_for_plan(trial: Mapping[str, Any]) -> set[str]:
@@ -867,21 +894,49 @@ def _record_ids_for_plan(trial: Mapping[str, Any]) -> set[str]:
     return result
 
 
-def _write_combined_records(attempt_dir: Path, rows: Sequence[dict[str, Any]]) -> None:
-    encoded = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in rows)
-    _write_text_if_identical(attempt_dir / "records.jsonl", encoded)
-
-
-def _copy_to_gzip(source: Path, destination: Path) -> str:
-    temporary = destination.with_suffix(destination.suffix + ".tmp")
-    with (
-        source.open("rb") as source_handle,
-        temporary.open("wb") as raw,
-        gzip.GzipFile(filename="", mode="wb", fileobj=raw, compresslevel=6, mtime=0) as destination_handle,
-    ):
-        shutil.copyfileobj(source_handle, destination_handle)
-    temporary.replace(destination)
-    return sha256_file(destination)
+def _finalize_record_shards(attempt_dir: Path) -> tuple[int, str, str]:
+    shard_dir = attempt_dir / "trial_records"
+    finalized_index = attempt_dir / "records" / "index.json"
+    if finalized_index.is_file() and not shard_dir.exists():
+        payload = json.loads(finalized_index.read_text(encoding="utf-8"))
+        return (
+            int(payload["records"]),
+            str(payload["uncompressed_records_sha256"]),
+            sha256_file(finalized_index),
+        )
+    if not shard_dir.is_dir():
+        raise ObservationNoiseError("cannot finalize missing trial record shards")
+    uncompressed = hashlib.sha256()
+    count = 0
+    entries: list[dict[str, Any]] = []
+    for trial_id, path in _trial_shard_index(attempt_dir):
+        shard_count = 0
+        with gzip.open(path, "rb") as handle:
+            for line in handle:
+                uncompressed.update(line)
+                shard_count += 1
+        count += shard_count
+        entries.append(
+            {
+                "trial_id": trial_id,
+                "path": f"records/{path.name}",
+                "records": shard_count,
+                "compressed_sha256": sha256_file(path),
+            }
+        )
+    json_dump(
+        shard_dir / "index.json",
+        {
+            "schema_version": "aaa.observation_noise_record_shards.v1",
+            "ordering": "trial_id ascending, step ascending",
+            "records": count,
+            "uncompressed_records_sha256": uncompressed.hexdigest(),
+            "shards": entries,
+        },
+    )
+    destination = attempt_dir / "records"
+    shard_dir.replace(destination)
+    return count, uncompressed.hexdigest(), sha256_file(destination / "index.json")
 
 
 def _primary_cells() -> list[tuple[str, float]]:
@@ -992,6 +1047,28 @@ def _require_confirmation_freeze(protocol: NoiseProtocol, batch_id: str) -> str:
         raise ObservationNoiseError(
             "confirmation requires benchmarks/observation_noise_freeze.json; no confirmation freeze exists"
         )
+    relative_freeze = str(freeze_path.relative_to(project_root()))
+    tracked = subprocess.run(
+        ["git", "-C", str(project_root()), "ls-files", "--error-unmatch", relative_freeze],
+        capture_output=True,
+        check=False,
+    )
+    status = subprocess.check_output(
+        ["git", "-C", str(project_root()), "status", "--porcelain", "--", relative_freeze],
+        text=True,
+    ).strip()
+    committed = subprocess.run(
+        ["git", "-C", str(project_root()), "show", f"HEAD:{relative_freeze}"],
+        capture_output=True,
+        check=False,
+    )
+    if (
+        tracked.returncode != 0
+        or status
+        or committed.returncode != 0
+        or committed.stdout != freeze_path.read_bytes()
+    ):
+        raise ObservationNoiseError("confirmation freeze must be committed unchanged at HEAD")
     freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
     if not isinstance(freeze, dict) or freeze.get("stage") != "confirmation_freeze":
         raise ObservationNoiseError("confirmation freeze has the wrong lifecycle stage")
@@ -1047,27 +1124,132 @@ def _require_confirmation_freeze(protocol: NoiseProtocol, batch_id: str) -> str:
     return selected_candidate
 
 
+def _isolated_v21_fixture(protocol: NoiseProtocol, seed: int, steps: int) -> dict[str, Any]:
+    """Run the reference side from the protocol-pinned Git commit."""
+
+    commit = str(protocol.reference["v2_1_commit"])
+    with tempfile.TemporaryDirectory(prefix="aaa-v21-reference-") as directory:
+        root = Path(directory)
+        archive = subprocess.Popen(
+            ["git", "-C", str(project_root()), "archive", commit],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        assert archive.stdout is not None
+        extracted = subprocess.run(
+            ["tar", "-x", "-C", str(root)],
+            stdin=archive.stdout,
+            capture_output=True,
+            check=False,
+        )
+        archive.stdout.close()
+        archive_stderr = archive.stderr.read().decode("utf-8") if archive.stderr is not None else ""
+        if archive.stderr is not None:
+            archive.stderr.close()
+        archive_returncode = archive.wait()
+        if archive_returncode != 0 or extracted.returncode != 0:
+            detail = archive_stderr or extracted.stderr.decode("utf-8", errors="replace")
+            raise ObservationNoiseError(f"could not materialize pinned v2.1 reference {commit}: {detail}")
+        script = """
+import hashlib
+import json
+from aaa.benchmark.families import make_candidate
+from aaa.benchmark.spec import load_spec, spec_hash
+from aaa.config import WorldConfig
+from aaa.environment import MovingDotEnvironment
+from aaa.experiment import TrialIdentity, run_episode
+
+seed = int(__import__('sys').argv[1])
+steps = int(__import__('sys').argv[2])
+spec = load_spec()
+motion = spec.motion_families['constant_velocity']
+world = WorldConfig(
+    lower_bound=spec.world.lower_bound,
+    upper_bound=spec.world.upper_bound,
+    dt=spec.world.dt,
+    steps_per_episode=steps,
+    history_length=spec.world.history_length,
+    speed_min=motion.speed_min,
+    speed_max=motion.speed_max,
+    change_step=None,
+    change_factor_low=0.45,
+    change_factor_high=1.8,
+    event_margin=0.18,
+)
+environment = MovingDotEnvironment('bouncing', seed, world)
+model = make_candidate(spec, name='reference_candidate', update_enabled=True)
+identity = TrialIdentity(
+    trial_id='zero-noise-reference', role='development', family='bouncing',
+    scenario='bouncing', environment_seed=seed, replica_id=0, episode=0,
+    update_mode='online',
+)
+records = run_episode(environment, [model], identity, learn=True)
+spec_path = __import__('pathlib').Path('aaa/benchmark/data/benchmark_v2_1.json')
+print(json.dumps({
+    'records': [record.to_dict() for record in records],
+    'state': model.state_dict(),
+    'raw_sha256': hashlib.sha256(spec_path.read_bytes()).hexdigest(),
+    'resolved_sha256': spec_hash(spec),
+}, sort_keys=True, allow_nan=False))
+"""
+        environment = dict(os.environ)
+        environment["PYTHONPATH"] = str(root)
+        completed = subprocess.run(
+            [sys.executable, "-c", script, str(seed), str(steps)],
+            cwd=root,
+            env=environment,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if completed.returncode != 0:
+            raise ObservationNoiseError(
+                f"pinned v2.1 reference fixture failed at {commit}: {completed.stderr.strip()}"
+            )
+        payload = json.loads(completed.stdout)
+        if not isinstance(payload, dict):
+            raise ObservationNoiseError("pinned v2.1 reference fixture returned a malformed payload")
+        return payload
+
+
 def _zero_noise_fixture(protocol: NoiseProtocol) -> dict[str, Any]:
-    """Compare a clean phase run with the unchanged v2.1 temporal runner."""
+    """Compare the phase with v2.1 executed from its pinned Git commit."""
 
     seed = derive_seed(20260913, protocol.seed_namespaces["generator_validation"], "zero-noise")
     steps = 20
-    schedule = generate_schedule("gaussian", 0.0, steps + 1, seed=seed)
-    plain = build_latent_environment("bouncing", seed, steps)
-    noisy = NoisyObservationEnvironment(build_latent_environment("bouncing", seed, steps), schedule)
-    reference_model = incumbent_from_v21(name="reference_candidate", update_enabled=True)
-    phase_model = incumbent_from_v21(name="incumbent_square_root_rls", update_enabled=True)
-    identity = TrialIdentity(
-        trial_id="zero-noise-reference",
-        role="development",
-        family="bouncing",
-        scenario="bouncing",
-        environment_seed=seed,
-        replica_id=0,
-        episode=0,
-        update_mode="online",
+    repository = project_root()
+    toplevel = subprocess.run(
+        ["git", "-C", str(repository), "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        text=True,
+        check=False,
     )
-    reference_records = run_episode(plain, [reference_model], identity, learn=True)
+    if toplevel.returncode != 0 or Path(toplevel.stdout.strip()).resolve() != repository.resolve():
+        return {
+            "status": "NOT_VERIFIED",
+            "detail": "isolated pinned-reference replay requires a maintained Git checkout",
+            "reference_commit": protocol.reference["v2_1_commit"],
+            "reference_identity_equal": None,
+            "exact_latent_trajectory": None,
+            "forecasts_equal": None,
+            "updates_equal": None,
+            "state_and_counters_equal": None,
+            "repeated_observation_idempotent": None,
+            "steps": steps,
+        }
+    commit = str(protocol.reference["v2_1_commit"])
+    available = subprocess.run(
+        ["git", "-C", str(repository), "cat-file", "-e", f"{commit}^{{commit}}"],
+        capture_output=True,
+        check=False,
+    )
+    if available.returncode != 0:
+        raise ObservationNoiseError(f"maintained checkout lacks pinned v2.1 reference commit {commit}")
+    schedule = generate_schedule("gaussian", 0.0, steps + 1, seed=seed)
+    noisy = NoisyObservationEnvironment(build_latent_environment("bouncing", seed, steps), schedule)
+    phase_model = incumbent_from_v21(name="incumbent_square_root_rls", update_enabled=True)
+    isolated = _isolated_v21_fixture(protocol, seed, steps)
+    reference_records = isolated["records"]
     trial = {
         "trial_id": "zero-noise-phase",
         "condition": "clean_trained",
@@ -1087,23 +1269,43 @@ def _zero_noise_fixture(protocol: NoiseProtocol) -> dict[str, Any]:
     target_equal = True
     update_equal = True
     for reference_record, phase_record in zip(reference_records, phase_records, strict=True):
-        reference_prediction = reference_record.predictions["reference_candidate"]["scored"]
+        reference_prediction = reference_record["predictions"]["reference_candidate"]["scored"]
         phase_prediction = phase_record["predictions"]["incumbent_square_root_rls"]["scored"]
         prediction_equal = prediction_equal and reference_prediction == phase_prediction
         target_equal = (
-            target_equal and reference_record.actual_next_position == phase_record["latent_position"]
+            target_equal
+            and reference_record["history"] == phase_record["observed_history"]
+            and reference_record["current_observation"] == phase_record["current_observation"]
+            and reference_record["actual_next_position"] == phase_record["latent_position"]
+            and reference_record["bounced"] == phase_record["bounced"]
+            and reference_record["changed"] == phase_record["changed"]
         )
         update_equal = (
-            update_equal and phase_record["available_training_target"] == phase_record["latent_position"]
+            update_equal
+            and reference_record["updates_enabled"]["reference_candidate"]
+            == phase_record["update_decisions"]["incumbent_square_root_rls"]
+            and phase_record["available_training_target"] == phase_record["latent_position"]
         )
-    reference_state = reference_model.state_dict()
+    reference_state = isolated["state"]
     phase_state = phase_model.state_dict()
     state_equal = all(reference_state[key] == phase_state[key] for key in reference_state if key != "name")
     repeated = noisy.reset() == noisy.observe() == noisy.observe()
+    reference_identity_equal = (
+        isolated.get("raw_sha256") == protocol.reference["v2_1_raw_sha256"]
+        and isolated.get("resolved_sha256") == protocol.reference["v2_1_resolved_sha256"]
+    )
     return {
         "status": "PASS"
-        if exact and prediction_equal and target_equal and update_equal and state_equal and repeated
+        if exact
+        and prediction_equal
+        and target_equal
+        and update_equal
+        and state_equal
+        and repeated
+        and reference_identity_equal
         else "FAIL",
+        "reference_commit": protocol.reference["v2_1_commit"],
+        "reference_identity_equal": reference_identity_equal,
         "exact_latent_trajectory": target_equal,
         "forecasts_equal": prediction_equal,
         "updates_equal": update_equal,
@@ -1171,13 +1373,15 @@ def _write_report(path: Path, summary: dict[str, Any], verification: dict[str, A
             "",
             "## Evidence limitations",
             "",
-            "The local full archive is retained in this attempt directory. A durable external locator and independent human review are not represented by this run. Confirmation A/B, adjusted primary uncertainty, matched intervention branches, and refinement promotion remain unverified until their frozen plan is executed.",
+            "The local full archive is retained in this attempt directory. A durable external locator and independent retrieval are not represented by this run. Confirmation A/B, adjusted primary uncertainty, matched intervention branches, and refinement promotion remain unverified until their frozen plan is executed.",
         ]
     )
     _write_text_atomic(path, "\n".join(lines) + "\n")
 
 
-def _scientific_gates(*, role: str, metrics: dict[str, Any], expected_trials: int) -> list[dict[str, Any]]:
+def _scientific_gates(
+    *, role: str, metrics: dict[str, Any], expected_trials: int, reference_status: str
+) -> list[dict[str, Any]]:
     """Evaluate only engineering-safe checks before confirmation evidence exists."""
 
     if role != "confirmation_a" and role != "confirmation_b":
@@ -1189,8 +1393,12 @@ def _scientific_gates(*, role: str, metrics: dict[str, Any], expected_trials: in
     return [
         _gate(
             "reference_preservation",
-            "PASS" if _reference_check()["status"] == "PASS" else "FAIL",
-            "v2.1 raw and resolved identities checked",
+            reference_status,
+            (
+                "v2.1 raw/resolved identities and pinned-checkout replay passed"
+                if reference_status == "PASS"
+                else "pinned-checkout replay was unavailable or failed"
+            ),
         ),
         _gate(
             "evidence_integrity",
@@ -1211,7 +1419,7 @@ def _scientific_gates(*, role: str, metrics: dict[str, Any], expected_trials: in
     ]
 
 
-def _coverage(records: Sequence[dict[str, Any]]) -> dict[str, Any]:
+def _coverage(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
     counts: dict[str, dict[str, set[object]]] = {}
     for record in records:
         trial = record["trial"]
@@ -1258,6 +1466,8 @@ def run_attempt(
         if protocol_path is not None:
             raise ObservationNoiseError("confirmation roles cannot use a protocol override")
         assert batch_id is not None
+        if not attempt_label:
+            raise ObservationNoiseError("confirmation roles require an explicit immutable attempt label")
         resolved_candidate_id = _require_confirmation_freeze(protocol, batch_id)
         registry_path = project_root() / "benchmarks" / "observation_noise_registry.json"
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
@@ -1266,21 +1476,34 @@ def run_attempt(
         declared = [item for item in registry.get("batches", []) if item.get("batch_id") == batch_id]
         if len(declared) != 1 or declared[0].get("role") != role or declared[0].get("status") != "planned":
             raise ObservationNoiseError(f"batch {batch_id!r} is not the declared planned batch for {role}")
+        try:
+            reservation = reserve_confirmation_batch(
+                project_root(),
+                batch_id=batch_id,
+                role=role,
+                attempt_id=attempt_label,
+                scientific_fingerprint_sha256=scientific_fingerprint(project_root())["sha256"],
+                resume=resume,
+            )
+        except ReservationError as exc:
+            raise ObservationNoiseError(str(exc)) from exc
     attempt_dir = _open_attempt_dir(Path(output_root), attempt_label, resume=resume)
     started_clock = time.perf_counter()
     lifecycle = attempt_dir / "lifecycle.jsonl"
     if not resume:
         _record_lifecycle(lifecycle, "created", attempt_id=attempt_dir.name, role=role, batch_id=batch_id)
+        if role != "development":
+            _record_lifecycle(lifecycle, "reserved", reservation=reservation)
     try:
         _record_lifecycle(lifecycle, "resumed" if resume else "started")
         schedule_dir = attempt_dir / "schedules"
         schedule_dir.mkdir(exist_ok=True)
-        record_path = attempt_dir / "records.jsonl"
-        all_records = _load_trial_shards(attempt_dir)
-        if not all_records and record_path.is_file():
-            all_records = _read_jsonl(record_path)
-            _persist_trial_rows(attempt_dir, all_records)
-        completed_record_ids = {str(row["trial"]["trial_id"]) for row in all_records}
+        legacy_record_path = attempt_dir / "records.jsonl"
+        shard_index = _trial_shard_index(attempt_dir)
+        if not shard_index and legacy_record_path.is_file():
+            _persist_trial_rows(attempt_dir, _read_jsonl(legacy_record_path))
+            shard_index = _trial_shard_index(attempt_dir)
+        completed_record_ids = {trial_id for trial_id, _path in shard_index}
         schedule_index: list[dict[str, Any]] = []
         lineage_count, episode_count, realization_count = _plan_counts(protocol, quick=quick, role=role)
         conditions = ("clean_trained", "noise_trained")
@@ -1515,7 +1738,6 @@ def run_attempt(
                     initial_calibrators=initial_calibrators[(trial["condition"], trial["lineage"])],
                 )
                 _persist_trial_rows(attempt_dir, rows)
-                all_records.extend(rows)
                 completed_record_ids.add(trial["trial_id"])
             if trial["family"] == "changed_law" and trial["branch"] == "stationary":
                 branch_ids = {f"{trial['trial_id']}:{branch}" for branch in ("prefix", "frozen", "online")}
@@ -1531,37 +1753,31 @@ def run_attempt(
                     _persist_trial_rows(attempt_dir, branch_rows)
                     for row in branch_rows:
                         trial_id = str(row["trial"]["trial_id"])
-                        if trial_id not in completed_record_ids:
-                            all_records.append(row)
-                            completed_record_ids.add(trial_id)
-        all_records = _load_trial_shards(attempt_dir)
-        if not all_records:
+                        completed_record_ids.add(trial_id)
+        if not _trial_shard_index(attempt_dir):
             raise ObservationNoiseError("no completed trial shards were retained")
-        all_records = sorted(all_records, key=lambda row: (str(row["trial"]["trial_id"]), int(row["step"])))
-        _write_combined_records(attempt_dir, all_records)
+        record_count, records_sha, shard_index_sha = _finalize_record_shards(attempt_dir)
         confirmation_fingerprint = (
             scientific_fingerprint(project_root())["sha256"] if role != "development" else None
         )
-        compressed_path = attempt_dir / "records.jsonl.gz"
-        compressed_sha = _copy_to_gzip(record_path, compressed_path)
-        metrics = _metric_rows(all_records)
+        metrics = _metric_rows(iter_records(attempt_dir))
         declared_draws = int(protocol.statistics["draws"])
         analysis_draws = 128 if quick else declared_draws
         statistics_seed = derive_seed(seed_root, protocol.seed_namespaces["calibration"], role, "statistics")
         hierarchical = hierarchical_bootstrap(
-            all_records,
+            iter_records(attempt_dir),
             draws=analysis_draws,
             seed=statistics_seed,
             levels=tuple(float(level) for level in protocol.statistics["intervals"]),
         )
         paired = paired_hierarchical_comparisons(
-            all_records,
+            iter_records(attempt_dir),
             draws=analysis_draws,
             seed=statistics_seed ^ 0x5EED,
             levels=tuple(float(level) for level in protocol.statistics["intervals"]),
         )
-        interval_summary = interval_statistics(all_records)
-        resource_summary = resource_statistics(all_records)
+        interval_summary = interval_statistics(iter_records(attempt_dir))
+        resource_summary = resource_statistics(iter_records(attempt_dir))
         null_validation = validate_null_behavior(
             seed=statistics_seed ^ 0xC0FFEE,
             simulations=32 if quick else 128,
@@ -1595,7 +1811,7 @@ def run_attempt(
         if set(checks) != set(CHECK_NAMES):
             raise ObservationNoiseError("mandatory check set drifted")
         manifest: dict[str, Any] = {
-            "schema_version": "aaa.observation_noise_run_manifest.v1",
+            "schema_version": "aaa.observation_noise_run_manifest.v2",
             "attempt_id": attempt_dir.name,
             "protocol_version": protocol.protocol_version,
             "protocol_hash": canonical_protocol_hash(),
@@ -1620,8 +1836,9 @@ def run_attempt(
             "families": family_steps,
             "channels": list(ALL_CHANNELS),
             "scales": list(ALL_SCALES),
-            "records_sha256": sha256_file(record_path),
-            "compressed_records_sha256": compressed_sha,
+            "records_sha256": records_sha,
+            "record_shard_index": "records/index.json",
+            "record_shard_index_sha256": shard_index_sha,
             "schedule_count": len(schedule_index),
             "training_record_count": len(training_evidence),
             "training_records_sha256": sha256_file(attempt_dir / "training_records.jsonl"),
@@ -1674,7 +1891,12 @@ def run_attempt(
             "full_archive_status": "local_full_archive_retained; durable_external_locator_not_yet_recorded",
         }
         json_dump(attempt_dir / "metadata.json", metadata)
-        gates = _scientific_gates(role=role, metrics=metrics, expected_trials=len(all_records))
+        gates = _scientific_gates(
+            role=role,
+            metrics=metrics,
+            expected_trials=record_count,
+            reference_status=str(zero_noise["status"]),
+        )
         summary = {
             "schema_version": "aaa.observation_noise_summary.v1",
             "protocol_version": protocol.protocol_version,
@@ -1700,7 +1922,7 @@ def run_attempt(
                 "intervals": interval_summary,
                 "resources": resource_summary,
             },
-            "coverage": _coverage(all_records),
+            "coverage": _coverage(iter_records(attempt_dir)),
             "checks": checks,
             "gates": gates,
             "all_required_gates_pass": all(gate["status"] == "PASS" for gate in gates if gate["required"]),
@@ -1708,8 +1930,8 @@ def run_attempt(
                 gate["name"] for gate in gates if gate["required"] and gate["status"] != "PASS"
             ],
             "reproduction": {
-                "status": "PASS" if zero_noise["status"] == "PASS" else "FAIL",
-                "detail": "deterministic zero-noise fixture",
+                "status": zero_noise["status"],
+                "detail": zero_noise.get("detail", "deterministic isolated zero-noise fixture"),
             },
             "independent_recomputation": {
                 "status": "NOT_VERIFIED",
@@ -1729,7 +1951,7 @@ def run_attempt(
             },
         }
         json_dump(attempt_dir / "summary.json", summary)
-        verification = verify_attempt(attempt_dir)
+        verification = verify_attempt(attempt_dir, require_checksums=False)
         summary["independent_recomputation"] = {
             "status": verification["verdict"],
             "records": verification["records"],
@@ -1748,7 +1970,7 @@ def run_attempt(
         _record_lifecycle(
             lifecycle,
             "completed",
-            records=len(all_records),
+            records=record_count,
             independent_recomputation=verification["verdict"],
         )
         manifest["elapsed_seconds"] = round(time.perf_counter() - started_clock, 6)
