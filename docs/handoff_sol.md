@@ -11,18 +11,18 @@ scientific confirmation, merge approval, or release approval.
 | Item | Value |
 |---|---|
 | PR | [#11](https://github.com/Cinqic/AAA/pull/11) |
-| current local head | `5690aa94802a4f1e4bd3471618a456f45e8d28d2` |
-| scientific source commit | `c0c3b0645cef3b94f82a104b728c7c56e1959499` |
+| current local head | `f7936da799313dc761050cca67a968a6d006f78e` |
+| scientific source commit | `4f7c08fe8564ba7ec88679a52dbb48e0e4f264cc` |
 | source dirty when frozen | `False` |
 | protocol | `aaa.observation_noise.v1.1` |
 | protocol hash | `546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c` |
-| scientific fingerprint | `369080bf21a43014561322d19e42c288d68ae9ccbc486b04f4d6791778c62311` |
+| scientific fingerprint | `762418a91061da247b331be03bbdab2c18c36003cb5218b5c2bf191605dba568` |
 | v2.1 reference commit | `25b6c32c9040d0f934314a2139993d12763afc99` |
 | v2.1 raw / resolved hash | `4993c5e6e173f9dd5ef002bc84ff4c484da853b066ea45662d41ad826d10d48e` / `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
 | dependency lock | `2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7` |
 | selected candidate | `incumbent-no-refinement-v1` |
 | candidate configuration | `dcc82cb0396985976419733a817d02027c45683db4f76d3ea37ac48290f6c649` |
-| confirmation freeze | prepared at `369080bf21a43014561322d19e42c288d68ae9ccbc486b04f4d6791778c62311`; not authorization to run |
+| confirmation freeze | prepared at `762418a91061da247b331be03bbdab2c18c36003cb5218b5c2bf191605dba568`; not authorization to run |
 
 ## Independent findings and repairs
 
@@ -46,6 +46,20 @@ decision only; it establishes no formal endpoint.
 Each of four candidate archives contained 235,776 scored records,
 1,024 trials, and 3,552 training
 records and independently verified `PASS` before selection.
+
+## Local validation
+
+The final maintained-checkout suite passed 442 tests in 77.860 seconds.
+The instrumented run passed the same 442 tests with 71% total coverage
+against the configured 70% floor. Ruff lint/format, mypy, the exact 24-pin
+dependency lock, confirmation exit-code contract, strict JSON parsing and
+diff whitespace checks passed. `aaa-0.2.0-py3-none-any.whl` built with the
+locked backend and contained both canonical protocol files and the license.
+A fresh Python 3.12 environment outside the checkout installed the lock and
+wheel; both protocol hashes passed, its 58,944-record noise smoke recomputed
+`PASS`, and the checkout-only pinned-reference field was truthfully
+`NOT_VERIFIED`. Final-head GitHub CI is external evidence and is not claimed
+by this pre-push generated file.
 
 ## Scale and archive boundary
 
