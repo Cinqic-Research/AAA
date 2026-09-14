@@ -66,7 +66,8 @@ def findings(path: str) -> str:
         or path.startswith("docs/evidence/observation_noise")
         or path.startswith("docs/evidence/sol_observation_noise")
         or "observation_noise" in path
-        or path in {
+        or path
+        in {
             "README.md",
             "CHANGELOG.md",
             "CONTRIBUTING.md",
