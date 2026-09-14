@@ -1,9 +1,10 @@
 {
+  "archive_locator": "transient_local_selection_root_not_committed",
   "attempts": {
-    "causal-innovation-clip-025-v1": "/tmp/aaa-noise-selection.QzYxvg/observation-noise-v1/selection-causal-innovation-clip-025-v1",
-    "causal-innovation-clip-050-v1": "/tmp/aaa-noise-selection.QzYxvg/observation-noise-v1/selection-causal-innovation-clip-050-v1",
-    "causal-innovation-clip-100-v1": "/tmp/aaa-noise-selection.QzYxvg/observation-noise-v1/selection-causal-innovation-clip-100-v1",
-    "incumbent-no-refinement-v1": "/tmp/aaa-noise-selection.QzYxvg/observation-noise-v1/selection-incumbent-no-refinement-v1"
+    "causal-innovation-clip-025-v1": "selection-causal-innovation-clip-025-v1",
+    "causal-innovation-clip-050-v1": "selection-causal-innovation-clip-050-v1",
+    "causal-innovation-clip-100-v1": "selection-causal-innovation-clip-100-v1",
+    "incumbent-no-refinement-v1": "selection-incumbent-no-refinement-v1"
   },
   "candidate_order": [
     "incumbent-no-refinement-v1",

@@ -133,7 +133,7 @@ def _ledger_entry(
     entry = definition.to_dict()
     entry.update(
         {
-            "development_attempts": [str(attempt.directory)],
+            "development_attempts": [attempt.directory.name],
             "outcome": outcome,
             "outcome_reason": reason,
             "development_evidence": {
@@ -213,7 +213,8 @@ def run_development_selection(
         "quick": quick,
         "selected_candidate": selected,
         "candidate_order": list(catalog),
-        "attempts": {candidate_id: str(attempts[candidate_id].directory) for candidate_id in catalog},
+        "attempts": {candidate_id: attempts[candidate_id].directory.name for candidate_id in catalog},
+        "archive_locator": "transient_local_selection_root_not_committed",
         "metrics": metrics_by_candidate,
         "ranking": {
             "eligible_refinements": eligible,

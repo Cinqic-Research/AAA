@@ -1,3 +1,129 @@
+# Observation-noise v1 handoff — PR #11
+
+This is the concise handoff for the separately scoped `aaa.observation_noise.v1`
+phase. It reports engineering work and evidence boundaries; it is not an
+approval and does not convert development smoke evidence into a confirmation
+claim.
+
+## Exact identity at the engineering source boundary
+
+| Item | Value |
+|---|---|
+| PR | [#11](https://github.com/Cinqic/AAA/pull/11), `[AAA] Add controlled observation-noise v1 phase` |
+| engineering branch | `codex/aaa-observation-noise-v1` |
+| source-bound head | `2939c2bad40412b253e27ce3efb05ca1a8aa9877` |
+| exact base | `main` at `25b6c32c9040d0f934314a2139993d12763afc99` |
+| scientific source fingerprint | `10a88d74af7aa8e79cf57ccf94018c03723caf0986e06014587de7d6c31f5e71` |
+| protocol | `aaa.observation_noise.v1` |
+| protocol hash | `d5466983b358175ac4f33f4d7450953573721159c34fec4660bbb38b5c9f88ff` |
+| v2.1 reference raw identity | `4993c5e6e173f9dd5ef002bc84ff4c484da853b066ea45662d41ad826d10d48e` |
+| v2.1 reference resolved identity | `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
+| dependency lock | `2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7` |
+| source-freeze manifest | `benchmarks/observation_noise_source_freeze.json`, identity `d3f6950e2a20e9402649956fde4cfd32a315b504362cfbd34ce9b19508efd3ad` |
+
+The source fingerprint is the non-self-referential identity used by future
+confirmation admission. The source freeze records the protocol, preserved
+v2.1 reference identities, lock, candidate ledger hash
+`e53e76ee18222d7589a54e4e6d2745721096f8db759d2a79c2e48dff0712455b`, and the
+two planned batch IDs below. Generated results and review documents are
+excluded from that fingerprint by design.
+
+## Candidate, ledger, freeze, and batch boundary
+
+The selected candidate is the valid no-refinement identity
+`incumbent-no-refinement-v1`, configuration hash
+`dcc82cb0396985976419733a817d02027c45683db4f76d3ea37ac48290f6c649`.
+The complete bounded catalog has four immutable entries and three rejected
+causal innovation-clipping variants:
+
+| Candidate | Configuration hash | Development outcome |
+|---|---|---|
+| `incumbent-no-refinement-v1` | `dcc82cb0396985976419733a817d02027c45683db4f76d3ea37ac48290f6c649` | selected; unchanged incumbent |
+| `causal-innovation-clip-025-v1` | recorded in `benchmarks/observation_noise_candidate_ledger.json` | rejected; development constraints not jointly met |
+| `causal-innovation-clip-050-v1` | recorded in `benchmarks/observation_noise_candidate_ledger.json` | rejected; development constraints not jointly met |
+| `causal-innovation-clip-100-v1` | recorded in `benchmarks/observation_noise_candidate_ledger.json` | rejected; development constraints not jointly met |
+
+All four quick development attempts were independently verified from their
+primitive records before the compact evidence was committed. Their stable
+attempt IDs and summary/record hashes are in the ledger; their local archive
+locator is explicitly `transient_local_selection_root_not_committed`.
+
+The confirmation-freeze identity is **not created**. No selected-candidate
+confirmation freeze, A/B checkpoint set, formal schedule reservation, or
+confirmation attempt identity exists. The predeclared batches are
+`observation-noise-a-0001` (`confirmation_a`) and
+`observation-noise-b-0001` (`confirmation_b`), both still `planned` in the
+registry. A/B attempt IDs, durable archive locators, archive hashes, and
+independent archive-retrieval results are therefore `N/A — not run`, not
+missing claims to be filled from transient development output.
+
+## Analysis and gate status
+
+The implemented joint evaluator recomputes the complete primary A+B endpoint
+family from primitive archives, checks shared candidate/checkpoint/fingerprint
+identity, and applies one Holm family to the one-sided 95% bounds. That joint
+analysis has not run because no admissible A/B archives exist. The formal gate
+status is:
+
+| Gate or required evidence | Status |
+|---|---|
+| v2.1 raw/resolved reference preservation and zero-noise regression | `PASS` in the local regression suite |
+| development archive integrity and independent arithmetic | `PASS` for the four bounded smoke attempts |
+| formal absolute utility | `INSUFFICIENT_EVIDENCE` |
+| formal reflected-baseline competitiveness | `INSUFFICIENT_EVIDENCE` |
+| formal first-50 changed-law adaptation | `INSUFFICIENT_EVIDENCE` |
+| formal unchanged-law retention | `INSUFFICIENT_EVIDENCE` |
+| added-mechanism promotion | `NOT_APPLICABLE` to the selected no-refinement incumbent |
+| joint Holm multiplicity analysis | `NOT_RUN` |
+| complete A/B primitive archives and durable retrieval | `BLOCKED` |
+| independent human review | `PENDING` |
+
+The development smoke selected no refinement; it does not establish that the
+incumbent satisfies any confirmation endpoint. Final outcome at this boundary:
+**EXPLICITLY BLOCKED BY MISSING APPROVED DURABLE A/B ARCHIVE AND INDEPENDENT
+REVIEW**. No scientific promotion, release, or generalization claim is made.
+
+## Reproduction and recomputation commands
+
+From the repository root, with the locked environment:
+
+```bash
+python -m aaa.cli observation-noise-protocol-hash
+python -m aaa.cli observation-noise-fingerprint
+python -m aaa.cli observation-noise-development-select --quick \
+  --output docs/evidence/observation_noise_development_selection.json \
+  --runs-root /tmp/aaa-noise-selection
+python -m aaa.cli observation-noise-recompute <development-attempt>
+python -m aaa.cli observation-noise-freeze \
+  --stage confirmation_freeze \
+  --batch observation-noise-a-0001 \
+  --batch observation-noise-b-0001 \
+  --selected-candidate incumbent-no-refinement-v1
+python -m aaa.cli observation-noise-confirmation-evaluate <A-archive> <B-archive> \
+  --output joint-observation-noise-evaluation.json
+```
+
+The last three commands are intentionally not represented as completed
+evidence in this PR. The confirmation freeze must be committed before either
+batch is consumed, both complete archives must be durably retrievable, and the
+joint evaluator must be independently recomputed before a scientific verdict.
+
+## CI and remaining blocker
+
+The PR head was pushed to GitHub and the CPU workflow run identity was
+`34807070748` (run number 49; status must be re-queried at the final PR head).
+Local validation before this documentation refresh was 429 tests passed. The
+remaining blocker is the absence of an approved durable archive mechanism for
+the full observation-noise A/B primitive records; this is tracked as
+`AAA-134`. The PR is engineering-complete for the controlled phase boundary
+and explicitly blocked for scientific confirmation.
+
+[SOL-INDEPENDENT-REVIEW: AAA / aaa.observation_noise.v1 / FULL]
+
+Independently inspect the entire repository, full PR #11 history/diff, protocol and source identities, candidate ledger, all development-selection evidence, confirmation freeze, complete A/B primitive archives, schedules, checkpoints, statistics, joint multiplicity analysis, independent recomputation, durable-archive retrieval, tests, CI, documentation, issue ledger and every scientific claim. Recompute from primitive evidence rather than trusting Luna's summaries. Issue one final verdict: APPROVED, DECLINED, or BLOCKED, with exact findings. Approval authorizes normal merge only unless release/tag publication is separately requested.
+
+---
+
 # Engineering handoff for independent review
 
 **Status: Prepared for GPT-5.6 Sol independent review and remediation.**

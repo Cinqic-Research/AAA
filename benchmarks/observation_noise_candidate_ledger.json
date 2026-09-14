@@ -5,7 +5,7 @@
       "candidate_id": "incumbent-no-refinement-v1",
       "configuration_hash": "dcc82cb0396985976419733a817d02027c45683db4f76d3ea37ac48290f6c649",
       "development_attempts": [
-        "/tmp/aaa-noise-selection.QzYxvg/observation-noise-v1/selection-incumbent-no-refinement-v1"
+        "selection-incumbent-no-refinement-v1"
       ],
       "development_evidence": {
         "archive_locator": "transient_local_selection_root_not_committed",
@@ -514,7 +514,7 @@
       "candidate_id": "causal-innovation-clip-025-v1",
       "configuration_hash": "03ad326d8aebe9bd2516f63244778bb49ffefc273dfa2aafa6dfd0b49516a8b6",
       "development_attempts": [
-        "/tmp/aaa-noise-selection.QzYxvg/observation-noise-v1/selection-causal-innovation-clip-025-v1"
+        "selection-causal-innovation-clip-025-v1"
       ],
       "development_evidence": {
         "archive_locator": "transient_local_selection_root_not_committed",
@@ -1024,7 +1024,7 @@
       "candidate_id": "causal-innovation-clip-050-v1",
       "configuration_hash": "ff33bd3064021ddd688f7ea6f7d228f1d7e2e3fbbf06f896e44d2fbc6af630d2",
       "development_attempts": [
-        "/tmp/aaa-noise-selection.QzYxvg/observation-noise-v1/selection-causal-innovation-clip-050-v1"
+        "selection-causal-innovation-clip-050-v1"
       ],
       "development_evidence": {
         "archive_locator": "transient_local_selection_root_not_committed",
@@ -1534,7 +1534,7 @@
       "candidate_id": "causal-innovation-clip-100-v1",
       "configuration_hash": "703177778db77fe7beb9c3e3e828071f22fb4fdb31b7ff570138d002bc4afa54",
       "development_attempts": [
-        "/tmp/aaa-noise-selection.QzYxvg/observation-noise-v1/selection-causal-innovation-clip-100-v1"
+        "selection-causal-innovation-clip-100-v1"
       ],
       "development_evidence": {
         "archive_locator": "transient_local_selection_root_not_committed",
