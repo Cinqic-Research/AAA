@@ -4,7 +4,7 @@
     "path": "requirements-lock.txt",
     "sha256": "2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7"
   },
-  "manifest_identity": "9ae4d250f578b730e9197b4e709ce930800402cfac464468929bc0d1f3641aab",
+  "manifest_identity": "ae79dbe06be6ce8946ba3e9baaa9b5647aa8cc3db2a9cb9a7ebce9a9761eba4f",
   "notes": "Sol-audited v1.1 source freeze after full development selection; confirmation remains blocked on durable archive storage.",
   "planned_batches": [
     "observation-noise-a-0002",
@@ -470,7 +470,7 @@
       },
       "tools/write_audit_inventory.py": {
         "executable": false,
-        "sha256": "3e6c3aff66cf10db835c991cb9b7562b3d415b44a884a60839b8ff1459e14e18"
+        "sha256": "f8f06ab93df91cc2e90cefb0fad1cad07c377c836eb44fd2395a3e0d67819d04"
       },
       "tools/write_candidate_selection.py": {
         "executable": false,
@@ -489,17 +489,17 @@
       "status"
     ],
     "schema": "aaa.observation_noise_scientific_source.v1",
-    "sha256": "86ba04c5005d806e3401e87bb917cbea433098c446bfb59a6799a78fd0e0e012"
+    "sha256": "369080bf21a43014561322d19e42c288d68ae9ccbc486b04f4d6791778c62311"
   },
-  "scientific_fingerprint_sha256": "86ba04c5005d806e3401e87bb917cbea433098c446bfb59a6799a78fd0e0e012",
+  "scientific_fingerprint_sha256": "369080bf21a43014561322d19e42c288d68ae9ccbc486b04f4d6791778c62311",
   "selected_candidate": null,
   "selected_candidate_configuration_hash": null,
   "source": {
     "branch": "codex/aaa-observation-noise-sol-review",
-    "commit": "84b4ec10879ec0d59a17d441381dbdb19d9fbb94",
+    "commit": "c0c3b0645cef3b94f82a104b728c7c56e1959499",
     "dirty": false,
     "status": [],
-    "tree_hash": "7e32fb5aa5761935a30b0618232512a11a27e20793236c03d11ba1b1fab7539a"
+    "tree_hash": "f7b5068d3e1530e7f250d5dc9bd8eaed60fd38f1ccf1442cfaecefb3121772fe"
   },
   "stage": "design_freeze"
 }
