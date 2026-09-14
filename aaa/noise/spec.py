@@ -432,6 +432,7 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
             "absolute_utility",
             "added_mechanism_promotion",
             "outcome_vocabulary",
+            "machine_criteria",
         },
         "protocol.acceptance",
     )
@@ -455,6 +456,41 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
         "blocked_by_missing_evidence",
     ):
         raise ProtocolError("outcome vocabulary drifted")
+    criteria = acceptance["machine_criteria"]
+    if not isinstance(criteria, Mapping) or set(criteria) != {
+        "absolute_utility",
+        "baseline_competitiveness",
+        "moderate_noise_adaptation",
+        "unchanged_law_retention",
+        "added_mechanism_promotion",
+    }:
+        raise ProtocolError("protocol.acceptance.machine_criteria is incomplete")
+    required_criteria_fields = {
+        "estimate",
+        "bound",
+        "confidence_level",
+        "adjustment",
+        "operator",
+        "threshold",
+    }
+    for name, criterion in criteria.items():
+        if not isinstance(criterion, Mapping) or not required_criteria_fields.issubset(criterion):
+            raise ProtocolError(f"protocol.acceptance.machine_criteria.{name} is incomplete")
+        if not isinstance(criterion["estimate"], str) or not criterion["estimate"]:
+            raise ProtocolError(f"protocol.acceptance.machine_criteria.{name}.estimate is required")
+        if criterion["bound"] not in {"upper_confidence_bound", "lower_confidence_bound"}:
+            raise ProtocolError(f"protocol.acceptance.machine_criteria.{name}.bound is invalid")
+        _number(
+            criterion["confidence_level"],
+            f"protocol.acceptance.machine_criteria.{name}.confidence_level",
+        )
+        if criterion["confidence_level"] != 0.95:
+            raise ProtocolError(f"protocol.acceptance.machine_criteria.{name} must use 95% bounds")
+        if not isinstance(criterion["adjustment"], str) or "Holm once" not in criterion["adjustment"]:
+            raise ProtocolError(f"protocol.acceptance.machine_criteria.{name} must declare joint Holm adjustment")
+        if criterion["operator"] not in {"<=", ">"}:
+            raise ProtocolError(f"protocol.acceptance.machine_criteria.{name}.operator is invalid")
+        _number(criterion["threshold"], f"protocol.acceptance.machine_criteria.{name}.threshold", nonnegative=True)
 
     search = _strict(
         raw["search_budget"],
@@ -463,6 +499,7 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
             "max_substantive_mechanism_changes",
             "baseline_search_separate",
             "candidate_ledger_file",
+            "development_selection_plan",
             "design_freeze",
             "confirmation_freeze",
         },
@@ -474,7 +511,12 @@ def _validate(raw_value: Mapping[str, Any]) -> NoiseProtocol:
         or search["baseline_search_separate"] is not True
     ):
         raise ProtocolError("candidate search budget drifted")
-    for key in ("candidate_ledger_file", "design_freeze", "confirmation_freeze"):
+    for key in (
+        "candidate_ledger_file",
+        "development_selection_plan",
+        "design_freeze",
+        "confirmation_freeze",
+    ):
         if not isinstance(search[key], str) or not search[key]:
             raise ProtocolError(f"protocol.search_budget.{key}: required path")
 

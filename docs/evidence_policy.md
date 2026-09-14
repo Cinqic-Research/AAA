@@ -108,3 +108,32 @@ truth field in evaluator evidence is not permission for a predictor or
 calibration callback to read it. A report must state whether a result is
 engineering complete, scientifically supported, negative, inconclusive, or
 blocked by missing evidence.
+
+### Observation-noise completion boundary
+
+The scientific identity used for a future confirmation freeze is the output of
+`observation-noise-fingerprint`, not a commit/tree equality check. It covers
+the scientific source map, including the protocol, candidate ledger and plan,
+runner, statistics, verifier, tests, lock and relevant documentation. It
+normalizes only mutable registry lifecycle fields and fails closed on
+nonignored untracked scientific files, unsafe paths and symlinks. The exact
+confirmation freeze, design/source freeze, result archives and review handoff
+are generated provenance and are excluded so their own commit does not create a
+self-reference.
+
+The committed development selection evidence is
+[`evidence/observation_noise_development_selection.json`](evidence/observation_noise_development_selection.json),
+and the full candidate ledger retains every attempted identity and outcome.
+The selected result is the unchanged incumbent control. The development
+attempt archives used for that compact evidence were transient local files and
+are explicitly labelled as such; they are not a durable confirmation archive.
+
+The joint command
+`python -m aaa.cli observation-noise-confirmation-evaluate <A> <B>` is the only
+supported route to a final A+B conclusion. It independently verifies both
+primitive archives, checks shared training/checkpoint and candidate identity,
+recomputes the endpoint family, records Holm order and adjusted bounds, and
+does not trust a stored summary conclusion. No durable archive mechanism is
+approved or recorded for this phase, so the confirmation boundary remains
+blocked until one is supplied and the two predeclared batches are legitimately
+spent.

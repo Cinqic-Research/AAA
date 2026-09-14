@@ -60,3 +60,17 @@ trial identities are allocated before the first observation. Existing attempt
 directories are never overwritten; an interrupted run is a preserved failure
 until a verified resume implementation reuses its original schedule and
 checkpoint state.
+
+The candidate ledger is a separate immutable-identity registry. Its entries
+contain candidate ID, parent, mechanism, exact parameters and configuration
+hash, trainable/fixed state, training condition, mechanism count, all
+development attempt IDs, and the outcome/reason. The selected candidate for a
+confirmation run is resolved from the committed confirmation freeze and ledger
+entry; a command-line candidate override cannot substitute for it.
+
+The development plan is committed before comparative work and limits the
+search to 12 configurations and three substantive mechanism changes. The
+current bounded search selected `incumbent-no-refinement-v1`; rejected
+innovation-clipping variants remain in the ledger. A future pair of full
+confirmation archives is evaluated jointly so A/B do not receive separate
+multiplicity corrections.

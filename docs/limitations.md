@@ -88,6 +88,15 @@ replication plan, durable full-archive publication, and independent human
 review are not represented until their explicit freezes and execution are
 complete.
 
+The bounded development refinement search is complete: three causal
+innovation-clipping variants were evaluated and rejected, and the unchanged
+incumbent was selected as a valid no-refinement control. This does not establish
+that the incumbent meets any confirmation endpoint. The source fingerprint is
+non-self-referential and fail-closed, but a durable archive locator is still
+absent. The exact confirmation freeze, full ten-lineage A/B execution, joint
+Holm analysis, and independent review are therefore `NOT_VERIFIED` or blocked,
+not silently treated as passing.
+
 The noise model corrupts observations only. It does not study process noise,
 dropout, bias, irregular sampling, hidden state, actions, goals, language,
 vision, or general intelligence. A favorable detector response to a sensor

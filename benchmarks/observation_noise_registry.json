@@ -1,7 +1,7 @@
 {
   "schema_version": "aaa.observation_noise_registry.v1",
   "protocol_version": "aaa.observation_noise.v1",
-  "protocol_hash": "e340d5c0a08a402dd70acb56664645039f71333c64c0934d15427aaddc2858eb",
+  "protocol_hash": "d5466983b358175ac4f33f4d7450953573721159c34fec4660bbb38b5c9f88ff",
   "batches": [
     {
       "batch_id": "observation-noise-a-0001",

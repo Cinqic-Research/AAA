@@ -85,6 +85,10 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser(
         "observation-noise-protocol-hash", help="Print the separate observation-noise protocol identity."
     )
+    subparsers.add_parser(
+        "observation-noise-fingerprint",
+        help="Print the non-self-referential observation-noise scientific source fingerprint.",
+    )
 
     noise_parser = subparsers.add_parser(
         "observation-noise", help="Run the separately versioned observation-noise phase."
@@ -102,12 +106,39 @@ def build_parser() -> argparse.ArgumentParser:
     noise_parser.add_argument(
         "--resume", action="store_true", help="Continue an interrupted observation-noise attempt."
     )
+    noise_parser.add_argument(
+        "--candidate-id",
+        help="Development-only candidate ID; confirmation resolves the committed freeze instead.",
+    )
 
     noise_recompute_parser = subparsers.add_parser(
         "observation-noise-recompute",
         help="Independently recompute observation-noise metrics from primitive records.",
     )
     noise_recompute_parser.add_argument("run_dir", type=Path)
+
+    noise_selection_parser = subparsers.add_parser(
+        "observation-noise-development-select",
+        help="Evaluate the frozen bounded observation-noise candidate catalog on development data.",
+    )
+    noise_selection_parser.add_argument("--output", type=Path, default=Path("docs/evidence/observation_noise_development_selection.json"))
+    noise_selection_parser.add_argument("--runs-root", type=Path, default=Path("runs/development-selection"))
+    noise_selection_parser.add_argument(
+        "--reuse-root", type=Path, help="Recompute and relabel already completed selection attempts."
+    )
+    noise_selection_parser.add_argument(
+        "--quick", action="store_true", help="Use the bounded one-lineage smoke plan."
+    )
+
+    noise_joint_parser = subparsers.add_parser(
+        "observation-noise-confirmation-evaluate",
+        help="Verify confirmation A and B independently and evaluate one joint primary family.",
+    )
+    noise_joint_parser.add_argument("archive_a", type=Path)
+    noise_joint_parser.add_argument("archive_b", type=Path)
+    noise_joint_parser.add_argument(
+        "--output", type=Path, default=Path("docs/evidence/observation_noise_joint_evaluation.json")
+    )
 
     noise_freeze_parser = subparsers.add_parser(
         "observation-noise-freeze", help="Write the observation-noise source freeze manifest."
@@ -197,6 +228,15 @@ def main(argv: list[str] | None = None) -> int:
         print(f"hash: {canonical_protocol_hash()}")
         return 0
 
+    if args.command == "observation-noise-fingerprint":
+        from .noise.scientific_identity import scientific_fingerprint
+
+        fingerprint = scientific_fingerprint(default_project_root())
+        print(f"schema: {fingerprint['schema']}")
+        print(f"sha256: {fingerprint['sha256']}")
+        print(f"files: {len(fingerprint['files'])}")
+        return 0
+
     if args.command == "observation-noise-recompute":
         from .noise.verifier import verify_attempt
 
@@ -206,6 +246,36 @@ def main(argv: list[str] | None = None) -> int:
         print(f"records: {result['records']}")
         print(f"trials: {result['trials']}")
         return 0 if result["verdict"] == "PASS" else 3
+
+    if args.command == "observation-noise-development-select":
+        from .noise.selection import run_development_selection
+
+        try:
+            selection = run_development_selection(
+                output_root=args.runs_root,
+                evidence_path=args.output,
+                quick=args.quick,
+                reuse_root=args.reuse_root,
+            )
+        except Exception as error:
+            print(f"observation-noise development selection failed: {error}", file=sys.stderr)
+            return 2
+        print(f"selected candidate: {selection['selected_candidate']}")
+        print(f"evidence: {args.output}")
+        return 0
+
+    if args.command == "observation-noise-confirmation-evaluate":
+        from .noise.joint import JointEvaluationError, evaluate_joint_archives
+
+        try:
+            result = evaluate_joint_archives(args.archive_a, args.archive_b, output_path=args.output)
+        except (JointEvaluationError, OSError, ValueError, json.JSONDecodeError) as error:
+            print(f"observation-noise joint evaluation failed: {error}", file=sys.stderr)
+            return 3
+        print(f"joint outcome: {result['outcome']}")
+        print(f"claims: {len(result['claims'])}")
+        print(f"evidence: {args.output}")
+        return 0 if result["all_required_gates_pass"] else 1
 
     if args.command == "observation-noise-freeze":
         from .noise.freeze import build_freeze_manifest, save_freeze_manifest
@@ -244,6 +314,7 @@ def main(argv: list[str] | None = None) -> int:
                 quick=args.quick,
                 protocol_path=args.protocol,
                 resume=args.resume,
+                candidate_id=args.candidate_id,
             )
         except Exception as error:
             print(f"observation-noise failed: {error}", file=sys.stderr)

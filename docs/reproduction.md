@@ -77,6 +77,32 @@ Formal A/B execution requires the separate source-freeze manifest, declared
 batch identities, the exact lock, the fixed ten-lineage plan, durable full
 archive retention, and independent review.
 
+The non-self-referential scientific identity can be inspected before a freeze:
+
+```bash
+python -m aaa.cli observation-noise-fingerprint
+```
+
+It covers the scientific source map and fails closed on nonignored untracked
+scientific files or symlinks. Only mutable batch lifecycle fields are
+normalized. Generated result, freeze and review files are excluded so writing
+the exact freeze cannot alter the fingerprint it records.
+
+Before any candidate comparison, run the committed bounded development plan:
+
+```bash
+python -m aaa.cli observation-noise-development-select --quick \
+  --output docs/evidence/observation_noise_development_selection.json \
+  --runs-root runs/development-selection
+```
+
+This evaluates all four catalogued IDs, retains every attempt, and updates the
+candidate ledger. The current selected identity is the unchanged incumbent
+control, which is a valid no-refinement result. A confirmation invocation does
+not accept a candidate override; it resolves the ID from the committed
+confirmation freeze and checks the ledger's selected entry and configuration
+hash.
+
 The design/source freeze is written only after the implementation is committed:
 
 ```bash
@@ -87,8 +113,9 @@ python -m aaa.cli observation-noise-freeze \
 
 After bounded development, a confirmation freeze is a separate file and must
 name the selected candidate explicitly. The command refuses to create that
-file without a candidate identity; this branch has no selected refinement, so
-no confirmation freeze or confirmation result is claimed.
+file without a candidate identity. A no-refinement incumbent selection is a
+legitimate candidate identity; it does not waive the freeze, full archive, or
+joint-analysis requirements.
 
 ## Development work
 
@@ -140,6 +167,21 @@ candidate was repaired on development evidence, which changed the specification
 hash, which in turn meant round 2 needed newly declared batches. A batch
 declared against one specification hash is refused under another. Both rounds
 are in `benchmarks/confirmation_batches.json` and `results/benchmark_v2_1/`.
+
+Observation-noise A and B are evaluated together only after both full archives
+exist:
+
+```bash
+python -m aaa.cli observation-noise-confirmation-evaluate \
+  runs/observation-noise-v1/<confirmation-a-attempt> \
+  runs/observation-noise-v1/<confirmation-b-attempt> \
+  --output docs/evidence/observation_noise_joint_evaluation.json
+```
+
+The command enumerates the complete primary family, applies one Holm
+adjustment across A+B, and returns non-zero on any failed or missing required
+claim. It is not a substitute for durable archive publication or independent
+review.
 
 A higher-replication track with 20 independent training lineages:
 

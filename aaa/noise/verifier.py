@@ -16,6 +16,8 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any, TextIO
 
+from .candidates import candidate_definition
+
 RECORD_SCHEMA = "aaa.observation_noise_step.v3"
 LEGACY_RECORD_SCHEMAS = {"aaa.observation_noise_step.v2"}
 CHECK_NAMES = (
@@ -488,6 +490,30 @@ def verify_attempt(run_dir: str | Path) -> dict[str, Any]:
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     if not all(isinstance(value, dict) for value in (metadata, manifest, summary)):
         raise VerificationError("metadata, manifest, and summary must be objects")
+    is_v3 = metadata.get("protocol_version") == "aaa.observation_noise.v1"
+    if is_v3:
+        candidate_ids = {
+            metadata.get("selected_candidate"),
+            manifest.get("selected_candidate"),
+            summary.get("selected_candidate"),
+        }
+        if len(candidate_ids) != 1 or None in candidate_ids:
+            raise VerificationError("selected candidate identities disagree or are missing")
+        try:
+            definition = candidate_definition(str(next(iter(candidate_ids))))
+        except ValueError as exc:
+            raise VerificationError(str(exc)) from exc
+        candidate_hashes = {
+            metadata.get("selected_candidate_configuration_hash"),
+            manifest.get("selected_candidate_configuration_hash"),
+            summary.get("selected_candidate_configuration_hash"),
+        }
+        if candidate_hashes != {definition.configuration_hash}:
+            raise VerificationError("selected candidate configuration hash is not canonical")
+        if metadata.get("role") in {"confirmation_a", "confirmation_b"} and not isinstance(
+            metadata.get("scientific_fingerprint_sha256"), str
+        ):
+            raise VerificationError("confirmation metadata is missing the scientific fingerprint")
     attempt_ids = {metadata.get("attempt_id"), manifest.get("attempt_id"), summary.get("attempt_id")}
     if len(attempt_ids) != 1 or None in attempt_ids:
         raise VerificationError("metadata, manifest, and summary attempt identities disagree")

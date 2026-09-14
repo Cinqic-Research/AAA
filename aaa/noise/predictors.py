@@ -153,6 +153,12 @@ def make_predictors(
 
 
 def clone_predictor(predictor: Predictor, *, update_enabled: bool) -> Predictor:
+    from .candidates import InnovationClipRLSPredictor
+
+    if isinstance(predictor, InnovationClipRLSPredictor):
+        return InnovationClipRLSPredictor.from_state_dict(
+            predictor.state_dict(), name=predictor.name, update_enabled=update_enabled
+        )
     if isinstance(predictor, OnlineRLSPredictor):
         return OnlineRLSPredictor.from_state_dict(
             predictor.state_dict(), name=predictor.name, update_enabled=update_enabled

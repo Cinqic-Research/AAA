@@ -1,5 +1,27 @@
 # Research history
 
+## Observation-noise v1 completion boundary (2026-09-14)
+
+The observation-noise phase now has a non-self-referential scientific source
+fingerprint. It hashes the tracked scientific source map, rejects untracked
+scientific files and symlinks, normalizes only mutable batch lifecycle fields,
+and excludes generated result/freeze/review artifacts. Committing the exact
+freeze therefore cannot invalidate its own recorded identity; Git commit and
+tree values remain provenance only.
+
+Development refinement is bounded by the declared 12-configuration/3-mechanism
+budget. Four immutable candidate identities were evaluated on the committed
+development plan. All three innovation-clipping refinements were rejected on
+the preregistered constraints, so `incumbent-no-refinement-v1` is the selected
+candidate. No A/B conclusion follows from this development result.
+
+The joint confirmation evaluator is present as
+`observation-noise-confirmation-evaluate <A> <B>`. It independently verifies
+both archives, requires shared candidate/fingerprint/training compatibility,
+reconstructs absolute utility, baseline competitiveness, first-50 adaptation,
+and unchanged-law retention claims, and applies one Holm family across A+B.
+No confirmation freeze or A/B archive was executed in this completion boundary.
+
 Dates are the dates of the work, not of any release. Nothing here is a product
 announcement.
 

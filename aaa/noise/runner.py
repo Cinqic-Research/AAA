@@ -26,6 +26,7 @@ from ..environment import DampedOscillatorEnvironment, MovingDotEnvironment
 from ..experiment import TrialIdentity, run_episode
 from ..predictors import OnlineRLSPredictor, Predictor
 from .calibration import CausalResidualCalibrator
+from .candidates import INCUMBENT_CANDIDATE_ID, candidate_definition, candidate_from_model
 from .observation import (
     NoiseSchedule,
     NoisyObservationEnvironment,
@@ -41,6 +42,7 @@ from .predictors import (
     clone_predictor,
     incumbent_from_v21,
 )
+from .scientific_identity import ScientificIdentityError, fingerprints_equal, scientific_fingerprint
 from .spec import NoiseProtocol, canonical_protocol_hash, load_protocol
 from .statistics import (
     hierarchical_bootstrap,
@@ -525,6 +527,7 @@ def run_matched_changed_law(
     trial: dict[str, Any],
     schedule: NoiseSchedule,
     *,
+    candidate_id: str = INCUMBENT_CANDIDATE_ID,
     initial_calibrators: dict[str, CausalResidualCalibrator] | None = None,
 ) -> list[dict[str, Any]]:
     """Create a common prefix, then clone the complete state into two branches."""
@@ -541,11 +544,13 @@ def run_matched_changed_law(
     for _ in range(environment.config.history_length - 1):
         environment.advance()
         history.append(environment.observe())
-    prefix_model = _clone_rls(model, "prefix_online", True)
+    prefix_model = candidate_from_model(
+        model, candidate_id, name="selected_candidate_prefix", update_enabled=True
+    )
     prefix_calibrators = _new_calibrators([prefix_model])
-    if initial_calibrators is not None and "incumbent_square_root_rls" in initial_calibrators:
+    if initial_calibrators is not None and "selected_candidate_online" in initial_calibrators:
         prefix_calibrators[prefix_model.name] = copy.deepcopy(
-            initial_calibrators["incumbent_square_root_rls"]
+            initial_calibrators["selected_candidate_online"]
         )
     prefix_trial = {**trial, "trial_id": f"{trial['trial_id']}:prefix", "branch": "prefix"}
     records = run_noisy_segment(
@@ -560,12 +565,14 @@ def run_matched_changed_law(
     )
     frozen_environment = copy.deepcopy(environment)
     online_environment = copy.deepcopy(environment)
-    frozen_model = _clone_rls(prefix_model, "incumbent_branch_frozen", False)
-    online_model = _clone_rls(prefix_model, "incumbent_branch_online", True)
+    frozen_model = clone_predictor(prefix_model, update_enabled=False)
+    frozen_model.name = "selected_candidate_branch_frozen"
+    online_model = clone_predictor(prefix_model, update_enabled=True)
+    online_model.name = "selected_candidate_branch_online"
     frozen_calibrators = copy.deepcopy(prefix_calibrators)
     online_calibrators = copy.deepcopy(prefix_calibrators)
 
-    def branch_predictors(model_copy: OnlineRLSPredictor) -> list[Predictor]:
+    def branch_predictors(model_copy: Predictor) -> list[Predictor]:
         lower = environment.config.lower_bound
         upper = environment.config.upper_bound
         return [
@@ -622,9 +629,17 @@ def _clone_rls(model: OnlineRLSPredictor, name: str, update_enabled: bool) -> On
     return OnlineRLSPredictor.from_state_dict(model.state_dict(), name=name, update_enabled=update_enabled)
 
 
-def _predictors(model: OnlineRLSPredictor, *, lower: float, upper: float, dt: float) -> list[Predictor]:
+def _predictors(
+    model: OnlineRLSPredictor,
+    *,
+    lower: float,
+    upper: float,
+    dt: float,
+    candidate_id: str = INCUMBENT_CANDIDATE_ID,
+) -> list[Predictor]:
     from ..predictors import ConstantMotionPredictor, PersistencePredictor, ReflectedConstantMotionPredictor
 
+    candidate_definition(candidate_id)
     return [
         PersistencePredictor(),
         ConstantMotionPredictor(),
@@ -634,6 +649,8 @@ def _predictors(model: OnlineRLSPredictor, *, lower: float, upper: float, dt: fl
         _clone_rls(model, "incumbent_frozen", False),
         _clone_rls(model, "incumbent_square_root_rls", True),
         incumbent_from_v21(name="no_learning_control", update_enabled=False),
+        candidate_from_model(model, candidate_id, name="selected_candidate_frozen", update_enabled=False),
+        candidate_from_model(model, candidate_id, name="selected_candidate_online", update_enabled=True),
     ]
 
 
@@ -965,7 +982,7 @@ def _reference_check() -> dict[str, Any]:
     }
 
 
-def _require_confirmation_freeze(protocol: NoiseProtocol, batch_id: str) -> None:
+def _require_confirmation_freeze(protocol: NoiseProtocol, batch_id: str) -> str:
     """Refuse A/B execution until the separately committed confirmation freeze matches."""
 
     if protocol.hash() != canonical_protocol_hash():
@@ -984,22 +1001,44 @@ def _require_confirmation_freeze(protocol: NoiseProtocol, batch_id: str) -> None
         raise ObservationNoiseError(f"batch {batch_id!r} is not listed in the confirmation freeze")
     if not isinstance(freeze.get("selected_candidate"), str) or not freeze["selected_candidate"]:
         raise ObservationNoiseError("confirmation freeze does not identify a selected candidate")
-    source = freeze.get("source")
-    current = git_metadata(project_root())
-    if (
-        not isinstance(source, dict)
-        or source.get("dirty") is not False
-        or source.get("commit") != current.get("commit")
-        or source.get("tree_hash") != current.get("tree_hash")
-        or current.get("dirty") is not False
-    ):
+    selected_candidate = str(freeze["selected_candidate"])
+    try:
+        definition = candidate_definition(selected_candidate)
+    except ValueError as exc:
+        raise ObservationNoiseError(str(exc)) from exc
+    if freeze.get("selected_candidate_configuration_hash") != definition.configuration_hash:
+        raise ObservationNoiseError("confirmation freeze candidate configuration hash is not canonical")
+    ledger_path = project_root() / "benchmarks" / "observation_noise_candidate_ledger.json"
+    if freeze.get("candidate_ledger_sha256") != sha256_file(ledger_path):
+        raise ObservationNoiseError("candidate ledger differs from the confirmation freeze")
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    selected_entries = [
+        entry
+        for entry in ledger.get("entries", [])
+        if isinstance(entry, dict)
+        and entry.get("candidate_id") == selected_candidate
+        and entry.get("outcome") == "selected"
+    ]
+    if ledger.get("status") != "development_complete" or ledger.get("selected_candidate") != selected_candidate:
+        raise ObservationNoiseError("candidate ledger has no committed development selection")
+    if len(selected_entries) != 1 or selected_entries[0].get("configuration_hash") != definition.configuration_hash:
+        raise ObservationNoiseError("candidate ledger selected entry is not the canonical candidate identity")
+    frozen_fingerprint = freeze.get("scientific_fingerprint")
+    if not isinstance(frozen_fingerprint, dict):
+        raise ObservationNoiseError("confirmation freeze has no scientific source fingerprint")
+    try:
+        current_fingerprint = scientific_fingerprint(project_root())
+    except ScientificIdentityError as exc:
+        raise ObservationNoiseError(f"cannot establish current scientific source fingerprint: {exc}") from exc
+    if not fingerprints_equal(frozen_fingerprint, current_fingerprint):
         raise ObservationNoiseError(
-            "confirmation source identity is not the clean, exact checkout recorded by the freeze"
+            "scientific source fingerprint differs from the confirmation freeze; commit SHA is provenance only"
         )
     lock = freeze.get("dependency_lock")
     lock_path = project_root() / "requirements-lock.txt"
     if not isinstance(lock, dict) or lock.get("sha256") != sha256_file(lock_path) or not lock_path.is_file():
         raise ObservationNoiseError("confirmation dependency lock differs from the freeze")
+    return selected_candidate
 
 
 def _zero_noise_fixture(protocol: NoiseProtocol) -> dict[str, Any]:
@@ -1199,6 +1238,7 @@ def run_attempt(
     quick: bool = False,
     protocol_path: str | Path | None = None,
     resume: bool = False,
+    candidate_id: str | None = None,
 ) -> AttemptResult:
     protocol = load_protocol(protocol_path)
     if role not in {"development", "confirmation_a", "confirmation_b"}:
@@ -1207,11 +1247,12 @@ def run_attempt(
         raise ObservationNoiseError("confirmation roles require an explicit predeclared batch_id")
     if role != "development" and quick:
         raise ObservationNoiseError("quick development mode is not valid for confirmation")
+    resolved_candidate_id = candidate_id or INCUMBENT_CANDIDATE_ID
     if role != "development":
         if protocol_path is not None:
             raise ObservationNoiseError("confirmation roles cannot use a protocol override")
         assert batch_id is not None
-        _require_confirmation_freeze(protocol, batch_id)
+        resolved_candidate_id = _require_confirmation_freeze(protocol, batch_id)
         registry_path = project_root() / "benchmarks" / "observation_noise_registry.json"
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
         if registry.get("protocol_hash") != canonical_protocol_hash():
@@ -1265,6 +1306,7 @@ def run_attempt(
                     lower=_base_world("constant_velocity", 40).lower_bound,
                     upper=_base_world("constant_velocity", 40).upper_bound,
                     dt=_base_world("constant_velocity", 40).dt,
+                    candidate_id=resolved_candidate_id,
                 )
                 predictor_inventory.append(
                     {
@@ -1456,6 +1498,7 @@ def run_attempt(
                     lower=latent.config.lower_bound,
                     upper=latent.config.upper_bound,
                     dt=latent.config.dt,
+                    candidate_id=resolved_candidate_id,
                 )
                 wrapped = NoisyObservationEnvironment(latent, schedule)
                 rows = run_noisy_episode(
@@ -1476,6 +1519,7 @@ def run_attempt(
                         model,
                         trial,
                         schedule,
+                        candidate_id=resolved_candidate_id,
                         initial_calibrators=initial_calibrators[(trial["condition"], trial["lineage"])],
                     )
                     _persist_trial_rows(attempt_dir, branch_rows)
@@ -1489,6 +1533,9 @@ def run_attempt(
             raise ObservationNoiseError("no completed trial shards were retained")
         all_records = sorted(all_records, key=lambda row: (str(row["trial"]["trial_id"]), int(row["step"])))
         _write_combined_records(attempt_dir, all_records)
+        confirmation_fingerprint = (
+            scientific_fingerprint(project_root())["sha256"] if role != "development" else None
+        )
         compressed_path = attempt_dir / "records.jsonl.gz"
         compressed_sha = _copy_to_gzip(record_path, compressed_path)
         metrics = _metric_rows(all_records)
@@ -1548,6 +1595,11 @@ def run_attempt(
             "protocol_hash": canonical_protocol_hash(),
             "role": role,
             "batch_id": batch_id,
+            "selected_candidate": resolved_candidate_id,
+            "selected_candidate_configuration_hash": candidate_definition(
+                resolved_candidate_id
+            ).configuration_hash,
+            "scientific_fingerprint_sha256": confirmation_fingerprint,
             "planned_trials": len(plans),
             "expected_scored_records": sum(
                 family_steps[item["family"]]
@@ -1582,6 +1634,11 @@ def run_attempt(
             "protocol_hash": canonical_protocol_hash(),
             "role": role,
             "batch_id": batch_id,
+            "selected_candidate": resolved_candidate_id,
+            "selected_candidate_configuration_hash": candidate_definition(
+                resolved_candidate_id
+            ).configuration_hash,
+            "scientific_fingerprint_sha256": confirmation_fingerprint,
             "created_at_utc": _now(),
             "source": git_metadata(project_root()),
             "dependency_lock": (
@@ -1619,6 +1676,10 @@ def run_attempt(
             "attempt_id": attempt_dir.name,
             "role": role,
             "batch_id": batch_id,
+            "selected_candidate": resolved_candidate_id,
+            "selected_candidate_configuration_hash": candidate_definition(
+                resolved_candidate_id
+            ).configuration_hash,
             "outcome": "inconclusive" if role == "development" else "blocked_by_missing_evidence",
             "engineering_status": "engineering_complete",
             "metrics": metrics,

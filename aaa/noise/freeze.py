@@ -9,6 +9,8 @@ from typing import Any
 
 from ..benchmark.evidence import git_metadata, sha256_file
 from ..benchmark.spec import load_spec, spec_hash
+from .candidates import candidate_definition
+from .scientific_identity import scientific_fingerprint
 from .spec import load_protocol
 
 
@@ -30,6 +32,10 @@ def build_freeze_manifest(
     protocol = load_protocol(protocol_path)
     protocol_hash = protocol.hash()
     git = git_metadata(project_root)
+    fingerprint = scientific_fingerprint(project_root)
+    candidate_hash = (
+        candidate_definition(selected_candidate).configuration_hash if selected_candidate else None
+    )
     return {
         "schema_version": "aaa.observation_noise_source_freeze.v1",
         "stage": stage,
@@ -42,6 +48,8 @@ def build_freeze_manifest(
             "resolved_sha256": spec_hash(load_spec(reference_path)),
         },
         "source": git,
+        "scientific_fingerprint": fingerprint,
+        "scientific_fingerprint_sha256": fingerprint["sha256"],
         "dependency_lock": {
             "path": "requirements-lock.txt",
             "sha256": sha256_file(project_root / "requirements-lock.txt"),
@@ -49,6 +57,7 @@ def build_freeze_manifest(
         "candidate_ledger_sha256": sha256_file(ledger_path),
         "planned_batches": list(batches),
         "selected_candidate": selected_candidate,
+        "selected_candidate_configuration_hash": candidate_hash,
         "notes": notes,
         "manifest_identity": hashlib.sha256(
             json.dumps(
@@ -58,6 +67,8 @@ def build_freeze_manifest(
                     "reference": sha256_file(reference_path),
                     "batches": batches,
                     "selected_candidate": selected_candidate,
+                    "selected_candidate_configuration_hash": candidate_hash,
+                    "scientific_fingerprint_sha256": fingerprint["sha256"],
                 },
                 sort_keys=True,
             ).encode()

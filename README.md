@@ -85,7 +85,10 @@ alongside everything else. No threshold was touched. See `AAA-120` in
 - Observation-noise v1: a separately versioned, design-frozen sensor model
   with cached schedules, latent/observed field separation, causal noisy-target
   updates, matched intervention branches, and a small reference verifier. Its
-  development smoke evidence is not a confirmation result.
+  development smoke evidence is not a confirmation result. The bounded
+  development refinement search evaluated four first-class candidate identities
+  and selected the unchanged incumbent as an explicit no-refinement control;
+  see [`benchmarks/observation_noise_candidate_ledger.json`](benchmarks/observation_noise_candidate_ledger.json).
 
 ## The learner
 
@@ -134,9 +137,14 @@ external API, no pretrained model, no paid service.
 python -m unittest discover -s tests -t .        # the test suite
 python -m aaa.cli spec-hash                      # canonical specification identity
 python -m aaa.cli observation-noise-protocol-hash # separate noise protocol identity
+python -m aaa.cli observation-noise-fingerprint    # scientific source identity
+python -m aaa.cli observation-noise-development-select --quick \
+    --output docs/evidence/observation_noise_development_selection.json
 python -m aaa.cli observation-noise --role development --quick \
     --attempt-label noise-smoke-001 --output-root runs
 python -m aaa.cli observation-noise-recompute runs/observation-noise-v1/noise-smoke-001
+python -m aaa.cli observation-noise-confirmation-evaluate <A> <B> \
+    --output docs/evidence/observation_noise_joint_evaluation.json
 python -m aaa.cli benchmark --role development --attempt-label dev-001 \
     --replicas 2 --episodes 3 --output-root runs
 python -m aaa.cli recompute runs/benchmark-v2_1/dev-001
@@ -145,8 +153,12 @@ python -m aaa.cli select-candidate
 python -m aaa.cli animate --checkpoint runs/<attempt>/checkpoints/replica-00.json
 ```
 
-Formal confirmation requires a predeclared batch, a committed freeze manifest
-and a clean source tree; see [`docs/reproduction.md`](docs/reproduction.md).
+Formal confirmation requires a predeclared batch, a committed freeze manifest,
+the selected candidate ledger entry, the exact lock, and a matching
+non-self-referential scientific fingerprint; see
+[`docs/reproduction.md`](docs/reproduction.md). The confirmation evaluator
+reconstructs the complete primary A+B claim family and applies one Holm
+adjustment without trusting stored conclusions.
 
 ## Interpreting a result
 

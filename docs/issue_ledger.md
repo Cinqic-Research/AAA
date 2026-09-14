@@ -1053,3 +1053,84 @@ engineering evidence only until the frozen ten-lineage confirmation plan is
 run. The phase verifier now binds every record to its saved schedule, checks
 the raw sensor equation and units, and rejects rehashed cached-error
 corruption, missing scientific gates, and strict-type substitutions.
+
+---
+
+## Observation-noise v1 completion audit
+
+### AAA-129 — confirmation freeze used a self-referential commit equality
+- **Source** fresh observation-noise completion audit · **Severity** critical · **Status** repaired
+- **Reproduction** The prior confirmation admission required the freeze's
+  recorded commit and tree hash to equal the current checkout. Generating and
+  committing `observation_noise_freeze.json` necessarily changed the commit,
+  so a valid freeze could not admit its own clean checkout.
+- **Repair** `aaa.noise.scientific_identity` enumerates the Git scientific file
+  map, hashes normalized content plus executable-bit metadata, excludes only
+  explicit generated result/freeze/review files, normalizes only mutable batch
+  lifecycle fields, and fails closed on nonignored untracked files, unsafe
+  paths and symlinks. Git metadata remains provenance. Confirmation compares
+  the complete fingerprint map instead of commit equality.
+- **Regression** `tests/test_observation_noise_identity.py` edits scientific
+  code, candidate, analysis, verifier and batch declarations; tests mutable
+  registry transitions, generated output, exact freeze commits, untracked
+  inputs and symlinks.
+
+### AAA-130 — observation-noise candidate ledger had no selected first-class candidate
+- **Source** fresh observation-noise completion audit · **Severity** critical · **Status** repaired
+- **Reproduction** The design ledger was empty and the runner had only named
+  incumbent/comparator predictors; no immutable selected candidate ID,
+  configuration hash, development disposition or confirmation resolver existed.
+- **Repair** Four catalogued identities now carry parent, mechanism, exact
+  parameters, trainable/fixed state, training condition, mechanism count,
+  configuration hash, attempt IDs and outcome reason. The committed bounded
+  selection plan evaluated the unchanged incumbent plus three causal
+  innovation-clipping variants. All refinements were rejected; the unchanged
+  incumbent is selected as a valid no-refinement control. Confirmation reads
+  only the committed freeze and selected ledger entry.
+- **Evidence** `benchmarks/observation_noise_candidate_ledger.json` and
+  `docs/evidence/observation_noise_development_selection.json`.
+
+### AAA-131 — observation-noise scientific gates were permanent placeholders
+- **Source** fresh observation-noise completion audit · **Severity** critical · **Status** partially repaired; confirmation pending
+- **Reproduction** The runner emitted `INSUFFICIENT_EVIDENCE` for scientific
+  endpoints on every role and had no machine-readable primary bound evaluator.
+- **Repair** Exact acceptance formulas, one-sided 95% bound direction,
+  thresholds, practical margin, first-surprise adaptation definition and
+  no-refinement promotion rule are now protocol fields. The joint evaluator
+  reconstructs the final claims from primitive A+B records. Development smoke
+  remains `INSUFFICIENT_EVIDENCE` by design; no confirmation result is claimed.
+- **Remaining boundary** Full ten-lineage A/B evidence, durable archive and
+  independent review have not been executed.
+
+### AAA-132 — separate A/B analyses did not implement one joint multiplicity family
+- **Source** fresh observation-noise completion audit · **Severity** high · **Status** repaired in code; confirmation pending
+- **Reproduction** Existing per-attempt paired statistics applied their own
+  local comparison output and could not enumerate the combined A+B endpoint,
+  cell and batch family.
+- **Repair** `observation-noise-confirmation-evaluate <A> <B>` independently
+  verifies both archives, checks compatibility and shared checkpoints,
+  reconstructs all primary claims, records a deterministic Holm order/family
+  size, and recomputes the outcome without stored conclusions.
+- **Regression** The joint evaluator's hierarchy, claim-family and archive
+  compatibility paths are covered by unit-level fixtures and fail-closed
+  archive admission tests.
+
+### AAA-133 — the observation-noise verifier did not bind candidate identity
+- **Source** fresh observation-noise completion audit · **Severity** high · **Status** repaired
+- **Reproduction** A v3 summary could be paired with primitive records while
+  omitting or changing the selected candidate identity and configuration hash.
+- **Repair** The independent verifier now requires matching canonical candidate
+  ID/configuration hashes in metadata, run manifest and summary; confirmation
+  metadata must also contain the scientific fingerprint. Cached outcomes remain
+  insufficient without primitive arithmetic.
+
+### AAA-134 — no approved durable archive locator exists for observation-noise A/B
+- **Source** fresh observation-noise completion audit · **Severity** blocking · **Status** open
+- **Reproduction** The protocol requires a full archive and immutable locator,
+  but this workspace has no approved durable storage mechanism for the new
+  observation-noise records. Temporary development roots cannot be presented
+  as durable evidence.
+- **Disposition** No locator is fabricated. The compact development evidence
+  records transient archive status, while the confirmation boundary remains
+  blocked until an approved durable mechanism is supplied and recorded before
+  A/B execution.

@@ -8,7 +8,52 @@
     "numerical_stability": "No registered cell may have an unhandled exception, nonfinite forecast/state, silent sample loss, or unrecorded reset.",
     "outcome_vocabulary": ["engineering_complete", "scientifically_supported", "negative", "inconclusive", "blocked_by_missing_evidence"],
     "reference_preservation": "The v2.1 raw and resolved identities remain unchanged and zero-noise behavioral equivalence passes within the declared tolerance.",
-    "unchanged_law_retention": "The same adjusted noninferiority rule is applied against the matched frozen learner in every primary unchanged-law cell."
+    "unchanged_law_retention": "The same adjusted noninferiority rule is applied against the matched frozen learner in every primary unchanged-law cell.",
+    "machine_criteria": {
+      "absolute_utility": {
+        "estimate": "mean(latent_normalized_absolute_error[selected_candidate_online])",
+        "bound": "upper_confidence_bound",
+        "confidence_level": 0.95,
+        "adjustment": "Holm once across the joint A+B primary family",
+        "operator": "<=",
+        "threshold": 0.02
+      },
+      "baseline_competitiveness": {
+        "estimate": "mean(latent_normalized_absolute_error[selected_candidate_online] - 1.10 * latent_normalized_absolute_error[constant_motion_reflected])",
+        "bound": "upper_confidence_bound",
+        "confidence_level": 0.95,
+        "adjustment": "Holm once across the joint A+B primary family",
+        "operator": "<=",
+        "threshold": 0.00001
+      },
+      "moderate_noise_adaptation": {
+        "estimate": "(mean(first50_frozen_error) - mean(first50_online_error)) / mean(first50_frozen_error)",
+        "bound": "lower_confidence_bound",
+        "confidence_level": 0.95,
+        "adjustment": "Holm once across the joint A+B primary family",
+        "operator": ">",
+        "threshold": 0.10,
+        "required_changed_law_branch": "stationary",
+        "includes_first_surprise": true
+      },
+      "unchanged_law_retention": {
+        "estimate": "mean(latent_normalized_absolute_error[selected_candidate_online] - latent_normalized_absolute_error[selected_candidate_frozen])",
+        "bound": "upper_confidence_bound",
+        "confidence_level": 0.95,
+        "adjustment": "Holm once across the joint A+B primary family",
+        "operator": "<=",
+        "threshold": 0.00001
+      },
+      "added_mechanism_promotion": {
+        "estimate": "mean(latent_normalized_absolute_error[incumbent_square_root_rls] - latent_normalized_absolute_error[selected_candidate_online])",
+        "bound": "lower_confidence_bound",
+        "confidence_level": 0.95,
+        "adjustment": "Holm once across the joint A+B primary family",
+        "operator": ">",
+        "threshold": 0.00001,
+        "required_only_when_mechanism_change_count": ">0"
+      }
+    }
   },
   "artifacts": {
     "candidate_ledger": "benchmarks/observation_noise_candidate_ledger.json",
@@ -112,6 +157,7 @@
   "search_budget": {
     "baseline_search_separate": true,
     "candidate_ledger_file": "benchmarks/observation_noise_candidate_ledger.json",
+    "development_selection_plan": "benchmarks/observation_noise_development_selection.json",
     "confirmation_freeze": "Commit selected candidate, baselines, schedules, analysis code, full run plan, and environment identity before reading either A or B.",
     "design_freeze": "Commit this protocol, generator, development/confirmation separation, and candidate-search budget before comparing candidate variants.",
     "max_candidate_configurations": 12,

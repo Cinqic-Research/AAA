@@ -128,6 +128,21 @@ mechanism changes. The ledger includes unsuccessful configurations. A
 refinement is not promoted merely because it is more complex or because a
 confirmation outcome was unfavorable.
 
+The committed selection plan is
+[`../benchmarks/observation_noise_development_selection.json`](../benchmarks/observation_noise_development_selection.json).
+It fixes the development namespace, sample, estimands, conjunctive ranking,
+practical margin, tie-break, baseline separation, and rejection policy before
+variants are compared. The four current identities are the unchanged
+`incumbent-no-refinement-v1` control and three causal innovation-clipping
+variants. Development selected the unchanged incumbent; the complete ledger
+and compact evidence retain the three rejected variants and their reasons.
+
+The confirmation candidate is resolved solely from the committed freeze and
+ledger. Its configuration hash is checked before any batch is consumed. The
+candidate receives only predictor-visible noisy history and the newly revealed
+noisy target; the clipping mechanism uses the candidate's own raw forecast and
+does not receive a law-change, bounce, truth, or evaluator-event label.
+
 ## Replication and uncertainty
 
 The fixed confirmation plan is ten independently trained learner lineages,
@@ -142,6 +157,16 @@ lineage, and sensor realization within episode, preserving paired models and
 branches. The protocol declares 4,000 draws, 90% and 95% intervals, fixed
 balanced cell weighting, and one Holm family across primary endpoint/cell/batch
 claims. Undefined ratios remain undefined.
+
+The machine-readable acceptance formulas are in
+`acceptance.machine_criteria`. The joint evaluator enumerates primary
+condition/family/channel/scale cells in A and B, computes absolute utility,
+candidate-versus-reflected-baseline margin, first-50 changed-law online versus
+complete-state frozen reduction (including the first surprise), and unchanged
+law retention. It applies one one-sided 95% Holm-adjusted bound family over all
+of those claims. An added mechanism has an additional preregistered positive
+gain margin over the unchanged incumbent; the no-refinement control makes that
+promotion gate not applicable rather than inventing a gain claim.
 
 ## Evidence and outcomes
 
@@ -175,3 +200,15 @@ supported, negative, inconclusive, and blocked by missing evidence. Only an
 explicit `PASS` satisfies a required engineering gate. A valid negative result
 may be merged as evidence but cannot promote an unsupported refinement or
 authorize the next capability stage.
+
+The formal command is:
+
+```bash
+python -m aaa.cli observation-noise-confirmation-evaluate <A> <B> \
+  --output docs/evidence/observation_noise_joint_evaluation.json
+```
+
+It is intentionally a joint operation. It independently verifies both full
+archives, rejects mismatched protocol/fingerprint/candidate/training inputs,
+reconstructs the primitive claims, records the claim order and family size,
+and recomputes the final outcome without trusting either stored conclusion.
