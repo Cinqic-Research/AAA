@@ -1,11 +1,11 @@
 {
-  "candidate_ledger_sha256": "e53e76ee18222d7589a54e4e6d2745721096f8db759d2a79c2e48dff0712455b",
+  "candidate_ledger_sha256": "4f049abf580b12c3a6a1718af16ab09d4c36ba05099c539efc87d311145d7be7",
   "dependency_lock": {
     "path": "requirements-lock.txt",
     "sha256": "2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7"
   },
-  "manifest_identity": "d3f6950e2a20e9402649956fde4cfd32a315b504362cfbd34ce9b19508efd3ad",
-  "notes": "design freeze after bounded candidate catalog and non-self-referential scientific identity",
+  "manifest_identity": "5d59e82b2707330552535055dd985f65a5a513c500a2eb79aeeabaaed92dd838",
+  "notes": "design freeze for observation-noise v1; candidate ledger and handoff finalized",
   "planned_batches": [
     "observation-noise-a-0001",
     "observation-noise-b-0001"
@@ -217,7 +217,7 @@
       },
       "aaa/noise/selection.py": {
         "executable": false,
-        "sha256": "0ca675d36191c1cf20fd8b7948e4f9dd12b288b7fb88a93395ad1a9b5ec01a8c"
+        "sha256": "a34f5634e0f97b54f788920e1510f93f58e035c50fc901eee8c197806bf4c4d9"
       },
       "aaa/noise/spec.py": {
         "executable": false,
@@ -265,7 +265,7 @@
       },
       "benchmarks/observation_noise_candidate_ledger.json": {
         "executable": false,
-        "sha256": "e53e76ee18222d7589a54e4e6d2745721096f8db759d2a79c2e48dff0712455b"
+        "sha256": "4f049abf580b12c3a6a1718af16ab09d4c36ba05099c539efc87d311145d7be7"
       },
       "benchmarks/observation_noise_development_selection.json": {
         "executable": false,
@@ -476,17 +476,17 @@
       "status"
     ],
     "schema": "aaa.observation_noise_scientific_source.v1",
-    "sha256": "10a88d74af7aa8e79cf57ccf94018c03723caf0986e06014587de7d6c31f5e71"
+    "sha256": "ddcbed59d8c0c223e5fbc546832c8e6d385c40c232abd6c70c1025b15b9082e0"
   },
-  "scientific_fingerprint_sha256": "10a88d74af7aa8e79cf57ccf94018c03723caf0986e06014587de7d6c31f5e71",
+  "scientific_fingerprint_sha256": "ddcbed59d8c0c223e5fbc546832c8e6d385c40c232abd6c70c1025b15b9082e0",
   "selected_candidate": null,
   "selected_candidate_configuration_hash": null,
   "source": {
     "branch": "codex/aaa-observation-noise-v1",
-    "commit": "98ddf9005858ee4c5e413e743944f4d5288d9e64",
+    "commit": "ac7ed2f8dd74d2372d49459b8c04ffe0258172a0",
     "dirty": false,
     "status": [],
-    "tree_hash": "294a97bfa3cc67e568015bc9253fcf6f95c07bf698c711e07e5f21865c5ce3aa"
+    "tree_hash": "6a13d6100439bb79f3018423b4b489f84dad911add9aa8c9ca64d03d607672a7"
   },
   "stage": "design_freeze"
 }
