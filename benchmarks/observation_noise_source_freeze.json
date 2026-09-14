@@ -4,8 +4,8 @@
     "path": "requirements-lock.txt",
     "sha256": "2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7"
   },
-  "manifest_identity": "5d59e82b2707330552535055dd985f65a5a513c500a2eb79aeeabaaed92dd838",
-  "notes": "design freeze for observation-noise v1; candidate ledger and handoff finalized",
+  "manifest_identity": "eef8c034c8ed02855083d2bfd467c1dcf0143f76bb0fa2c3f7716d4010783688",
+  "notes": "design freeze for observation-noise v1; final candidate ledger, typed implementation, and Sol handoff",
   "planned_batches": [
     "observation-noise-a-0001",
     "observation-noise-b-0001"
@@ -145,7 +145,7 @@
       },
       "aaa/cli.py": {
         "executable": false,
-        "sha256": "1d3941fab3749b544247bdde84ef19e73d40e8f0fd3d2c569e3c1552a1b64d8a"
+        "sha256": "c8d1c86a6aa39aea2c01d97fb9bb58c0ffdaaaf8e8e1c2a7fa48521a8e9df7b7"
       },
       "aaa/config.py": {
         "executable": false,
@@ -181,7 +181,7 @@
       },
       "aaa/noise/candidates.py": {
         "executable": false,
-        "sha256": "ecf6fd2f6d22a0006acebdd76a7b71db9590dd560707d997f7c8e5112cb75c0f"
+        "sha256": "d89bb8cdccc56e922a7e11c07a1a926e501556bf6440602e7ec58981c33500ed"
       },
       "aaa/noise/data/observation_noise_v1.json": {
         "executable": false,
@@ -193,7 +193,7 @@
       },
       "aaa/noise/joint.py": {
         "executable": false,
-        "sha256": "c8e88c1418332f3569f7cf9c04d3ee093c4ee8f0740b25a0ebc9549e7b86d98d"
+        "sha256": "fad667bf7fe8ef4c9f31d378017cebe4859efbe668784dff37b65b94d969d52a"
       },
       "aaa/noise/observation.py": {
         "executable": false,
@@ -209,19 +209,19 @@
       },
       "aaa/noise/runner.py": {
         "executable": false,
-        "sha256": "045a450073c9b2a9d2400ecff2159b8993b62ffc4fda8239cc4180745c17e484"
+        "sha256": "c7c81cd2da91d4a7e03a73837f1ff8b7adced68bee62c29316267e5f9f5cc2e9"
       },
       "aaa/noise/scientific_identity.py": {
         "executable": false,
-        "sha256": "80673e64c3a7362c9deadeebe54398055fa21cff9d7b3c5382a10f1ed88e1324"
+        "sha256": "21b85fdf7e7437eefb195ca9c8787f24f5ea7447d1540c4db1221c82a1b6a649"
       },
       "aaa/noise/selection.py": {
         "executable": false,
-        "sha256": "a34f5634e0f97b54f788920e1510f93f58e035c50fc901eee8c197806bf4c4d9"
+        "sha256": "6a9fd5451e649eb73481c031b654c66c6818e202cbba022484a615a322a84405"
       },
       "aaa/noise/spec.py": {
         "executable": false,
-        "sha256": "191a5ba2ef49ba929fcd733b2b1e94fc0801584205d9270a65a92ff49e982c9d"
+        "sha256": "3655821afb22cb820a29a029c315c2d18b01f7b8a30190b405c45b12d77926db"
       },
       "aaa/noise/statistics.py": {
         "executable": false,
@@ -405,7 +405,7 @@
       },
       "tests/test_observation_noise_identity.py": {
         "executable": false,
-        "sha256": "9c680ed5b96dbd8cc3a658d4983244774aeba160825e68781175304d82aa0d83"
+        "sha256": "e0a76ff1a98c42833de5ca16fbdb7d4ac08f6a9a2be6689e05da3e8e04436fcc"
       },
       "tests/test_predictors.py": {
         "executable": false,
@@ -476,17 +476,17 @@
       "status"
     ],
     "schema": "aaa.observation_noise_scientific_source.v1",
-    "sha256": "ddcbed59d8c0c223e5fbc546832c8e6d385c40c232abd6c70c1025b15b9082e0"
+    "sha256": "7bf189a452789a00a02cf21839f66c586d30e6eaf9a5aca1c41b1f6b8cf28721"
   },
-  "scientific_fingerprint_sha256": "ddcbed59d8c0c223e5fbc546832c8e6d385c40c232abd6c70c1025b15b9082e0",
+  "scientific_fingerprint_sha256": "7bf189a452789a00a02cf21839f66c586d30e6eaf9a5aca1c41b1f6b8cf28721",
   "selected_candidate": null,
   "selected_candidate_configuration_hash": null,
   "source": {
     "branch": "codex/aaa-observation-noise-v1",
-    "commit": "ac7ed2f8dd74d2372d49459b8c04ffe0258172a0",
+    "commit": "a825b7e31085922b7e1c28a245b30645756758a1",
     "dirty": false,
     "status": [],
-    "tree_hash": "6a13d6100439bb79f3018423b4b489f84dad911add9aa8c9ca64d03d607672a7"
+    "tree_hash": "bb300bc2cb2d2c7d7571be36b2b6772e055e9d4529cce4cd6a7b958b734055b5"
   },
   "stage": "design_freeze"
 }
