@@ -483,10 +483,10 @@
   "selected_candidate_configuration_hash": null,
   "source": {
     "branch": "codex/aaa-observation-noise-v1",
-    "commit": "78259dd4d70cf8c5aa8f5224149d9339ec3cc114",
+    "commit": "98ddf9005858ee4c5e413e743944f4d5288d9e64",
     "dirty": false,
     "status": [],
-    "tree_hash": "143e0047d4349eeacd942119770e2cced04e32901ad7e0824aa6a3fa7de4ac20"
+    "tree_hash": "294a97bfa3cc67e568015bc9253fcf6f95c07bf698c711e07e5f21865c5ce3aa"
   },
   "stage": "design_freeze"
 }
