@@ -33,7 +33,8 @@ def main() -> None:
     confirmation_path = ROOT / "benchmarks" / "observation_noise_freeze.json"
     confirmation = load("benchmarks/observation_noise_freeze.json") if confirmation_path.is_file() else None
     protocol_hash = str(source_freeze["protocol_hash"])
-    batches = [row for row in registry["batches"] if row.get("protocol_hash") == protocol_hash]
+    planned_batches = set(source_freeze["planned_batches"])
+    batches = [row for row in registry["batches"] if row.get("batch_id") in planned_batches]
     selected = str(ledger["selected_candidate"])
     selected_entry = next(row for row in ledger["entries"] if row["candidate_id"] == selected)
     eligible = selection["ranking"]["eligible_refinements"]
