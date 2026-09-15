@@ -9,20 +9,70 @@
   },
   "base_commit": "58e440462ce2e8fb551c5a5975bef85d4a54fef3",
   "results": [
-    {"command": "MPLBACKEND=Agg python -m unittest discover -s tests -t .", "result": "442 tests, OK", "elapsed_seconds": 77.642, "note": "identical to the baseline measured on the unmodified base commit (442 tests, OK, 78.130 s)"},
-    {"command": "PYTHONPATH=$PWD python -m unittest discover -s research/aaa134/archive_prototype/tests -t .", "result": "41 tests, OK", "elapsed_seconds": 0.35},
-    {"command": "python -m ruff check .", "result": "All checks passed!"},
-    {"command": "python -m ruff format --check .", "result": "108 files already formatted"},
-    {"command": "python -m mypy", "result": "Success: no issues found in 42 source files", "note": "the repository's configured scope is files = [\"aaa\"]"},
-    {"command": "python -m mypy research/aaa134", "result": "Success: no issues found in 12 source files", "note": "run explicitly; the prototype is outside the configured mypy scope"},
-    {"command": "python tools/check_lock.py", "result": "all 24 pinned distributions match the installed environment"},
-    {"command": "python -m aaa.cli spec-hash", "result": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37", "note": "unchanged"},
-    {"command": "python -m aaa.cli observation-noise-protocol-hash", "result": "546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c", "note": "unchanged"},
-    {"command": "git diff --check 58e4404..HEAD", "result": "clean"},
-    {"command": "git diff --diff-filter=MDR --name-only 58e4404..HEAD", "result": "empty: no existing file was modified, deleted or renamed"},
-    {"command": "strict json.load of every added .json", "result": "5 of 5 parsed"},
-    {"command": "credential pattern scan of the complete diff", "result": "no matches"},
-    {"command": "setuptools find_packages(include=['aaa*'])", "result": "['aaa', 'aaa.benchmark', 'aaa.noise']", "note": "research/ is not packaged; pyproject.toml was not modified"}
+    {
+      "command": "MPLBACKEND=Agg python -m unittest discover -s tests -t .",
+      "result": "442 tests, OK",
+      "elapsed_seconds": 77.642,
+      "note": "identical to the baseline measured on the unmodified base commit (442 tests, OK, 78.130 s)"
+    },
+    {
+      "command": "PYTHONPATH=$PWD python -m unittest discover -s research/aaa134/archive_prototype/tests -t .",
+      "result": "41 tests, OK",
+      "elapsed_seconds": 0.35
+    },
+    {
+      "command": "python -m ruff check .",
+      "result": "All checks passed!"
+    },
+    {
+      "command": "python -m ruff format --check .",
+      "result": "108 files already formatted"
+    },
+    {
+      "command": "python -m mypy",
+      "result": "Success: no issues found in 42 source files",
+      "note": "the repository's configured scope is files = [\"aaa\"]"
+    },
+    {
+      "command": "python -m mypy research/aaa134",
+      "result": "Success: no issues found in 12 source files",
+      "note": "run explicitly; the prototype is outside the configured mypy scope"
+    },
+    {
+      "command": "python tools/check_lock.py",
+      "result": "all 24 pinned distributions match the installed environment"
+    },
+    {
+      "command": "python -m aaa.cli spec-hash",
+      "result": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
+      "note": "unchanged"
+    },
+    {
+      "command": "python -m aaa.cli observation-noise-protocol-hash",
+      "result": "546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c",
+      "note": "unchanged"
+    },
+    {
+      "command": "git diff --check 58e4404..HEAD",
+      "result": "clean"
+    },
+    {
+      "command": "git diff --diff-filter=MDR --name-only 58e4404..HEAD",
+      "result": "empty: no existing file was modified, deleted or renamed; 25 files added"
+    },
+    {
+      "command": "strict json.load of every added .json",
+      "result": "5 of 5 parsed"
+    },
+    {
+      "command": "credential pattern scan of the complete diff",
+      "result": "no matches"
+    },
+    {
+      "command": "setuptools find_packages(include=['aaa*'])",
+      "result": "['aaa', 'aaa.benchmark', 'aaa.noise']",
+      "note": "research/ is not packaged; pyproject.toml was not modified"
+    }
   ],
   "boundaries_verified": {
     "existing_files_modified": 0,
