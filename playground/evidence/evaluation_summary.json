@@ -609,8 +609,8 @@
   "seeds_where_online_beat_its_frozen_clone": 5,
   "source": {
     "available": true,
-    "commit": "03923083ed1619cde01816922e6c9968031d59ba",
-    "dirty": true
+    "commit": "bd1ebc666a794844a84779c0461c33c1910fdd58",
+    "dirty": false
   },
   "status": "exploratory"
 }
