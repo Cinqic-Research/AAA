@@ -248,6 +248,28 @@ def _activation_color(value: float | None) -> str | tuple[float, float, float]:
     return (1.0, shade, shade)
 
 
+def release_default_keymap(figure: Figure) -> bool:
+    """Drop Matplotlib's built-in figure key bindings. Returns whether it did.
+
+    Matplotlib binds ``f`` to fullscreen, ``r`` to home and ``right`` to
+    forward by default -- the same three keys this Playground documents for
+    freeze, reset and single step. In a real window those fire *as well as* the
+    Playground's handler: pressing ``f`` froze the tiny network and threw the
+    window to fullscreen at the same time. Disconnecting the default handler
+    leaves the documented controls as the only key bindings on this figure.
+
+    Save, zoom, pan and the rest stay available on the toolbar, and the window
+    manager still closes the window, so nothing a viewer needs is lost.
+    """
+
+    manager = getattr(figure.canvas, "manager", None)
+    handler_id = getattr(manager, "key_press_handler_id", None)
+    if handler_id is None:
+        return False
+    figure.canvas.mpl_disconnect(handler_id)
+    return True
+
+
 class PlaygroundRenderer:
     """Builds and refreshes the dashboard for one :class:`PlaygroundSession`.
 
@@ -258,6 +280,7 @@ class PlaygroundRenderer:
     def __init__(self, session: PlaygroundSession, *, figure: Figure | None = None) -> None:
         self.session = session
         self.figure = figure if figure is not None else plt.figure(figsize=(14.0, 8.0))
+        release_default_keymap(self.figure)
         self.figure.suptitle(
             "AAA Playground — exploratory visualizer. Not benchmark v2.1 evidence.",
             fontsize=11,

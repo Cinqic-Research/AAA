@@ -53,6 +53,13 @@ independent review.
 | Radio | scenario: `straight`, `bouncing`, `changed`, `dynamics_change` |
 | Slider | steps per animation frame |
 
+Matplotlib's own figure key bindings are released when the dashboard is built.
+It binds `f` to fullscreen, `r` to home and `Right` to forward by default —
+the same three keys documented above — so without that release, pressing `f`
+froze the tiny network *and* threw the window into fullscreen at the same
+time. Save, zoom and pan remain on the toolbar, and the window manager still
+closes the window.
+
 Pausing freezes the simulation completely: no environment transition, no
 prediction, no update. If a hyperparameter is changed mid-run the session is
 latched as `EXPLORATORY / MODIFIED DURING RUN`, because a run whose protocol

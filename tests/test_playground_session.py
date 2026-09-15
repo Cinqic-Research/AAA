@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -514,6 +515,63 @@ class RenderingSmokeTests(unittest.TestCase):
             self.assertEqual(marker, change_step + 1 - offset)
             # And that scored step is genuinely the one the session labelled.
             self.assertEqual(dict(session.snapshot().event_steps)[change_step + 1], "change")
+        finally:
+            plt.close(renderer.figure)
+
+    def test_matplotlib_default_key_bindings_are_released(self) -> None:
+        """The documented shortcuts must be the only ones bound.
+
+        Matplotlib binds f/r/right to fullscreen/home/forward by default, which
+        are exactly this Playground's freeze/reset/single-step keys. In a real
+        window both handlers fire, so pressing f froze the model and threw the
+        window fullscreen at the same time.
+        """
+
+        import matplotlib.pyplot as plt
+
+        from playground.rendering import PlaygroundRenderer, release_default_keymap
+
+        colliding = set()
+        for setting in ("keymap.fullscreen", "keymap.home", "keymap.forward"):
+            colliding.update(str(key).lower() for key in plt.rcParams[setting])
+        # If matplotlib ever stops binding these, this test should be revisited
+        # rather than silently passing for the wrong reason.
+        self.assertTrue({"f", "r", "right"} <= colliding)
+
+        session = PlaygroundSession(seed=1)
+        renderer = PlaygroundRenderer(session)
+        try:
+            manager = renderer.figure.canvas.manager
+            self.assertIsNotNone(manager)
+            handler_id = manager.key_press_handler_id
+            self.assertNotIn(
+                handler_id, renderer.figure.canvas.callbacks.callbacks.get("key_press_event", {})
+            )
+            # Releasing an already-released figure is a no-op, not an error.
+            release_default_keymap(renderer.figure)
+        finally:
+            plt.close(renderer.figure)
+
+    def test_the_documented_shortcuts_still_reach_the_session(self) -> None:
+        import matplotlib.pyplot as plt
+
+        from playground.rendering import PlaygroundRenderer
+
+        session = PlaygroundSession(seed=1)
+        renderer = PlaygroundRenderer(session)
+        try:
+            renderer.figure.canvas.mpl_connect("key_press_event", renderer.on_key)
+            run_steps(session, 5)
+            self.assertTrue(session.tiny_online)
+            renderer.on_key(SimpleNamespace(key="f"))
+            self.assertFalse(session.tiny_online)
+            renderer.on_key(SimpleNamespace(key=" "))
+            self.assertTrue(session.paused)
+            before = session.step_index
+            renderer.on_key(SimpleNamespace(key="right"))
+            self.assertEqual(session.step_index, before + 1)
+            renderer.on_key(SimpleNamespace(key="r"))
+            self.assertEqual(session.step_index, 0)
         finally:
             plt.close(renderer.figure)
 
