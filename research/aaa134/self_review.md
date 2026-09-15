@@ -159,3 +159,24 @@ change.
 9. **The bias and drift magnitudes are unmeasured design choices** — see above.
 10. **This is a self-review.** It is not independent review, and it does not
     substitute for one.
+
+## Hosted CI, reported rather than fixed
+
+Two jobs fail on this PR — `Locked environment` and `Fresh install` — and **they
+fail identically on PR #11's own head**, at the same step, for the same reason.
+
+Every substantive step passes: locked install, lock verification, lint, format,
+mypy, tests with coverage, both identity hashes, the observation-noise
+development smoke, independent recomputation, and the confirmation exit-code
+contract. The only failing step is `Retain failure evidence`
+(`actions/upload-artifact`, `if: always()`), which rejects the colons in schedule
+filenames such as
+`development:clean_trained:bouncing:correlated:000000:l000:e0000:r00.json`.
+
+This branch adds no schedule file and modifies neither `.github/workflows/ci.yml`
+nor `aaa/noise/runner.py`, so it cannot be the cause. **I did not fix it**, because
+fixing it means modifying an existing file, which this assignment forbids.
+
+Worth flagging beyond the red tick: it means the Actions-artifact path cannot
+currently retain a noise run's evidence *at all*, which independently weakens any
+fallback story in which CI artifacts stand in for durable storage.

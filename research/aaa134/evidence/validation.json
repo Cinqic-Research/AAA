@@ -100,5 +100,42 @@
     "coverage measurement: the repository's configured coverage source is [\"aaa\"], which this branch does not touch; the baseline 71% figure is unaffected.",
     "wheel build and fresh-install smoke: this branch changes no packaged code and pyproject.toml is unmodified; find_packages confirms research/ is excluded.",
     "any confirmation-role command: prohibited by the assignment and by the missing durable-archive prerequisite."
-  ]
+  ],
+  "hosted_ci": {
+    "pull_request": 13,
+    "runs": [
+      "34925841124",
+      "34925844609"
+    ],
+    "passing_jobs": [
+      "Python 3.10",
+      "Python 3.11",
+      "Python 3.12",
+      "Python 3.13"
+    ],
+    "failing_jobs": [
+      "Locked environment",
+      "Fresh install"
+    ],
+    "failing_step": "Retain failure evidence (actions/upload-artifact, if: always())",
+    "cause": "The observation-noise development smoke writes schedule filenames containing colons, for example 'development:clean_trained:bouncing:correlated:000000:l000:e0000:r00.json'. actions/upload-artifact rejects colons for NTFS compatibility, so the upload step fails after every substantive step has already passed.",
+    "every_substantive_step_passed": [
+      "install the locked environment",
+      "verify the installed set matches the lock",
+      "lint",
+      "format check",
+      "static type check",
+      "tests with coverage",
+      "canonical specification identity",
+      "observation-noise protocol identity",
+      "observation-noise development smoke",
+      "independent recomputation",
+      "confirmation exit-code contract"
+    ],
+    "caused_by_this_branch": false,
+    "pre_existing_on_pr11": true,
+    "pr11_evidence": "PR #11's own latest checks fail identically: jobs 104234471652 and 104234465686 fail only at 'Retain failure evidence' with the same colon error. This branch adds no schedule file and modifies neither .github/workflows/ci.yml nor aaa/noise/runner.py.",
+    "not_fixed_here_because": "Fixing it would require modifying an existing file, which this assignment forbids. It is reported for a separate maintainer decision.",
+    "side_note": "This also undercuts any fallback story in which GitHub Actions artifacts serve as observation-noise evidence storage: for a noise run that upload cannot currently succeed at all."
+  }
 }
