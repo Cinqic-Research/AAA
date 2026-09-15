@@ -11,23 +11,23 @@ scientific confirmation, merge approval, or release approval.
 | Item | Value |
 |---|---|
 | PR | [#11](https://github.com/Cinqic/AAA/pull/11) |
-| current local head | `1e84b662d213a423b63eb35ea37b3ce0ae0a079d` |
-| scientific source commit | `43404a75e88bf9b8c599ec94aa5a7ca1f92ed437` |
+| current local head | `a03e9c1bfa5fea4d472dc7124f61ed9e2d877082` |
+| scientific source commit | `404280e050b05ec7cd46f8cacc3e3bb56d74003c` |
 | source dirty when frozen | `False` |
 | protocol | `aaa.observation_noise.v1.1` |
 | protocol hash | `546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c` |
-| scientific fingerprint | `ebea6cce0677cc506b691d9f7d22e9b6e470478f009a8d26022106687ea9779d` |
+| scientific fingerprint | `28a5e55e6866f0825e86cd49b69d88ab08dd28ce7562d23d3015acb8cbb5ac19` |
 | v2.1 reference commit | `25b6c32c9040d0f934314a2139993d12763afc99` |
 | v2.1 raw / resolved hash | `4993c5e6e173f9dd5ef002bc84ff4c484da853b066ea45662d41ad826d10d48e` / `f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37` |
 | dependency lock | `2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7` |
 | selected candidate | `incumbent-no-refinement-v1` |
 | candidate configuration | `dcc82cb0396985976419733a817d02027c45683db4f76d3ea37ac48290f6c649` |
-| confirmation freeze | prepared at `ebea6cce0677cc506b691d9f7d22e9b6e470478f009a8d26022106687ea9779d`; not authorization to run |
+| confirmation freeze | prepared at `28a5e55e6866f0825e86cd49b69d88ab08dd28ce7562d23d3015acb8cbb5ac19`; not authorization to run |
 
 ## Independent findings and repairs
 
 Sol reproduced and retained the failures recorded as `AAA-135` through
-`AAA-148` in `docs/issue_ledger.md`. The repairs include mandatory complete
+`AAA-149` in `docs/issue_ledger.md`. The repairs include mandatory complete
 checksums, finite comparisons, ratio-of-means adaptation, complete selection
 constraints, fixed formal draw/batch identity, atomic cross-clone reservation,
 bounded-memory sharded evidence, isolated pinned-reference replay, causal
