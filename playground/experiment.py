@@ -609,7 +609,14 @@ def build_parser() -> argparse.ArgumentParser:
         prog="playground.experiment",
         description="Tiny neural AAA experiment (exploratory; not a benchmark).",
     )
-    parser.add_argument("--quick", action="store_true", help="Small deterministic smoke form.")
+    parser.add_argument(
+        "--quick",
+        action="store_true",
+        help=(
+            "Small deterministic smoke form at a truncated horizon. It is a check that the "
+            "protocol runs, not the evaluation result, whichever seed group it is given."
+        ),
+    )
     parser.add_argument(
         "--seeds",
         choices=("evaluation", "development"),

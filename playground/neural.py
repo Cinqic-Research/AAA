@@ -347,6 +347,12 @@ class TinyMLPPredictor(Predictor):
         target = self.normalized_target(history, target_position)
         loss = 0.5 * (output - target) ** 2
 
+        # ``target`` is treated as a constant with respect to the parameters.
+        # That is exact, not an approximation: unfolding selects a branch of a
+        # piecewise map by proximity, so it is locally constant in the
+        # parameters everywhere except on the measure-zero set where the branch
+        # switches. This is the same treatment the AAA RLS candidate applies to
+        # the same public map.
         d_output = output - target
         grad_w2 = d_output * hidden.reshape(1, HIDDEN_SIZE)
         grad_b2 = np.asarray([d_output], dtype=float)

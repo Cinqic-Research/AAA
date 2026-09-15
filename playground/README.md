@@ -68,7 +68,11 @@ moved while it was running is not fixed-protocol evidence.
   red negative, thickness by magnitude), its actual hidden activations, its
   actual biases. There are no decorative neurons.
 - **error** — rolling normalized MAE per predictor, one linear axis shared by
-  every series. Nothing is rescaled to flatter the network.
+  every series, with revealed law changes marked. Nothing is rescaled to
+  flatter the network. Note that `f` freezes only the tiny network: the AAA RLS
+  learner keeps updating, because it is shown as the project's current *online*
+  learner. A frozen TinyMLP is therefore not a like-for-like comparison against
+  it, and the panel says `FROZEN` in that state for exactly that reason.
 - **state** — step, scenario, environment seed, model seed, online/frozen,
   learning rate, latest loss, update count, cumulative gradient norm, and the
   cumulative MAE of every arm.
@@ -146,11 +150,16 @@ silently reset.
 ## The tiny neural AAA experiment
 
 ```bash
-python -m playground.experiment --quick          # smoke form
+python -m playground.experiment --quick          # smoke form, truncated horizon
 python -m playground.experiment                  # evaluation seeds
 python -m playground.experiment --seeds development
 python -m playground.experiment --select-learning-rate
 ```
+
+`--quick` is a check that the protocol runs, at a truncated horizon. It is not
+the evaluation result whichever seed group it is given; the recorded evaluation
+is the full-horizon run in
+[`evidence/evaluation_summary.json`](evidence/evaluation_summary.json).
 
 For each seed: a fresh TinyMLP learns causally through a common pre-change
 prefix under the damped oscillator's pre-change law; at the intervention its
