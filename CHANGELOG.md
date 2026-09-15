@@ -2,8 +2,8 @@
 
 ## Observation-noise v1.1 independent repair boundary (2026-09-14)
 
-Sol independently reproduced fourteen observation-noise review findings
-(`AAA-135` through `AAA-148`) before repairing the implementation. The phase is
+Sol independently reproduced fifteen observation-noise review findings
+(`AAA-135` through `AAA-149`) before repairing the implementation. The phase is
 now explicitly versioned `aaa.observation_noise.v1.1`; v1 is retained as an
 unobserved superseded protocol because its adaptation prose and machine
 operator disagreed at the exact 10% boundary.

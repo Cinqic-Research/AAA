@@ -22,8 +22,8 @@ CI, but this review does not authorize merge, tag, or release.
 
 Sol reproduced `AAA-135` through `AAA-145` before changing the corresponding
 implementation. The final self-review additionally reproduced `AAA-146`
-through `AAA-148`: archive containment, evidence preservation and installed
-checkout-boundary defects. The issue ledger preserves each failure,
+through `AAA-149`: archive containment, evidence preservation, installed
+checkout-boundary and hosted shallow-clone defects. The issue ledger preserves each failure,
 root cause, repair, regression and remaining boundary.
 
 The corrected full 2 x 2 x 1 development search evaluated all four frozen

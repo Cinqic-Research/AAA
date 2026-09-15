@@ -77,7 +77,7 @@ def main() -> None:
         "## Independent findings and repairs",
         "",
         "Sol reproduced and retained the failures recorded as `AAA-135` through",
-        "`AAA-148` in `docs/issue_ledger.md`. The repairs include mandatory complete",
+        "`AAA-149` in `docs/issue_ledger.md`. The repairs include mandatory complete",
         "checksums, finite comparisons, ratio-of-means adaptation, complete selection",
         "constraints, fixed formal draw/batch identity, atomic cross-clone reservation,",
         "bounded-memory sharded evidence, isolated pinned-reference replay, causal",

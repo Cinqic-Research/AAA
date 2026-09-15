@@ -17,12 +17,14 @@ Material results:
   refinement met all constraints; no confirmation data was inspected.
 - A timing-neutral digest, metrics, and coverage matched exactly across the
   streaming implementation and deterministic sharded implementation.
-- The final adversarial pass found `AAA-146` through `AAA-148`: schedule-index
+- The final adversarial pass found `AAA-146` through `AAA-149`: schedule-index
   members could traverse outside the archive or follow a symlink, and quick
   selection could overwrite the canonical full evidence. Fresh-wheel execution
   also failed because installed packages have no pinned Git history.
   Containment checks, a protected evidence destination and an explicit
-  `NOT_VERIFIED` installed-checkout boundary now address all three defects.
+  `NOT_VERIFIED` installed-checkout boundary address those three defects. The
+  first final-head CI then proved shallow Actions checkouts omitted the pinned
+  historical commit; all CI jobs now fetch complete history.
 - Missing checksums, rehashed NaN summaries, wrong adaptation estimands,
   incomplete cells, caller-selected formal draws, cross-clone batch reuse,
   current-checkout reference drift, shard tampering, zero-valued legitimate

@@ -1324,3 +1324,16 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Regression** `test_installed_package_reports_checkout_only_reference_as_not_verified`
   exercises the no-checkout boundary. Fresh-wheel execution and recomputation
   are repeated separately in the final validation record.
+
+### AAA-149 — hosted CI omitted the pinned reference commit
+- **Source** final-head GitHub CPU CI runs `34922456399` and `34922458676` · **Severity** high · **Status** repaired; replacement CI pending
+- **Reproduction** The Python matrix failed across versions at
+  `test_zero_noise_reference_runs_from_the_pinned_v21_commit`. Actions checked
+  out only the PR head, so `git cat-file -e 25b6c32...^{commit}` failed and the
+  maintained-checkout fixture correctly refused to claim a pinned replay.
+- **Repair** Every CPU workflow checkout now uses `fetch-depth: 0`. This makes
+  the exact protocol-pinned historical commit available to the isolated
+  `git archive` fixture in the locked, version-matrix and fresh-wheel jobs.
+- **Regression** The fail-closed unit test remains unchanged. Replacement
+  final-head GitHub checks must pass all required Python versions before this
+  repair is considered hosted-CI verified.

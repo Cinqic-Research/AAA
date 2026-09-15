@@ -84,7 +84,7 @@ def findings(path: str) -> str:
         }
     )
     if noise_path:
-        return "AAA-135 through AAA-148; AAA-144 remains open"
+        return "AAA-135 through AAA-149; AAA-144 remains open"
     ids: list[str] = []
     if path.startswith(("aaa/", "tests/", "tools/", "benchmarks/")):
         ids.extend(["AAA-121", "AAA-122", "AAA-123"])
