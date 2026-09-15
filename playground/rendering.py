@@ -82,15 +82,16 @@ class NetworkGraph:
 
     def __init__(self, axis: Any) -> None:
         self.axis = axis
-        axis.set_xlim(-0.35, 2.45)
+        # Room on both flanks so the input and output labels stay inside the
+        # panel when the window is narrow.
+        axis.set_xlim(-0.85, 2.95)
         axis.set_ylim(-0.15, 1.15)
         axis.set_xticks([])
         axis.set_yticks([])
         for spine in axis.spines.values():
             spine.set_visible(False)
         axis.set_title(
-            f"TinyMLP: {INPUT_SIZE} inputs → {HIDDEN_SIZE} tanh hidden → {OUTPUT_SIZE} linear "
-            f"({PARAMETER_COUNT} trainable parameters)",
+            f"TinyMLP {INPUT_SIZE}→{HIDDEN_SIZE} tanh→{OUTPUT_SIZE} ({PARAMETER_COUNT} trainable parameters)",
             fontsize=9,
         )
 
@@ -136,8 +137,19 @@ class NetworkGraph:
                 self.input_positions, ("recent\ndisplacement", "centered\nposition"), strict=True
             )
         ]
+        # One line, on a white plate: two stacked lines collided with the node
+        # below at this spacing, which made the activations unreadable.
         self.hidden_texts = [
-            axis.text(point[0], point[1] - 0.115, "", ha="center", va="top", fontsize=6.5, zorder=3)
+            axis.text(
+                point[0],
+                point[1] - 0.10,
+                "",
+                ha="center",
+                va="top",
+                fontsize=6,
+                zorder=3,
+                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.85, "pad": 0.6},
+            )
             for point in self.hidden_positions
         ]
         self.output_text = axis.text(
@@ -186,16 +198,16 @@ class NetworkGraph:
             value = None if hidden is None else hidden[index]
             node.set_facecolor(_activation_color(value))
             self.hidden_texts[index].set_text(
-                f"h={_format(value, 2)}\nb={bias_1[index]:+.2f}" if value is not None else ""
+                f"h={value:+.2f}  b={bias_1[index]:+.2f}" if value is not None else ""
             )
         output_value = None
         frame = snapshot.last_frame
         if frame is not None and frame.tiny_raw_prediction is not None:
             output_value = frame.tiny_raw_prediction
         self.output_nodes[0].set_facecolor(_activation_color(None))
-        self.output_text.set_text(f"raw x̂\n{_format(output_value, 3)}\nb={bias_2[0]:+.2f}")
+        self.output_text.set_text(f"raw x̂ {_format(output_value, 3)}\nb={bias_2[0]:+.2f}")
         self.caption.set_text(
-            "line colour = weight sign (blue positive, red negative); thickness = |weight|; node fill = activation"
+            "colour = weight sign (blue pos, red neg)  ·  thickness = |weight|  ·  fill = activation"
         )
 
 
@@ -251,7 +263,15 @@ class PlaygroundRenderer:
             fontsize=11,
         )
         grid = GridSpec(
-            2, 2, figure=self.figure, left=0.06, right=0.975, top=0.90, bottom=0.27, hspace=0.42, wspace=0.18
+            2,
+            2,
+            figure=self.figure,
+            left=0.075,
+            right=0.975,
+            top=0.875,
+            bottom=0.27,
+            hspace=0.50,
+            wspace=0.18,
         )
         self.world_axis = self.figure.add_subplot(grid[0, 0])
         self.network_axis = self.figure.add_subplot(grid[0, 1])
@@ -272,16 +292,23 @@ class PlaygroundRenderer:
         axis = self.world_axis
         snapshot = self.session.snapshot()
         axis.set_xlim(snapshot.lower_bound, snapshot.upper_bound)
-        axis.set_ylim(-0.6, 0.9)
+        axis.set_ylim(-0.45, 1.25)
         axis.set_yticks([])
-        axis.set_xlabel("position")
-        axis.set_title("world: actual dot and the predictions issued before it was revealed", fontsize=9)
+        axis.set_xlabel("position — predictions were issued before this position was revealed")
         axis.axhline(0.0, color="#dddddd", linewidth=1.0, zorder=0)
         (self.actual_artist,) = axis.plot(
             [], [], "o", color="black", markersize=12, label="actual x[t+1]", zorder=5
         )
+        # Each predictor gets its own row. Stacking every marker on one line
+        # hid them all behind the actual dot, which is exactly when they agree
+        # and exactly when the viewer needs to see that they do.
+        self.prediction_rows: dict[str, float] = {
+            name: 0.25 + 0.20 * index for index, name in enumerate(PREDICTOR_NAMES)
+        }
         self.prediction_artists: dict[str, Line2D] = {}
-        for index, name in enumerate(PREDICTOR_NAMES):
+        for name in PREDICTOR_NAMES:
+            row = self.prediction_rows[name]
+            axis.axhline(row, color="#f0f0f0", linewidth=0.8, zorder=0)
             (artist,) = axis.plot(
                 [],
                 [],
@@ -290,7 +317,7 @@ class PlaygroundRenderer:
                 markersize=9,
                 mew=2,
                 label=PREDICTOR_LABELS[name],
-                zorder=4 - index * 0.1,
+                zorder=4,
             )
             self.prediction_artists[name] = artist
         (self.tiny_raw_artist,) = axis.plot(
@@ -304,13 +331,22 @@ class PlaygroundRenderer:
             label="TinyMLP raw (before public reflection)",
             zorder=3,
         )
-        self.event_artist = axis.text(0.02, 0.86, "", transform=axis.transAxes, fontsize=8, color="#444444")
-        axis.legend(loc="lower center", fontsize=6.5, ncol=2, framealpha=0.9)
+        self.event_artist = axis.text(0.01, 0.02, "", transform=axis.transAxes, fontsize=7, color="#444444")
+        # Above the axes: predictions travel the whole interval, so any in-axes
+        # legend eventually sits on top of the markers it is labelling.
+        axis.legend(
+            loc="lower center",
+            bbox_to_anchor=(0.5, 1.01),
+            fontsize=6.5,
+            ncol=3,
+            framealpha=0.9,
+            borderaxespad=0.0,
+        )
 
     def _build_error_panel(self) -> None:
         axis = self.error_axis
         axis.set_xlabel("scored step")
-        axis.set_ylabel(f"rolling MAE (window {self.session.rolling_window}), normalized by L")
+        axis.set_ylabel(f"rolling MAE / L (window {self.session.rolling_window})", fontsize=8)
         axis.set_title("prediction error — linear scale, common axis, no per-series rescaling", fontsize=9)
         axis.grid(alpha=0.25, linewidth=0.5)
         self.error_artists: dict[str, Line2D] = {}
@@ -320,7 +356,7 @@ class PlaygroundRenderer:
             )
             self.error_artists[name] = artist
         self.error_events: list[Line2D] = []
-        axis.legend(loc="upper left", fontsize=6.5, ncol=2, framealpha=0.9)
+        axis.legend(loc="upper right", fontsize=6.5, ncol=2, framealpha=0.9)
 
     def _build_state_panel(self) -> None:
         axis = self.state_axis
@@ -332,14 +368,17 @@ class PlaygroundRenderer:
         self.state_text = axis.text(
             0.01, 0.97, "", transform=axis.transAxes, va="top", ha="left", fontsize=8, family="monospace"
         )
-        self.warning_text = axis.text(
-            0.01,
-            0.02,
+        # Figure level, in the clear strip under the suptitle above the right
+        # column. Inside the state panel it collided with the readout, and a
+        # status banner a viewer has to read through other text is not a
+        # status banner.
+        self.warning_text = self.figure.text(
+            0.76,
+            0.955,
             "",
-            transform=axis.transAxes,
-            va="bottom",
-            ha="left",
-            fontsize=8.5,
+            ha="center",
+            va="top",
+            fontsize=9,
             color="#b00020",
             weight="bold",
         )
@@ -452,14 +491,14 @@ class PlaygroundRenderer:
                 if value is None:
                     artist.set_data([], [])
                 else:
-                    artist.set_data([value], [0.0])
+                    artist.set_data([value], [self.prediction_rows[name]])
             raw = frame.tiny_raw_prediction
             reflected = frame.tiny_reflected_prediction
             # The raw marker is drawn only when public reflection actually
             # moved the prediction, so the two are never confused with one
             # another when they coincide.
             if raw is not None and reflected is not None and raw != reflected:
-                self.tiny_raw_artist.set_data([raw], [0.0])
+                self.tiny_raw_artist.set_data([raw], [self.prediction_rows["tiny_nn"]])
             else:
                 self.tiny_raw_artist.set_data([], [])
             label = {"change": "law change revealed", "bounce": "wall contact revealed", "steady": ""}.get(
@@ -485,6 +524,7 @@ class PlaygroundRenderer:
                 longest = max(longest, len(series))
         self.error_axis.set_xlim(0, max(longest, 10))
         self.error_axis.set_ylim(0.0, max(maximum * 1.15, 1e-4))
+        self._mark_change_events(snapshot)
 
         self.network.refresh(snapshot)
         self.state_text.set_text(self._state_lines(snapshot))
@@ -496,6 +536,36 @@ class PlaygroundRenderer:
         self.warning_text.set_text("\n".join(warnings))
         self.play_button.label.set_text("Play" if snapshot.paused else "Pause")
         self.freeze_button.label.set_text("Freeze TinyMLP" if snapshot.tiny_online else "Unfreeze TinyMLP")
+
+    def _mark_change_events(self, snapshot: Any) -> None:
+        """Mark revealed law-change transitions on the error panel.
+
+        A scored step ``n`` (1-based on this axis) is the session step
+        ``n + history_length - 1``, because the first ``history_length - 1``
+        transitions are unscored warm-up. Inverting that is what keeps the
+        marker on the step the change was actually revealed on, rather than one
+        to the side of it. Bounces are deliberately not marked: they are
+        frequent enough to bury the curves they are meant to explain.
+        """
+
+        offset = self.session.world.history_length - 1
+        positions = [step - offset for step, event in snapshot.event_steps if event == "change"]
+        positions = [value for value in positions if value >= 1]
+        if len(positions) == len(self.error_events):
+            return
+        for marker in self.error_events:
+            marker.remove()
+        self.error_events = [
+            self.error_axis.axvline(
+                value,
+                color="#b00020",
+                linewidth=1.0,
+                linestyle="--",
+                alpha=0.7,
+                label="law change revealed" if index == 0 else None,
+            )
+            for index, value in enumerate(positions)
+        ]
 
     def _state_lines(self, snapshot: Any) -> str:
         frame = snapshot.last_frame

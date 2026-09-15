@@ -494,6 +494,29 @@ class RenderingSmokeTests(unittest.TestCase):
         finally:
             plt.close(renderer.figure)
 
+    def test_the_change_marker_lands_on_the_revealed_step_not_beside_it(self) -> None:
+        import matplotlib.pyplot as plt
+
+        from playground.rendering import PlaygroundRenderer
+
+        session = PlaygroundSession(scenario="dynamics_change", seed=711)
+        renderer = PlaygroundRenderer(session)
+        try:
+            change_step = session.world.change_step
+            assert change_step is not None
+            run_steps(session, change_step + 10)
+            renderer.refresh()
+            self.assertEqual(len(renderer.error_events), 1)
+            marker = renderer.error_events[0].get_xdata()[0]
+            # The change transition is revealed as session step change_step + 1,
+            # which is scored step change_step + 1 - (history_length - 1).
+            offset = session.world.history_length - 1
+            self.assertEqual(marker, change_step + 1 - offset)
+            # And that scored step is genuinely the one the session labelled.
+            self.assertEqual(dict(session.snapshot().event_steps)[change_step + 1], "change")
+        finally:
+            plt.close(renderer.figure)
+
     def test_rolling_series_matches_a_direct_computation(self) -> None:
         from playground.rendering import rolling_series
 
