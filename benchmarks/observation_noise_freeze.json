@@ -4,7 +4,7 @@
     "path": "requirements-lock.txt",
     "sha256": "2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7"
   },
-  "manifest_identity": "712d37f70e60410467add03d3549a3f9b05f55a9bcce7b34b529b4d67c00a91f",
+  "manifest_identity": "8e97ab3c9b07b85da856b9129c5ef72f86c7570aab89e259e7da65b9879958a2",
   "notes": "Prepared but not authorized for observation until immutable archive upload and independent retrieval are available.",
   "planned_batches": [
     "observation-noise-a-0002",
@@ -478,7 +478,7 @@
       },
       "tools/write_handoff.py": {
         "executable": false,
-        "sha256": "f5544ce20a3884c5bf872009a84844df6cab9d0bb40369d4dc4a498d6417403d"
+        "sha256": "5f8d74172c59ab8d4572db846284a267bde040363afbbb6640871fa3de99b14b"
       }
     },
     "normalized_registry_fields": [
@@ -489,17 +489,17 @@
       "status"
     ],
     "schema": "aaa.observation_noise_scientific_source.v1",
-    "sha256": "762418a91061da247b331be03bbdab2c18c36003cb5218b5c2bf191605dba568"
+    "sha256": "ebea6cce0677cc506b691d9f7d22e9b6e470478f009a8d26022106687ea9779d"
   },
-  "scientific_fingerprint_sha256": "762418a91061da247b331be03bbdab2c18c36003cb5218b5c2bf191605dba568",
+  "scientific_fingerprint_sha256": "ebea6cce0677cc506b691d9f7d22e9b6e470478f009a8d26022106687ea9779d",
   "selected_candidate": "incumbent-no-refinement-v1",
   "selected_candidate_configuration_hash": "dcc82cb0396985976419733a817d02027c45683db4f76d3ea37ac48290f6c649",
   "source": {
     "branch": "codex/aaa-observation-noise-sol-review",
-    "commit": "f7936da799313dc761050cca67a968a6d006f78e",
+    "commit": "1e84b662d213a423b63eb35ea37b3ce0ae0a079d",
     "dirty": false,
     "status": [],
-    "tree_hash": "b88b6a3cca0f2b73287621adf5ebd45222a51738bcc018e120c16c96866642d7"
+    "tree_hash": "ebf870dd0fb7183b66d9e161bce464d1c59d998929b8c2913a93cf2982cdfd4e"
   },
   "stage": "confirmation_freeze"
 }
