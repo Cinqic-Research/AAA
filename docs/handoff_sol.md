@@ -10,7 +10,7 @@ and exact hosted CI. It is not human review or product-release approval.
 
 | Item | Value |
 |---|---|
-| generated from local head | `a37651859da73c837efa98f42c20ce4495abcb50` |
+| generated from local head | `bcd045d23188e3e941357da45709e565330b241a` |
 | protocol | `aaa.observation_noise.v1.1` |
 | protocol hash | `546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c` |
 | scientific fingerprint | `f48f9d8f67d767b84c99d2fc53fd658e1e5e1362f1fac9f209520d0293135d7a` |

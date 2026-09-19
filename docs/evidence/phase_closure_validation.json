@@ -39,7 +39,26 @@
     "installed_observation_noise_recomputation": "PASS: 58944 records, 256 trials",
     "installed_schedule_filename_scan": "PASS: 161 files, no unsafe component"
   },
-  "clean_checkout": "pending exact candidate commit",
+  "clean_checkout": {
+    "commit": "bcd045d23188e3e941357da45709e565330b241a",
+    "location": "/media/cinqic/Cinqic Storage/AAA/validation/clean-checkout-bcd045d",
+    "fresh_environment": "/media/cinqic/Cinqic Storage/AAA/validation/clean-env-bcd045d",
+    "dependency_lock": "PASS: 24/24 exact pins",
+    "ruff_lint": "PASS",
+    "ruff_format": "PASS",
+    "mypy": "PASS",
+    "tests": "PASS: 445 tests in 166.095 seconds; 167.37 seconds wall; 179288 KiB max RSS",
+    "coverage": "PASS: 72% against 70% floor",
+    "exit_code_contract": "PASS",
+    "git_diff_check": "PASS",
+    "strict_json": "PASS: 374 repository JSON files; non-finite constants rejected",
+    "benchmark_v2_1_development_smoke": "PASS mechanics and recomputation; scientific stratum, identification, and recovery gates INSUFFICIENT_EVIDENCE as expected for the reduced smoke",
+    "historical_v1_smoke": "PASS",
+    "observation_noise_development_smoke": "PASS engineering mechanics; scientific endpoints INSUFFICIENT_EVIDENCE; confirmation reproducibility NOT_VERIFIED",
+    "observation_noise_recomputation": "PASS: 58944 records, 256 trials",
+    "wheel": "PASS: 50 members; both protocol files, license, and entry point present; no playground, research, results, or runs",
+    "wheel_sha256": "2fcb8d1503d726dbbe1e7aff176263b331b175159d173eb52ca649157d2984ae"
+  },
   "github_ci_runs": "pending exact final head",
   "final_main": "pending merge and post-merge verification"
 }
