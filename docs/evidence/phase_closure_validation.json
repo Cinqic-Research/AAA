@@ -59,6 +59,6 @@
     "wheel": "PASS: 50 members; both protocol files, license, and entry point present; no playground, research, results, or runs",
     "wheel_sha256": "2fcb8d1503d726dbbe1e7aff176263b331b175159d173eb52ca649157d2984ae"
   },
-  "github_ci_runs": "pending exact final head",
+  "github_ci_runs": "source-identical head d7511da06465a40d3b97e614e03ae34d5b312263: push run 35450887407 and pull-request run 35450890204; all 12 jobs PASS; locked artifacts 10585989223 and 10586079089 uploaded successfully",
   "final_main": "pending merge and post-merge verification"
 }

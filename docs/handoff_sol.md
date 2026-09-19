@@ -10,7 +10,7 @@ and exact hosted CI. It is not human review or product-release approval.
 
 | Item | Value |
 |---|---|
-| generated from local head | `bcd045d23188e3e941357da45709e565330b241a` |
+| generated from local head | `d7511da06465a40d3b97e614e03ae34d5b312263` |
 | protocol | `aaa.observation_noise.v1.1` |
 | protocol hash | `546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c` |
 | scientific fingerprint | `f48f9d8f67d767b84c99d2fc53fd658e1e5e1362f1fac9f209520d0293135d7a` |
@@ -66,7 +66,7 @@ it does not justify the replication budget or establish external durability.
   package build/payload, clean wheel install, installed CLI smoke,
   v2.1 smoke/recomputation, observation-noise smoke/recomputation, and
   zero-noise pinned-reference replay passed.
-- Final-head hosted CI runs: pending exact final head.
+- Recorded exact-source hosted CI runs: source-identical head d7511da06465a40d3b97e614e03ae34d5b312263: push run 35450887407 and pull-request run 35450890204; all 12 jobs PASS; locked artifacts 10585989223 and 10586079089 uploaded successfully.
 - Exact final remote main: pending merge and post-merge verification.
 
 ## Approval matrix
