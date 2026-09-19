@@ -2,14 +2,11 @@
   "candidate_ledger_sha256": "fae154863ad32edee81a5d77daac9f8fd7d502ae02ffee693c0d522e3c79b2dc",
   "dependency_lock": {
     "path": "requirements-lock.txt",
-    "sha256": "2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7"
+    "sha256": "2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6"
   },
-  "manifest_identity": "f6579a21ce7d5fff18a2ad3f341bd2c0d3a3303d4837d7fe829b6ad300a69ff5",
-  "notes": "Sol-audited v1.1 source freeze after full development selection; confirmation remains blocked on durable archive storage.",
-  "planned_batches": [
-    "observation-noise-a-0002",
-    "observation-noise-b-0002"
-  ],
+  "manifest_identity": "a9246f473d39f540feaad4325970d216bd95d323cd4d08ebda4f7ad262c5efc5",
+  "notes": "Final engineering phase-closure source identity; no formal observation-noise batches are authorized.",
+  "planned_batches": [],
   "protocol_file_sha256": "2b7faa7558a475f30ded87c67c6a2f9a5a2ee4268fee9acfffcd4f5519bf9587",
   "protocol_hash": "546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c",
   "protocol_version": "aaa.observation_noise.v1.1",
@@ -25,6 +22,7 @@
       "benchmarks/observation_noise_freeze.json",
       "benchmarks/observation_noise_source_freeze.json",
       "docs/evidence/observation_noise_development_selection.json",
+      "docs/evidence/phase_closure_validation.json",
       "docs/final_audit.md",
       "docs/handoff_sol.md",
       "docs/sol_review.md"
@@ -54,7 +52,7 @@
       },
       "CHANGELOG.md": {
         "executable": false,
-        "sha256": "32189f60aab2a940488b211671712f7e381c1c9ac53ea4e2be8aba5f4aafb278"
+        "sha256": "c170d46efc8e9ba5698cfb079642d763cce2cd124a083a0802b142699ad15a2e"
       },
       "CITATION.cff": {
         "executable": false,
@@ -70,11 +68,11 @@
       },
       "README.md": {
         "executable": false,
-        "sha256": "64bc4eb7f82a9623518a0f87260c6953ece9bb5290d422365391150208af6112"
+        "sha256": "ad2e9e78ead4a0c417e3bb0af9c1e3a16fb357af91dc8917d2a6a2809b3f918c"
       },
       "SECURITY.md": {
         "executable": false,
-        "sha256": "a56d473776b7d25ff008048690c57005f658eac023bcf54dc301ce503e9354bf"
+        "sha256": "808be3299da8765a73aa6d31524579b5992605633de428fb651dcb79fe5064d3"
       },
       "aaa/__init__.py": {
         "executable": false,
@@ -146,7 +144,7 @@
       },
       "aaa/cli.py": {
         "executable": false,
-        "sha256": "542cde6782808246e9efdea43adfcf9f8cefe724eae1bf08ae4e3e5975af9645"
+        "sha256": "e27c98b4091e08180b6cbd60cc2c806e66e335004be6336fd05ba2a8598edf6e"
       },
       "aaa/config.py": {
         "executable": false,
@@ -214,11 +212,11 @@
       },
       "aaa/noise/runner.py": {
         "executable": false,
-        "sha256": "7eb4cfdc96119b736d7f676c6a1c914cdebddd8d31fcae8b38060423616e82a7"
+        "sha256": "731f116cfb3cc427a4e5ac9f65dda557a670ef9205b483c50c72718a5fc84721"
       },
       "aaa/noise/scientific_identity.py": {
         "executable": false,
-        "sha256": "21b85fdf7e7437eefb195ca9c8787f24f5ea7447d1540c4db1221c82a1b6a649"
+        "sha256": "3db41428e4f5db171c9d500dd4863cdbe61a43f5d7028255c576fc9a9799ef37"
       },
       "aaa/noise/selection.py": {
         "executable": false,
@@ -278,7 +276,7 @@
       },
       "benchmarks/observation_noise_registry.json": {
         "executable": false,
-        "sha256": "08fbd9bca3da3b4b82918b425f19b2e61ef08f603159ab271af311aeea0058f3"
+        "sha256": "d6b40e6bafb598444eab4eecee5bcf13e1f9b1d19325c8aa2e167bebd4e5f58b"
       },
       "docs/benchmark_protocol.md": {
         "executable": false,
@@ -320,6 +318,10 @@
         "executable": false,
         "sha256": "0aee0c12fccff7480ba03ebeeab75893503c4e99274e7d4febf238290b2ed095"
       },
+      "docs/evidence/phase_closure_storage_profile.json": {
+        "executable": false,
+        "sha256": "eb1978d466a04d411cb4bbc63a9ae26981c4840f207663866dfb8da12b463500"
+      },
       "docs/evidence/pre_repair_probes.json": {
         "executable": false,
         "sha256": "f65e33337af58e450c337213c5349ecd10d3fcaa4d27b20b0d15ff036d603a9b"
@@ -330,31 +332,35 @@
       },
       "docs/evidence_policy.md": {
         "executable": false,
-        "sha256": "9b8841acea4c0c31cfb2de8366ec95ba58214f5d22dfd05a6e1c567c141f9417"
+        "sha256": "3ab244038e12166df5ed95e36af6348240467e0433a6c8c6efb4896785ca50b5"
       },
       "docs/experiment_registry.md": {
         "executable": false,
-        "sha256": "cd202b535a01af83cff3d0514e12b931bd0ead343dbf3401675aab59327ec449"
+        "sha256": "58fe1419f06b019e17e6e4db91a425e6b18887e1c6103e527a1b7b49a136fd0d"
       },
       "docs/issue_ledger.md": {
         "executable": false,
-        "sha256": "aa59ea29c32868bd3a8caf42f6c8ce1d5297c6b6ef75d6f87b7159d7527914d0"
+        "sha256": "25ff14c8fa89c8dd32c46ea04f71663b17ee3c3dc166432272b19868cee55977"
       },
       "docs/limitations.md": {
         "executable": false,
-        "sha256": "a8df56e954fcb185ce4ea40a1367e2c0742d192b4da1060043820517e51c6133"
+        "sha256": "edfc339f760bac360394dc92419ea8e996e4a310e8d496b86132d3a77f96aa09"
       },
       "docs/observation_noise_protocol.md": {
         "executable": false,
-        "sha256": "52b13fc28067725b0bda35de0e72d796838989fe7cf0d01162940351b0952ea5"
+        "sha256": "a2849c8c2ff9c6d75cc13aef43e34c92c50c3566338e8893527cfbf3523640a9"
+      },
+      "docs/phase_closure_decisions.md": {
+        "executable": false,
+        "sha256": "7bd08de634de0885924ab211973c0fd1b764a47c9b4db32fa9d7ad3e14f7e057"
       },
       "docs/reproduction.md": {
         "executable": false,
-        "sha256": "ead2e63a865dfd3e08e7c2439991fdb54969eb94fc3bc89ff9df1bb577ba40fd"
+        "sha256": "dab69bc275b9ae82809ea306838ae0ee942f3db865a32b9f79c6f8900c3d925a"
       },
       "docs/self_review.md": {
         "executable": false,
-        "sha256": "c44a63fbac763d74d4cb73c556c83f728360e72073861521e9d0ae17f1238e9f"
+        "sha256": "ebbda6dc9be1579932ab25f878cffb5cea30e14b4b9944846ab3a6fce34bb05a"
       },
       "pyproject.toml": {
         "executable": false,
@@ -362,7 +368,7 @@
       },
       "requirements-lock.txt": {
         "executable": false,
-        "sha256": "2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7"
+        "sha256": "2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6"
       },
       "tests/__init__.py": {
         "executable": false,
@@ -414,11 +420,11 @@
       },
       "tests/test_observation_noise.py": {
         "executable": false,
-        "sha256": "a9e1fef96c5f9631885cbd393933e32190ff76becd0227ad54d5b44f8663a627"
+        "sha256": "c0e2d3d3ae3dfa8371cb7640750da82826c118b8684613c3eba85ee0aeb0e1f3"
       },
       "tests/test_observation_noise_identity.py": {
         "executable": false,
-        "sha256": "0e484b82119f8f957a2fba8b9d5d4d5c3eae40b9a9f17faf8d6db1fcadd4439c"
+        "sha256": "0e38644cec23345d2dd5b71bfa2a1bf5ba87572dfdb3d0af1b5ca3f552f0513d"
       },
       "tests/test_predictors.py": {
         "executable": false,
@@ -470,7 +476,7 @@
       },
       "tools/write_audit_inventory.py": {
         "executable": false,
-        "sha256": "4f78ab0c89ad3348689cfdce48cdef5c45914e18adc347d7dc556a6e82ce94b5"
+        "sha256": "f0131e0a39a20c1f0a113df3d0d4a632e6f689958654813b14e310a0c98775a7"
       },
       "tools/write_candidate_selection.py": {
         "executable": false,
@@ -478,7 +484,7 @@
       },
       "tools/write_handoff.py": {
         "executable": false,
-        "sha256": "7fff1f271480f1659b147b3c9e8fec98d053de2bc7a703e695eaf4ba9959e6d2"
+        "sha256": "78b8cdc8e745306618f606ca246ea746d220aaae7f412c0fceee720479a0596c"
       }
     },
     "normalized_registry_fields": [
@@ -489,17 +495,17 @@
       "status"
     ],
     "schema": "aaa.observation_noise_scientific_source.v1",
-    "sha256": "28a5e55e6866f0825e86cd49b69d88ab08dd28ce7562d23d3015acb8cbb5ac19"
+    "sha256": "f48f9d8f67d767b84c99d2fc53fd658e1e5e1362f1fac9f209520d0293135d7a"
   },
-  "scientific_fingerprint_sha256": "28a5e55e6866f0825e86cd49b69d88ab08dd28ce7562d23d3015acb8cbb5ac19",
+  "scientific_fingerprint_sha256": "f48f9d8f67d767b84c99d2fc53fd658e1e5e1362f1fac9f209520d0293135d7a",
   "selected_candidate": null,
   "selected_candidate_configuration_hash": null,
   "source": {
     "branch": "codex/aaa-observation-noise-sol-review",
-    "commit": "404280e050b05ec7cd46f8cacc3e3bb56d74003c",
+    "commit": "a37651859da73c837efa98f42c20ce4495abcb50",
     "dirty": false,
     "status": [],
-    "tree_hash": "ba91caf751de48db348c65ef673b52c60a9338763582479d247f5c108eec0213"
+    "tree_hash": "2d0778b2e8b84457e966a19f0c3650a20f9f6ef0af445c6280d5890934e39255"
   },
   "stage": "design_freeze"
 }

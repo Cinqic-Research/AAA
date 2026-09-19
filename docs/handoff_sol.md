@@ -10,11 +10,11 @@ and exact hosted CI. It is not human review or product-release approval.
 
 | Item | Value |
 |---|---|
-| generated from local head | `1d1ccfef75f9faee0d6a5ac6f627619a8948196b` |
+| generated from local head | `a37651859da73c837efa98f42c20ce4495abcb50` |
 | protocol | `aaa.observation_noise.v1.1` |
 | protocol hash | `546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c` |
-| scientific fingerprint | `28a5e55e6866f0825e86cd49b69d88ab08dd28ce7562d23d3015acb8cbb5ac19` |
-| dependency lock | `2aa52a7deefd05403b9fb6441bef42e13e47a4384baaf780f3b4b879bfcf3bc7` |
+| scientific fingerprint | `f48f9d8f67d767b84c99d2fc53fd658e1e5e1362f1fac9f209520d0293135d7a` |
+| dependency lock | `2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6` |
 | v2.1 reference commit | `25b6c32c9040d0f934314a2139993d12763afc99` |
 | selected candidate | `incumbent-no-refinement-v1` |
 | candidate configuration | `dcc82cb0396985976419733a817d02027c45683db4f76d3ea37ac48290f6c649` |
