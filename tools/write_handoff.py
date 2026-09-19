@@ -110,7 +110,7 @@ def main() -> None:
                 "  package build/payload, clean wheel install, installed CLI smoke,",
                 "  v2.1 smoke/recomputation, observation-noise smoke/recomputation, and",
                 "  zero-noise pinned-reference replay passed.",
-                f"- Recorded exact-source hosted CI runs: {validation.get('github_ci_runs', 'pending')}.",
+                f"- Final-head hosted CI runs: {validation.get('github_ci_runs', 'pending')}.",
                 f"- Exact final remote main: {validation.get('final_main', 'pending')}.",
             ]
             if validation
