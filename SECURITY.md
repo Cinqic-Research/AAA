@@ -33,8 +33,8 @@ Realistic concerns are correspondingly narrow:
 
 ## Repository settings
 
-These were inspected and applied through the GitHub API, and then read back to
-confirm. See `AAA-110` in [`docs/issue_ledger.md`](docs/issue_ledger.md).
+These were inspected through the GitHub API again on 2026-09-19. See `AAA-110`
+in [`docs/issue_ledger.md`](docs/issue_ledger.md).
 
 **Applied and verified on `main`:**
 
@@ -49,6 +49,8 @@ confirm. See `AAA-110` in [`docs/issue_ledger.md`](docs/issue_ledger.md).
 | delete head branches after merge | yes |
 | Dependabot alerts and security updates | enabled |
 | secret scanning and push protection | enabled |
+| default workflow token permissions | read |
+| workflows may approve pull requests | no |
 | `.github/dependabot.yml` | weekly `github-actions` and `pip` updates |
 
 **Deliberately not applied:**
@@ -58,11 +60,9 @@ confirm. See `AAA-110` in [`docs/issue_ledger.md`](docs/issue_ledger.md).
   Turn it on with
   `gh api -X POST repos/Cinqic/AAA/branches/main/protection/enforce_admins`
   once the check names are considered stable.
-- *Default workflow permissions read-only.* This is an organization- or
-  account-level Actions setting rather than a repository one. Every workflow in
-  this repository already declares `permissions: contents: read` explicitly,
-  which is the stronger guarantee because it does not depend on an inherited
-  default.
+- *Required signed commits.* Not enabled. Existing scientific identity and CI
+  checks verify content and behavior, but do not constitute author-signature
+  verification.
 
 Verify the current state with:
 

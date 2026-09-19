@@ -136,8 +136,13 @@ The joint command
 supported route to a final A+B conclusion. It independently verifies both
 primitive archives, checks shared training/checkpoint and candidate identity,
 recomputes the endpoint family, records Holm order and adjusted bounds, and
-does not trust a stored summary conclusion. No durable archive mechanism is
-approved or recorded for this phase. Formal A/B therefore remains unobserved
-and the confirmation boundary is `BLOCKED` until an immutable destination is
-supplied, development upload/retrieval is proved, and the fresh v1.1 batches
-are legitimately spent.
+does not trust a stored summary conclusion. No external durable archive
+mechanism is approved or recorded. The dedicated Cinqic HDD is verified local
+working storage only; it is not immutable, off-site, or an independent failure
+domain. External archival is publication-grade evidence rather than an
+engineering merge gate for this internal phase. Formal A/B remains unobserved
+for a separate reason: the large replication budget has no quantitative
+precision justification. Its declared v1.1 batches were retired unobserved.
+Any successor must be versioned and receive fresh batch identities before
+observation, and any claim of publication-grade durability still requires a
+genuine external archive plus independent retrieval.

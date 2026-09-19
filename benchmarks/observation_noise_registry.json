@@ -22,18 +22,18 @@
     {
       "batch_id": "observation-noise-a-0002",
       "role": "confirmation_a",
-      "status": "planned",
+      "status": "retired_unobserved",
       "namespace": "observation_noise_confirmation_a",
       "declared_at": "2026-09-14",
-      "notes": "Fresh A stream declared for v1.1 before execution. Shared training lineages; disjoint latent and sensor evaluation stream."
+      "notes": "Fresh A stream declared for v1.1 but retired unobserved during the 2026-09-19 engineering phase closure because the formal replication budget had no quantitative precision justification. It must never be reactivated."
     },
     {
       "batch_id": "observation-noise-b-0002",
       "role": "confirmation_b",
-      "status": "planned",
+      "status": "retired_unobserved",
       "namespace": "observation_noise_confirmation_b",
       "declared_at": "2026-09-14",
-      "notes": "Fresh B stream declared for v1.1 before either v1.1 confirmation batch is observed."
+      "notes": "Fresh B stream declared for v1.1 but retired unobserved during the 2026-09-19 engineering phase closure before either stream was observed. It must never be reactivated."
     }
   ],
   "rules": {

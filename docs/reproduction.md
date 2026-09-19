@@ -75,9 +75,10 @@ matched first-error trajectories, noise-only controls, worst realized strata,
 detector/update diagnostics, and `plot_provenance.json` binding each figure to
 the retained primitive record hash. Its scientific endpoints remain
 `INSUFFICIENT_EVIDENCE`; it is an engineering smoke fixture, not confirmation.
-Formal A/B execution requires the separate source-freeze manifest, declared
-batch identities, the exact lock, the fixed ten-lineage plan, durable full
-archive retention/retrieval, and independent recomputation.
+Formal A/B execution requires a separate source-freeze manifest, fresh declared
+batch identities, the exact lock, a quantitatively justified replication plan,
+full archive retention, and independent recomputation. The v1.1 `0002` pair is
+retired unobserved and cannot be used for a future run.
 
 ## Installed-wheel boundary
 
@@ -115,7 +116,9 @@ not accept a candidate override; it resolves the ID from the committed
 confirmation freeze and checks the ledger's selected entry and configuration
 hash.
 
-The design/source freeze is written only after the implementation is committed:
+The following historical command shows how the v1.1 design/source freeze was
+written after the implementation was committed. Its named batches are now
+retired and the command must not be rerun as authorization:
 
 ```bash
 python -m aaa.cli observation-noise-freeze \
@@ -127,7 +130,9 @@ After bounded development, a confirmation freeze is a separate file and must
 name the selected candidate explicitly. The command refuses to create that
 file without a candidate identity. A no-refinement incumbent selection is a
 legitimate candidate identity; it does not waive the freeze, full archive, or
-joint-analysis requirements.
+joint-analysis requirements. The retained v1.1 confirmation freeze is
+historical preparation only: registry status prevents either retired batch
+from being admitted.
 
 ## Development work
 

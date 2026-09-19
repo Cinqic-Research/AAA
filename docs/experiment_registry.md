@@ -76,6 +76,9 @@ quick search was development smoke and could not validly complete the frozen
 selection plan. A fresh full 2 x 2 x 1 selection under v1.1 retained and
 independently verified all four archives; no refinement was eligible, so the
 unchanged incumbent is the explicit no-refinement control. The old quick
-attempts remain historical evidence. A future pair of full
-confirmation archives is evaluated jointly so A/B do not receive separate
-multiplicity corrections.
+attempts remain historical evidence. The declared v1.1 A/B pair was retired
+unobserved during the 2026-09-19 engineering phase closure because the
+replication budget had no quantitative precision justification. Those IDs must
+never be reactivated. A future formal pair requires a versioned,
+precision-justified protocol and fresh batch identities; its archives must be
+evaluated jointly so A/B do not receive separate multiplicity corrections.

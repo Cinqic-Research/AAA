@@ -1,0 +1,45 @@
+{
+  "schema_version": "aaa.phase_closure_validation.v1",
+  "candidate_date": "2026-09-19",
+  "tests": {
+    "command": "python -m coverage run -m unittest discover -s tests -t . -v",
+    "count": 445,
+    "seconds": 165.15,
+    "exit_code": 0
+  },
+  "coverage": {
+    "percent": 72,
+    "required_percent": 70,
+    "exit_code": 0
+  },
+  "static_validation": {
+    "dependency_lock": "PASS after updating the maintained environment to FontTools 4.65.0",
+    "ruff_lint": "PASS",
+    "ruff_format": "PASS",
+    "mypy": "PASS",
+    "exit_code_contract": "PASS",
+    "git_diff_check": "PASS",
+    "strict_json": "PASS: 4341 files, non-finite constants rejected"
+  },
+  "identities": {
+    "benchmark_v2_1_hash": "f8e1090bf5b1aeb02cb8a129fec0ec9c83ab1b50cb2c500496b862fe6a1a5e37",
+    "observation_noise_v1_1_hash": "546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c",
+    "dependency_lock_sha256": "2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6"
+  },
+  "package": {
+    "version": "0.2.0",
+    "wheel": "aaa-0.2.0-py3-none-any.whl",
+    "wheel_sha256": "34f041806d8da380cdb4dee3db949206c3123c9e8312939e7d420df5ccddcb68",
+    "members": 50,
+    "payload": "PASS: both protocol files, license, entry point; no playground, research, results, or runs",
+    "fresh_external_environment_lock": "PASS: 24/24 pins",
+    "installed_version": "0.2.0",
+    "installed_protocol_hashes": "PASS",
+    "installed_observation_noise_smoke": "PASS engineering mechanics; reference NOT_VERIFIED; scientific endpoints INSUFFICIENT_EVIDENCE",
+    "installed_observation_noise_recomputation": "PASS: 58944 records, 256 trials",
+    "installed_schedule_filename_scan": "PASS: 161 files, no unsafe component"
+  },
+  "clean_checkout": "pending exact candidate commit",
+  "github_ci_runs": "pending exact final head",
+  "final_main": "pending merge and post-merge verification"
+}

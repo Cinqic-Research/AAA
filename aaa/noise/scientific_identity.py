@@ -28,6 +28,7 @@ GENERATED_FILES = frozenset(
         "docs/handoff_sol.md",
         "docs/sol_review.md",
         "docs/evidence/observation_noise_development_selection.json",
+        "docs/evidence/phase_closure_validation.json",
     }
 )
 MUTABLE_BATCH_FIELDS = frozenset({"status", "consumed_by", "outcome", "claimed_by", "claim_started_at"})

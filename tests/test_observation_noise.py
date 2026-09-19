@@ -20,9 +20,12 @@ from aaa.noise.observation import (
     generator_validation,
 )
 from aaa.noise.runner import (
+    FORMAL_MIN_AVAILABLE_BYTES,
     ObservationNoiseError,
     _finalize_record_shards,
+    _formal_storage_preflight,
     _persist_trial_rows,
+    _schedule_storage_name,
     _zero_noise_fixture,
     build_latent_environment,
     run_attempt,
@@ -50,6 +53,75 @@ from aaa.predictors import Predictor
 
 
 class ObservationNoiseProtocolTests(unittest.TestCase):
+    def test_schedule_storage_names_are_portable_deterministic_and_collision_resistant(self):
+        identities = set()
+        for role in ("development", "confirmation_a", "confirmation_b"):
+            for condition in ("clean_trained", "noise_trained"):
+                for family in ("constant_velocity", "bouncing", "changed_law"):
+                    for channel in ("gaussian", "uniform", "correlated", "impulsive"):
+                        for scale in ("000000", "000500", "002000", "010000"):
+                            for lineage in (0, 9):
+                                for episode in (0, 31):
+                                    for realization in (0, 2):
+                                        identities.add(
+                                            f"{role}:{condition}:{family}:{channel}:{scale}:"
+                                            f"l{lineage:03d}:e{episode:04d}:r{realization:02d}"
+                                        )
+        identities.update(
+            {
+                "confirmation_a:factorial:clean_trained:changed:gaussian:"
+                "000500to002000:aligned:l000:e0000:r00",
+                "confirmation_b:factorial:noise_trained:unchanged:uniform:"
+                "002000to000500:staggered:l009:e0031:r02",
+                '../unsafe:<bad>|name*?"\\\r\n',
+            }
+        )
+        names = [_schedule_storage_name(identity) for identity in identities]
+        self.assertEqual(len(names), len(set(names)))
+        self.assertEqual(names, [_schedule_storage_name(identity) for identity in identities])
+        for name in names:
+            self.assertRegex(name, r"^trial-[0-9a-f]{64}\.json$")
+            self.assertLessEqual(len(name), 80)
+            self.assertFalse(set(name) & set(':"<>|*?/\\\r\n'))
+
+    def test_formal_storage_preflight_rejects_insufficient_headroom(self):
+        fake_stats = type(
+            "Stats",
+            (),
+            {
+                "f_bavail": (FORMAL_MIN_AVAILABLE_BYTES - 1) // 4096,
+                "f_frsize": 4096,
+                "f_blocks": FORMAL_MIN_AVAILABLE_BYTES // 4096,
+            },
+        )()
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch("aaa.noise.runner.os.statvfs", return_value=fake_stats),
+            self.assertRaisesRegex(ObservationNoiseError, "lacks required headroom"),
+        ):
+            _formal_storage_preflight(Path(directory) / "not-yet-created")
+
+    def test_formal_storage_preflight_records_target_filesystem(self):
+        fake_stats = type(
+            "Stats",
+            (),
+            {
+                "f_bavail": (FORMAL_MIN_AVAILABLE_BYTES + 4095) // 4096,
+                "f_frsize": 4096,
+                "f_blocks": (FORMAL_MIN_AVAILABLE_BYTES * 2) // 4096,
+            },
+        )()
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch("aaa.noise.runner.os.statvfs", return_value=fake_stats),
+        ):
+            result = _formal_storage_preflight(Path(directory) / "not-yet-created")
+        self.assertGreaterEqual(
+            result["filesystem_available_bytes_before_reservation"],
+            FORMAL_MIN_AVAILABLE_BYTES,
+        )
+        self.assertEqual(result["required_available_bytes"], FORMAL_MIN_AVAILABLE_BYTES)
+
     def test_protocol_identity_and_frozen_choices(self):
         protocol = load_protocol()
         self.assertEqual(protocol.protocol_version, "aaa.observation_noise.v1.1")

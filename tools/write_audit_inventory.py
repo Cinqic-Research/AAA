@@ -40,7 +40,12 @@ def category(path: str) -> str:
         return "historical"
     if path.startswith("results/benchmark_v2_1/") or path.startswith("docs/evidence/"):
         return "retained evidence"
-    if path in {"docs/final_audit.md", "docs/handoff_sol.md"}:
+    if path in {
+        "docs/evidence/phase_closure_validation.json",
+        "docs/final_audit.md",
+        "docs/handoff_sol.md",
+        "docs/sol_review.md",
+    }:
         return "generated"
     return "active"
 
@@ -84,7 +89,7 @@ def findings(path: str) -> str:
         }
     )
     if noise_path:
-        return "AAA-135 through AAA-149; AAA-144 remains open"
+        return "AAA-135 through AAA-151; AAA-134/144 retained as publication-grade limitations"
     ids: list[str] = []
     if path.startswith(("aaa/", "tests/", "tools/", "benchmarks/")):
         ids.extend(["AAA-121", "AAA-122", "AAA-123"])

@@ -1,5 +1,32 @@
 # Research history
 
+## Observation-noise engineering phase closure (2026-09-19)
+
+The current engineering line fixes the hosted artifact filename defect with a
+portable full-SHA-256 schedule storage ID; authoritative trial identity remains
+in structured metadata and the schedule index. Formal runs now refuse to reserve
+a batch unless their output filesystem has at least 100 GB available.
+
+The dedicated Cinqic HDD was directly qualified as an ext4 working filesystem.
+A retained 58,944-record sharded run occupied 47,307,645 bytes, completed in
+113.16 seconds with 150,844 KiB peak RSS, and independently recomputed in 24.66
+seconds. Linear scaling projects about 31.4 wall hours and 47.4 GB per formal
+batch, roughly 64 CPU hours plus 13.7 recomputation hours for A+B, and about
+447,000 files per batch. Quick-scale creation, traversal, resume, checksum, and
+cleanup measurements did not justify introducing a new packed-container format.
+
+Formal A/B was deliberately not executed. Local capacity is no longer the
+blocker, but the fixed replication budget lacks a quantitative precision basis.
+The v1.1 A/B identities were retired unobserved so they cannot be reused. The
+scientific outcome is `NOT EXECUTED`; external immutable archival is
+`NOT VERIFIED` and is not a gate for this internal engineering closure. Any
+successor experiment must be versioned, precision-justified, frozen, and given
+fresh batch identities before observation.
+
+The FontTools 4.65.0 lock update was incorporated before the final source
+freeze. The Playground/tiny-NN PR and archive/future-design draft were retained
+as exploratory PR history rather than added to the maintained scientific tree.
+
 ## Observation-noise v1.1 independent repair boundary (2026-09-14)
 
 Sol independently reproduced fifteen observation-noise review findings

@@ -1,0 +1,99 @@
+{
+  "schema_version": "aaa.phase_closure_storage_profile.v1",
+  "measured_at": "2026-09-19",
+  "mount": {
+    "target": "/media/cinqic/Cinqic Storage",
+    "source": "/dev/sda1",
+    "filesystem": "ext4",
+    "options": "rw,nosuid,nodev,relatime,errors=remount-ro",
+    "total_bytes": 491106508800,
+    "available_bytes_before_profile": 425141489664,
+    "available_bytes_after_profile": 425045323776,
+    "free_inodes_before_profile": 30526651,
+    "root_filesystem_available_bytes_before_profile": 24722862080
+  },
+  "filesystem_capabilities": {
+    "ordinary_write": "PASS",
+    "same_filesystem_atomic_rename": "PASS",
+    "symbolic_links": "PASS",
+    "posix_mode_0600": "PASS",
+    "sequential_write_probe_bytes": 67108864,
+    "sequential_write_probe_seconds": 0.752889,
+    "sequential_write_probe_bytes_per_second": 89100000,
+    "sequential_read_sha256_seconds": 0.03,
+    "smart_health": "NOT_VERIFIED",
+    "smart_health_reason": "smartctl is not installed in the available environment"
+  },
+  "attempt": {
+    "locator": "/media/cinqic/Cinqic Storage/AAA/runs/observation-noise-v1_1/phase-closure-hdd-profile-20260919",
+    "role": "development",
+    "quick": true,
+    "candidate_id": "incumbent-no-refinement-v1",
+    "scored_records": 58944,
+    "planned_trials": 160,
+    "record_shards_including_index": 257,
+    "schedule_files_including_index": 161,
+    "total_files": 446,
+    "total_bytes": 47307645,
+    "wall_seconds": 113.16,
+    "runner_reported_seconds": 112.868476,
+    "user_cpu_seconds": 114.09,
+    "system_cpu_seconds": 0.92,
+    "maximum_resident_kib": 150844,
+    "filesystem_output_blocks_reported_by_time_v": 220800,
+    "checksums_sha256": "52b2050f38f04071d3306f4ec83b4deaafa653b631811003f4cf5575dc546c23",
+    "run_manifest_sha256": "849809928d8512b2177f966b73dc9e6ea2e87088eb1e05fe1fbcc208319f4e7f",
+    "summary_sha256": "1506d0081d9cc755b69204e57de7e2aba23269bac54d93a4148454194f171a41",
+    "engineering_checks": {
+      "reference_preservation": "PASS",
+      "evidence_integrity": "PASS",
+      "numerical_stability": "PASS"
+    },
+    "scientific_primary_endpoints": "INSUFFICIENT_EVIDENCE",
+    "confirmation_reproducibility": "NOT_VERIFIED"
+  },
+  "independent_recomputation": {
+    "status": "PASS",
+    "records": 58944,
+    "trials": 256,
+    "wall_seconds": 24.66,
+    "maximum_resident_kib": 71444
+  },
+  "filesystem_object_operations": {
+    "directory_traversal_seconds": 0.0,
+    "warm_cache_random_256_shard_checksum_seconds": 0.02,
+    "warm_cache_sequential_256_shard_checksum_seconds": 0.02,
+    "copy_seconds": 0.03,
+    "cleanup_seconds": 0.0,
+    "note": "The random/sequential shard reads were page-cache warm and are recorded only as an object-operation check, not as a physical random-I/O benchmark."
+  },
+  "resume": {
+    "finalized_attempt_refusal": "PASS",
+    "finalized_attempt_refusal_seconds": 0.13,
+    "interruption_method": "SIGINT after 20 seconds in a separate retained development attempt",
+    "resumed_attempt": "phase-closure-hdd-resume-probe-20260919",
+    "resumed_to_completion": "PASS",
+    "resume_wall_seconds": 93.24,
+    "resume_maximum_resident_kib": 154412,
+    "resumed_scientific_primary_endpoints": "INSUFFICIENT_EVIDENCE",
+    "resumed_confirmation_reproducibility": "NOT_VERIFIED"
+  },
+  "formal_projection": {
+    "scored_records_per_batch": 59043840,
+    "measured_record_scale_factor": 1001.6938110749186,
+    "projected_wall_hours_per_batch": 31.40545940962722,
+    "projected_cpu_hours_for_a_plus_b": 64.00266956207021,
+    "projected_attempt_bytes_per_batch": 47387775213,
+    "projected_attempt_gib_per_batch": 44.13328153360635,
+    "projected_file_count_per_batch": 446755,
+    "projected_minimum_directory_block_overhead_bytes_per_batch": 1829910281,
+    "projected_independent_recomputation_hours_for_a_plus_b": 13.723205211726386,
+    "projection_limit": "Linear extrapolation from the retained quick HDD profile; not a completed formal-scale benchmark."
+  },
+  "decision": {
+    "sharding": "retain for current engineering closure",
+    "packing": "not justified by measured quick-scale object operations",
+    "formal_a_b": "NOT_EXECUTED",
+    "reason": "The HDD removes the capacity blocker, but the formal replication budget lacks a quantitative precision justification and projects about 31.4 wall hours per batch."
+  }
+}

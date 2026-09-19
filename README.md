@@ -87,9 +87,11 @@ alongside everything else. No threshold was touched. See `AAA-120` in
   matched intervention branches, deterministic sharded evidence, and an
   independent reference verifier. The corrected full 2 x 2 x 1 development
   search evaluated four candidate identities and retained the unchanged
-  incumbent as an explicit no-refinement control. Formal A/B remains blocked
-  on an approved immutable archive/retrieval destination; development evidence
-  is not a confirmation result. See
+  incumbent as an explicit no-refinement control. Formal A/B was not executed:
+  the dedicated HDD removes the local capacity blocker, but a measured profile
+  projects about 31.4 wall hours per formal batch and the replication budget
+  has no quantitative precision justification. The declared v1.1 batches were
+  retired unobserved. Development evidence is not a confirmation result. See
   [`benchmarks/observation_noise_candidate_ledger.json`](benchmarks/observation_noise_candidate_ledger.json).
 
 ## The learner

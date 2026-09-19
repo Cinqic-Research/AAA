@@ -1,57 +1,63 @@
-# GPT-5.6 Sol independent review — observation noise v1.1
+# GPT-5.6 Sol self-audit — observation-noise engineering phase closure
 
-## Current verdict (2026-09-14)
+## Current verdict (2026-09-19)
 
-**BLOCKED FOR COMPLETION AND NORMAL MERGE.**
+The repository engineering candidate is **APPROVED PENDING EXACT FINAL-HEAD
+HOSTED CI AND POST-MERGE VERIFICATION**. The observation-noise scientific
+outcome is **NOT EXECUTED**.
 
-The independent review repaired the reproducible engineering, integrity,
-selection, causality, scalability and documentation defects in PR #11. The
-scientific outcome is nevertheless **NOT ESTABLISHED**: neither fresh v1.1 A/B
-batch has been observed, no immutable external archive exists, no development
-upload/retrieval proof exists, and no joint formal endpoint family has been
-recomputed. Missing confirmation evidence is not a negative or inconclusive
-result.
+Sol's initial audit of inherited PR #11 was independent. After Sol changed the
+implementation, this became a self-audit rather than a second independent
+review. The confidence basis is adversarial regression coverage, an independent
+recomputation path, a clean-checkout run, and exact hosted CI—not a claim of
+human independence.
 
-The exact external prerequisite is `AAA-144`: an approved immutable destination
-for two projected 38.5 GB compressed primitive streams plus schedules,
-metadata, retrieval headroom and documented retention/access. The repaired
-implementation and negative evidence may be pushed to PR #11 and exercised by
-CI, but this review does not authorize merge, tag, or release.
+## Findings, repairs, and retained development evidence
 
-## Findings and corrected development evidence
+The earlier review reproduced `AAA-135` through `AAA-149`. This closure also
+reproduced hosted artifact-upload failure `AAA-150`: colon-bearing schedule
+filenames survived the 442-test suite but were rejected by GitHub's artifact
+service. Schedule storage now uses a full SHA-256 identifier while complete
+trial identity remains in structured metadata and the index. `AAA-151` adds a
+100 GB target-filesystem preflight before any formal remote reservation.
 
-Sol reproduced `AAA-135` through `AAA-145` before changing the corresponding
-implementation. The final self-review additionally reproduced `AAA-146`
-through `AAA-149`: archive containment, evidence preservation, installed
-checkout-boundary and hosted shallow-clone defects. The issue ledger preserves each failure,
-root cause, repair, regression and remaining boundary.
+The corrected full 2 x 2 x 1 development search remains valid development
+evidence: all four 235,776-record candidate archives independently verified,
+no clipping refinement met every preregistered condition, and
+`incumbent-no-refinement-v1` remains the selected no-refinement control. It does
+not establish any formal observation-noise endpoint.
 
-The corrected full 2 x 2 x 1 development search evaluated all four frozen
-candidate identities. Each candidate archive retained 235,776 scored records,
-1,024 trials and 3,552 training records and independently verified `PASS`.
-None of the three innovation-clipping mechanisms met every preregistered
-selection condition, so `incumbent-no-refinement-v1` remains selected. This
-disposition is valid development evidence only.
+## Storage and experiment decision
 
-The bounded-memory pilot retained 58,944 scored records in 256 deterministic
-gzip shards, peaked at 155,054,080 bytes RSS, and independently verified. Its
-timing-neutral record digest, metrics and coverage exactly matched the prior
-streaming run. These measurements support implementation practicality and the
-38.5 GB compressed projection; they do not prove formal runtime, durable
-retention, or scientific endpoints.
+The dedicated ext4 HDD was directly inspected and exercised. It had
+425,141,489,664 available bytes before profiling, supports ordinary POSIX
+permissions, symlinks and same-filesystem atomic rename, and retained a fresh
+58,944-record/446-file run occupying 47,307,645 bytes. The run completed in
+113.16 seconds at 150,844 KiB peak RSS and independently recomputed in 24.66
+seconds. An interrupted attempt resumed to completion. SMART health is
+`NOT VERIFIED` because `smartctl` is unavailable.
+
+Linear scaling projects about 31.4 wall hours, 47.4 GB, and 447,000 files per
+formal batch; A+B projects about 64 CPU hours plus 13.7 hours of independent
+recomputation. Quick-scale object operations do not justify adding a packed
+container format. They also do not justify the fixed replication count.
+
+Formal A/B was therefore not executed. The v1.1 `0002` batch identities were
+retired unobserved and cannot be reused. A future formal experiment must have a
+new version, quantitative precision justification, final freeze, and fresh
+batch identities before observation. External immutable archival is
+`NOT VERIFIED`; it remains necessary for publication-grade durability claims
+but is not an engineering merge gate for this internal phase.
 
 ## Identity and evidence boundary
 
-The active protocol is `aaa.observation_noise.v1.1`, with protocol hash
-`546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c`.
-It pins the preserved v2.1 reference commit
-`25b6c32c9040d0f934314a2139993d12763afc99`. The v1 protocol and planned 0001
-batches are retained as superseded and unobserved; the fresh v1.1 0002 batches
-remain planned and unobserved.
-
-Final local commands, the source fingerprint/freeze, PR head and CI results are
-recorded in `handoff_sol.md` and `final_audit.md` after generation. This is an
-AI review. It does not claim human independence.
+The active protocol remains `aaa.observation_noise.v1.1`, hash
+`546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c`,
+and pins v2.1 commit
+`25b6c32c9040d0f934314a2139993d12763afc99`. Final source fingerprint, lock,
+commit, hosted CI, merge, and post-merge verification are recorded in
+`handoff_sol.md` and `final_audit.md` after the exact final candidate is
+generated.
 
 ---
 

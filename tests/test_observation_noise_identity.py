@@ -117,11 +117,15 @@ class ScientificIdentityTests(unittest.TestCase):
             source_freeze.write_text("source one\n", encoding="utf-8")
             (root / "results").mkdir()
             (root / "results" / "generated.json").write_text("result\n", encoding="utf-8")
+            (root / "docs" / "evidence").mkdir(parents=True)
+            validation = root / "docs" / "evidence" / "phase_closure_validation.json"
+            validation.write_text("validation one\n", encoding="utf-8")
             self.assertTrue(
                 fingerprints_equal(first, scientific_fingerprint(root, require_project_shape=False))
             )
             freeze.write_text("freeze two\n", encoding="utf-8")
             source_freeze.write_text("source two\n", encoding="utf-8")
+            validation.write_text("validation two\n", encoding="utf-8")
             self.assertTrue(
                 fingerprints_equal(first, scientific_fingerprint(root, require_project_shape=False))
             )

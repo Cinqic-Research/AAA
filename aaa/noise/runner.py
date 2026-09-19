@@ -62,6 +62,7 @@ ALL_CHANNELS = ("gaussian", "uniform", "correlated", "impulsive")
 ALL_SCALES = (0.0, 0.0005, 0.002, 0.01)
 SHIFT_LEVEL_PAIRS = ((0.0005, 0.002), (0.002, 0.0005))
 SHIFT_TIMES = (("aligned", 300), ("staggered", 340))
+FORMAL_MIN_AVAILABLE_BYTES = 100_000_000_000
 
 
 class ObservationNoiseError(RuntimeError):
@@ -112,6 +113,45 @@ def _record_lifecycle(path: Path, event: str, **data: Any) -> None:
 def _stable_json_hash(value: object) -> str:
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _schedule_storage_name(trial_id: str) -> str:
+    """Return a portable opaque filename for an authoritative trial identity."""
+
+    if not isinstance(trial_id, str) or not trial_id:
+        raise ObservationNoiseError("schedule trial identity must be a nonempty string")
+    digest = hashlib.sha256(trial_id.encode("utf-8")).hexdigest()
+    return f"trial-{digest}.json"
+
+
+def _formal_storage_preflight(output_root: str | Path) -> dict[str, Any]:
+    """Refuse formal work before reservation when the target lacks headroom."""
+
+    target = Path(output_root).expanduser().resolve(strict=False)
+    probe = target
+    while not probe.exists():
+        parent = probe.parent
+        if parent == probe:
+            raise ObservationNoiseError(f"cannot resolve output filesystem for {target}")
+        probe = parent
+    if not probe.is_dir():
+        raise ObservationNoiseError(f"output filesystem probe is not a directory: {probe}")
+    stats = os.statvfs(probe)
+    available = int(stats.f_bavail * stats.f_frsize)
+    total = int(stats.f_blocks * stats.f_frsize)
+    if available < FORMAL_MIN_AVAILABLE_BYTES:
+        raise ObservationNoiseError(
+            "formal observation-noise output filesystem lacks required headroom: "
+            f"available={available} required={FORMAL_MIN_AVAILABLE_BYTES} target={target}"
+        )
+    return {
+        "target": str(target),
+        "probed_existing_path": str(probe.resolve()),
+        "device_id": int(probe.stat().st_dev),
+        "filesystem_total_bytes": total,
+        "filesystem_available_bytes_before_reservation": available,
+        "required_available_bytes": FORMAL_MIN_AVAILABLE_BYTES,
+    }
 
 
 def _base_world(family: str, steps: int, *, change_step: int | None = None) -> WorldConfig:
@@ -1462,6 +1502,7 @@ def run_attempt(
     if role != "development" and quick:
         raise ObservationNoiseError("quick development mode is not valid for confirmation")
     resolved_candidate_id = candidate_id or INCUMBENT_CANDIDATE_ID
+    storage_preflight: dict[str, Any] | None = None
     if role != "development":
         if protocol_path is not None:
             raise ObservationNoiseError("confirmation roles cannot use a protocol override")
@@ -1476,6 +1517,7 @@ def run_attempt(
         declared = [item for item in registry.get("batches", []) if item.get("batch_id") == batch_id]
         if len(declared) != 1 or declared[0].get("role") != role or declared[0].get("status") != "planned":
             raise ObservationNoiseError(f"batch {batch_id!r} is not the declared planned batch for {role}")
+        storage_preflight = _formal_storage_preflight(output_root)
         try:
             reservation = reserve_confirmation_batch(
                 project_root(),
@@ -1615,7 +1657,7 @@ def run_attempt(
                                         protocol, trial, steps
                                     )
                                     trial["stratum"] = stratum
-                                    relative = Path("schedules") / f"{trial['trial_id']}.json"
+                                    relative = Path("schedules") / _schedule_storage_name(trial["trial_id"])
                                     path = attempt_dir / relative
                                     digest = _write_schedule(path, schedule)
                                     schedule_index.append(
@@ -1686,7 +1728,9 @@ def run_attempt(
                                             "branch": branch,
                                             "stratum": "unstratified",
                                         }
-                                        relative = Path("schedules") / f"{trial['trial_id']}.json"
+                                        relative = Path("schedules") / _schedule_storage_name(
+                                            trial["trial_id"]
+                                        )
                                         path = attempt_dir / relative
                                         digest = _write_schedule(path, schedule)
                                         schedule_index.append(
@@ -1848,6 +1892,7 @@ def run_attempt(
             "calibration_schedule_count": len(list(calibration_schedule_dir.glob("*.json")))
             if calibration_schedule_dir.is_dir()
             else 0,
+            "storage_preflight": storage_preflight,
         }
         json_dump(attempt_dir / "run_manifest.json", manifest)
         metadata = {
@@ -1863,6 +1908,7 @@ def run_attempt(
             ).configuration_hash,
             "scientific_fingerprint_sha256": confirmation_fingerprint,
             "created_at_utc": _now(),
+            "storage_preflight": storage_preflight,
             "source": git_metadata(project_root()),
             "dependency_lock": (
                 {

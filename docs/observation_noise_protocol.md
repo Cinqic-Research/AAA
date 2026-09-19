@@ -199,8 +199,14 @@ Protocol v1 was superseded before either confirmation batch was executed or
 observed. Its exact hash, source commit, retired batch IDs, and audit reason are
 retained in `benchmarks/observation_noise_registry.json`. v1.1 resolves the
 10%-boundary prose/operator contradiction, pins the v2.1 reference commit, and
-declares the bounded sharded archive. The fresh confirmation IDs are
-`observation-noise-a-0002` and `observation-noise-b-0002`.
+declares the bounded sharded archive. The fresh confirmation IDs were
+`observation-noise-a-0002` and `observation-noise-b-0002`. Both were retired
+unobserved during the 2026-09-19 engineering phase closure. The dedicated HDD
+removed the immediate capacity blocker, but direct profiling projected about
+31.4 wall hours per formal batch and the fixed replication count had no
+quantitative precision justification. Neither identity may be reactivated. A
+future formal design must be versioned, precision-justified, frozen, and
+allocated fresh batch identities before any confirmation stream is observed.
 
 Training updates are retained in `training_records.jsonl` and are bound to the
 saved training schedules. Each evaluated lineage also receives a fixed four-cell

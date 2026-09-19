@@ -1125,15 +1125,18 @@ corruption, missing scientific gates, and strict-type substitutions.
   insufficient without primitive arithmetic.
 
 ### AAA-134 — no approved durable archive locator exists for observation-noise A/B
-- **Source** fresh observation-noise completion audit · **Severity** blocking · **Status** open
+- **Source** fresh observation-noise completion audit · **Severity** publication-grade evidence limitation · **Status** retained limitation; not required for current internal engineering phase
 - **Reproduction** The protocol requires a full archive and immutable locator,
   but this workspace has no approved durable storage mechanism for the new
   observation-noise records. Temporary development roots cannot be presented
   as durable evidence.
-- **Disposition** No locator is fabricated. The compact development evidence
-  records transient archive status, while the confirmation boundary remains
-  blocked until an approved durable mechanism is supplied and recorded before
-  A/B execution.
+- **Disposition** No locator is fabricated. The dedicated HDD provides verified
+  local working capacity but not immutability, off-site retention, or an
+  independent failure domain. External archival is reclassified as a
+  publication-grade evidence requirement rather than a merge gate for this
+  internal engineering phase. Any future claim of durable independent
+  retrieval still requires a genuine external mechanism established before
+  observation.
 
 ### AAA-135 — verifier accepted an archive with no checksum manifest
 - **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
@@ -1250,15 +1253,20 @@ corruption, missing scientific gates, and strict-type substitutions.
   The isolated fixture passes both recorded v2.1 content identities.
 
 ### AAA-144 — formal archive remains without an approved durable destination
-- **Source** independent Sol archive audit · **Severity** blocking · **Status** open
+- **Source** independent Sol archive audit · **Severity** publication-grade evidence limitation · **Status** retained limitation; not required for current internal engineering phase
 - **Reproduction** The repaired single-copy format projects one formal batch at
-  about 38.5 GB plus schedules and metadata. The repository has no Git LFS
-  configuration, release asset, or approved object-store credentials, and only
-  about 69.8 GB was available at the measured boundary. A local run could not
-  be truthfully called durably archived or independently retrieved.
-- **Disposition** No locator is fabricated and A/B remain unexecuted. The
-  protocol requires a repository-approved immutable destination and successful
-  retrieval verification before either confirmation claim can pass.
+  about 38.5 GB of compressed primitive records plus schedules and metadata.
+  Direct 2026-09-19 inspection found 425,141,489,664 available bytes on the
+  dedicated ext4 HDD, so local capacity is no longer the blocker. The
+  repository still has no Git LFS configuration, release asset, or approved
+  object-store credentials. A local run therefore cannot be truthfully called
+  durably archived or independently retrieved.
+- **Disposition** No locator is fabricated and A/B remain unexecuted. External
+  immutable archival is not required to merge validated infrastructure in the
+  current internal phase. It remains required before any publication-grade
+  durability or independent-retrieval claim. Formal execution was separately
+  deferred because the replication budget lacks a quantitative precision
+  justification; both declared v1.1 batches were retired unobserved.
 
 ### AAA-145 — scalar bootstrap traversal made the frozen draw count impractical
 - **Source** independent Sol full-selection timing probe · **Severity** critical · **Status** repaired and verified
@@ -1337,3 +1345,36 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Regression** The fail-closed unit test remains unchanged. Replacement
   final-head GitHub checks must pass all required Python versions before this
   repair is considered hosted-CI verified.
+
+### AAA-150 — schedule filenames were not portable to GitHub artifact storage
+- **Source** final-head GitHub CPU CI runs `34922822759` and `34922825001` · **Severity** high · **Status** repaired locally; final hosted artifact upload pending
+- **Reproduction** Both the locked and fresh-install jobs completed their
+  environment, static, test, benchmark, recomputation, and exit-code work, then
+  `actions/upload-artifact` rejected schedule paths such as
+  `development:clean_trained:bouncing:correlated:...json` because `:` is not a
+  portable artifact filename character.
+- **Repair** Schedule files now use `trial-<full lowercase SHA-256>.json`, where
+  the digest is computed over the canonical UTF-8 trial identity. The complete
+  authoritative identity remains in the schedule payload index and primitive
+  records; no verifier reconstructs it from the filename.
+- **Regression** The filename regression covers 3,459 representative and
+  adversarial identities across every role, family, training condition,
+  channel, scale, lineage, episode, realization, and shift form. It checks
+  determinism, uniqueness, fixed length, and exclusion of all forbidden path
+  characters. Final hosted CI must also pass the real artifact-upload step.
+
+### AAA-151 — formal execution had no output-filesystem capacity preflight
+- **Source** 2026-09-19 storage audit · **Severity** high · **Status** repaired and locally verified
+- **Reproduction** The runner could reserve a formal batch before establishing
+  that the explicitly selected output filesystem had enough space for both
+  retained A/B evidence and working headroom. On this host `/` had only
+  24,722,862,080 available bytes while the dedicated HDD had
+  425,141,489,664.
+- **Repair** Before any remote reservation, a formal run resolves the target
+  filesystem and requires at least 100,000,000,000 available bytes. It records
+  target, existing probe path, device ID, total bytes, available bytes, and the
+  threshold in its manifest and metadata. Development runs remain portable and
+  do not require the machine-specific HDD path.
+- **Regression** Focused tests inject insufficient and sufficient filesystem
+  states and verify refusal and provenance without hard-coding a deployment
+  path into AAA source.

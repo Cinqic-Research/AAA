@@ -91,11 +91,16 @@ all four candidate archives independently verified, no refinement had the
 preregistered practical gain or adjusted positive evidence, and the unchanged
 incumbent was retained as the explicit no-refinement control. This does not
 establish that the incumbent meets any confirmation endpoint. The source
-fingerprint is non-self-referential and fail-closed, but a durable archive
-locator is still absent. The exact confirmation freeze may be prepared, but
-full ten-lineage A/B execution, joint Holm analysis and durable retrieval are
-therefore `NOT_VERIFIED` or `BLOCKED`, not silently treated as passing. Sol's AI
-review is recorded separately and does not claim independent human review.
+fingerprint is non-self-referential and fail-closed. The dedicated HDD
+establishes local execution capacity, not immutability, off-site retention, or
+an independent failure domain. External durable archival remains
+`NOT VERIFIED`, but is not required for the current internal engineering phase.
+The measured HDD profile projects about 31.4 wall hours per formal batch and
+the replication count has no quantitative precision justification. The
+declared v1.1 batches were therefore retired before observation. Full A/B
+execution, joint Holm analysis, and durable retrieval are `NOT EXECUTED` or
+`NOT VERIFIED`, never silently treated as passing. Sol's AI review is recorded
+separately and does not claim independent human review.
 
 The noise model corrupts observations only. It does not study process noise,
 dropout, bias, irregular sampling, hidden state, actions, goals, language,

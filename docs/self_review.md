@@ -30,9 +30,17 @@ Material results:
   current-checkout reference drift, shard tampering, zero-valued legitimate
   metrics, interruption/resume, and causal interval ordering have dedicated
   negative tests.
-- Formal A/B was not run. There is no immutable archive locator or independent
-  retrieval proof for the projected 38.5 GB compressed record stream per
-  batch. This is `BLOCKED`, not a scientific result and not merge approval.
+- Hosted CI then exposed `AAA-150`: colon-bearing schedule filenames passed the
+  unit suite but failed the real artifact service. Full-SHA-256 storage names
+  now have a cross-product regression and retain authoritative identity in the
+  index. `AAA-151` adds a 100 GB target-filesystem preflight before reservation.
+- Formal A/B was not run. The dedicated HDD removes the local-capacity blocker,
+  but a retained profile projects about 31.4 wall hours per batch and the fixed
+  replication count has no quantitative precision justification. The v1.1
+  batches were retired unobserved. This is `NOT EXECUTED`, not a negative,
+  inconclusive, or successful scientific result. External durable archival is
+  `NOT VERIFIED` and remains a publication-grade evidence limitation rather
+  than a current internal engineering merge gate.
 
 ## Historical Opus v2.1 self-review — not current approval
 
