@@ -284,8 +284,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "observation-noise-freeze":
         from .noise.freeze import build_freeze_manifest, save_freeze_manifest
 
-        if not args.batch:
-            raise SystemExit("observation-noise-freeze requires at least one --batch")
+        if args.stage == "confirmation_freeze" and not args.batch:
+            raise SystemExit("confirmation_freeze requires at least one --batch")
         if args.stage == "confirmation_freeze" and not args.selected_candidate:
             raise SystemExit("confirmation_freeze requires --selected-candidate")
         destination_name = (
