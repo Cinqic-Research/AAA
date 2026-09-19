@@ -1,7 +1,94 @@
 # Research history
 
+## Observation-noise engineering phase closure (2026-09-19)
+
+The current engineering line fixes the hosted artifact filename defect with a
+portable full-SHA-256 schedule storage ID; authoritative trial identity remains
+in structured metadata and the schedule index. Formal runs now refuse to reserve
+a batch unless their output filesystem has at least 100 GB available.
+
+The dedicated Cinqic HDD was directly qualified as an ext4 working filesystem.
+A retained 58,944-record sharded run occupied 47,307,645 bytes, completed in
+113.16 seconds with 150,844 KiB peak RSS, and independently recomputed in 24.66
+seconds. Linear scaling projects about 31.4 wall hours and 47.4 GB per formal
+batch, roughly 64 CPU hours plus 13.7 recomputation hours for A+B, and about
+447,000 files per batch. Quick-scale creation, traversal, resume, checksum, and
+cleanup measurements did not justify introducing a new packed-container format.
+
+Formal A/B was deliberately not executed. Local capacity is no longer the
+blocker, but the fixed replication budget lacks a quantitative precision basis.
+The v1.1 A/B identities were retired unobserved so they cannot be reused. The
+scientific outcome is `NOT EXECUTED`; external immutable archival is
+`NOT VERIFIED` and is not a gate for this internal engineering closure. Any
+successor experiment must be versioned, precision-justified, frozen, and given
+fresh batch identities before observation.
+
+The FontTools 4.65.0 lock update was incorporated before the final source
+freeze. The Playground/tiny-NN PR and archive/future-design draft were retained
+as exploratory PR history rather than added to the maintained scientific tree.
+
+## Observation-noise v1.1 independent repair boundary (2026-09-14)
+
+Sol independently reproduced fifteen observation-noise review findings
+(`AAA-135` through `AAA-149`) before repairing the implementation. The phase is
+now explicitly versioned `aaa.observation_noise.v1.1`; v1 is retained as an
+unobserved superseded protocol because its adaptation prose and machine
+operator disagreed at the exact 10% boundary.
+
+The corrected full 2 x 2 x 1 development selection retained and independently
+verified four 235,776-record candidate archives. None of the three innovation
+clipping refinements met every preregistered constraint, so the unchanged
+`incumbent-no-refinement-v1` control remains selected. This is a development
+decision, not confirmation evidence.
+
+Record production and verification are bounded-memory and use deterministic
+per-trial gzip shards. A measured quick pilot reduced peak RSS from about 2.67
+GiB to 148 MiB and retained one primitive copy with exact timing-neutral
+semantic equivalence. Formal admission now requires a committed freeze, fixed
+4,000 draws, frozen batch identities, and an atomic append-only remote claim.
+The verifier requires complete checksums and rejects non-finite values,
+incomplete cells, unsafe paths, symlinks, ambiguous record layouts, and
+tampered schedules or statistics.
+
+Formal A/B remains deliberately unobserved. One batch is projected at 38.5 GB
+of compressed records plus schedules and metadata, and no approved immutable
+archive/retrieval destination exists. The phase is therefore `BLOCKED`, not
+negative or inconclusive, and PR #11 is not approved for merge at this boundary.
+
+## Observation-noise v1 completion boundary (2026-09-14, superseded)
+
+The observation-noise phase now has a non-self-referential scientific source
+fingerprint. It hashes the tracked scientific source map, rejects untracked
+scientific files and symlinks, normalizes only mutable batch lifecycle fields,
+and excludes generated result/freeze/review artifacts. Committing the exact
+freeze therefore cannot invalidate its own recorded identity; Git commit and
+tree values remain provenance only.
+
+Development refinement is bounded by the declared 12-configuration/3-mechanism
+budget. Four immutable candidate identities were evaluated on the committed
+development plan. All three innovation-clipping refinements were rejected on
+the preregistered constraints, so `incumbent-no-refinement-v1` is the selected
+candidate. No A/B conclusion follows from this development result.
+
+The joint confirmation evaluator is present as
+`observation-noise-confirmation-evaluate <A> <B>`. It independently verifies
+both archives, requires shared candidate/fingerprint/training compatibility,
+reconstructs absolute utility, baseline competitiveness, first-50 adaptation,
+and unchanged-law retention claims, and applies one Holm family across A+B.
+No confirmation freeze or A/B archive was executed in this completion boundary.
+
 Dates are the dates of the work, not of any release. Nothing here is a product
 announcement.
+
+## Observation-noise v1 design freeze (2026-09-13)
+
+Added the separately versioned `aaa.observation_noise.v1` protocol and a
+controlled sensor channel for next-position prediction. The implementation
+keeps latent truth and noisy observations separate, caches one schedule sample
+per timestamp, updates only from the revealed noisy observation, records full
+primitive evidence, and independently recomputes its arithmetic. Development
+smoke output is explicitly inconclusive; no refinement or capability promotion
+is claimed.
 
 ## v2.1 — benchmark protocol repair (2026-09-10 / 2026-09-11)
 

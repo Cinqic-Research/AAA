@@ -40,7 +40,12 @@ def category(path: str) -> str:
         return "historical"
     if path.startswith("results/benchmark_v2_1/") or path.startswith("docs/evidence/"):
         return "retained evidence"
-    if path in {"docs/final_audit.md", "docs/handoff_sol.md"}:
+    if path in {
+        "docs/evidence/phase_closure_validation.json",
+        "docs/final_audit.md",
+        "docs/handoff_sol.md",
+        "docs/sol_review.md",
+    }:
         return "generated"
     return "active"
 
@@ -61,6 +66,30 @@ def verification(path: str) -> str:
 
 
 def findings(path: str) -> str:
+    noise_path = (
+        path.startswith("aaa/noise/")
+        or path.startswith("docs/evidence/observation_noise")
+        or path.startswith("docs/evidence/sol_observation_noise")
+        or "observation_noise" in path
+        or path
+        in {
+            "README.md",
+            "CHANGELOG.md",
+            "CONTRIBUTING.md",
+            ".github/workflows/ci.yml",
+            "docs/evidence_policy.md",
+            "docs/experiment_registry.md",
+            "docs/issue_ledger.md",
+            "docs/limitations.md",
+            "docs/reproduction.md",
+            "docs/self_review.md",
+            "docs/sol_review.md",
+            "docs/handoff_sol.md",
+            "tools/write_handoff.py",
+        }
+    )
+    if noise_path:
+        return "AAA-135 through AAA-151; AAA-134/144 retained as publication-grade limitations"
     ids: list[str] = []
     if path.startswith(("aaa/", "tests/", "tools/", "benchmarks/")):
         ids.extend(["AAA-121", "AAA-122", "AAA-123"])

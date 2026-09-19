@@ -1,4 +1,67 @@
-# GPT-5.6 Sol independent review
+# GPT-5.6 Sol self-audit — observation-noise engineering phase closure
+
+## Current verdict (2026-09-19)
+
+The repository engineering candidate is **APPROVED PENDING EXACT FINAL-HEAD
+HOSTED CI AND POST-MERGE VERIFICATION**. The observation-noise scientific
+outcome is **NOT EXECUTED**.
+
+Sol's initial audit of inherited PR #11 was independent. After Sol changed the
+implementation, this became a self-audit rather than a second independent
+review. The confidence basis is adversarial regression coverage, an independent
+recomputation path, a clean-checkout run, and exact hosted CI—not a claim of
+human independence.
+
+## Findings, repairs, and retained development evidence
+
+The earlier review reproduced `AAA-135` through `AAA-149`. This closure also
+reproduced hosted artifact-upload failure `AAA-150`: colon-bearing schedule
+filenames survived the 442-test suite but were rejected by GitHub's artifact
+service. Schedule storage now uses a full SHA-256 identifier while complete
+trial identity remains in structured metadata and the index. `AAA-151` adds a
+100 GB target-filesystem preflight before any formal remote reservation.
+
+The corrected full 2 x 2 x 1 development search remains valid development
+evidence: all four 235,776-record candidate archives independently verified,
+no clipping refinement met every preregistered condition, and
+`incumbent-no-refinement-v1` remains the selected no-refinement control. It does
+not establish any formal observation-noise endpoint.
+
+## Storage and experiment decision
+
+The dedicated ext4 HDD was directly inspected and exercised. It had
+425,141,489,664 available bytes before profiling, supports ordinary POSIX
+permissions, symlinks and same-filesystem atomic rename, and retained a fresh
+58,944-record/446-file run occupying 47,307,645 bytes. The run completed in
+113.16 seconds at 150,844 KiB peak RSS and independently recomputed in 24.66
+seconds. An interrupted attempt resumed to completion. SMART health is
+`NOT VERIFIED` because `smartctl` is unavailable.
+
+Linear scaling projects about 31.4 wall hours, 47.4 GB, and 447,000 files per
+formal batch; A+B projects about 64 CPU hours plus 13.7 hours of independent
+recomputation. Quick-scale object operations do not justify adding a packed
+container format. They also do not justify the fixed replication count.
+
+Formal A/B was therefore not executed. The v1.1 `0002` batch identities were
+retired unobserved and cannot be reused. A future formal experiment must have a
+new version, quantitative precision justification, final freeze, and fresh
+batch identities before observation. External immutable archival is
+`NOT VERIFIED`; it remains necessary for publication-grade durability claims
+but is not an engineering merge gate for this internal phase.
+
+## Identity and evidence boundary
+
+The active protocol remains `aaa.observation_noise.v1.1`, hash
+`546e2434cc15850779107c1a329af1e2f8581cd6a1c3b31807eecf5f6e7b427c`,
+and pins v2.1 commit
+`25b6c32c9040d0f934314a2139993d12763afc99`. Final source fingerprint, lock,
+commit, hosted CI, merge, and post-merge verification are recorded in
+`handoff_sol.md` and `final_audit.md` after the exact final candidate is
+generated.
+
+---
+
+# Historical GPT-5.6 Sol independent review — benchmark v2.1 (2026-09-12)
 
 ## Verdict
 
