@@ -66,24 +66,27 @@ it does not justify the replication budget or establish external durability.
   package build/payload, clean wheel install, installed CLI smoke,
   v2.1 smoke/recomputation, observation-noise smoke/recomputation, and
   zero-noise pinned-reference replay passed.
-- Final-head hosted CI runs: source-identical head d7511da06465a40d3b97e614e03ae34d5b312263: push run 35450887407 and pull-request run 35450890204; all 12 jobs PASS; locked artifacts 10585989223 and 10586079089 uploaded successfully.
-- Exact final remote main: pending merge and post-merge verification.
+- Final-head hosted CI runs: source-identical head `d7511da06465a40d3b97e614e03ae34d5b312263` passed push run `35450887407` and pull-request run `35450890204`; exact PR head `e46377386628a02a633d21a11819a9ce8bd8dd6d` passed push run `35451372899` and pull-request run `35451375484`; all 24 PR-head jobs passed and every locked/fresh-install artifact uploaded successfully.
+- Engineering integration commit `ff7199d24a057ab37fe19ec050ce1b8065ffc2f1` passed all six jobs in exact-main CPU CI run `35451862857` and Dependency Graph run `35451864870`.
+- PR #11 merged normally. PRs #12 and #13 were preserved in PR history and closed unmerged; PR #14 was closed as superseded by the exact lock update integrated through #11.
+- All obsolete ordinary remote branches were removed, including `feat/aaa-prototype`; only `main` remains. There are no active confirmation reservation refs.
+- The protected merge of this documentation-only closure record is identified by annotated tag `aaa-pre-next-phase-closure-2026-09-19`; the earlier `aaa-pre-next-phase-2026-09-19` tag identifies the engineering integration boundary.
 
 ## Approval matrix
 
 | Gate | Verdict |
 |---|---|
-| Repository engineering | APPROVED, subject to exact final-head CI when marked pending above |
-| Test and CI integrity | APPROVED only when final-head hosted jobs are recorded green |
-| Packaging and clean-install integrity | APPROVED when final validation record is present |
+| Repository engineering | APPROVED |
+| Test and CI integrity | APPROVED: exact PR head and integration-main CI green |
+| Packaging and clean-install integrity | APPROVED |
 | Evidence integrity | APPROVED for the retained engineering/development evidence |
 | Benchmark v2.1 historical state | LIMITED: valid confirmed results, historical raw-archive limitations retained |
-| Observation-noise implementation | APPROVED when final-head artifact upload is green |
+| Observation-noise implementation | APPROVED: final-head artifact uploads green |
 | Observation-noise scientific outcome | NOT EXECUTED |
 | Local evidence retention | VERIFIED on the dedicated HDD |
 | External durable archival | NOT VERIFIED; not required for current internal phase |
-| Repository hygiene | APPROVED after final PR/branch closure |
-| Ready for next AAA phase | APPROVED after exact final main and hosted CI verification |
+| Repository hygiene | APPROVED |
+| Ready for next AAA phase | APPROVED |
 
 The scientific `NOT EXECUTED` status is intentional and is not represented as
 a negative, inconclusive, or successful experiment.
