@@ -5,14 +5,19 @@ implementer's summary. Originally written by the implementer, then updated
 after independent Sol review. The permanent verdict is in
 `aaa_1k_sol_review.md`.
 
+The identity rows below record the historical AAA-1K review branch and PR, not
+the active checkout. That branch was merged into `main`; use the current
+remote `main` when starting a new review.
+
 ## 1. Identity
 
 | Item | Value |
 |---|---|
 | phase | `aaa.1k.v1` |
-| base commit (`main`) | `02c3b20dd163c11a99502e846a2816b3e6c761de` |
-| branch | `codex/aaa-1k-sol-review` |
-| head commit | recorded in the pull request; `git log -1 --format=%H` |
+| historical base commit (`main`) | `02c3b20dd163c11a99502e846a2816b3e6c761de` |
+| historical review branch (now merged) | `codex/aaa-1k-sol-review` |
+| historical reviewed PR head | `f47580a30c6bff1a0cd4c11a3e1b03b910700cae` |
+| merge commit into `main` | `acbb52ee4d199c497a4c62517adcabdc3aa08421` |
 | phase scientific fingerprint | `python -m research.aaa_1k fingerprint` |
 | model format | `aaa.1k.gru.v1`, architecture `AAA1KGRU-3x16x2` |
 | benchmark families | `aaa.1k.benchmarks.v1` |
@@ -204,10 +209,11 @@ without rerunning a model:
 python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation_round3.json
 ```
 
-It rebuilds 99 stored values — Q1, Q3, Q4, every adaptation and retention
-trial, every per-family mean and the stability counters — from the cells beside
-them and exits non-zero on any disagreement. The same command on the superseded
-round-1 file rebuilds its 59.
+It rebuilds 21 stored round-3 summary values from retained cells and trials:
+the three Q1 values, the three values for each of Q3's two comparisons, the
+three Q4 values, and the three summary values for each of Q2 and Q5. It exits
+non-zero on any disagreement. The same command rebuilds 99 values from the
+superseded round-2 file and 59 from the superseded round-1 file.
 
 Dashboard:
 
@@ -237,14 +243,14 @@ Round 1's top four entries were defects and are now repaired; see
    learning rate of 0.1 where the gated model survives to 0.3. Three claims,
    two measured.
 2. **Q4's mean and median disagree in sign.** The gated model is slightly better
-   on 117 of 144 streams and much worse on the rest. That structure wants a
+   on 113 of 144 streams and much worse on the rest. That structure wants a
    distributional analysis this phase does not have.
 3. **The two memory benchmarks were designed by the implementer whose model
    they evaluate**, and reviewed by nobody. The decomposition probe addresses
    `coarse_speed_v1` — with the speed fixed the recurrent model is *worse*, so
    the family genuinely tests regime inference — but `occlusion_v1` has no
    equivalent check.
-4. **Q6 is weak.** Mean rank correlation 0.44; 106 of 720 cells have a monotone
+4. **Q6 is weak.** Mean rank correlation 0.44; 114 of 720 cells have a monotone
    quintile table; the head over-predicts.
 5. **The missingness code is weak.** During a gap inputs 2 and 3 are both
    exactly zero, which a genuine zero displacement and zero error would also
