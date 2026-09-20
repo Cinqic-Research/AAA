@@ -1,6 +1,7 @@
 {
   "configuration": {
     "error_loss_weight": 0.25,
+    "gradient_clip": 10.0,
     "learning_rate": 0.03,
     "tbptt_steps": 4
   },
@@ -114,44 +115,44 @@
       "question": "does Q2 measure adaptation to the change, or continued learning in general?"
     },
     {
-      "finding": "every comparison kept its sign across all tested initializations, so the direction of each conclusion is robust; the magnitudes vary by up to a factor of two, and the headline intervals do not include that variance because they resample streams and not initializations",
+      "finding": "at least one comparison changed sign across initializations; the corresponding conclusion is not supported",
       "probe": "initialization_sensitivity",
       "question": "do the conclusions depend on the single initialization the headline uses?",
       "rows": [
         {
           "model_seed": 909333949,
           "model_seed_index": 0,
-          "q3_versus_state_reset": 0.0007062705341955396,
-          "q3_versus_stateless_mlp": 0.00044256691405333837,
-          "q4_versus_ungated_rnn": -0.00033442518951868076
+          "q3_versus_state_reset": 0.00022821293374616827,
+          "q3_versus_stateless_mlp": 0.02460854214606784,
+          "q4_versus_ungated_rnn": 0.004960996351396208
         },
         {
           "model_seed": 436086993,
           "model_seed_index": 1,
-          "q3_versus_state_reset": 0.0007268007232848389,
-          "q3_versus_stateless_mlp": 0.00029834562966126225,
-          "q4_versus_ungated_rnn": -0.0005019158212888647
+          "q3_versus_state_reset": 0.0002051646134496578,
+          "q3_versus_stateless_mlp": 0.024326457135706865,
+          "q4_versus_ungated_rnn": -0.000382079072963001
         },
         {
           "model_seed": 835687596,
           "model_seed_index": 2,
-          "q3_versus_state_reset": 0.0006936027667327105,
-          "q3_versus_stateless_mlp": 0.00034359340488116045,
-          "q4_versus_ungated_rnn": -0.0003904320838927235
+          "q3_versus_state_reset": 0.00020507805975833452,
+          "q3_versus_stateless_mlp": 0.02464188263224573,
+          "q4_versus_ungated_rnn": -0.00035809560438060357
         },
         {
           "model_seed": 308335928,
           "model_seed_index": 3,
-          "q3_versus_state_reset": 0.0006687423939697322,
-          "q3_versus_stateless_mlp": 0.00036029912374372296,
-          "q4_versus_ungated_rnn": -0.0004951011230531451
+          "q3_versus_state_reset": 0.00018025975292951355,
+          "q3_versus_stateless_mlp": 0.024619583849578505,
+          "q4_versus_ungated_rnn": -0.0003450910367047066
         },
         {
           "model_seed": 1479172421,
           "model_seed_index": 4,
-          "q3_versus_state_reset": 0.0005409082372116623,
-          "q3_versus_stateless_mlp": 0.0002259851385977759,
-          "q4_versus_ungated_rnn": -0.0004892496213277598
+          "q3_versus_state_reset": 0.00013666248086999022,
+          "q3_versus_stateless_mlp": 0.024499836582264577,
+          "q4_versus_ungated_rnn": -0.0003035278595445198
         }
       ],
       "seeds": 5,
@@ -163,10 +164,11 @@
           1
         ],
         "q4_versus_ungated_rnn": [
-          -1
+          -1,
+          1
         ]
       },
-      "signs_consistent": true,
+      "signs_consistent": false,
       "streams": 16
     }
   ],
