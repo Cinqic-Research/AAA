@@ -24,6 +24,7 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 from .seeds import derive_seed
 
@@ -93,7 +94,7 @@ def paired_difference(
     }
 
 
-def summarize_values(values: Sequence[float]) -> dict[str, float]:
+def summarize_values(values: Sequence[float]) -> dict[str, Any]:
     array = np.asarray(values, dtype=float)
     finite = array[np.isfinite(array)]
     return {
@@ -129,9 +130,7 @@ def _correlation(first: np.ndarray, second: np.ndarray) -> float:
     return float(np.corrcoef(first, second)[0, 1])
 
 
-def calibration(
-    predicted: Sequence[float], realized: Sequence[float], *, bins: int = 5
-) -> dict[str, Any]:
+def calibration(predicted: ArrayLike, realized: ArrayLike, *, bins: int = 5) -> dict[str, Any]:
     """How informative the error head is about the error it will actually make.
 
     ``predicted`` is the model's error-magnitude estimate for a step and
@@ -186,8 +185,7 @@ def calibration(
             }
         )
     monotone = all(
-        table[index]["mean_realized"] <= table[index + 1]["mean_realized"]
-        for index in range(len(table) - 1)
+        table[index]["mean_realized"] <= table[index + 1]["mean_realized"] for index in range(len(table) - 1)
     )
     return {
         "status": "MEASURED",

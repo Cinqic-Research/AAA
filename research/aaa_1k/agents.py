@@ -204,9 +204,7 @@ class NeuralAgent:
         self._input_position = known
         self.error_estimate = error_estimate
         scored = (
-            reflect_prediction(raw, self.scales.lower_bound, self.scales.upper_bound)
-            if self.reflect
-            else raw
+            reflect_prediction(raw, self.scales.lower_bound, self.scales.upper_bound) if self.reflect else raw
         )
         self._scored_prediction = scored
         return scored
@@ -229,9 +227,7 @@ class NeuralAgent:
         elif self._raw_prediction is not None:
             self.skipped_targets += 1
         if self._scored_prediction is not None:
-            self.previous_signed_error = (
-                value - self._scored_prediction
-            ) / self.scales.displacement_scale
+            self.previous_signed_error = (value - self._scored_prediction) / self.scales.displacement_scale
         self.tracker.accept(value)
 
     # -- internals ------------------------------------------------------
@@ -564,12 +560,7 @@ class RLSAgent:
                 self.observed.append(False)
             return
         value = float(observation)
-        if (
-            len(self.history) >= self.HISTORY
-            and self.update_enabled
-            and self.observed
-            and self.observed[-1]
-        ):
+        if len(self.history) >= self.HISTORY and self.update_enabled and self.observed and self.observed[-1]:
             self.predictor.update(tuple(self.history[-self.HISTORY :]), value)
         self.history.append(value)
         self.observed.append(True)

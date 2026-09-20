@@ -160,7 +160,11 @@ def motion_compat_stream(
         stream_id=f"motion_compat:{scenario}:{seed}",
         seed=int(seed),
         steps=tuple(records),
-        metadata={"scenario": scenario, "change_step": change_step, "steps_per_episode": world.steps_per_episode},
+        metadata={
+            "scenario": scenario,
+            "change_step": change_step,
+            "steps_per_episode": world.steps_per_episode,
+        },
     )
 
 
@@ -380,9 +384,7 @@ def aba_stream(
         elif bounced:
             event = "bounce"
         records.append(
-            StreamStep(
-                index=step_index, true_position=position, observed=True, regime=label, event=event
-            )
+            StreamStep(index=step_index, true_position=position, observed=True, regime=label, event=event)
         )
     return Stream(
         family="aba_v1",

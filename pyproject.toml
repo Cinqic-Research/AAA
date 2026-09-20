@@ -46,7 +46,7 @@ Issues = "https://github.com/Cinqic/AAA/issues"
 aaa = "aaa.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["aaa*"]
+include = ["aaa*", "research*"]
 
 [tool.setuptools.package-data]
 # The canonical benchmark specification must travel with an installed package;
@@ -78,7 +78,7 @@ ignore = [
 # Deliberately not pinned: mypy would then parse the installed third-party
 # stubs under that version too, and NumPy's stubs use 3.12 syntax. Language
 # level support is verified by running the suite on the CI version matrix.
-files = ["aaa"]
+files = ["aaa", "research"]
 warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
@@ -92,9 +92,9 @@ module = ["matplotlib.*", "psutil.*"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
-source = ["aaa"]
+source = ["aaa", "research"]
 branch = true
-omit = ["aaa/__main__.py"]
+omit = ["aaa/__main__.py", "research/aaa_1k/__main__.py"]
 
 [tool.coverage.report]
 show_missing = true

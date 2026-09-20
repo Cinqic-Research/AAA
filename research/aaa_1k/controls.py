@@ -22,13 +22,16 @@ import hashlib
 import json
 import math
 from collections import deque
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 from .model import INPUT_SIZE, OUTPUT_SIZE, InvalidModelState, sigmoid, softplus
+
+ControlT = TypeVar("ControlT", bound="_NeuralControl")
 
 MLP_FORMAT_VERSION = "aaa.1k.mlp.v1"
 RNN_FORMAT_VERSION = "aaa.1k.rnn.v1"
@@ -39,14 +42,7 @@ RNN_HIDDEN = 28
 
 
 def expected_mlp_parameter_count(hidden: int = MLP_HIDDEN) -> int:
-    return (
-        INPUT_SIZE * hidden
-        + hidden
-        + hidden * hidden
-        + hidden
-        + hidden * OUTPUT_SIZE
-        + OUTPUT_SIZE
-    )
+    return INPUT_SIZE * hidden + hidden + hidden * hidden + hidden + hidden * OUTPUT_SIZE + OUTPUT_SIZE
 
 
 def expected_rnn_parameter_count(hidden: int = RNN_HIDDEN) -> int:
@@ -139,11 +135,11 @@ class _NeuralControl:
 
     # -- loss -----------------------------------------------------------
     @staticmethod
-    def split_output(output: Sequence[float]) -> tuple[float, float]:
+    def split_output(output: ArrayLike) -> tuple[float, float]:
         values = np.asarray(output, dtype=float)
         return float(values[0]), float(softplus(values[1:2])[0])
 
-    def step_loss(self, output: Sequence[float], target_displacement: float) -> dict[str, float]:
+    def step_loss(self, output: ArrayLike, target_displacement: float) -> dict[str, float]:
         values = np.asarray(output, dtype=float)
         signed = float(values[0]) - float(target_displacement)
         estimate = float(softplus(values[1:2])[0])
@@ -162,9 +158,7 @@ class _NeuralControl:
         estimate = float(softplus(output[1:2])[0])
         grad = np.zeros(OUTPUT_SIZE, dtype=float)
         grad[0] = 2.0 * signed
-        grad[1] = (
-            self.error_loss_weight * 2.0 * (estimate - abs(signed)) * float(sigmoid(output[1:2])[0])
-        )
+        grad[1] = self.error_loss_weight * 2.0 * (estimate - abs(signed)) * float(sigmoid(output[1:2])[0])
         return grad
 
     # -- optimization ---------------------------------------------------
@@ -233,7 +227,11 @@ class _NeuralControl:
         payload = json.dumps(self.state_dict(), sort_keys=True, separators=(",", ":"), allow_nan=False)
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
-    def clone(self):  # type: ignore[no-untyped-def]
+    @classmethod
+    def from_state_dict(cls: type[ControlT], state: Mapping[str, Any]) -> ControlT:
+        raise NotImplementedError
+
+    def clone(self: ControlT) -> ControlT:
         return type(self).from_state_dict(json.loads(json.dumps(self.state_dict())))
 
     def state_footprint(self) -> dict[str, int]:
@@ -305,7 +303,7 @@ class StatelessMLPControl(_NeuralControl):
     def reset_state(self) -> None:
         self._cache = None
 
-    def forward(self, inputs: Sequence[float], *, record: bool = True) -> np.ndarray:
+    def forward(self, inputs: ArrayLike, *, record: bool = True) -> np.ndarray:
         x = np.asarray(inputs, dtype=float)
         if x.shape != (INPUT_SIZE,):
             raise InvalidModelState(f"input must have shape ({INPUT_SIZE},), got {x.shape}")
@@ -449,7 +447,7 @@ class VanillaRNNControl(_NeuralControl):
         self.hidden = np.zeros(RNN_HIDDEN, dtype=float)
         self._caches.clear()
 
-    def forward(self, inputs: Sequence[float], *, record: bool = True) -> np.ndarray:
+    def forward(self, inputs: ArrayLike, *, record: bool = True) -> np.ndarray:
         x = np.asarray(inputs, dtype=float)
         if x.shape != (INPUT_SIZE,):
             raise InvalidModelState(f"input must have shape ({INPUT_SIZE},), got {x.shape}")
@@ -505,9 +503,7 @@ class VanillaRNNControl(_NeuralControl):
         }
 
     def state_footprint(self) -> dict[str, int]:
-        cache_scalars = sum(
-            int(c.x.size + c.h_prev.size + c.h.size + c.output.size) for c in self._caches
-        )
+        cache_scalars = sum(int(c.x.size + c.h_prev.size + c.h.size + c.output.size) for c in self._caches)
         trainable = self.parameter_count()
         return {
             "trainable_parameters": trainable,

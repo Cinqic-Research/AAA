@@ -35,7 +35,7 @@ def derive_seed(namespace: str, index: int) -> int:
         raise ValueError(f"unknown seed namespace {namespace!r}; expected one of {NAMESPACES}")
     if isinstance(index, bool) or not isinstance(index, int) or index < 0:
         raise ValueError("seed index must be a non-negative integer")
-    digest = hashlib.sha256(f"{PHASE_SALT}:{namespace}:{index}".encode("utf-8")).digest()
+    digest = hashlib.sha256(f"{PHASE_SALT}:{namespace}:{index}".encode()).digest()
     return int.from_bytes(digest[:8], "big") % _SEED_MODULUS
 
 

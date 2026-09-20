@@ -63,12 +63,13 @@ import hashlib
 import json
 import math
 from collections import deque
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 MODEL_FORMAT_VERSION = "aaa.1k.gru.v1"
 ARCHITECTURE_ID = "AAA1KGRU-3x16x2"
@@ -321,7 +322,7 @@ class AAA1KGRU:
         self.hidden = np.zeros(HIDDEN_SIZE, dtype=float)
         self._caches.clear()
 
-    def forward(self, inputs: Sequence[float], *, record: bool = True) -> np.ndarray:
+    def forward(self, inputs: ArrayLike, *, record: bool = True) -> np.ndarray:
         """Advance the hidden state by one step and return ``[displacement, raw_error]``.
 
         This is the only place the live hidden state advances. A frozen clone
@@ -362,7 +363,7 @@ class AAA1KGRU:
         return output
 
     @staticmethod
-    def split_output(output: Sequence[float]) -> tuple[float, float]:
+    def split_output(output: ArrayLike) -> tuple[float, float]:
         """Return ``(predicted normalized displacement, predicted error magnitude)``."""
 
         values = np.asarray(output, dtype=float)
@@ -371,7 +372,7 @@ class AAA1KGRU:
     # ------------------------------------------------------------------
     # loss and backward
     # ------------------------------------------------------------------
-    def step_loss(self, output: Sequence[float], target_displacement: float) -> dict[str, float]:
+    def step_loss(self, output: ArrayLike, target_displacement: float) -> dict[str, float]:
         """Return the two loss terms and the total for one step.
 
         The auxiliary target is ``|o0 - d*|`` with stop-gradient semantics: the
@@ -489,9 +490,7 @@ class AAA1KGRU:
         return {
             "gradient_norm": norm,
             "clip_scale": scale,
-            "parameter_norm": float(
-                math.sqrt(sum(float(np.sum(a * a)) for a in self.parameters.values()))
-            ),
+            "parameter_norm": float(math.sqrt(sum(float(np.sum(a * a)) for a in self.parameters.values()))),
         }
 
     def learn(self, target_displacement: float) -> dict[str, float]:

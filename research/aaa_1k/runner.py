@@ -150,15 +150,9 @@ def run_stream(
 
         truth = float(target.true_position)
         absolute = {name: abs(value - truth) for name, value in predictions.items()}
-        estimates = {
-            agent.name: float(getattr(agent, "error_estimate", float("nan"))) for agent in agents
-        }
+        estimates = {agent.name: float(getattr(agent, "error_estimate", float("nan"))) for agent in agents}
         diagnostics = (
-            {
-                agent.name: dict(agent.diagnostics())
-                for agent in agents
-                if hasattr(agent, "diagnostics")
-            }
+            {agent.name: dict(agent.diagnostics()) for agent in agents if hasattr(agent, "diagnostics")}
             if collect_diagnostics
             else {}
         )
