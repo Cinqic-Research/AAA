@@ -1,0 +1,176 @@
+{
+  "configuration": {
+    "error_loss_weight": 0.25,
+    "gradient_clip": 10.0,
+    "learning_rate": 0.03,
+    "tbptt_steps": 4
+  },
+  "probes": [
+    {
+      "at_change": {
+        "ci_high": 0.0010309974547933628,
+        "ci_low": 0.0006174334451755139,
+        "confidence": 0.95,
+        "draws": 10000,
+        "favours_first": 32,
+        "favours_second": 0,
+        "first_mean": 0.00016507507674824062,
+        "interval_status": "MEASURED",
+        "mean_difference": 0.0008069646424995864,
+        "median_difference": 0.0005192416608257263,
+        "per_stream_difference": [
+          0.00045338449778238924,
+          0.00043796706263861754,
+          0.000429131879913619,
+          0.00052889008040127,
+          0.0013587653590125567,
+          0.001517451847285982,
+          0.00025231133941376436,
+          0.0006706355151027268,
+          0.0005095932412501825,
+          0.002785304989575204,
+          0.00042691829024411876,
+          0.0009222338440215989,
+          0.0007665440556741626,
+          0.0007242314130971607,
+          0.00033872531877070456,
+          0.00048123221035057946,
+          0.0012555219848956272,
+          0.0012210678810005897,
+          0.0011535340839985975,
+          0.0002564784366696471,
+          0.00044871272201481017,
+          0.001111793723859018,
+          0.0010545722079325721,
+          0.0004211886238624307,
+          0.00023020884306532374,
+          0.0007535441464505824,
+          0.0025739534310166524,
+          0.0002880725481886276,
+          0.0003992189518987405,
+          0.0012537709602376589,
+          0.00042237647370765185,
+          0.0003755325966535938
+        ],
+        "relative_difference": 0.8301766136923118,
+        "second_mean": 0.0009720397192478268,
+        "streams": 32,
+        "ties": 0
+      },
+      "change_index": 100,
+      "control": {
+        "ci_high": 0.0009759532801790413,
+        "ci_low": 0.0005768564014341625,
+        "confidence": 0.95,
+        "draws": 10000,
+        "favours_first": 32,
+        "favours_second": 0,
+        "first_mean": 0.00013357176396206887,
+        "interval_status": "MEASURED",
+        "mean_difference": 0.0007646232366048675,
+        "median_difference": 0.000534439755975655,
+        "per_stream_difference": [
+          0.0003119683019255907,
+          0.0003093549599616294,
+          0.0002747470364790699,
+          0.0003670956257054694,
+          0.0009371375465978961,
+          0.0009598362757426115,
+          0.00012339227624417746,
+          0.0014428959371940299,
+          0.0003153565710025714,
+          0.001963278960091993,
+          0.0003001995069182406,
+          0.0007571873703721244,
+          0.0005396068325019774,
+          0.0005089818359814224,
+          0.00022599019331035792,
+          0.00030231566037208183,
+          0.0008195487609262883,
+          0.0008392108635425282,
+          0.0008884311675854533,
+          0.0011666508191475386,
+          0.00027657282801192323,
+          0.0009504222781871593,
+          0.0018712902573518686,
+          0.00026330327566437473,
+          0.00020706911484016138,
+          0.0005292726794493326,
+          0.0018047455656575026,
+          0.00018091652118297654,
+          0.0017483110980351679,
+          0.0011262580609913602,
+          0.00026054980248347014,
+          0.00189604558789741
+        ],
+        "relative_difference": 0.8512886802111357,
+        "second_mean": 0.0008981950005669363,
+        "streams": 32,
+        "ties": 0
+      },
+      "control_fraction_of_effect": 0.94753003580979,
+      "control_index": 60,
+      "finding": "the online advantage at a quiet branch point is 95% of the advantage at the declared change point, so Q2 is substantially a measurement of continued learning rather than of adaptation specific to the change",
+      "probe": "branch_point_control",
+      "question": "does Q2 measure adaptation to the change, or continued learning in general?"
+    },
+    {
+      "finding": "at least one comparison changed sign across initializations; the corresponding conclusion is not supported",
+      "probe": "initialization_sensitivity",
+      "question": "do the conclusions depend on the single initialization the headline uses?",
+      "rows": [
+        {
+          "model_seed": 909333949,
+          "model_seed_index": 0,
+          "q3_versus_state_reset": 0.00022821293374616827,
+          "q3_versus_stateless_mlp": 0.02460854214606784,
+          "q4_versus_ungated_rnn": 0.004960996351396208
+        },
+        {
+          "model_seed": 436086993,
+          "model_seed_index": 1,
+          "q3_versus_state_reset": 0.0002051646134496578,
+          "q3_versus_stateless_mlp": 0.024326457135706865,
+          "q4_versus_ungated_rnn": -0.000382079072963001
+        },
+        {
+          "model_seed": 835687596,
+          "model_seed_index": 2,
+          "q3_versus_state_reset": 0.00020507805975833452,
+          "q3_versus_stateless_mlp": 0.02464188263224573,
+          "q4_versus_ungated_rnn": -0.00035809560438060357
+        },
+        {
+          "model_seed": 308335928,
+          "model_seed_index": 3,
+          "q3_versus_state_reset": 0.00018025975292951355,
+          "q3_versus_stateless_mlp": 0.024619583849578505,
+          "q4_versus_ungated_rnn": -0.0003450910367047066
+        },
+        {
+          "model_seed": 1479172421,
+          "model_seed_index": 4,
+          "q3_versus_state_reset": 0.00013666248086999022,
+          "q3_versus_stateless_mlp": 0.024499836582264577,
+          "q4_versus_ungated_rnn": -0.0003035278595445198
+        }
+      ],
+      "seeds": 5,
+      "sign_sets": {
+        "q3_versus_state_reset": [
+          1
+        ],
+        "q3_versus_stateless_mlp": [
+          1
+        ],
+        "q4_versus_ungated_rnn": [
+          -1,
+          1
+        ]
+      },
+      "signs_consistent": false,
+      "streams": 16
+    }
+  ],
+  "schema": "aaa.1k.adversarial_probes.v1"
+}

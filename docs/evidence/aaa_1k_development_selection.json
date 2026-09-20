@@ -1,0 +1,5218 @@
+{
+  "architecture_configurations": {
+    "AAA1KGRU": {
+      "error_loss_weight": 0.25,
+      "gradient_clip": 10.0,
+      "learning_rate": 0.03,
+      "tbptt_steps": 4
+    },
+    "StatelessMLPControl": {
+      "error_loss_weight": 0.25,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "tbptt_steps": 4
+    },
+    "VanillaRNNControl": {
+      "error_loss_weight": 0.25,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "tbptt_steps": 4
+    }
+  },
+  "development_streams": [
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "motion_compat",
+      "metadata": {
+        "change_step": null,
+        "scenario": "bouncing",
+        "steps_per_episode": 160
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 160,
+      "seed": 2146409619,
+      "steps": 161,
+      "stream_id": "motion_compat:bouncing:2146409619"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "motion_compat",
+      "metadata": {
+        "change_step": null,
+        "scenario": "bouncing",
+        "steps_per_episode": 160
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 160,
+      "seed": 1764231905,
+      "steps": 161,
+      "stream_id": "motion_compat:bouncing:1764231905"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "motion_compat",
+      "metadata": {
+        "change_step": 80,
+        "scenario": "changed",
+        "steps_per_episode": 160
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 160,
+      "seed": 824499729,
+      "steps": 161,
+      "stream_id": "motion_compat:changed:824499729"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "motion_compat",
+      "metadata": {
+        "change_step": 80,
+        "scenario": "changed",
+        "steps_per_episode": 160
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 160,
+      "seed": 2135368761,
+      "steps": 161,
+      "stream_id": "motion_compat:changed:2135368761"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "motion_compat",
+      "metadata": {
+        "change_step": 80,
+        "scenario": "dynamics_change",
+        "steps_per_episode": 160
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 160,
+      "seed": 1261182130,
+      "steps": 161,
+      "stream_id": "motion_compat:dynamics_change:1261182130"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "motion_compat",
+      "metadata": {
+        "change_step": 80,
+        "scenario": "dynamics_change",
+        "steps_per_episode": 160
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 160,
+      "seed": 1189567216,
+      "steps": 161,
+      "stream_id": "motion_compat:dynamics_change:1189567216"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "occlusion_v1",
+      "metadata": {
+        "gap_length": 4,
+        "gap_period": 20,
+        "hidden_steps": [
+          13,
+          14,
+          15,
+          16,
+          33,
+          34,
+          35,
+          36,
+          53,
+          54,
+          55,
+          56,
+          73,
+          74,
+          75,
+          76,
+          93,
+          94,
+          95,
+          96,
+          113,
+          114,
+          115,
+          116,
+          133,
+          134,
+          135,
+          136,
+          153,
+          154,
+          155,
+          156,
+          173,
+          174,
+          175,
+          176,
+          193,
+          194,
+          195,
+          196
+        ],
+        "initial_speed": 0.1446113305543456,
+        "warmup": 12
+      },
+      "observed_fraction": 0.8009950248756219,
+      "scored_steps": 200,
+      "seed": 1683942133,
+      "steps": 201,
+      "stream_id": "occlusion_v1:1683942133"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "occlusion_v1",
+      "metadata": {
+        "gap_length": 4,
+        "gap_period": 20,
+        "hidden_steps": [
+          19,
+          20,
+          21,
+          22,
+          39,
+          40,
+          41,
+          42,
+          59,
+          60,
+          61,
+          62,
+          79,
+          80,
+          81,
+          82,
+          99,
+          100,
+          101,
+          102,
+          119,
+          120,
+          121,
+          122,
+          139,
+          140,
+          141,
+          142,
+          159,
+          160,
+          161,
+          162,
+          179,
+          180,
+          181,
+          182
+        ],
+        "initial_speed": 0.300110630120103,
+        "warmup": 12
+      },
+      "observed_fraction": 0.8208955223880597,
+      "scored_steps": 200,
+      "seed": 1280439271,
+      "steps": 201,
+      "stream_id": "occlusion_v1:1280439271"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "coarse_speed_v1",
+      "metadata": {
+        "fast_speed": 0.3,
+        "quantum": 0.005,
+        "regime_length": 60,
+        "scoring": "the quantized observable; the latent continuous position is never a target",
+        "slow_speed": 0.12
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 240,
+      "seed": 401945564,
+      "steps": 241,
+      "stream_id": "coarse_speed_v1:401945564"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "coarse_speed_v1",
+      "metadata": {
+        "fast_speed": 0.3,
+        "quantum": 0.005,
+        "regime_length": 60,
+        "scoring": "the quantized observable; the latent continuous position is never a target",
+        "slow_speed": 0.12
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 240,
+      "seed": 398354074,
+      "steps": 241,
+      "stream_id": "coarse_speed_v1:398354074"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "aba_v1",
+      "metadata": {
+        "change_steps": [
+          121,
+          241
+        ],
+        "damping": 0.08,
+        "omega": 6.0,
+        "segment_steps": 120
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 360,
+      "seed": 2115706035,
+      "steps": 361,
+      "stream_id": "aba_v1:2115706035"
+    },
+    {
+      "benchmark_version": "aaa.1k.benchmarks.v1",
+      "family": "aba_v1",
+      "metadata": {
+        "change_steps": [
+          121,
+          241
+        ],
+        "damping": 0.08,
+        "omega": 6.0,
+        "segment_steps": 120
+      },
+      "observed_fraction": 1.0,
+      "scored_steps": 360,
+      "seed": 1645197752,
+      "steps": 361,
+      "stream_id": "aba_v1:1645197752"
+    }
+  ],
+  "eligible_learning_rates": [
+    0.001,
+    0.003,
+    0.01,
+    0.03
+  ],
+  "error_weight_decision": "the predeclared default was retained: no alternative beat it by more than 2% on development data",
+  "git": {
+    "branch": "opus/aaa-1k-recurrent-core",
+    "commit": "b82e40aa4ef644381ad57885db0265bb88153d39",
+    "dirty": false,
+    "tree_hash": "ef515407aa0029975feb6dd472a13b373583ee27"
+  },
+  "plan": {
+    "declared_gradient_clip": 1.0,
+    "default_error_weight": 0.25,
+    "development_families": [
+      "motion_compat",
+      "motion_compat",
+      "motion_compat",
+      "occlusion_v1",
+      "coarse_speed_v1",
+      "aba_v1"
+    ],
+    "error_weights": [
+      0.0,
+      0.1,
+      0.25,
+      0.5
+    ],
+    "gradient_clips": [
+      0.3,
+      1.0,
+      3.0,
+      10.0,
+      null
+    ],
+    "learning_rates": [
+      0.001,
+      0.003,
+      0.01,
+      0.03,
+      0.1,
+      0.3
+    ],
+    "practical_margin": 0.02,
+    "stability_margin_steps": 2,
+    "streams_per_family": 2,
+    "tbptt_horizons": [
+      4,
+      8,
+      16,
+      32
+    ]
+  },
+  "schema": "aaa.1k.development_selection.v1",
+  "scientific_fingerprint": "60ab9aa04f2e7f99359e1ec2b41a0e86af58f0c78727307017ab3b17ad90978a",
+  "selected": {
+    "error_loss_weight": 0.25,
+    "gradient_clip": 10.0,
+    "learning_rate": 0.03,
+    "tbptt_steps": 4
+  },
+  "selected_gradient_clip": 10.0,
+  "selected_key": "lr=0.03;T=4;lambda=0.25",
+  "stage_one": [
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.001,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.001;T=4;lambda=0.25",
+      "mean_mae": 0.0042069339457970305,
+      "median_mae": 0.0034895298874535116,
+      "post_change_adaptation": 0.0038385174933734403,
+      "retention_ratio": 0.8974898330681457,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6940171077902051,
+          "family": "motion_compat",
+          "first_half_mae": 0.0036870501611691265,
+          "mae": 0.003350307283997503,
+          "second_half_mae": 0.0030135644068258792,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 159,
+          "error_estimate_mean": 0.6938669714588714,
+          "family": "motion_compat",
+          "first_half_mae": 0.003679804675950485,
+          "mae": 0.003397916795063164,
+          "second_half_mae": 0.0031160289141758434,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.0017310037526845456,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6939863228095311,
+          "family": "motion_compat",
+          "first_half_mae": 0.004001082253572457,
+          "mae": 0.0027929742129908053,
+          "second_half_mae": 0.0015848661724091537,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.002317881137609142,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6931844950666379,
+          "family": "motion_compat",
+          "first_half_mae": 0.0050352046546529704,
+          "mae": 0.0035811429798438587,
+          "second_half_mae": 0.002127081305034746,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.002768064557898749,
+          "clip_events": 61,
+          "error_estimate_mean": 0.6897901970076884,
+          "family": "motion_compat",
+          "first_half_mae": 0.001010699287274347,
+          "mae": 0.0012917756922008808,
+          "second_half_mae": 0.0015728520971274146,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.002246520135193188,
+          "clip_events": 49,
+          "error_estimate_mean": 0.6894361023738683,
+          "family": "motion_compat",
+          "first_half_mae": 0.00097242099106572,
+          "mae": 0.0011226019020348383,
+          "second_half_mae": 0.0012727828130039566,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 150,
+          "error_estimate_mean": 0.6919644691323206,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004046279173865432,
+          "mae": 0.003763554484165129,
+          "second_half_mae": 0.0034808297944648268,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 155,
+          "error_estimate_mean": 0.6947569360417405,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.008162378759480931,
+          "mae": 0.008090351864137073,
+          "second_half_mae": 0.008018324968793218,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.004401590248005793,
+          "clip_events": 180,
+          "error_estimate_mean": 0.6900321373820757,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0040894444958466955,
+          "mae": 0.0039424814780816345,
+          "second_half_mae": 0.0037955184603165734,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.0013339184376072177,
+          "clip_events": 177,
+          "error_estimate_mean": 0.6907777359796621,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0039264697218560395,
+          "mae": 0.0038181303559610183,
+          "second_half_mae": 0.0037097909900659968,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.0013616145984275037,
+          "clip_events": 294,
+          "error_estimate_mean": 0.6913729446234572,
+          "family": "aba_v1",
+          "first_half_mae": 0.005134693881427685,
+          "mae": 0.0033280660167104574,
+          "second_half_mae": 0.0015214381519932307,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.014547547079561381,
+          "clip_events": 359,
+          "error_estimate_mean": 0.6944371129279715,
+          "family": "aba_v1",
+          "first_half_mae": 0.009960663647454888,
+          "mae": 0.012003904284378007,
+          "second_half_mae": 0.014047144921301121,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 2064
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.003,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.003;T=4;lambda=0.25",
+      "mean_mae": 0.0033059685542272156,
+      "median_mae": 0.0025512941317109637,
+      "post_change_adaptation": 0.0029830345790551323,
+      "retention_ratio": 0.6998047638897303,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 151,
+          "error_estimate_mean": 0.6883095357795581,
+          "family": "motion_compat",
+          "first_half_mae": 0.0031682546610109982,
+          "mae": 0.0023329529392018033,
+          "second_half_mae": 0.0014976512173926087,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 156,
+          "error_estimate_mean": 0.6902767653999448,
+          "family": "motion_compat",
+          "first_half_mae": 0.003185391621906164,
+          "mae": 0.0024406713407167796,
+          "second_half_mae": 0.0016959510595273952,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.0007619332323624846,
+          "clip_events": 80,
+          "error_estimate_mean": 0.6868885222802013,
+          "family": "motion_compat",
+          "first_half_mae": 0.003289291266325508,
+          "mae": 0.0019487627720471755,
+          "second_half_mae": 0.0006082342777688432,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0012659266300962665,
+          "clip_events": 112,
+          "error_estimate_mean": 0.6850026325704304,
+          "family": "motion_compat",
+          "first_half_mae": 0.004425817885961162,
+          "mae": 0.002661916922705148,
+          "second_half_mae": 0.0008980159594491333,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0023838465570984106,
+          "clip_events": 46,
+          "error_estimate_mean": 0.6822534804682558,
+          "family": "motion_compat",
+          "first_half_mae": 0.00091617398422177,
+          "mae": 0.0011103234963667358,
+          "second_half_mae": 0.0013044730085117015,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0019070601088446678,
+          "clip_events": 39,
+          "error_estimate_mean": 0.6812770399803305,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008874635732406058,
+          "mae": 0.0009687323565172164,
+          "second_half_mae": 0.001050001139793827,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 85,
+          "error_estimate_mean": 0.6758844040777496,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0035084402288830772,
+          "mae": 0.0028623857349691475,
+          "second_half_mae": 0.002216331241055217,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 155,
+          "error_estimate_mean": 0.6955359277101307,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.007590345218056372,
+          "mae": 0.00697051152153695,
+          "second_half_mae": 0.006350677825017528,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0037931429305991804,
+          "clip_events": 212,
+          "error_estimate_mean": 0.6856877617165852,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003862557903246988,
+          "mae": 0.0035688477323779595,
+          "second_half_mae": 0.0032751375615089314,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.003033295087698451,
+          "clip_events": 196,
+          "error_estimate_mean": 0.6875880628232871,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003601638558982584,
+          "mae": 0.003381526778061408,
+          "second_half_mae": 0.003161414997140232,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 6.312938965115089e-05,
+          "clip_events": 198,
+          "error_estimate_mean": 0.6763988578598904,
+          "family": "aba_v1",
+          "first_half_mae": 0.0039408497133458665,
+          "mae": 0.002166485138581793,
+          "second_half_mae": 0.000392120563817719,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.010655942696090447,
+          "clip_events": 333,
+          "error_estimate_mean": 0.6889402497993081,
+          "family": "aba_v1",
+          "first_half_mae": 0.008800195320737217,
+          "mae": 0.009258505917644464,
+          "second_half_mae": 0.00971681651455171,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 1763
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.01,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.01;T=4;lambda=0.25",
+      "mean_mae": 0.002027297819172802,
+      "median_mae": 0.001191482276115667,
+      "post_change_adaptation": 0.001904547857166196,
+      "retention_ratio": 0.5003132647576636,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 58,
+          "error_estimate_mean": 0.6185330931277062,
+          "family": "motion_compat",
+          "first_half_mae": 0.0018265478712477478,
+          "mae": 0.00094654665708622,
+          "second_half_mae": 6.654544292469221e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 62,
+          "error_estimate_mean": 0.6363220559622828,
+          "family": "motion_compat",
+          "first_half_mae": 0.0018585453716334784,
+          "mae": 0.0009972015816535798,
+          "second_half_mae": 0.00013585779167368112,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.000326556240539444,
+          "clip_events": 46,
+          "error_estimate_mean": 0.6229418325507592,
+          "family": "motion_compat",
+          "first_half_mae": 0.0015858684224921004,
+          "mae": 0.000877340246158138,
+          "second_half_mae": 0.00016881206982417575,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0001547813863236436,
+          "clip_events": 74,
+          "error_estimate_mean": 0.6371378721699047,
+          "family": "motion_compat",
+          "first_half_mae": 0.002684073529989331,
+          "mae": 0.0013857629705777545,
+          "second_half_mae": 8.745241116617786e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0016406242677476368,
+          "clip_events": 34,
+          "error_estimate_mean": 0.6527741270085665,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007062549835483683,
+          "mae": 0.0007876301806398853,
+          "second_half_mae": 0.0008690053777314022,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0012916482847629659,
+          "clip_events": 21,
+          "error_estimate_mean": 0.6503010123639444,
+          "family": "motion_compat",
+          "first_half_mae": 0.0006899952718681754,
+          "mae": 0.000693987739703469,
+          "second_half_mae": 0.0006979802075387627,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 26,
+          "error_estimate_mean": 0.5930485957179482,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0024307281261724384,
+          "mae": 0.002026904053101453,
+          "second_half_mae": 0.0016230799800304673,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 84,
+          "error_estimate_mean": 0.6360200859611069,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.005882983055667381,
+          "mae": 0.004774402734623008,
+          "second_half_mae": 0.0036658224135786345,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.003327732793705629,
+          "clip_events": 195,
+          "error_estimate_mean": 0.6581741185351376,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0032152693276706733,
+          "mae": 0.0028220033214061166,
+          "second_half_mae": 0.0024287373151415602,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004829750797644028,
+          "clip_events": 170,
+          "error_estimate_mean": 0.667980387579238,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002842484666397695,
+          "mae": 0.002639932315609633,
+          "second_half_mae": 0.0024373799648215707,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.00016197186492652264,
+          "clip_events": 124,
+          "error_estimate_mean": 0.5903654421064455,
+          "family": "aba_v1",
+          "first_half_mae": 0.0017302603520194279,
+          "mae": 0.0009905116327127402,
+          "second_half_mae": 0.00025076291340605237,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.003503317221679699,
+          "clip_events": 194,
+          "error_estimate_mean": 0.648540368913236,
+          "family": "aba_v1",
+          "first_half_mae": 0.00735431784614972,
+          "mae": 0.005385350396801632,
+          "second_half_mae": 0.0034163829474535465,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 1088
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.03;T=4;lambda=0.25",
+      "mean_mae": 0.0014344007202870622,
+      "median_mae": 0.0005526797240729518,
+      "post_change_adaptation": 0.0013922241806814469,
+      "retention_ratio": 0.5639599273412416,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.5083062384157941,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007904104280983804,
+          "mae": 0.0004002138786640155,
+          "second_half_mae": 1.0017329229650499e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.5244958636305899,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008203019577746967,
+          "mae": 0.0004191945382121767,
+          "second_half_mae": 1.808711864965673e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.00022243605393010846,
+          "clip_events": 16,
+          "error_estimate_mean": 0.4660844022447284,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005730876045411136,
+          "mae": 0.0003332925299634564,
+          "second_half_mae": 9.349745538579924e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0001311418661238517,
+          "clip_events": 28,
+          "error_estimate_mean": 0.5177534667972405,
+          "family": "motion_compat",
+          "first_half_mae": 0.001079829195062329,
+          "mae": 0.0005734898274114691,
+          "second_half_mae": 6.71504597606093e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0010935435408793216,
+          "clip_events": 17,
+          "error_estimate_mean": 0.5780059615356361,
+          "family": "motion_compat",
+          "first_half_mae": 0.00045130025031861893,
+          "mae": 0.0005318696207344345,
+          "second_half_mae": 0.00061243899115025,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0008947304713942543,
+          "clip_events": 7,
+          "error_estimate_mean": 0.5741356503016959,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004393852781686178,
+          "mae": 0.0004778379457816378,
+          "second_half_mae": 0.0005162906133946577,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.4513480757291366,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0018890605146704592,
+          "mae": 0.0017417253325238006,
+          "second_half_mae": 0.0015943901503771417,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 30,
+          "error_estimate_mean": 0.5248459294463843,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004065547114286199,
+          "mae": 0.003836810931792681,
+          "second_half_mae": 0.0036080747492991637,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.002894799371378043,
+          "clip_events": 174,
+          "error_estimate_mean": 0.5792553528672009,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002586918682582264,
+          "mae": 0.0023648617638196436,
+          "second_half_mae": 0.0021428048450570234,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004923722302895617,
+          "clip_events": 145,
+          "error_estimate_mean": 0.6157928728954577,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002393315428517251,
+          "mae": 0.002383131569369948,
+          "second_half_mae": 0.002372947710222645,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 1.1988540341876612e-05,
+          "clip_events": 58,
+          "error_estimate_mean": 0.44859990761209506,
+          "family": "aba_v1",
+          "first_half_mae": 0.0008288180375679124,
+          "mae": 0.0004990434974206068,
+          "second_half_mae": 0.00016926895727330124,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0009654312985085024,
+          "clip_events": 144,
+          "error_estimate_mean": 0.5514236818571993,
+          "family": "aba_v1",
+          "first_half_mae": 0.005986539645394921,
+          "mae": 0.0036513372077508766,
+          "second_half_mae": 0.001316134770106831,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 675
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.1,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.1;T=4;lambda=0.25",
+      "mean_mae": 0.0011383009302268876,
+      "median_mae": 0.00033970924867346273,
+      "post_change_adaptation": 0.001162586773242604,
+      "retention_ratio": 0.6859348292386159,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 11,
+          "error_estimate_mean": 0.3494069444093121,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004120886921221794,
+          "mae": 0.00020961222578927183,
+          "second_half_mae": 7.1357594563642435e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.35009884936490077,
+          "family": "motion_compat",
+          "first_half_mae": 0.00040637359420374607,
+          "mae": 0.00020607617223625875,
+          "second_half_mae": 5.778750268771449e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 9.87477228320266e-05,
+          "clip_events": 6,
+          "error_estimate_mean": 0.27941855143511535,
+          "family": "motion_compat",
+          "first_half_mae": 0.00021911565836405731,
+          "mae": 0.00012925641496017889,
+          "second_half_mae": 3.939717155630046e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 9.696950325345602e-05,
+          "clip_events": 12,
+          "error_estimate_mean": 0.3397604462694816,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005112826926035804,
+          "mae": 0.0002763984753684924,
+          "second_half_mae": 4.151425813340437e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0007787380244793566,
+          "clip_events": 6,
+          "error_estimate_mean": 0.43118099309994734,
+          "family": "motion_compat",
+          "first_half_mae": 0.00023719263228547393,
+          "mae": 0.00035443652899225345,
+          "second_half_mae": 0.000471680425699033,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0006569055727027873,
+          "clip_events": 1,
+          "error_estimate_mean": 0.42981144956190676,
+          "family": "motion_compat",
+          "first_half_mae": 0.00023230365635212857,
+          "mae": 0.000324981968354672,
+          "second_half_mae": 0.00041766028035721545,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 4,
+          "error_estimate_mean": 0.2816395973765762,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0016796780612747914,
+          "mae": 0.0016176881329105375,
+          "second_half_mae": 0.0015556982045462832,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 13,
+          "error_estimate_mean": 0.3479889519177087,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0034804854218113425,
+          "mae": 0.003555250377285364,
+          "second_half_mae": 0.003630015332759384,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0003466559292515381,
+          "clip_events": 128,
+          "error_estimate_mean": 0.4320065624660933,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002309207818610756,
+          "mae": 0.001860510099135597,
+          "second_half_mae": 0.0014118123796604376,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.005554050217366879,
+          "clip_events": 147,
+          "error_estimate_mean": 0.5066798952039996,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002422044426841131,
+          "mae": 0.002302292528518423,
+          "second_half_mae": 0.0021825406301957157,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 2.3306939890484676e-05,
+          "clip_events": 23,
+          "error_estimate_mean": 0.2756668125622258,
+          "family": "aba_v1",
+          "first_half_mae": 0.00043367392831448624,
+          "mae": 0.00027415787578260824,
+          "second_half_mae": 0.00011464182325073028,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0017453202761643035,
+          "clip_events": 219,
+          "error_estimate_mean": 0.4531483157988551,
+          "family": "aba_v1",
+          "first_half_mae": 0.0036253502549134496,
+          "mae": 0.002548950363388994,
+          "second_half_mae": 0.0014725504718645385,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 580
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.3,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.3;T=4;lambda=0.25",
+      "mean_mae": 0.0013783480631231217,
+      "median_mae": 0.0006646851481258275,
+      "post_change_adaptation": 0.0009331149153861929,
+      "retention_ratio": 0.881656771625163,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 32,
+          "error_estimate_mean": 0.30006628884423037,
+          "family": "motion_compat",
+          "first_half_mae": 0.000946758487749448,
+          "mae": 0.0005600575078053696,
+          "second_half_mae": 0.000173356527861291,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 28,
+          "error_estimate_mean": 0.2995357874789112,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009271431254898003,
+          "mae": 0.0005859162980765102,
+          "second_half_mae": 0.00024468947066322023,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 7.292459804858857e-05,
+          "clip_events": 9,
+          "error_estimate_mean": 0.2182566411441676,
+          "family": "motion_compat",
+          "first_half_mae": 0.00044439681451687724,
+          "mae": 0.00023594571121836398,
+          "second_half_mae": 2.74946079198507e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.000262238257651252,
+          "clip_events": 59,
+          "error_estimate_mean": 0.34774946947467644,
+          "family": "motion_compat",
+          "first_half_mae": 0.001384355878459463,
+          "mae": 0.0007434539981751448,
+          "second_half_mae": 0.00010255211789082647,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0002943707734653559,
+          "clip_events": 5,
+          "error_estimate_mean": 0.21972970197932998,
+          "family": "motion_compat",
+          "first_half_mae": 8.121040377245814e-05,
+          "mae": 0.00018523953499624302,
+          "second_half_mae": 0.0002892686662200279,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0002406879044647481,
+          "clip_events": 1,
+          "error_estimate_mean": 0.21642100380364374,
+          "family": "motion_compat",
+          "first_half_mae": 8.013839103544889e-05,
+          "mae": 0.0001170365552355359,
+          "second_half_mae": 0.00015393471943562289,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 2,
+          "error_estimate_mean": 0.21769237962979823,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0017739485137826317,
+          "mae": 0.0017292683994506563,
+          "second_half_mae": 0.0016845882851186807,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 86,
+          "error_estimate_mean": 0.38390023855356037,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004141109996484568,
+          "mae": 0.0042884356028255015,
+          "second_half_mae": 0.004435761209166435,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 7.66190560830271e-06,
+          "clip_events": 127,
+          "error_estimate_mean": 0.39851330283828557,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023582893669517363,
+          "mae": 0.0018507031243897255,
+          "second_half_mae": 0.0013431168818277147,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.0036806481064100005,
+          "clip_events": 188,
+          "error_estimate_mean": 0.5304828297013888,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.00403999237969224,
+          "mae": 0.003415545407524809,
+          "second_half_mae": 0.002791098435357377,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 7.19367688248318e-05,
+          "clip_events": 78,
+          "error_estimate_mean": 0.24682481277262444,
+          "family": "aba_v1",
+          "first_half_mae": 0.0009157394929681268,
+          "mae": 0.0005369245832629796,
+          "second_half_mae": 0.00015810967355783245,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.002834451008616464,
+          "clip_events": 230,
+          "error_estimate_mean": 0.3814296220085887,
+          "family": "aba_v1",
+          "first_half_mae": 0.0022246347978130544,
+          "mae": 0.0022916500345166193,
+          "second_half_mae": 0.002358665271220184,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 845
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.001,
+        "tbptt_steps": 8
+      },
+      "failure": null,
+      "key": "lr=0.001;T=8;lambda=0.25",
+      "mean_mae": 0.004206869067035937,
+      "median_mae": 0.0034894702977581902,
+      "post_change_adaptation": 0.0038386099838365285,
+      "retention_ratio": 0.8974593382001436,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6940170530319427,
+          "family": "motion_compat",
+          "first_half_mae": 0.0036870479657377074,
+          "mae": 0.003350203273591355,
+          "second_half_mae": 0.0030133585814450014,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 159,
+          "error_estimate_mean": 0.6938668438460084,
+          "family": "motion_compat",
+          "first_half_mae": 0.003679803783265367,
+          "mae": 0.0033978756610759365,
+          "second_half_mae": 0.0031159475388865057,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.001730867246253535,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6939882053947234,
+          "family": "motion_compat",
+          "first_half_mae": 0.004001069986471543,
+          "mae": 0.002792795285728059,
+          "second_half_mae": 0.001584520584984575,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0023178449405372873,
+          "clip_events": 160,
+          "error_estimate_mean": 0.693184461123877,
+          "family": "motion_compat",
+          "first_half_mae": 0.005035204221336885,
+          "mae": 0.0035810649344404435,
+          "second_half_mae": 0.002126925647544002,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0027680798273249283,
+          "clip_events": 61,
+          "error_estimate_mean": 0.6897904909318673,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010106982335309142,
+          "mae": 0.0012917882023694247,
+          "second_half_mae": 0.0015728781712079352,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.002246538136298269,
+          "clip_events": 49,
+          "error_estimate_mean": 0.6894363294807422,
+          "family": "motion_compat",
+          "first_half_mae": 0.000972418739068831,
+          "mae": 0.00112261232239592,
+          "second_half_mae": 0.0012728059057230089,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 150,
+          "error_estimate_mean": 0.6919638327670751,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004046256673309815,
+          "mae": 0.003763330226354693,
+          "second_half_mae": 0.0034804037793995713,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 155,
+          "error_estimate_mean": 0.6947568676745925,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.008162377940929659,
+          "mae": 0.008090324937671665,
+          "second_half_mae": 0.008018271934413672,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.004401572501974094,
+          "clip_events": 180,
+          "error_estimate_mean": 0.6900295755699052,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.004089440517778282,
+          "mae": 0.00394247038087998,
+          "second_half_mae": 0.0037955002439816793,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.0013340644883582664,
+          "clip_events": 177,
+          "error_estimate_mean": 0.6907760727899995,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003926471303537754,
+          "mae": 0.0038181398788261866,
+          "second_half_mae": 0.00370980845411462,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.001361996616370409,
+          "clip_events": 296,
+          "error_estimate_mean": 0.6913771217147009,
+          "family": "aba_v1",
+          "first_half_mae": 0.005134717434001429,
+          "mae": 0.0033277181880697992,
+          "second_half_mae": 0.0015207189421381692,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.01454791611357544,
+          "clip_events": 359,
+          "error_estimate_mean": 0.6944352380661291,
+          "family": "aba_v1",
+          "first_half_mae": 0.009960744013243261,
+          "mae": 0.012004105513027786,
+          "second_half_mae": 0.014047467012812313,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 2066
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.003,
+        "tbptt_steps": 8
+      },
+      "failure": null,
+      "key": "lr=0.003;T=8;lambda=0.25",
+      "mean_mae": 0.0033046930381758215,
+      "median_mae": 0.002549196798746524,
+      "post_change_adaptation": 0.0029831428305340836,
+      "retention_ratio": 0.6991282230887105,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 152,
+          "error_estimate_mean": 0.688282499619956,
+          "family": "motion_compat",
+          "first_half_mae": 0.0031681667575665573,
+          "mae": 0.0023296260527419497,
+          "second_half_mae": 0.0014910853479173421,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 156,
+          "error_estimate_mean": 0.6902685749251929,
+          "family": "motion_compat",
+          "first_half_mae": 0.003185368193552042,
+          "mae": 0.002439388854740405,
+          "second_half_mae": 0.0016934095159287677,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.0007573060281084472,
+          "clip_events": 80,
+          "error_estimate_mean": 0.6867995226521415,
+          "family": "motion_compat",
+          "first_half_mae": 0.00328892165715835,
+          "mae": 0.0019445226442631684,
+          "second_half_mae": 0.0006001236313679867,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.001264799691852144,
+          "clip_events": 113,
+          "error_estimate_mean": 0.6849315150485555,
+          "family": "motion_compat",
+          "first_half_mae": 0.00442579299367022,
+          "mae": 0.0026590047427526428,
+          "second_half_mae": 0.0008922164918350656,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0023842206446029134,
+          "clip_events": 46,
+          "error_estimate_mean": 0.6822583808772682,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009161417775200451,
+          "mae": 0.0011105153091383597,
+          "second_half_mae": 0.0013048888407566745,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0019073162675603032,
+          "clip_events": 39,
+          "error_estimate_mean": 0.6812804931216976,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008873994010775473,
+          "mae": 0.0009688784356193293,
+          "second_half_mae": 0.001050357470161111,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 86,
+          "error_estimate_mean": 0.6756971772156674,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.003507789087506825,
+          "mae": 0.002856865442188608,
+          "second_half_mae": 0.0022059417968703907,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 155,
+          "error_estimate_mean": 0.6955323871595133,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.007590316760953604,
+          "mae": 0.006969700730191176,
+          "second_half_mae": 0.006349084699428749,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.003791333838397637,
+          "clip_events": 212,
+          "error_estimate_mean": 0.6856569637441777,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0038624671852066517,
+          "mae": 0.00356877804569249,
+          "second_half_mae": 0.003275088906178328,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.0030370996461168698,
+          "clip_events": 198,
+          "error_estimate_mean": 0.6875842314552166,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003601676210152806,
+          "mae": 0.003381556406770208,
+          "second_half_mae": 0.00316143660338761,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 6.321681214067806e-05,
+          "clip_events": 199,
+          "error_estimate_mean": 0.6764066960925532,
+          "family": "aba_v1",
+          "first_half_mae": 0.003941343261896715,
+          "mae": 0.002167502178347713,
+          "second_half_mae": 0.00039366109479871034,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.010659849715493675,
+          "clip_events": 334,
+          "error_estimate_mean": 0.6889262367210718,
+          "family": "aba_v1",
+          "first_half_mae": 0.008800895545894114,
+          "mae": 0.009259977615663809,
+          "second_half_mae": 0.009719059685433502,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 1770
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.01,
+        "tbptt_steps": 8
+      },
+      "failure": null,
+      "key": "lr=0.01;T=8;lambda=0.25",
+      "mean_mae": 0.0020262092900959414,
+      "median_mae": 0.0011899990831144972,
+      "post_change_adaptation": 0.0019193216424950952,
+      "retention_ratio": 0.5001693254647125,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 59,
+          "error_estimate_mean": 0.6162652992962399,
+          "family": "motion_compat",
+          "first_half_mae": 0.0018223360963802494,
+          "mae": 0.0009378397816445135,
+          "second_half_mae": 5.3343466908777755e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 63,
+          "error_estimate_mean": 0.6355790062488167,
+          "family": "motion_compat",
+          "first_half_mae": 0.00185579977391183,
+          "mae": 0.0009927940493786765,
+          "second_half_mae": 0.00012978832484552283,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.00033279061676964037,
+          "clip_events": 46,
+          "error_estimate_mean": 0.6218077296832241,
+          "family": "motion_compat",
+          "first_half_mae": 0.0015764887565278142,
+          "mae": 0.0008722677111545122,
+          "second_half_mae": 0.0001680466657812102,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.00016372604831058624,
+          "clip_events": 74,
+          "error_estimate_mean": 0.6367007585660964,
+          "family": "motion_compat",
+          "first_half_mae": 0.002682667572725435,
+          "mae": 0.0013872041168503178,
+          "second_half_mae": 9.174066097520084e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0016485644022635729,
+          "clip_events": 34,
+          "error_estimate_mean": 0.6528658091314469,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007053240268140943,
+          "mae": 0.0007893597391934158,
+          "second_half_mae": 0.0008733954515727372,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0012958864380264,
+          "clip_events": 24,
+          "error_estimate_mean": 0.6503131956665349,
+          "family": "motion_compat",
+          "first_half_mae": 0.0006888170176578389,
+          "mae": 0.0006950407134535131,
+          "second_half_mae": 0.0007012644092491873,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 26,
+          "error_estimate_mean": 0.590865976462488,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.002422819907001243,
+          "mae": 0.002019220546035067,
+          "second_half_mae": 0.0016156211850688906,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 84,
+          "error_estimate_mean": 0.6353443405840967,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.005881566496930592,
+          "mae": 0.004768251455277923,
+          "second_half_mae": 0.003654936413625256,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.003333050117871328,
+          "clip_events": 195,
+          "error_estimate_mean": 0.6578895571456405,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003213485271832057,
+          "mae": 0.0028198493628770636,
+          "second_half_mae": 0.002426213453922071,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004844265532037539,
+          "clip_events": 171,
+          "error_estimate_mean": 0.667765821568225,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002843058835090439,
+          "mae": 0.0026374305453185946,
+          "second_half_mae": 0.002431802255546751,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.00014057426170509905,
+          "clip_events": 130,
+          "error_estimate_mean": 0.5912260759237786,
+          "family": "aba_v1",
+          "first_half_mae": 0.0017332026271219458,
+          "mae": 0.0009868938304846483,
+          "second_half_mae": 0.00024058503384735079,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0035957157229765955,
+          "clip_events": 196,
+          "error_estimate_mean": 0.6490415749465471,
+          "family": "aba_v1",
+          "first_half_mae": 0.007367103334319693,
+          "mae": 0.005408359629483046,
+          "second_half_mae": 0.0034496159246464,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 1102
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 8
+      },
+      "failure": null,
+      "key": "lr=0.03;T=8;lambda=0.25",
+      "mean_mae": 0.0014356896327000189,
+      "median_mae": 0.0005543496103750774,
+      "post_change_adaptation": 0.0013993997429719107,
+      "retention_ratio": 0.5675518670937468,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.5054090392056251,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007905002518257806,
+          "mae": 0.0004012544865182021,
+          "second_half_mae": 1.2008721210623672e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.523686943599877,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008191999296823752,
+          "mae": 0.000418399955562581,
+          "second_half_mae": 1.7599981442786848e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.00021971566944544533,
+          "clip_events": 16,
+          "error_estimate_mean": 0.46158959346053974,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005703071325398087,
+          "mae": 0.00033270500507480633,
+          "second_half_mae": 9.510287760980396e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.00013300871149238465,
+          "clip_events": 29,
+          "error_estimate_mean": 0.5168436845927241,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010794566905693221,
+          "mae": 0.0005739047572717329,
+          "second_half_mae": 6.835282397414377e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.001115133562408425,
+          "clip_events": 24,
+          "error_estimate_mean": 0.5782392164196951,
+          "family": "motion_compat",
+          "first_half_mae": 0.00044963413069645244,
+          "mae": 0.0005347944634784219,
+          "second_half_mae": 0.0006199547962603913,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0009032946173386976,
+          "clip_events": 7,
+          "error_estimate_mean": 0.5739410535362486,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004369718556292715,
+          "mae": 0.00047992680107779957,
+          "second_half_mae": 0.0005228817465263276,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.4460800136421533,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0018836838431207353,
+          "mae": 0.0017356459640086286,
+          "second_half_mae": 0.0015876080848965218,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 30,
+          "error_estimate_mean": 0.5238637884188794,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004060161356260991,
+          "mae": 0.003828129089389829,
+          "second_half_mae": 0.0035960968225186673,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0029481939284305425,
+          "clip_events": 174,
+          "error_estimate_mean": 0.5783532799502541,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0025829868632687076,
+          "mae": 0.0023649303390275876,
+          "second_half_mae": 0.0021468738147864684,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.0049233435055264785,
+          "clip_events": 146,
+          "error_estimate_mean": 0.6148010064126734,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023949227541717735,
+          "mae": 0.0023842506738945436,
+          "second_half_mae": 0.002373578593617314,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 1.1002591000680573e-05,
+          "clip_events": 63,
+          "error_estimate_mean": 0.44830669842383286,
+          "family": "aba_v1",
+          "first_half_mae": 0.0008313407130282068,
+          "mae": 0.0004987280762519007,
+          "second_half_mae": 0.00016611543947559466,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0009415053581326321,
+          "clip_events": 149,
+          "error_estimate_mean": 0.552110600828006,
+          "family": "aba_v1",
+          "first_half_mae": 0.006036074869070338,
+          "mae": 0.0036756059808441943,
+          "second_half_mae": 0.0013151370926180511,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 694
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.1,
+        "tbptt_steps": 8
+      },
+      "failure": null,
+      "key": "lr=0.1;T=8;lambda=0.25",
+      "mean_mae": 0.0011403608318836375,
+      "median_mae": 0.0003239938007979488,
+      "post_change_adaptation": 0.0011564944171570022,
+      "retention_ratio": 0.6700875925743658,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 11,
+          "error_estimate_mean": 0.34805322936260125,
+          "family": "motion_compat",
+          "first_half_mae": 0.00041546239521609,
+          "mae": 0.00021153244064128608,
+          "second_half_mae": 7.602486066482159e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.34900412251539964,
+          "family": "motion_compat",
+          "first_half_mae": 0.00040894483647051504,
+          "mae": 0.00020741594822237323,
+          "second_half_mae": 5.88705997423139e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 9.804329454760063e-05,
+          "clip_events": 6,
+          "error_estimate_mean": 0.27286733287199116,
+          "family": "motion_compat",
+          "first_half_mae": 0.00021995729487224447,
+          "mae": 0.00012964074022965357,
+          "second_half_mae": 3.932418558706269e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 9.746351910262148e-05,
+          "clip_events": 12,
+          "error_estimate_mean": 0.3380973685405581,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005135874401158716,
+          "mae": 0.0002776869122486043,
+          "second_half_mae": 4.1786384381337085e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0007588656826616191,
+          "clip_events": 10,
+          "error_estimate_mean": 0.4028479162289981,
+          "family": "motion_compat",
+          "first_half_mae": 0.00023068311483021297,
+          "mae": 0.0003398014266092486,
+          "second_half_mae": 0.00044891973838828426,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0006366347671831325,
+          "clip_events": 1,
+          "error_estimate_mean": 0.40830571345502686,
+          "family": "motion_compat",
+          "first_half_mae": 0.0002317305390266894,
+          "mae": 0.000308186174986649,
+          "second_half_mae": 0.0003846418109466086,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 4,
+          "error_estimate_mean": 0.2750845451691614,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0016761895810267031,
+          "mae": 0.0016127458450491167,
+          "second_half_mae": 0.0015493021090715303,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 13,
+          "error_estimate_mean": 0.3462965155658337,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0034768891906192447,
+          "mae": 0.0035476877019000284,
+          "second_half_mae": 0.003618486213180814,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0004218490035022282,
+          "clip_events": 129,
+          "error_estimate_mean": 0.42908756663155845,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023118395526093146,
+          "mae": 0.0018715307588212887,
+          "second_half_mae": 0.0014312219650332626,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.00552506540187403,
+          "clip_events": 148,
+          "error_estimate_mean": 0.5039211112998252,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0024338849594985968,
+          "mae": 0.0023010904225435973,
+          "second_half_mae": 0.0021682958855885975,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 4.164081793242939e-05,
+          "clip_events": 24,
+          "error_estimate_mean": 0.2705850647280655,
+          "family": "aba_v1",
+          "first_half_mae": 0.0004375708281736017,
+          "mae": 0.00027776089400206964,
+          "second_half_mae": 0.00011795095983053758,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0016723928504523563,
+          "clip_events": 215,
+          "error_estimate_mean": 0.4546294192680048,
+          "family": "aba_v1",
+          "first_half_mae": 0.0037191766160696383,
+          "mae": 0.0025992507173497343,
+          "second_half_mae": 0.0014793248186298303,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 583
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.3,
+        "tbptt_steps": 8
+      },
+      "failure": null,
+      "key": "lr=0.3;T=8;lambda=0.25",
+      "mean_mae": 0.0013560739611062015,
+      "median_mae": 0.00067348797291913,
+      "post_change_adaptation": 0.0012409282516801664,
+      "retention_ratio": 1.31661018203008,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 28,
+          "error_estimate_mean": 0.30135737705538773,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009151334695749689,
+          "mae": 0.0005379464673290151,
+          "second_half_mae": 0.0001607594650830612,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 31,
+          "error_estimate_mean": 0.3032984091114191,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009216597354609723,
+          "mae": 0.0005775923773342004,
+          "second_half_mae": 0.0002335250192074284,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 7.324230635188758e-05,
+          "clip_events": 8,
+          "error_estimate_mean": 0.21345353167875242,
+          "family": "motion_compat",
+          "first_half_mae": 0.00042987854128991656,
+          "mae": 0.00022873035545339197,
+          "second_half_mae": 2.758216961686738e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0002623420401999662,
+          "clip_events": 62,
+          "error_estimate_mean": 0.34496596685777436,
+          "family": "motion_compat",
+          "first_half_mae": 0.0013563972002741287,
+          "mae": 0.0007295244672571151,
+          "second_half_mae": 0.00010265173424010149,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0005132262807480433,
+          "clip_events": 9,
+          "error_estimate_mean": 0.21419030215461543,
+          "family": "motion_compat",
+          "first_half_mae": 7.163551431384612e-05,
+          "mae": 0.00022515715939372128,
+          "second_half_mae": 0.00037867880447359643,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0005838565748045661,
+          "clip_events": 10,
+          "error_estimate_mean": 0.21667842144980115,
+          "family": "motion_compat",
+          "first_half_mae": 7.000072276042157e-05,
+          "mae": 0.00021855547715297525,
+          "second_half_mae": 0.0003671102315455289,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 2,
+          "error_estimate_mean": 0.2203480859455054,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0017550772854303355,
+          "mae": 0.0017299057769485876,
+          "second_half_mae": 0.0017047342684668395,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 98,
+          "error_estimate_mean": 0.38330871078161494,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004138981818755766,
+          "mae": 0.004278007536288155,
+          "second_half_mae": 0.004417033253820544,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 1.739158794755724e-08,
+          "clip_events": 127,
+          "error_estimate_mean": 0.40071662700929295,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023234338334304234,
+          "mae": 0.0018587623442734762,
+          "second_half_mae": 0.0013940908551165288,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.005415463760707895,
+          "clip_events": 171,
+          "error_estimate_mean": 0.4485793009680705,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0035198667583949657,
+          "mae": 0.0029880827779398245,
+          "second_half_mae": 0.0024562987974846833,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.00018257198326076713,
+          "clip_events": 111,
+          "error_estimate_mean": 0.257326149578707,
+          "family": "aba_v1",
+          "first_half_mae": 0.0009134912201790765,
+          "mae": 0.000617451478581145,
+          "second_half_mae": 0.0003214117369832135,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.002896705675780259,
+          "clip_events": 223,
+          "error_estimate_mean": 0.3628952545593496,
+          "family": "aba_v1",
+          "first_half_mae": 0.0022699199041442616,
+          "mae": 0.0022831713153228096,
+          "second_half_mae": 0.0022964227265013567,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 880
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.001,
+        "tbptt_steps": 16
+      },
+      "failure": null,
+      "key": "lr=0.001;T=16;lambda=0.25",
+      "mean_mae": 0.004206863918868967,
+      "median_mae": 0.0034894536966402923,
+      "post_change_adaptation": 0.0038387146022499847,
+      "retention_ratio": 0.8974558366897267,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6940170628844403,
+          "family": "motion_compat",
+          "first_half_mae": 0.0036870493019994844,
+          "mae": 0.003350185433493679,
+          "second_half_mae": 0.003013321564987874,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 159,
+          "error_estimate_mean": 0.6938668226147501,
+          "family": "motion_compat",
+          "first_half_mae": 0.003679804059189479,
+          "mae": 0.0033978650864797066,
+          "second_half_mae": 0.0031159261137699346,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.001730839156604395,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6939895261002844,
+          "family": "motion_compat",
+          "first_half_mae": 0.004001067944531622,
+          "mae": 0.0027927548554213767,
+          "second_half_mae": 0.0015844417663111315,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.002317836381994165,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6931845665142093,
+          "family": "motion_compat",
+          "first_half_mae": 0.005035204408391651,
+          "mae": 0.003581042306800878,
+          "second_half_mae": 0.002126880205210105,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0027680950423792723,
+          "clip_events": 61,
+          "error_estimate_mean": 0.6897906412225752,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010106972226072944,
+          "mae": 0.0012918001473453938,
+          "second_half_mae": 0.001572903072083493,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0022465583418249113,
+          "clip_events": 49,
+          "error_estimate_mean": 0.6894364300757413,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009724168667708963,
+          "mae": 0.0011226231607678878,
+          "second_half_mae": 0.0012728294547648795,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 150,
+          "error_estimate_mean": 0.69196364348555,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004046246226404643,
+          "mae": 0.003763220348545872,
+          "second_half_mae": 0.0034801944706871007,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 155,
+          "error_estimate_mean": 0.6947568882579347,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.008162377618980083,
+          "mae": 0.008090313297668936,
+          "second_half_mae": 0.008018248976357792,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.004401669490623317,
+          "clip_events": 180,
+          "error_estimate_mean": 0.6900281664955031,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.004089438871068172,
+          "mae": 0.003942467422331791,
+          "second_half_mae": 0.0037954959735954094,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.0013340594650975701,
+          "clip_events": 177,
+          "error_estimate_mean": 0.6907754319592352,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003926472920108098,
+          "mae": 0.003818152192401222,
+          "second_half_mae": 0.0037098314646943466,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.0013624287461483067,
+          "clip_events": 297,
+          "error_estimate_mean": 0.691382102404596,
+          "family": "aba_v1",
+          "first_half_mae": 0.00513472859449249,
+          "mae": 0.0033276770425873254,
+          "second_half_mae": 0.0015206254906821605,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.014548230193327943,
+          "clip_events": 359,
+          "error_estimate_mean": 0.6944339467652432,
+          "family": "aba_v1",
+          "first_half_mae": 0.009960810278751127,
+          "mae": 0.01200426573258353,
+          "second_half_mae": 0.014047721186415934,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 2067
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.003,
+        "tbptt_steps": 16
+      },
+      "failure": null,
+      "key": "lr=0.003;T=16;lambda=0.25",
+      "mean_mae": 0.0033042726117028178,
+      "median_mae": 0.0025484369779361967,
+      "post_change_adaptation": 0.0029837729752017657,
+      "retention_ratio": 0.6989129619068172,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 152,
+          "error_estimate_mean": 0.6882836785922365,
+          "family": "motion_compat",
+          "first_half_mae": 0.003168196401164986,
+          "mae": 0.002328908401000595,
+          "second_half_mae": 0.0014896204008362033,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 156,
+          "error_estimate_mean": 0.6902684268409673,
+          "family": "motion_compat",
+          "first_half_mae": 0.003185375551998633,
+          "mae": 0.0024390480348445626,
+          "second_half_mae": 0.0016927205176904922,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.000755549833416469,
+          "clip_events": 80,
+          "error_estimate_mean": 0.6867615774623556,
+          "family": "motion_compat",
+          "first_half_mae": 0.003288853095207927,
+          "mae": 0.0019426727036477378,
+          "second_half_mae": 0.0005964923120875487,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0012645369532529815,
+          "clip_events": 113,
+          "error_estimate_mean": 0.6849045525265662,
+          "family": "motion_compat",
+          "first_half_mae": 0.004425795687429961,
+          "mae": 0.0026578259210278303,
+          "second_half_mae": 0.0008898561546256997,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0023845687150179707,
+          "clip_events": 47,
+          "error_estimate_mean": 0.6822604656348543,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009161118517294522,
+          "mae": 0.0011106830922100106,
+          "second_half_mae": 0.001305254332690569,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0019076214261895966,
+          "clip_events": 39,
+          "error_estimate_mean": 0.6812811336098555,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008873470528412752,
+          "mae": 0.0009690210645991574,
+          "second_half_mae": 0.0010506950763570395,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 87,
+          "error_estimate_mean": 0.6755960203003578,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.003507490114399399,
+          "mae": 0.002853858702086916,
+          "second_half_mae": 0.0022002272897744327,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 155,
+          "error_estimate_mean": 0.695532015649249,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.007590306616912528,
+          "mae": 0.006969391482056189,
+          "second_half_mae": 0.006348476347199852,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.003791793550306677,
+          "clip_events": 212,
+          "error_estimate_mean": 0.6856424586550433,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003862431728608005,
+          "mae": 0.0035688276901258862,
+          "second_half_mae": 0.003275223651643768,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.003037582830915042,
+          "clip_events": 199,
+          "error_estimate_mean": 0.6875825282925445,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0036017072579701075,
+          "mae": 0.003381686895338253,
+          "second_half_mae": 0.0031616665327063986,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 6.577950718107776e-05,
+          "clip_events": 202,
+          "error_estimate_mean": 0.6764450283675914,
+          "family": "aba_v1",
+          "first_half_mae": 0.003941595271625584,
+          "mae": 0.0021683932788587297,
+          "second_half_mae": 0.00039519128609187597,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.01066275098533431,
+          "clip_events": 334,
+          "error_estimate_mean": 0.6889312297605853,
+          "family": "aba_v1",
+          "first_half_mae": 0.008801768996114715,
+          "mae": 0.009260954074637947,
+          "second_half_mae": 0.009720139153161183,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 1776
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.01,
+        "tbptt_steps": 16
+      },
+      "failure": null,
+      "key": "lr=0.01;T=16;lambda=0.25",
+      "mean_mae": 0.002026095642377445,
+      "median_mae": 0.0011896665537267665,
+      "post_change_adaptation": 0.0019274979012132648,
+      "retention_ratio": 0.5005724691240873,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 59,
+          "error_estimate_mean": 0.6155880048834801,
+          "family": "motion_compat",
+          "first_half_mae": 0.0018220426846177775,
+          "mae": 0.0009356916594073685,
+          "second_half_mae": 4.9340634196959676e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 63,
+          "error_estimate_mean": 0.6352941364114775,
+          "family": "motion_compat",
+          "first_half_mae": 0.0018550334151784295,
+          "mae": 0.0009914348711665224,
+          "second_half_mae": 0.00012783632715461513,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.0003342515140589401,
+          "clip_events": 46,
+          "error_estimate_mean": 0.6214336409455149,
+          "family": "motion_compat",
+          "first_half_mae": 0.00157346534686853,
+          "mae": 0.0008702295282311701,
+          "second_half_mae": 0.0001669937095938101,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0001665498350921409,
+          "clip_events": 74,
+          "error_estimate_mean": 0.6365577142598903,
+          "family": "motion_compat",
+          "first_half_mae": 0.0026826152440097713,
+          "mae": 0.0013878982362870106,
+          "second_half_mae": 9.318122856424998e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0016548312349308574,
+          "clip_events": 34,
+          "error_estimate_mean": 0.6528895382027006,
+          "family": "motion_compat",
+          "first_half_mae": 0.000704560401681456,
+          "mae": 0.0007904985146975719,
+          "second_half_mae": 0.0008764366277136879,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0013010396021263747,
+          "clip_events": 25,
+          "error_estimate_mean": 0.650287828941095,
+          "family": "motion_compat",
+          "first_half_mae": 0.0006878710570631538,
+          "mae": 0.0006960168184663565,
+          "second_half_mae": 0.0007041625798695592,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 26,
+          "error_estimate_mean": 0.58968480891717,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.002418796874181135,
+          "mae": 0.002015318321523899,
+          "second_half_mae": 0.0016118397688666627,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 84,
+          "error_estimate_mean": 0.6351153928807293,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.005881134224789315,
+          "mae": 0.004766280715852501,
+          "second_half_mae": 0.0036514272069156873,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0033429608185329696,
+          "clip_events": 195,
+          "error_estimate_mean": 0.6577737492233121,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0032129890931625205,
+          "mae": 0.0028197949440117915,
+          "second_half_mae": 0.0024266007948610625,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004847792846847221,
+          "clip_events": 171,
+          "error_estimate_mean": 0.6677017673851255,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002843400597025496,
+          "mae": 0.0026372494545462643,
+          "second_half_mae": 0.002431098312067033,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.0001291929631901297,
+          "clip_events": 131,
+          "error_estimate_mean": 0.5916640854012123,
+          "family": "aba_v1",
+          "first_half_mae": 0.0017349892283840063,
+          "mae": 0.0009853137453547658,
+          "second_half_mae": 0.0002356382623255254,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.003643364394927485,
+          "clip_events": 196,
+          "error_estimate_mean": 0.649103293354401,
+          "family": "aba_v1",
+          "first_half_mae": 0.007375323370045781,
+          "mae": 0.005417420898984121,
+          "second_half_mae": 0.0034595184279224596,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 1104
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 16
+      },
+      "failure": null,
+      "key": "lr=0.03;T=16;lambda=0.25",
+      "mean_mae": 0.0014370605422895503,
+      "median_mae": 0.0005556780729963913,
+      "post_change_adaptation": 0.001404009235085637,
+      "retention_ratio": 0.5707163942277552,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.5050309092970269,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007916585947909708,
+          "mae": 0.00040211203560084507,
+          "second_half_mae": 1.2565476410719354e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.5236998363351499,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008194972285238591,
+          "mae": 0.000418605566862143,
+          "second_half_mae": 1.771390520042687e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.00021883054347225558,
+          "clip_events": 16,
+          "error_estimate_mean": 0.45991621588548093,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005698114217678622,
+          "mae": 0.00033301423840325533,
+          "second_half_mae": 9.621705503864847e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.00013399125972020828,
+          "clip_events": 29,
+          "error_estimate_mean": 0.516763169654735,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010799424234911841,
+          "mae": 0.0005746006663472858,
+          "second_half_mae": 6.92589092033874e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.00113203870496284,
+          "clip_events": 24,
+          "error_estimate_mean": 0.5781745148317582,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004478368103003755,
+          "mae": 0.0005367554796454968,
+          "second_half_mae": 0.0006256741489906181,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0009114035668598623,
+          "clip_events": 10,
+          "error_estimate_mean": 0.5734566856214717,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004346204297718856,
+          "mae": 0.00048104067590044907,
+          "second_half_mae": 0.0005274609220290126,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.44357303122360037,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0018815081715133019,
+          "mae": 0.0017329410648759549,
+          "second_half_mae": 0.0015843739582386079,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 31,
+          "error_estimate_mean": 0.523752582729993,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004058874122968149,
+          "mae": 0.0038262514825112446,
+          "second_half_mae": 0.003593628842054339,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.00298488923290241,
+          "clip_events": 175,
+          "error_estimate_mean": 0.5778361540728123,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0025817978996749776,
+          "mae": 0.0023662568689561693,
+          "second_half_mae": 0.002150715838237361,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004922559311633101,
+          "clip_events": 146,
+          "error_estimate_mean": 0.6145517730372251,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023961446440759807,
+          "mae": 0.002385647887908556,
+          "second_half_mae": 0.002375151131741131,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 1.353206961307955e-05,
+          "clip_events": 66,
+          "error_estimate_mean": 0.44833698953989004,
+          "family": "aba_v1",
+          "first_half_mae": 0.0008333131501628177,
+          "mae": 0.0004997659853429108,
+          "second_half_mae": 0.00016621882052300394,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0009148291915213395,
+          "clip_events": 144,
+          "error_estimate_mean": 0.5512365708626511,
+          "family": "aba_v1",
+          "first_half_mae": 0.00606428283313547,
+          "mae": 0.0036877345551202903,
+          "second_half_mae": 0.0013111862771051108,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 697
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.1,
+        "tbptt_steps": 16
+      },
+      "failure": null,
+      "key": "lr=0.1;T=16;lambda=0.25",
+      "mean_mae": 0.0011392206308340298,
+      "median_mae": 0.00029744039337842223,
+      "post_change_adaptation": 0.0011332875157506863,
+      "retention_ratio": 0.6513307150100133,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 11,
+          "error_estimate_mean": 0.348133507100277,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004168888480160315,
+          "mae": 0.00021233438950442096,
+          "second_half_mae": 7.779930992810394e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.34896785584046847,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004099964996385,
+          "mae": 0.00020803321222965035,
+          "second_half_mae": 6.0699248208007095e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 9.786117597267625e-05,
+          "clip_events": 6,
+          "error_estimate_mean": 0.2705862279909465,
+          "family": "motion_compat",
+          "first_half_mae": 0.00022034724604209563,
+          "mae": 0.000129809928422844,
+          "second_half_mae": 3.927261080359234e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 9.793573443309667e-05,
+          "clip_events": 12,
+          "error_estimate_mean": 0.33771628120884156,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005145253961083785,
+          "mae": 0.0002783053210512157,
+          "second_half_mae": 4.208524599405294e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0006687891537947466,
+          "clip_events": 9,
+          "error_estimate_mean": 0.3754256082832722,
+          "family": "motion_compat",
+          "first_half_mae": 0.00021942601299315828,
+          "mae": 0.00031357872279126934,
+          "second_half_mae": 0.0004077314325893804,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0005554973489118171,
+          "clip_events": 1,
+          "error_estimate_mean": 0.3822588323301495,
+          "family": "motion_compat",
+          "first_half_mae": 0.00022298435112844546,
+          "mae": 0.0002813020639655751,
+          "second_half_mae": 0.00033961977680270483,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 4,
+          "error_estimate_mean": 0.2721746859569158,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0016747594959413636,
+          "mae": 0.0016106577366141323,
+          "second_half_mae": 0.0015465559772869005,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 13,
+          "error_estimate_mean": 0.3460880773762277,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0034765766408926947,
+          "mae": 0.003546313864937681,
+          "second_half_mae": 0.003616051088982669,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0004461508097346467,
+          "clip_events": 129,
+          "error_estimate_mean": 0.4271071799881486,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023132480029506805,
+          "mae": 0.0018753719827858868,
+          "second_half_mae": 0.0014374959626210929,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.005521737487555911,
+          "clip_events": 148,
+          "error_estimate_mean": 0.503770206829373,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0024389213235028124,
+          "mae": 0.00230261684669385,
+          "second_half_mae": 0.0021663123698848876,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 6.868568464614514e-05,
+          "clip_events": 24,
+          "error_estimate_mean": 0.26828086728654277,
+          "family": "aba_v1",
+          "first_half_mae": 0.0004379545181406652,
+          "mae": 0.0002808620348625782,
+          "second_half_mae": 0.00012376955158449116,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0016096427309564515,
+          "clip_events": 219,
+          "error_estimate_mean": 0.450187606005859,
+          "family": "aba_v1",
+          "first_half_mae": 0.0037987974598748205,
+          "mae": 0.0026314614661492527,
+          "second_half_mae": 0.0014641254724236847,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 586
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.3,
+        "tbptt_steps": 16
+      },
+      "failure": null,
+      "key": "lr=0.3;T=16;lambda=0.25",
+      "mean_mae": 0.0013458926117626488,
+      "median_mae": 0.0007592264554370997,
+      "post_change_adaptation": 0.001091057325693518,
+      "retention_ratio": 1.1449461675191008,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 29,
+          "error_estimate_mean": 0.3012128207720527,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009109611254322985,
+          "mae": 0.0005341458090787016,
+          "second_half_mae": 0.0001573304927251048,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 31,
+          "error_estimate_mean": 0.30403868788669663,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009188966323720015,
+          "mae": 0.0005741174665504535,
+          "second_half_mae": 0.00022933830072890542,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 7.325562114910793e-05,
+          "clip_events": 8,
+          "error_estimate_mean": 0.21130112010799468,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004259477801075759,
+          "mae": 0.00022677163578650115,
+          "second_half_mae": 2.7595491465426392e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.00025750920874841136,
+          "clip_events": 61,
+          "error_estimate_mean": 0.34297626667836373,
+          "family": "motion_compat",
+          "first_half_mae": 0.0013471602531488949,
+          "mae": 0.0007239217702271254,
+          "second_half_mae": 0.00010068328730535592,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0004662390966045482,
+          "clip_events": 8,
+          "error_estimate_mean": 0.22947675337919754,
+          "family": "motion_compat",
+          "first_half_mae": 6.874840385247688e-05,
+          "mae": 0.00019510503361776718,
+          "second_half_mae": 0.00032146166338305746,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.00033910886227796476,
+          "clip_events": 4,
+          "error_estimate_mean": 0.2121422816913794,
+          "family": "motion_compat",
+          "first_half_mae": 6.694200870100142e-05,
+          "mae": 0.00014152940320349278,
+          "second_half_mae": 0.00021611679770598414,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 5,
+          "error_estimate_mean": 0.2207531823778068,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0017484087671620807,
+          "mae": 0.001725686936283797,
+          "second_half_mae": 0.0017029651054055134,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 91,
+          "error_estimate_mean": 0.3866227808491813,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004154813049410976,
+          "mae": 0.004279928346363249,
+          "second_half_mae": 0.0044050436433155215,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 7.0563519263822094e-06,
+          "clip_events": 127,
+          "error_estimate_mean": 0.3965496706945653,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023241814947225253,
+          "mae": 0.0018573878005750343,
+          "second_half_mae": 0.0013905941064275432,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.003884041593712362,
+          "clip_events": 184,
+          "error_estimate_mean": 0.4701995828410945,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0030720158135636795,
+          "mae": 0.002848830700258671,
+          "second_half_mae": 0.0026256455869536617,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.001131902645213595,
+          "clip_events": 152,
+          "error_estimate_mean": 0.2874192115340221,
+          "family": "aba_v1",
+          "first_half_mae": 0.0009049792398418568,
+          "mae": 0.0007945311406470741,
+          "second_half_mae": 0.0006840830414522916,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.002569345225915773,
+          "clip_events": 234,
+          "error_estimate_mean": 0.37668353422911655,
+          "family": "aba_v1",
+          "first_half_mae": 0.002215467445044477,
+          "mae": 0.002248755298559918,
+          "second_half_mae": 0.0022820431520753593,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 934
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.001,
+        "tbptt_steps": 32
+      },
+      "failure": null,
+      "key": "lr=0.001;T=32;lambda=0.25",
+      "mean_mae": 0.00420686756741505,
+      "median_mae": 0.003489451845379703,
+      "post_change_adaptation": 0.003838745345622375,
+      "retention_ratio": 0.8974566206250457,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6940170626194242,
+          "family": "motion_compat",
+          "first_half_mae": 0.0036870499274937393,
+          "mae": 0.003350185963544917,
+          "second_half_mae": 0.003013321999596094,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 159,
+          "error_estimate_mean": 0.6938668218838442,
+          "family": "motion_compat",
+          "first_half_mae": 0.0036798041072098066,
+          "mae": 0.003397864042499389,
+          "second_half_mae": 0.003115923977788972,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.0017308383211376214,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6939897169742189,
+          "family": "motion_compat",
+          "first_half_mae": 0.004001067862057695,
+          "mae": 0.0027927527476986434,
+          "second_half_mae": 0.0015844376333395914,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0023178355042892673,
+          "clip_events": 160,
+          "error_estimate_mean": 0.6931845936577752,
+          "family": "motion_compat",
+          "first_half_mae": 0.005035204434750591,
+          "mae": 0.003581039648260017,
+          "second_half_mae": 0.0021268748617694427,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0027681011293429073,
+          "clip_events": 61,
+          "error_estimate_mean": 0.689790667225715,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010106967470215917,
+          "mae": 0.0012918032845307087,
+          "second_half_mae": 0.001572909822039826,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0022465662718490135,
+          "clip_events": 49,
+          "error_estimate_mean": 0.6894364449432985,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009724161654407884,
+          "mae": 0.0011226262001913935,
+          "second_half_mae": 0.0012728362349419986,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 150,
+          "error_estimate_mean": 0.6919636401480753,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004046244489959158,
+          "mae": 0.00376320012546175,
+          "second_half_mae": 0.003480155760964342,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 155,
+          "error_estimate_mean": 0.6947568908976859,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.008162377608790121,
+          "mae": 0.008090311702442357,
+          "second_half_mae": 0.008018245796094593,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.004401703990588979,
+          "clip_events": 180,
+          "error_estimate_mean": 0.690027897707764,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.004089438676191454,
+          "mae": 0.003942467022151474,
+          "second_half_mae": 0.0037954953681114925,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.001334057214665063,
+          "clip_events": 177,
+          "error_estimate_mean": 0.6907753882517332,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003926473695132862,
+          "mae": 0.0038181537221706158,
+          "second_half_mae": 0.0037098337492083707,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.0013624939296045025,
+          "clip_events": 297,
+          "error_estimate_mean": 0.6913832095902328,
+          "family": "aba_v1",
+          "first_half_mae": 0.005134730733365779,
+          "mae": 0.003327668707712376,
+          "second_half_mae": 0.0015206066820589725,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.014548366403501647,
+          "clip_events": 359,
+          "error_estimate_mean": 0.6944335759866452,
+          "family": "aba_v1",
+          "first_half_mae": 0.009960829194243683,
+          "mae": 0.012004337642316967,
+          "second_half_mae": 0.014047846090390254,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 2067
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.003,
+        "tbptt_steps": 32
+      },
+      "failure": null,
+      "key": "lr=0.003;T=32;lambda=0.25",
+      "mean_mae": 0.003304269527930929,
+      "median_mae": 0.0025483346198317512,
+      "post_change_adaptation": 0.002984119094864718,
+      "retention_ratio": 0.6988999339034606,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 152,
+          "error_estimate_mean": 0.6882845878988757,
+          "family": "motion_compat",
+          "first_half_mae": 0.003168211364730855,
+          "mae": 0.0023289030694768433,
+          "second_half_mae": 0.0014895947742228316,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 156,
+          "error_estimate_mean": 0.6902686671055521,
+          "family": "motion_compat",
+          "first_half_mae": 0.0031853770787105286,
+          "mae": 0.0024390166197299163,
+          "second_half_mae": 0.0016926561607493035,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.0007553979171685025,
+          "clip_events": 80,
+          "error_estimate_mean": 0.686757073409453,
+          "family": "motion_compat",
+          "first_half_mae": 0.0032888502716231617,
+          "mae": 0.0019424418893741607,
+          "second_half_mae": 0.0005960335071251599,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0012645137429952362,
+          "clip_events": 113,
+          "error_estimate_mean": 0.684900671116691,
+          "family": "motion_compat",
+          "first_half_mae": 0.004425796385986301,
+          "mae": 0.002657652619933586,
+          "second_half_mae": 0.0008895088538808715,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0023846979429450964,
+          "clip_events": 47,
+          "error_estimate_mean": 0.6822607524327122,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009160992743539445,
+          "mae": 0.0011107266497738632,
+          "second_half_mae": 0.001305354025193782,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.001907737764513484,
+          "clip_events": 39,
+          "error_estimate_mean": 0.6812807972557253,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008873284234937384,
+          "mae": 0.0009690583596377832,
+          "second_half_mae": 0.0010507882957818278,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 87,
+          "error_estimate_mean": 0.6755758971129336,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0035074415832789256,
+          "mae": 0.002853251407715864,
+          "second_half_mae": 0.0021990612321528017,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 155,
+          "error_estimate_mean": 0.6955320219774928,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.007590306138364679,
+          "mae": 0.006969354436709965,
+          "second_half_mae": 0.00634840273505525,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.003792029283376186,
+          "clip_events": 212,
+          "error_estimate_mean": 0.6856401396134795,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003862427779617081,
+          "mae": 0.003568844732663684,
+          "second_half_mae": 0.003275261685710287,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.0030375891155941526,
+          "clip_events": 199,
+          "error_estimate_mean": 0.6875821982631277,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0036017194381411754,
+          "mae": 0.0033817042970094987,
+          "second_half_mae": 0.003161689155877822,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 6.618247065252602e-05,
+          "clip_events": 202,
+          "error_estimate_mean": 0.6764532177563626,
+          "family": "aba_v1",
+          "first_half_mae": 0.00394161914014259,
+          "mae": 0.002168499878365759,
+          "second_half_mae": 0.00039538061658892816,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.010664804521672561,
+          "clip_events": 334,
+          "error_estimate_mean": 0.6889330979066394,
+          "family": "aba_v1",
+          "first_half_mae": 0.008802111162737335,
+          "mae": 0.009261780374780221,
+          "second_half_mae": 0.009721449586823104,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 1776
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.01,
+        "tbptt_steps": 32
+      },
+      "failure": null,
+      "key": "lr=0.01;T=32;lambda=0.25",
+      "mean_mae": 0.00202628352994683,
+      "median_mae": 0.001189656170903068,
+      "post_change_adaptation": 0.0019297692393425844,
+      "retention_ratio": 0.5008297668738101,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 59,
+          "error_estimate_mean": 0.615572644722846,
+          "family": "motion_compat",
+          "first_half_mae": 0.0018222117515616421,
+          "mae": 0.0009356857621919737,
+          "second_half_mae": 4.915977282230547e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 63,
+          "error_estimate_mean": 0.6352656592510021,
+          "family": "motion_compat",
+          "first_half_mae": 0.0018549881995034213,
+          "mae": 0.0009913291023133472,
+          "second_half_mae": 0.0001276700051232732,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.0003341852237235895,
+          "clip_events": 46,
+          "error_estimate_mean": 0.6214154370456723,
+          "family": "motion_compat",
+          "first_half_mae": 0.0015732519860902155,
+          "mae": 0.0008699818634689549,
+          "second_half_mae": 0.00016671174084769425,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0001667885785515355,
+          "clip_events": 74,
+          "error_estimate_mean": 0.6365448977017303,
+          "family": "motion_compat",
+          "first_half_mae": 0.002682635757063885,
+          "mae": 0.001387983239492789,
+          "second_half_mae": 9.333072192169306e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0016567725672831527,
+          "clip_events": 35,
+          "error_estimate_mean": 0.652886586393935,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007042896399358567,
+          "mae": 0.000790766701773209,
+          "second_half_mae": 0.0008772437636105614,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.00130287421356756,
+          "clip_events": 28,
+          "error_estimate_mean": 0.6502700900804855,
+          "family": "motion_compat",
+          "first_half_mae": 0.0006875441463393861,
+          "mae": 0.0006962668780155602,
+          "second_half_mae": 0.0007049896096917342,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 26,
+          "error_estimate_mean": 0.5894590403252981,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0024180645524537127,
+          "mae": 0.0020146063376423485,
+          "second_half_mae": 0.0016111481228309845,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 84,
+          "error_estimate_mean": 0.6350923524258654,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.005881108558277155,
+          "mae": 0.0047660959145295455,
+          "second_half_mae": 0.003651083270781936,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.003345470965834263,
+          "clip_events": 195,
+          "error_estimate_mean": 0.6577542503420358,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0032129563994088236,
+          "mae": 0.0028199266777518346,
+          "second_half_mae": 0.0024268969560948457,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004847963394608579,
+          "clip_events": 171,
+          "error_estimate_mean": 0.6676944782966829,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0028434780984658964,
+          "mae": 0.002637281521250738,
+          "second_half_mae": 0.0024310849440355798,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.00012863982586581538,
+          "clip_events": 131,
+          "error_estimate_mean": 0.5916784794635264,
+          "family": "aba_v1",
+          "first_half_mae": 0.0017350954653234227,
+          "mae": 0.0009852948260878748,
+          "second_half_mae": 0.00023549418685232695,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0036554591453061796,
+          "clip_events": 196,
+          "error_estimate_mean": 0.6490755293415218,
+          "family": "aba_v1",
+          "first_half_mae": 0.007377917769658631,
+          "mae": 0.005420183534843782,
+          "second_half_mae": 0.003462449300028934,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 1108
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 32
+      },
+      "failure": null,
+      "key": "lr=0.03;T=32;lambda=0.25",
+      "mean_mae": 0.0014374991644262175,
+      "median_mae": 0.000555915497226272,
+      "post_change_adaptation": 0.0014043402076922163,
+      "retention_ratio": 0.5716753305123277,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.505072077756927,
+          "family": "motion_compat",
+          "first_half_mae": 0.000791902230815472,
+          "mae": 0.0004022485196642753,
+          "second_half_mae": 1.2594808513078509e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.5237089174120003,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008195908901732537,
+          "mae": 0.00041867653968805514,
+          "second_half_mae": 1.7762189202856494e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.00021874979826329947,
+          "clip_events": 16,
+          "error_estimate_mean": 0.45980096313458213,
+          "family": "motion_compat",
+          "first_half_mae": 0.000569829063479823,
+          "mae": 0.0003331515658282335,
+          "second_half_mae": 9.647406817664406e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.00013411849329959165,
+          "clip_events": 29,
+          "error_estimate_mean": 0.5167579992816919,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010800108488588824,
+          "mae": 0.0005747163753353025,
+          "second_half_mae": 6.942190181172259e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0011363246999341178,
+          "clip_events": 24,
+          "error_estimate_mean": 0.5780932179027148,
+          "family": "motion_compat",
+          "first_half_mae": 0.00044712570621234374,
+          "mae": 0.0005371146191172415,
+          "second_half_mae": 0.0006271035320221392,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.000913909756124052,
+          "clip_events": 11,
+          "error_estimate_mean": 0.5732408030165845,
+          "family": "motion_compat",
+          "first_half_mae": 0.00043378671355891044,
+          "mae": 0.00048121925552390527,
+          "second_half_mae": 0.0005286517974889,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.44316252698585884,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0018812301033466743,
+          "mae": 0.0017325315583348628,
+          "second_half_mae": 0.0015838330133230508,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 31,
+          "error_estimate_mean": 0.523746398516488,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004058799223405941,
+          "mae": 0.0038261228756010426,
+          "second_half_mae": 0.0035934465277961437,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0029918206621517007,
+          "clip_events": 175,
+          "error_estimate_mean": 0.577735206534915,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002581732669998336,
+          "mae": 0.002366654585805228,
+          "second_half_mae": 0.0021515765016121196,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004922407810733165,
+          "clip_events": 146,
+          "error_estimate_mean": 0.6145320554205367,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023964743584460055,
+          "mae": 0.0023858647962314346,
+          "second_half_mae": 0.0023752552340168633,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 1.3849474660293515e-05,
+          "clip_events": 67,
+          "error_estimate_mean": 0.44823327158804427,
+          "family": "aba_v1",
+          "first_half_mae": 0.00083342335394648,
+          "mae": 0.0004998879016714505,
+          "second_half_mae": 0.00016635244939642102,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0009035409663715106,
+          "clip_events": 142,
+          "error_estimate_mean": 0.5508512132772717,
+          "family": "aba_v1",
+          "first_half_mae": 0.006070343479895817,
+          "mae": 0.0036918013803135803,
+          "second_half_mae": 0.0013132592807313438,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 697
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.1,
+        "tbptt_steps": 32
+      },
+      "failure": null,
+      "key": "lr=0.1;T=32;lambda=0.25",
+      "mean_mae": 0.0011381820695052158,
+      "median_mae": 0.00029384221263037706,
+      "post_change_adaptation": 0.0011336777123526266,
+      "retention_ratio": 0.6456204977546682,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 11,
+          "error_estimate_mean": 0.34816186284748873,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004170673620594302,
+          "mae": 0.00021243231930802162,
+          "second_half_mae": 7.79727655661304e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.3489612850650221,
+          "family": "motion_compat",
+          "first_half_mae": 0.00041010395866185323,
+          "mae": 0.00020810329751988835,
+          "second_half_mae": 6.102636377923465e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 9.78793749968195e-05,
+          "clip_events": 6,
+          "error_estimate_mean": 0.2703788049092751,
+          "family": "motion_compat",
+          "first_half_mae": 0.00022037178622706446,
+          "mae": 0.0001298322992554935,
+          "second_half_mae": 3.929281228392256e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 9.80067357101766e-05,
+          "clip_events": 12,
+          "error_estimate_mean": 0.3376833051170195,
+          "family": "motion_compat",
+          "first_half_mae": 0.000514614966213843,
+          "mae": 0.0002783773808573489,
+          "second_half_mae": 4.2139795500854836e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0006479464443980158,
+          "clip_events": 7,
+          "error_estimate_mean": 0.36972606702415933,
+          "family": "motion_compat",
+          "first_half_mae": 0.00021664567510685655,
+          "mae": 0.0003064107177987819,
+          "second_half_mae": 0.0003961757604907072,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0005310410906098628,
+          "clip_events": 1,
+          "error_estimate_mean": 0.3761565637629821,
+          "family": "motion_compat",
+          "first_half_mae": 0.00022028348538221943,
+          "mae": 0.0002735658324219993,
+          "second_half_mae": 0.0003268481794617792,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 4,
+          "error_estimate_mean": 0.2716829112315738,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0016745153432549031,
+          "mae": 0.0016103108284320387,
+          "second_half_mae": 0.001546106313609174,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 13,
+          "error_estimate_mean": 0.3460717885588444,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0034765652026466707,
+          "mae": 0.0035461897915738793,
+          "second_half_mae": 0.003615814380501088,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.00044755369176785464,
+          "clip_events": 129,
+          "error_estimate_mean": 0.42675320324663785,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002313394507564455,
+          "mae": 0.0018756916123861343,
+          "second_half_mae": 0.0014379887172078132,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.005516883374705128,
+          "clip_events": 148,
+          "error_estimate_mean": 0.5036952867440994,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002439674780721902,
+          "mae": 0.002302437822303159,
+          "second_half_mae": 0.0021652008638844153,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 7.15286508681708e-05,
+          "clip_events": 23,
+          "error_estimate_mean": 0.26802882525978317,
+          "family": "aba_v1",
+          "first_half_mae": 0.00043771244599603176,
+          "mae": 0.00028127370746197227,
+          "second_half_mae": 0.0001248349689279128,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.001658582335764985,
+          "clip_events": 217,
+          "error_estimate_mean": 0.4493111954886002,
+          "family": "aba_v1",
+          "first_half_mae": 0.003806868746216992,
+          "mae": 0.0026335592247438725,
+          "second_half_mae": 0.0014602497032707533,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 581
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.3,
+        "tbptt_steps": 32
+      },
+      "failure": null,
+      "key": "lr=0.3;T=32;lambda=0.25",
+      "mean_mae": 0.001353950743418963,
+      "median_mae": 0.0007775822130228696,
+      "post_change_adaptation": 0.0015698538181713347,
+      "retention_ratio": 1.1631324156726925,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 31,
+          "error_estimate_mean": 0.30159568546221893,
+          "family": "motion_compat",
+          "first_half_mae": 0.0009121546664217575,
+          "mae": 0.0005350533219594317,
+          "second_half_mae": 0.0001579519774971061,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 33,
+          "error_estimate_mean": 0.3045295874828378,
+          "family": "motion_compat",
+          "first_half_mae": 0.000919235250074657,
+          "mae": 0.0005745716333598175,
+          "second_half_mae": 0.00022990801664497795,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 7.327916428432706e-05,
+          "clip_events": 9,
+          "error_estimate_mean": 0.21069636993415183,
+          "family": "motion_compat",
+          "first_half_mae": 0.000425113258074214,
+          "mae": 0.00022635813232663935,
+          "second_half_mae": 2.7603006579064726e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0002596253407075736,
+          "clip_events": 60,
+          "error_estimate_mean": 0.34276434164357517,
+          "family": "motion_compat",
+          "first_half_mae": 0.0013465227587961149,
+          "mae": 0.0007239906122819904,
+          "second_half_mae": 0.00010145846576786605,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.00041656354161401785,
+          "clip_events": 9,
+          "error_estimate_mean": 0.2312530614357197,
+          "family": "motion_compat",
+          "first_half_mae": 6.839757434723704e-05,
+          "mae": 0.0001894634986634454,
+          "second_half_mae": 0.0003105294229796537,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0003580897833614149,
+          "clip_events": 3,
+          "error_estimate_mean": 0.21714010689148341,
+          "family": "motion_compat",
+          "first_half_mae": 6.656335467822572e-05,
+          "mae": 0.0001514791374908904,
+          "second_half_mae": 0.00023639492030355508,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 3,
+          "error_estimate_mean": 0.220256744890793,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0017531578236076872,
+          "mae": 0.001727407013692342,
+          "second_half_mae": 0.001701656203776997,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 98,
+          "error_estimate_mean": 0.38946995773964604,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.00415623914813688,
+          "mae": 0.004286607919050504,
+          "second_half_mae": 0.004416976689964128,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 5.338606725246997e-06,
+          "clip_events": 128,
+          "error_estimate_mean": 0.39387560498767255,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023156476313635006,
+          "mae": 0.0018418807326024795,
+          "second_half_mae": 0.0013681138338414583,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.007449854668301836,
+          "clip_events": 186,
+          "error_estimate_mean": 0.4748490985796903,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.003073312998728291,
+          "mae": 0.0028244521709565812,
+          "second_half_mae": 0.0025755913431848715,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 0.0011377731161524537,
+          "clip_events": 162,
+          "error_estimate_mean": 0.29219203641766733,
+          "family": "aba_v1",
+          "first_half_mae": 0.0008863369179483854,
+          "mae": 0.0008311738137637488,
+          "second_half_mae": 0.0007760107095791123,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0028583063242238072,
+          "clip_events": 235,
+          "error_estimate_mean": 0.36785357236163924,
+          "family": "aba_v1",
+          "first_half_mae": 0.002376803188489664,
+          "mae": 0.002334970934879686,
+          "second_half_mae": 0.002293138681269707,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 957
+    }
+  ],
+  "stage_one_eliminated": [
+    {
+      "failure": null,
+      "key": "lr=0.1;T=4;lambda=0.25",
+      "mean_mae": 0.0011383009302268876,
+      "reason": "learning rate is inside the declared stability margin",
+      "stable": true
+    },
+    {
+      "failure": null,
+      "key": "lr=0.3;T=4;lambda=0.25",
+      "mean_mae": 0.0013783480631231217,
+      "reason": "learning rate is inside the declared stability margin",
+      "stable": true
+    },
+    {
+      "failure": null,
+      "key": "lr=0.1;T=8;lambda=0.25",
+      "mean_mae": 0.0011403608318836375,
+      "reason": "learning rate is inside the declared stability margin",
+      "stable": true
+    },
+    {
+      "failure": null,
+      "key": "lr=0.3;T=8;lambda=0.25",
+      "mean_mae": 0.0013560739611062015,
+      "reason": "learning rate is inside the declared stability margin",
+      "stable": true
+    },
+    {
+      "failure": null,
+      "key": "lr=0.1;T=16;lambda=0.25",
+      "mean_mae": 0.0011392206308340298,
+      "reason": "learning rate is inside the declared stability margin",
+      "stable": true
+    },
+    {
+      "failure": null,
+      "key": "lr=0.3;T=16;lambda=0.25",
+      "mean_mae": 0.0013458926117626488,
+      "reason": "learning rate is inside the declared stability margin",
+      "stable": true
+    },
+    {
+      "failure": null,
+      "key": "lr=0.1;T=32;lambda=0.25",
+      "mean_mae": 0.0011381820695052158,
+      "reason": "learning rate is inside the declared stability margin",
+      "stable": true
+    },
+    {
+      "failure": null,
+      "key": "lr=0.3;T=32;lambda=0.25",
+      "mean_mae": 0.001353950743418963,
+      "reason": "learning rate is inside the declared stability margin",
+      "stable": true
+    }
+  ],
+  "stage_one_ranking": [
+    "lr=0.03;T=4;lambda=0.25",
+    "lr=0.03;T=8;lambda=0.25",
+    "lr=0.03;T=16;lambda=0.25",
+    "lr=0.03;T=32;lambda=0.25",
+    "lr=0.01;T=16;lambda=0.25",
+    "lr=0.01;T=8;lambda=0.25",
+    "lr=0.01;T=32;lambda=0.25",
+    "lr=0.01;T=4;lambda=0.25",
+    "lr=0.003;T=32;lambda=0.25",
+    "lr=0.003;T=16;lambda=0.25",
+    "lr=0.003;T=8;lambda=0.25",
+    "lr=0.003;T=4;lambda=0.25",
+    "lr=0.001;T=16;lambda=0.25",
+    "lr=0.001;T=32;lambda=0.25",
+    "lr=0.001;T=8;lambda=0.25",
+    "lr=0.001;T=4;lambda=0.25"
+  ],
+  "stage_three_a_architecture_selections": {
+    "AAA1KGRU": {
+      "architecture": "AAA1KGRU",
+      "clip_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 0.3,
+          "mean_clip_rate": 0.6409240591397849,
+          "mean_mae": 0.002245030203245449,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "mean_clip_rate": 0.2430182198327359,
+          "mean_mae": 0.00149378040907088,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 3.0,
+          "mean_clip_rate": 0.07668881919553963,
+          "mean_mae": 0.0012661394189734864,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 10.0,
+          "mean_clip_rate": 0.007986111111111112,
+          "mean_mae": 0.0011616585682277466,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "mean_clip_rate": 0.0,
+          "mean_mae": 0.0011476433174187756,
+          "stable": true
+        }
+      ],
+      "eligible_learning_rates": [
+        0.001,
+        0.003,
+        0.01,
+        0.03
+      ],
+      "learning_rate_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.001,
+          "mean_mae": 0.0042069339457970305,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.003,
+          "mean_mae": 0.0033059685542272156,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.01,
+          "mean_mae": 0.002027297819172802,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0014344007202870622,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.1,
+          "mean_mae": 0.0011383009302268876,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.3,
+          "mean_mae": 0.0013783480631231217,
+          "stable": true
+        }
+      ],
+      "selected": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 10.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 4
+      },
+      "unclipped_divergence_boundary": 0.3,
+      "unclipped_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.001,
+          "mean_mae": 0.0026917724467113717,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.003,
+          "mean_mae": 0.001887566355754815,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.01,
+          "mean_mae": 0.0013636614001354935,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0011119655224517105,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.1,
+          "mean_mae": 0.03320485152823804,
+          "stable": true
+        },
+        {
+          "diverged_streams": [
+            "motion_compat:bouncing:2146409619: ValueError",
+            "motion_compat:bouncing:1764231905: ValueError",
+            "motion_compat:changed:2135368761: ValueError",
+            "occlusion_v1:1280439271: ValueError",
+            "coarse_speed_v1:401945564: ValueError",
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:2115706035: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.3,
+          "mean_mae": Infinity,
+          "stable": false
+        }
+      ]
+    },
+    "StatelessMLPControl": {
+      "architecture": "StatelessMLPControl",
+      "clip_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 0.3,
+          "mean_clip_rate": 0.917650462962963,
+          "mean_mae": 0.0035354967807075433,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "mean_clip_rate": 0.4477764088012744,
+          "mean_mae": 0.0022095732352547504,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 3.0,
+          "mean_clip_rate": 0.1128329101951414,
+          "mean_mae": 0.0016270635359894783,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 10.0,
+          "mean_clip_rate": 0.013387345679012345,
+          "mean_mae": 0.0014727157837047076,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "mean_clip_rate": 0.0,
+          "mean_mae": 0.0013987855691978386,
+          "stable": true
+        }
+      ],
+      "eligible_learning_rates": [
+        0.001,
+        0.003,
+        0.01
+      ],
+      "learning_rate_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.001,
+          "mean_mae": 0.004348586385603039,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.003,
+          "mean_mae": 0.0035615314686190127,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.01,
+          "mean_mae": 0.0022304965126361802,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.03,
+          "mean_mae": 0.001505658479492582,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.1,
+          "mean_mae": 0.0012256351414839364,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.3,
+          "mean_mae": 0.011200970868851004,
+          "stable": true
+        }
+      ],
+      "selected": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": null,
+        "learning_rate": 0.01,
+        "tbptt_steps": 4
+      },
+      "unclipped_divergence_boundary": 0.1,
+      "unclipped_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.001,
+          "mean_mae": 0.003023955317896653,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.003,
+          "mean_mae": 0.0021629409361129132,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.01,
+          "mean_mae": 0.00142383361650934,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0010733990673456727,
+          "stable": true
+        },
+        {
+          "diverged_streams": [
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.1,
+          "mean_mae": Infinity,
+          "stable": false
+        },
+        {
+          "diverged_streams": [
+            "motion_compat:bouncing:2146409619: ValueError",
+            "motion_compat:bouncing:1764231905: ValueError",
+            "motion_compat:changed:2135368761: ValueError",
+            "motion_compat:dynamics_change:1261182130: ValueError",
+            "occlusion_v1:1280439271: ValueError",
+            "coarse_speed_v1:401945564: ValueError",
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:2115706035: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.3,
+          "mean_mae": Infinity,
+          "stable": false
+        }
+      ]
+    },
+    "VanillaRNNControl": {
+      "architecture": "VanillaRNNControl",
+      "clip_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 0.3,
+          "mean_clip_rate": 0.9738618827160492,
+          "mean_mae": 0.003180027228531702,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "mean_clip_rate": 0.438345405217045,
+          "mean_mae": 0.0018355565264294407,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 3.0,
+          "mean_clip_rate": 0.11312039526085223,
+          "mean_mae": 0.001312198750068051,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 10.0,
+          "mean_clip_rate": 0.01465800477897252,
+          "mean_mae": 0.001183517097323986,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "mean_clip_rate": 0.0,
+          "mean_mae": 0.0011257377318403244,
+          "stable": true
+        }
+      ],
+      "eligible_learning_rates": [
+        0.001,
+        0.003,
+        0.01
+      ],
+      "learning_rate_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.001,
+          "mean_mae": 0.004186336447265141,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.003,
+          "mean_mae": 0.003188641395717387,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.01,
+          "mean_mae": 0.0018422939381788498,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0012469903303989165,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.1,
+          "mean_mae": 0.0010852254889763809,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.3,
+          "mean_mae": 0.0016840867128255497,
+          "stable": true
+        }
+      ],
+      "selected": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": null,
+        "learning_rate": 0.01,
+        "tbptt_steps": 4
+      },
+      "unclipped_divergence_boundary": 0.1,
+      "unclipped_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.001,
+          "mean_mae": 0.002421039568927696,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.003,
+          "mean_mae": 0.001629948806323296,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.01,
+          "mean_mae": 0.0011532122689884678,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0011519574207710928,
+          "stable": true
+        },
+        {
+          "diverged_streams": [
+            "motion_compat:bouncing:2146409619: ValueError",
+            "motion_compat:bouncing:1764231905: ValueError",
+            "motion_compat:changed:2135368761: ValueError",
+            "occlusion_v1:1280439271: ValueError",
+            "coarse_speed_v1:401945564: ValueError",
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:2115706035: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.1,
+          "mean_mae": Infinity,
+          "stable": false
+        },
+        {
+          "diverged_streams": [
+            "motion_compat:bouncing:2146409619: ValueError",
+            "motion_compat:bouncing:1764231905: ValueError",
+            "motion_compat:changed:824499729: ValueError",
+            "motion_compat:changed:2135368761: ValueError",
+            "motion_compat:dynamics_change:1261182130: ValueError",
+            "motion_compat:dynamics_change:1189567216: ValueError",
+            "occlusion_v1:1683942133: ValueError",
+            "occlusion_v1:1280439271: ValueError",
+            "coarse_speed_v1:401945564: ValueError",
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:2115706035: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.3,
+          "mean_mae": Infinity,
+          "stable": false
+        }
+      ]
+    }
+  },
+  "stage_three_gradient_clip": {
+    "declared_clip_rate": 0.2430182198327359,
+    "declared_cost_versus_best": 0.3016068550206168,
+    "declared_gradient_clip": 1.0,
+    "records": [
+      {
+        "diverged_streams": [],
+        "gradient_clip": 0.3,
+        "initializations": 3,
+        "mean_clip_rate": 0.6409240591397849,
+        "mean_mae": 0.002245030203245449,
+        "stable": true
+      },
+      {
+        "diverged_streams": [],
+        "gradient_clip": 1.0,
+        "initializations": 3,
+        "mean_clip_rate": 0.2430182198327359,
+        "mean_mae": 0.00149378040907088,
+        "stable": true
+      },
+      {
+        "diverged_streams": [],
+        "gradient_clip": 3.0,
+        "initializations": 3,
+        "mean_clip_rate": 0.07668881919553963,
+        "mean_mae": 0.0012661394189734864,
+        "stable": true
+      },
+      {
+        "diverged_streams": [],
+        "gradient_clip": 10.0,
+        "initializations": 3,
+        "mean_clip_rate": 0.007986111111111112,
+        "mean_mae": 0.0011616585682277466,
+        "stable": true
+      },
+      {
+        "diverged_streams": [],
+        "gradient_clip": null,
+        "initializations": 3,
+        "mean_clip_rate": 0.0,
+        "mean_mae": 0.0011476433174187756,
+        "stable": true
+      }
+    ],
+    "rule": "the most conservative threshold within the practical margin of the best stable one; a bare threshold is chosen only when no finite threshold is close",
+    "selected_clip_rate": 0.007986111111111112,
+    "selected_gradient_clip": 10.0
+  },
+  "stage_two": [
+    {
+      "configuration": {
+        "error_loss_weight": 0.0,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.03;T=4;lambda=0",
+      "mean_mae": 0.0014295903641718555,
+      "median_mae": 0.0005483424445536184,
+      "post_change_adaptation": 0.0013888019975930128,
+      "retention_ratio": 0.564824045250189,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 22,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007868020508576355,
+          "mae": 0.0003949810692413028,
+          "second_half_mae": 3.1600876249700954e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 22,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008156156777729268,
+          "mae": 0.0004155731583196272,
+          "second_half_mae": 1.5530638866327606e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.00020181843262242853,
+          "clip_events": 16,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005765821402524879,
+          "mae": 0.00032819451810302963,
+          "second_half_mae": 7.980689595357137e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.00012966953215848287,
+          "clip_events": 28,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010773888660084608,
+          "mae": 0.0005690955219116347,
+          "second_half_mae": 6.080217781480879e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0010920558845292508,
+          "clip_events": 18,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "motion_compat",
+          "first_half_mae": 0.00044254007121080906,
+          "mae": 0.0005275893671956019,
+          "second_half_mae": 0.0006126386631803947,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0008933812724496985,
+          "clip_events": 7,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "motion_compat",
+          "first_half_mae": 0.00043181157222224874,
+          "mae": 0.0004744946847349121,
+          "second_half_mae": 0.0005171777972475755,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 9,
+          "error_estimate_mean": 0.6931471805599452,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0018947602057339669,
+          "mae": 0.0017526947516747998,
+          "second_half_mae": 0.001610629297615633,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 29,
+          "error_estimate_mean": 0.6931471805599452,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004063746770701128,
+          "mae": 0.003839165528958137,
+          "second_half_mae": 0.0036145842872151467,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0029037985371258013,
+          "clip_events": 171,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0025858948588268304,
+          "mae": 0.0023651613136419034,
+          "second_half_mae": 0.0021444277684569764,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.0049167732772789075,
+          "clip_events": 144,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023912887137047274,
+          "mae": 0.0023816218721980226,
+          "second_half_mae": 0.0023719550306913182,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 5.1571778003171404e-06,
+          "clip_events": 56,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "aba_v1",
+          "first_half_mae": 0.0008285681039946862,
+          "mae": 0.0004964905781675679,
+          "second_half_mae": 0.00016441305234044955,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0009677618667792151,
+          "clip_events": 135,
+          "error_estimate_mean": 0.6931471805599453,
+          "family": "aba_v1",
+          "first_half_mae": 0.005923986894910153,
+          "mae": 0.0036100220059157263,
+          "second_half_mae": 0.0012960571169213005,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 657
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.1,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.03;T=4;lambda=0.1",
+      "mean_mae": 0.0014305683035520744,
+      "median_mae": 0.0005494556769145415,
+      "post_change_adaptation": 0.0013899412699011453,
+      "retention_ratio": 0.5643852545235772,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 22,
+          "error_estimate_mean": 0.5915740689897859,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007872579438101872,
+          "mae": 0.00039441068836715916,
+          "second_half_mae": 1.5634329241311778e-06,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 22,
+          "error_estimate_mean": 0.6045847510094312,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008164663159225275,
+          "mae": 0.0004164401818699058,
+          "second_half_mae": 1.6414047817284172e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.00020888634045661917,
+          "clip_events": 16,
+          "error_estimate_mean": 0.5668204337971725,
+          "family": "motion_compat",
+          "first_half_mae": 0.000574635017107164,
+          "mae": 0.0003277488945878003,
+          "second_half_mae": 8.086277206843657e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.00013002408525530546,
+          "clip_events": 28,
+          "error_estimate_mean": 0.5992854965981836,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010777082634959288,
+          "mae": 0.0005705147297859787,
+          "second_half_mae": 6.332119607602854e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.001092351084317217,
+          "clip_events": 17,
+          "error_estimate_mean": 0.6373686236472575,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004441949940208148,
+          "mae": 0.0005283966240431044,
+          "second_half_mae": 0.000612598254065394,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0008938042265416575,
+          "clip_events": 7,
+          "error_estimate_mean": 0.6351756330709937,
+          "family": "motion_compat",
+          "first_half_mae": 0.000433209078841415,
+          "mae": 0.00047513435331453246,
+          "second_half_mae": 0.0005170596277876499,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 9,
+          "error_estimate_mean": 0.5560841648241993,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.001893135691447817,
+          "mae": 0.0017490100243250841,
+          "second_half_mae": 0.0016048843572023512,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 29,
+          "error_estimate_mean": 0.6012866608503266,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0040638796089676145,
+          "mae": 0.003838381583391606,
+          "second_half_mae": 0.003612883557815598,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.00290003576068687,
+          "clip_events": 171,
+          "error_estimate_mean": 0.6361539968637371,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002585987912038331,
+          "mae": 0.0023650787659299723,
+          "second_half_mae": 0.002144169619821614,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.00491889109040311,
+          "clip_events": 144,
+          "error_estimate_mean": 0.662185049961754,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0023917077321879447,
+          "mae": 0.002381976478953982,
+          "second_half_mae": 0.0023722452257200193,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 8.305317687088791e-06,
+          "clip_events": 56,
+          "error_estimate_mean": 0.5464123296976452,
+          "family": "aba_v1",
+          "first_half_mae": 0.0008286035171315854,
+          "mae": 0.0004977625618888843,
+          "second_half_mae": 0.00016692160664618326,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0009672322538612951,
+          "clip_events": 140,
+          "error_estimate_mean": 0.605485311344583,
+          "family": "aba_v1",
+          "first_half_mae": 0.005941748255800423,
+          "mae": 0.003621964756166883,
+          "second_half_mae": 0.0013021812565333455,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 661
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.03;T=4;lambda=0.25",
+      "mean_mae": 0.0014344007202870622,
+      "median_mae": 0.0005526797240729518,
+      "post_change_adaptation": 0.0013922241806814469,
+      "retention_ratio": 0.5639599273412416,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.5083062384157941,
+          "family": "motion_compat",
+          "first_half_mae": 0.0007904104280983804,
+          "mae": 0.0004002138786640155,
+          "second_half_mae": 1.0017329229650499e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 23,
+          "error_estimate_mean": 0.5244958636305899,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008203019577746967,
+          "mae": 0.0004191945382121767,
+          "second_half_mae": 1.808711864965673e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.00022243605393010846,
+          "clip_events": 16,
+          "error_estimate_mean": 0.4660844022447284,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005730876045411136,
+          "mae": 0.0003332925299634564,
+          "second_half_mae": 9.349745538579924e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.0001311418661238517,
+          "clip_events": 28,
+          "error_estimate_mean": 0.5177534667972405,
+          "family": "motion_compat",
+          "first_half_mae": 0.001079829195062329,
+          "mae": 0.0005734898274114691,
+          "second_half_mae": 6.71504597606093e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0010935435408793216,
+          "clip_events": 17,
+          "error_estimate_mean": 0.5780059615356361,
+          "family": "motion_compat",
+          "first_half_mae": 0.00045130025031861893,
+          "mae": 0.0005318696207344345,
+          "second_half_mae": 0.00061243899115025,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0008947304713942543,
+          "clip_events": 7,
+          "error_estimate_mean": 0.5741356503016959,
+          "family": "motion_compat",
+          "first_half_mae": 0.0004393852781686178,
+          "mae": 0.0004778379457816378,
+          "second_half_mae": 0.0005162906133946577,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.4513480757291366,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0018890605146704592,
+          "mae": 0.0017417253325238006,
+          "second_half_mae": 0.0015943901503771417,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 30,
+          "error_estimate_mean": 0.5248459294463843,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004065547114286199,
+          "mae": 0.003836810931792681,
+          "second_half_mae": 0.0036080747492991637,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.002894799371378043,
+          "clip_events": 174,
+          "error_estimate_mean": 0.5792553528672009,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002586918682582264,
+          "mae": 0.0023648617638196436,
+          "second_half_mae": 0.0021428048450570234,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004923722302895617,
+          "clip_events": 145,
+          "error_estimate_mean": 0.6157928728954577,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.002393315428517251,
+          "mae": 0.002383131569369948,
+          "second_half_mae": 0.002372947710222645,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 1.1988540341876612e-05,
+          "clip_events": 58,
+          "error_estimate_mean": 0.44859990761209506,
+          "family": "aba_v1",
+          "first_half_mae": 0.0008288180375679124,
+          "mae": 0.0004990434974206068,
+          "second_half_mae": 0.00016926895727330124,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0009654312985085024,
+          "clip_events": 144,
+          "error_estimate_mean": 0.5514236818571993,
+          "family": "aba_v1",
+          "first_half_mae": 0.005986539645394921,
+          "mae": 0.0036513372077508766,
+          "second_half_mae": 0.001316134770106831,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 675
+    },
+    {
+      "configuration": {
+        "error_loss_weight": 0.5,
+        "gradient_clip": 1.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 4
+      },
+      "failure": null,
+      "key": "lr=0.03;T=4;lambda=0.5",
+      "mean_mae": 0.0014406135257253455,
+      "median_mae": 0.0005607339016125627,
+      "post_change_adaptation": 0.0013676797174832988,
+      "retention_ratio": 0.5559068743788103,
+      "stable": true,
+      "streams": [
+        {
+          "adaptation": null,
+          "clip_events": 24,
+          "error_estimate_mean": 0.4335635408649042,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008010373395780105,
+          "mae": 0.0004095823275887438,
+          "second_half_mae": 1.812731559947718e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:2146409619"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 24,
+          "error_estimate_mean": 0.4478378791604595,
+          "family": "motion_compat",
+          "first_half_mae": 0.0008320513907114052,
+          "mae": 0.00042592516800959225,
+          "second_half_mae": 1.9798945307779316e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:bouncing:1764231905"
+        },
+        {
+          "adaptation": 0.0002341909051720085,
+          "clip_events": 17,
+          "error_estimate_mean": 0.3782071782821688,
+          "family": "motion_compat",
+          "first_half_mae": 0.0005778223135578908,
+          "mae": 0.00033992731144019266,
+          "second_half_mae": 0.00010203230932249451,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:824499729"
+        },
+        {
+          "adaptation": 0.00013347207161594024,
+          "clip_events": 31,
+          "error_estimate_mean": 0.44362478007970785,
+          "family": "motion_compat",
+          "first_half_mae": 0.0010907022363531734,
+          "mae": 0.0005801949250990076,
+          "second_half_mae": 6.968761384484184e-05,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:changed:2135368761"
+        },
+        {
+          "adaptation": 0.0010991100998861802,
+          "clip_events": 19,
+          "error_estimate_mean": 0.5126143561673413,
+          "family": "motion_compat",
+          "first_half_mae": 0.00047003080660849297,
+          "mae": 0.0005412728781261179,
+          "second_half_mae": 0.000612514949643743,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1261182130"
+        },
+        {
+          "adaptation": 0.0008964457510615549,
+          "clip_events": 9,
+          "error_estimate_mean": 0.5078208518807642,
+          "family": "motion_compat",
+          "first_half_mae": 0.00045667309118951893,
+          "mae": 0.00048523957721126505,
+          "second_half_mae": 0.0005138060632330112,
+          "status": "COMPLETED",
+          "stream_id": "motion_compat:dynamics_change:1189567216"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 10,
+          "error_estimate_mean": 0.3614615229051736,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.0018841682680069522,
+          "mae": 0.0017334241500034265,
+          "second_half_mae": 0.001582680031999901,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1683942133"
+        },
+        {
+          "adaptation": null,
+          "clip_events": 34,
+          "error_estimate_mean": 0.4568485845307309,
+          "family": "occlusion_v1",
+          "first_half_mae": 0.004076317647481473,
+          "mae": 0.003838408315777088,
+          "second_half_mae": 0.003600498984072702,
+          "status": "COMPLETED",
+          "stream_id": "occlusion_v1:1280439271"
+        },
+        {
+          "adaptation": 0.0028983102329182553,
+          "clip_events": 178,
+          "error_estimate_mean": 0.5250451293022358,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0025923348627352387,
+          "mae": 0.002365494454023424,
+          "second_half_mae": 0.0021386540453116097,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:401945564"
+        },
+        {
+          "adaptation": 0.004928609219052027,
+          "clip_events": 150,
+          "error_estimate_mean": 0.5665586403263515,
+          "family": "coarse_speed_v1",
+          "first_half_mae": 0.0024000800529276334,
+          "mae": 0.0023865652481798497,
+          "second_half_mae": 0.0023730504434320656,
+          "status": "COMPLETED",
+          "stream_id": "coarse_speed_v1:398354074"
+        },
+        {
+          "adaptation": 1.4406499736339487e-05,
+          "clip_events": 62,
+          "error_estimate_mean": 0.36751116036014153,
+          "family": "aba_v1",
+          "first_half_mae": 0.0008324990317420921,
+          "mae": 0.0005017046683168566,
+          "second_half_mae": 0.0001709103048916211,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:2115706035"
+        },
+        {
+          "adaptation": 0.0007368929604240844,
+          "clip_events": 139,
+          "error_estimate_mean": 0.5273787799052763,
+          "family": "aba_v1",
+          "first_half_mae": 0.006064725722770429,
+          "mae": 0.0036796232849285815,
+          "second_half_mae": 0.0012945208470867334,
+          "status": "COMPLETED",
+          "stream_id": "aba_v1:1645197752"
+        }
+      ],
+      "total_clip_events": 697
+    }
+  ],
+  "stage_two_ranking": [
+    "lr=0.03;T=4;lambda=0.5",
+    "lr=0.03;T=4;lambda=0",
+    "lr=0.03;T=4;lambda=0.1",
+    "lr=0.03;T=4;lambda=0.25"
+  ],
+  "stage_zero_divergence_probe": {
+    "horizon": 8,
+    "lowest_diverging_learning_rate": 0.3,
+    "note": "measured with gradient clipping disabled; the selected configuration keeps the declared clip, so this is a property of the bare optimizer, not of the candidate",
+    "records": [
+      {
+        "diverged": false,
+        "diverged_streams": [],
+        "gradient_clip": null,
+        "learning_rate": 0.001,
+        "tbptt_steps": 8,
+        "worst_normalized_error": 0.041575594808006544
+      },
+      {
+        "diverged": false,
+        "diverged_streams": [],
+        "gradient_clip": null,
+        "learning_rate": 0.003,
+        "tbptt_steps": 8,
+        "worst_normalized_error": 0.033043208819184766
+      },
+      {
+        "diverged": false,
+        "diverged_streams": [],
+        "gradient_clip": null,
+        "learning_rate": 0.01,
+        "tbptt_steps": 8,
+        "worst_normalized_error": 0.02915382129711297
+      },
+      {
+        "diverged": false,
+        "diverged_streams": [],
+        "gradient_clip": null,
+        "learning_rate": 0.03,
+        "tbptt_steps": 8,
+        "worst_normalized_error": 0.02905366686974642
+      },
+      {
+        "diverged": false,
+        "diverged_streams": [],
+        "gradient_clip": null,
+        "learning_rate": 0.1,
+        "tbptt_steps": 8,
+        "worst_normalized_error": 0.9055438923734707
+      },
+      {
+        "diverged": true,
+        "diverged_streams": [
+          "motion_compat:bouncing:2146409619: FloatingPointError",
+          "motion_compat:bouncing:1764231905: FloatingPointError",
+          "motion_compat:changed:2135368761: FloatingPointError",
+          "occlusion_v1:1280439271: FloatingPointError",
+          "coarse_speed_v1:401945564: FloatingPointError",
+          "coarse_speed_v1:398354074: FloatingPointError",
+          "aba_v1:2115706035: ValueError",
+          "aba_v1:1645197752: FloatingPointError"
+        ],
+        "gradient_clip": null,
+        "learning_rate": 0.3,
+        "tbptt_steps": 8,
+        "worst_normalized_error": 0.012196042337874857
+      }
+    ]
+  }
+}

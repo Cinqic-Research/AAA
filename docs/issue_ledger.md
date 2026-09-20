@@ -1378,3 +1378,194 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Regression** Focused tests inject insufficient and sufficient filesystem
   states and verify refusal and provenance without hard-coding a deployment
   path into AAA source.
+
+### AAA-152 — a new research phase necessarily changes both repository-wide source fingerprints
+- **Source** AAA-1K phase construction, 2026-09-19 · **Severity** medium · **Status** open; accepted and documented
+- **Reproduction** `aaa/benchmark/source_identity.py` and
+  `aaa/noise/scientific_identity.py` both hash every tracked, non-generated
+  file. Adding `research/aaa_1k/` therefore changes both digests, so the
+  working tree no longer reproduces the fingerprints recorded in
+  `benchmarks/freeze_manifest.json` and
+  `benchmarks/observation_noise_source_freeze.json`.
+- **Rejected repair** Adding `research/` to either module's excluded prefixes.
+  That is a convenience exclusion whose only purpose is to make an old hash
+  keep matching, and `AAA-121` already established what incomplete source
+  identity costs.
+- **Accepted disposition** AAA-1K is a separate versioned phase with its own
+  non-self-referential fingerprint over its own source, the shared `aaa/`
+  modules it executes, its tests, its protocol documents and the dependency
+  lock (`python -m research.aaa_1k fingerprint`). Historical evidence stays
+  reproducible from its historical checkout: the annotated tags
+  `aaa-pre-next-phase-2026-09-19` and
+  `aaa-pre-next-phase-closure-2026-09-19` mark those trees exactly. Every
+  v2.1 confirmation batch is already spent or retired, so no pending
+  confirmation is blocked. One hash is not asked to describe two worlds.
+- **Regression** `tests/test_aaa_1k.py::IdentityTests` asserts the phase
+  fingerprint covers the phase source and the shared modules, and excludes the
+  documents this phase generates so the identity cannot become
+  self-referential. No existing fingerprint test was weakened.
+
+### AAA-153 — the AAA-1K online/frozen comparison does not isolate adaptation
+- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** repaired
+- **Reproduction** `python -m research.aaa_1k adversarial-probes`. Branching an
+  online/frozen pair at step 60, where nothing happens, reproduces 95% of the
+  advantage measured at the declared change point at step 100
+  (+7.65e-04 against +8.07e-04).
+- **Root cause** The model improves throughout every stream, so "online beat
+  its frozen twin after a change" is equally consistent with "continued
+  learning helps everywhere". The single-branch design cannot separate them.
+- **Repair** A new `paired_change_v1` family emits two streams that are
+  bit-identical until a declared step, after which one changes speed and the
+  other does not. One model is driven through the shared prefix, so both
+  variants branch from the same model state — asserted equal by complete
+  state hash, not assumed. The estimator is
+  `advantage(changed) - advantage(control)`, so the ordinary benefit of
+  continuing to learn cancels. Measured on fresh evaluation identities in
+  round 2: the adaptation component is `+9.50e-04` with a 95% interval of
+  `[+5.63e-04, +1.33e-03]`, about 49% under the canonical
+  `adaptation / (adaptation + continued learning)` definition. Earlier 65%
+  wording was an arithmetic/documentation error. The
+  round-1 claim was therefore *directionally* right and *quantitatively*
+  overstated by roughly a third.
+- **Regression** `Round2FailureInjectionTests` substitutes an unpaired control
+  stream and proves the identical-trunk assertion fires. The original probe
+  remains committed at `docs/evidence/aaa_1k_adversarial_probes.json`, and
+  round 1 is retained at
+  `docs/evidence/aaa_1k_evaluation_round1_superseded.json`.
+
+### AAA-154 — the AAA-1K A/B/A benchmark does not measure retention
+- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** repaired
+- **Reproduction** In `docs/evidence/aaa_1k_evaluation_round1_superseded.json`, every learning arm
+  has a *lower* error in the final A segment than in the first, which reads as
+  "no catastrophic forgetting" but is confounded: by A2 the model has had three
+  times as much total experience. The non-learning control
+  (`constant_motion_reflected`) is flat across A1 and A2, as it must be.
+- **Repair** A fixed bank of eight held-out regime-A episodes, generated once
+  from the benchmark-generation namespace and never trained on, is evaluated by
+  a frozen clone with its hidden state reset at the end of each of A1, B and
+  A2. Because the same questions are asked at every checkpoint, accumulated
+  experience cannot flatter the later ones. Measured in round 2: probe error
+  after B minus after A1 is `-3.74e-04`, interval `[-7.99e-04, -9.52e-07]` —
+  regime-A ability *improved* while the model trained on regime B, so there is
+  no forgetting to target and no replay is warranted.
+- **Regression** `Round2FailureInjectionTests` hands the probe an agent whose
+  clones still learn and proves the read-only assertion fires. Round 1's
+  confounded comparison is retained in the superseded evidence file.
+
+### AAA-155 — AAA-1K intervals resampled streams but not initializations
+- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** repaired
+- **Reproduction** Round 1 gave every arm one `model_init` seed, deliberately,
+  so that an ablation differed from the primary in exactly one mechanism. The
+  bootstrap then resampled streams only. Initialization variance was therefore
+  entirely unsampled, and a five-seed probe found effect magnitudes varying by
+  up to a factor of two while the intervals claimed a precision that did not
+  account for it.
+- **Repair** Round 2 runs the whole design from five initializations and uses a
+  crossed bootstrap that resamples initializations and streams independently,
+  recomputing the mean over the selected cells. Per-initialization differences
+  are reported alongside the mean, and the record states whether every
+  initialization agreed on the sign. Achieved precision is now reported as the
+  interval half-width against the effect that was actually measured, replacing
+  a target sized from a pilot estimate of an effect nobody had seen.
+- **Regression** `CrossedBootstrapTests` builds a design whose initializations
+  genuinely disagree and asserts the crossed interval is more than three times
+  wider than the stream-only interval on the same data, so the old estimator's
+  optimism is a live check rather than a remembered argument.
+
+### AAA-156 — one architecture's hyperparameters were imposed on the others
+- **Source** AAA-1K round-2 construction, 2026-09-19 · **Severity** high · **Status** repaired
+- **Reproduction** The gradient-clip threshold was *asserted* at 1.0 rather
+  than selected. A development probe found it activating on 24% of updates and
+  costing 29% of development error against the best stable threshold — at that
+  rate it is a hyperparameter deciding what is learned, not a guard. Worse,
+  when the threshold was first selected on the gated model and then applied to
+  every arm, the stateless control destabilized on `coarse_speed_v1`: its mean
+  error reached `1.6e-01` against the gated model's `2.2e-03`, and the crossed
+  comparison reported a hidden-state advantage of `+1.28e-02`, thirty times the
+  true effect. That would have been published as "hidden state helps".
+- **Repair** Stage 3 of the development selection now chooses the clip
+  threshold by the same rules as every other hyperparameter, preferring the
+  most conservative threshold within the practical margin of the best. Stage 3a
+  runs the whole selection — learning rate *and* clip — **separately for each
+  architecture**, because imposing one architecture's hyperparameters on
+  another turns a comparison into a handicap. Ablations of the gated model
+  still share its hyperparameters exactly, since an ablation is the same
+  architecture with one mechanism removed. With fair hyperparameters the
+  hidden-state effect is `+2.49e-04` and the gating result moves from
+  `NEGATIVE` to `INCONCLUSIVE`.
+- **Regression** `PerArchitectureSelectionTests` asserts that each control
+  receives its own rule-selected learning rate and clip, that the primary and
+  its three ablations share one configuration and bitwise-identical initial
+  parameters, and that each ablation differs from the primary in exactly one
+  declared mechanism.
+
+### AAA-157 — AAA-1K checkpoint restoration accepted malformed persistent state
+- **Source** independent Sol review of PR #16, 2026-09-20 · **Severity** high · **Status** repaired and verified
+- **Reproduction** The reviewed head accepted wrong-shaped and non-finite TBPTT
+  cache entries, silently truncated an oversized cache through `deque(maxlen=...)`,
+  accepted negative or boolean counters, and loaded impossible observation-gap
+  states. `NeuralAgent.load_state` ignored the serialized model entirely, so its
+  advertised complete-resume boundary was not actually complete.
+- **Scientific impact** An exact-resume or identical-branch claim is not valid
+  when malformed state can enter the claim-critical path and fail only later.
+- **Repair** Model, cache, counter, tracker, and adapter state now validate
+  schemas, types, shapes, finiteness, ranges, and cross-field invariants before
+  mutation. Agent restoration restores the serialized model and previously
+  omitted error-estimate/update-diagnostic state.
+- **Regression** `CheckpointBoundaryTests` injects oversized, non-finite,
+  wrong-shaped, negative, boolean, and impossible state and requires fail-closed
+  rejection; it also verifies exact model restoration.
+
+### AAA-158 — branch identity covered the model but not the complete interaction state
+- **Source** independent Sol review of PR #16, 2026-09-20 · **Severity** high · **Status** repaired and verified
+- **Reproduction** `run_online_frozen_branch` recorded and compared only
+  `model.state_hash()`, despite documentation claiming equality of weights,
+  hidden/cache state, previous error, observation tracker, pending prediction,
+  and adapter counters. Mutating `previous_signed_error` did not affect the
+  asserted branch identity.
+- **Scientific impact** Online/frozen and changed/control comparisons could
+  claim identical starting agents while adapter state differed.
+- **Repair** The branch hash now canonically covers every future-affecting model
+  and interaction field, excluding only the intentional treatment labels
+  `name` and `update_enabled`.
+- **Regression** A failure-injection test mutates adapter state with identical
+  weights and proves the complete-interaction hash changes.
+
+### AAA-159 — Q1's time contrast did not causally identify online learning
+- **Source** independent Sol review of PR #16, 2026-09-20 · **Severity** high · **Status** repaired and measured in round 3
+- **Reproduction** Round 2 called first-quarter minus last-quarter error
+  "learning." A stream whose later portion is easier produces the same sign
+  even when no weights update; no matched non-learning arm removed this time
+  structure.
+- **Scientific impact** The headline Q1 claim was stronger than its estimator.
+- **Repair** Round 3 compares the online model with an otherwise identical
+  frozen-weight copy on every initialization-stream cell. Both arms see the
+  same temporal structure and start from the same complete interaction state.
+  Positive frozen-minus-online error now identifies the effect of updating
+  weights under this benchmark.
+- **Regression** The round-3 Q1 test requires the matched frozen-arm statistic
+  and complete crossed design; the old quarter contrast remains only in
+  superseded evidence.
+- **Outcome** Matched frozen-minus-online error is `+3.299e-03`, 95% interval
+  `[+3.013e-03, +3.590e-03]`; every initialization mean and all 144 stream
+  averages have the favorable sign.
+
+### AAA-160 — Q2 and Q5 treated reused initializations as independent trials
+- **Source** independent Sol review of PR #16, 2026-09-20 · **Severity** high · **Status** repaired and measured in round 3
+- **Reproduction** Round 2 cycled `trial_index % 5` across 24 adaptation and 12
+  retention trials, then applied a one-dimensional paired bootstrap. Trials
+  sharing starting weights were treated as independent even though the general
+  round-2 description claimed initialization resampling.
+- **Scientific impact** Q2/Q5 uncertainty could be materially understated and
+  was inconsistent with the estimator used for Q1/Q3/Q4.
+- **Repair** Round 3 fully crosses every declared initialization with every
+  adaptation or retention environment and independently resamples both factors.
+  A ragged or incomplete crossing is rejected rather than flattened.
+- **Regression** `_trial_matrix` refuses an incomplete grid; independent
+  recomputation reconstructs all Q2/Q5 interval endpoints from retained trials.
+- **Outcome** Q2 adaptation is `+5.121e-04`
+  `[+1.689e-04, +8.667e-04]`; its share of the combined adaptation plus
+  continued-learning advantage is 43.15%. Q5 forgetting is inconclusive at
+  `-2.025e-04` `[-6.418e-04, +1.257e-04]`. The truthful claim is that no
+  forgetting was measured on this probe bank, not that retention immunity was
+  established.

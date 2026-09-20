@@ -106,3 +106,58 @@ The noise model corrupts observations only. It does not study process noise,
 dropout, bias, irregular sampling, hidden state, actions, goals, language,
 vision, or general intelligence. A favorable detector response to a sensor
 shift is not evidence that a physical-law change was detected.
+
+## AAA-1K (`aaa.1k.v1`)
+
+The 994-parameter recurrent phase has its own limitations, and they are
+different in kind from the v2.1 ones. Its evaluation ran three times. Rounds 1
+and 2 are retained as superseded evidence; round 3 repairs Q1 identification
+and Q2/Q5 initialization dependence on fresh identities.
+
+**What round 3 shows.** Online weight updating beats a matched frozen copy.
+Persistent recurrent
+state beating both a state-reset ablation and a matched-capacity stateless
+control, most clearly on steps whose target the agent never saw. Genuine
+adaptation, isolated from ordinary continued learning by a
+difference-of-differences against a bit-identical unchanged world, accounting
+for about 43% of the combined advantage. No statistically resolved forgetting
+on the fixed probe bank; the interval crosses zero.
+
+**What it does not show.** Generalization beyond unseen trajectories of the same
+four families; no unseen family was tested. Whether gating pays for itself:
+round 1's negative result did not survive giving the ungated control its own
+rule-selected learning rate, and the honest answer is now inconclusive overall
+and negative on the memory families.
+
+**The most dangerous thing that nearly happened.** Selecting a gradient-clip
+threshold on the gated model and applying it to every arm destabilized the
+stateless control on one family — mean error `1.6e-01` against the gated model's
+`2.2e-03` — and inflated the reported hidden-state advantage to thirty times its
+true value. It was caught by reading the per-arm table rather than the summary.
+Hyperparameters are now selected per architecture (`AAA-156`).
+
+**Where the evidence is thin.** Five initializations is a small second bootstrap
+level. Q4's mean and median disagree in sign, so a minority of streams carries
+the aggregate. The self-error head is weakly informative and over-predicts.
+
+**Mechanisms that are programmed, not learned.** Boundary reflection, target
+unfolding, the holding of unobserved steps, and the rule that a learner updates
+only on transitions whose both ends it was shown. All four are public knowledge
+of the observation format applied identically to every arm, and the
+dead-reckoning and reflected constant-motion baselines exist so that none of
+them is mistaken for a capability.
+
+**Benchmark provenance, still the weakest point.** `occlusion_v1` and
+`coarse_speed_v1` are new, designed by the same implementer whose model they
+evaluate, and reviewed by nobody. A decomposition probe established that
+`coarse_speed_v1` genuinely tests hidden-regime inference — with the speed held
+fixed the recurrent model is *worse* than the stateless control — but
+`occlusion_v1` has no equivalent check, and neither has been seen by anyone
+else.
+
+**The most useful next experiments**, in order: a width-matched gating
+comparison, to separate "gating" from "fewer hidden units at the same parameter
+count"; a distributional analysis of the minority of streams where the ungated
+control wins large; an independently designed memory benchmark; and a benchmark
+with genuine long-range dependence, without which the truncation horizon does
+not matter and an unbiased online recurrent learner has nothing to fix.

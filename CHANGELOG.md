@@ -1,5 +1,118 @@
 # Research history
 
+## aaa.1k.v1 — a recurrent predictive seed (2026-09-19)
+
+A new versioned research phase in `research/aaa_1k/`, isolated from the frozen
+v2.1 core and the observation-noise phase. Nothing under `aaa/`, `benchmarks/`
+or `results/` is modified, and no historical evidence is regenerated.
+
+**A 994-parameter GRU, written out by hand.** Three inputs, sixteen hidden
+units, two outputs, one bias vector per gate. No framework: at this size a
+framework costs transparency and buys nothing. Every parameter of every model
+is finite-difference verified against a *sequence* loss, exhaustively, to a
+maximum absolute error of 8.7e-10 — because a recurrent model can have a
+perfect one-step gradient and a broken temporal one, and an injected
+single-step backward pass is shown to be caught.
+
+**The optimizer holds nothing.** Plain SGD, zero optimizer state, counted and
+reported separately from the 16 hidden scalars and the 404-scalar truncation
+buffer. A "1K model" with a hidden 100K of optimizer state would deserve
+ridicule.
+
+**Mechanisms, not architectures.** Three ablations of the model itself — state
+reset, previous-error input removed, recurrent weights frozen — plus a
+982-parameter stateless MLP and a 954-parameter ungated RNN, all sharing one
+initialization seed so each differs in exactly one mechanism. The design is
+adapted from Foucault & Meyniel (2021), whose conclusion it then contradicts.
+
+**Two new benchmark families that recurrence could actually matter on**, since
+a GRU losing to a closed-form extrapolator on smooth motion teaches very
+little: `occlusion_v1` (periodic observation gaps; during a gap the displacement
+and error inputs are exactly zero for every arm) and `coarse_speed_v1` (a hidden
+speed regime behind a coarse deterministic quantizer). Plus `aba_v1`, one
+unlabelled A→B→A stream. A dead-reckoning baseline that carries velocity
+perfectly and for free was added so that "the network remembered the velocity"
+has to beat something that also remembered it.
+
+**The results, including the ones that are not flattering.** The model learns
+online on every family. Persistent hidden state helps, most clearly on steps
+whose target it never saw. **Gating does not pay for itself**: the smaller
+ungated control wins. The model loses to reflected constant motion, dead
+reckoning and the existing three-parameter RLS learner on smooth fully observed
+motion. Its self-error head is weakly informative and over-predicts.
+
+**A gate that fired.** The stability-margin rule was rewritten mid-phase after
+it was found to be vacuous — with the declared gradient clip in place, nothing
+in the search grid ever diverges, so "require the next higher rate to be
+stable" could not fail. A stage-0 probe with clipping disabled located a real
+boundary at `lr = 0.3`, and the repaired rule then **eliminated the four best
+development configurations**, costing 26% of development accuracy. The rule was
+declared before the numbers existed.
+
+**The evaluation ran three times, and round 3 is current.** Round 1 was
+completed, probed, and found to contain four design defects. All four were
+repaired and re-measured on fresh stream identities; round 1 is retained,
+superseded, with its report and a banner naming what was wrong. Independent
+review then superseded round 2 because Q1 did not identify weight learning and
+Q2/Q5 flattened reused initialization identities.
+
+**Q2 did not measure adaptation.** Branching an online/frozen pair where
+*nothing happens* reproduced 95% of the effect, so the result was mostly about
+continuing to learn. Repaired with a `paired_change_v1` family that emits two
+streams bit-identical until a declared step, after which one changes and one
+does not; the estimator is the difference of the two advantages, so the ordinary
+benefit of learning cancels. Round 3 measures
+`+5.12e-04 [+1.69e-04, +8.67e-04]`, 43% of the combined adaptation plus
+ordinary continued-learning advantage (`AAA-153`, `AAA-160`).
+
+**Q5 did not measure retention.** The A→B→A comparison confounded "came back
+intact" with "had three times the experience". Repaired with a fixed bank of
+held-out regime-A episodes, never trained on, evaluated by a frozen clone at
+every segment boundary. Round 3 measures no statistically resolved forgetting:
+`-2.02e-04 [-6.42e-04, +1.26e-04]`. This is not general retention immunity and
+no replay was added (`AAA-154`, `AAA-160`).
+
+**The intervals were too narrow.** They resampled streams while treating the
+starting weights as fixed by nature. Repaired with five initializations and a
+crossed bootstrap over both factors, plus achieved precision reported against
+the effect that was measured rather than a pilot-sized target (`AAA-155`).
+
+**The controls were handicapped, and it nearly produced a false headline.** The
+gradient clip was asserted rather than selected; a probe found it firing on 24%
+of updates and costing 29% of development error. Making it a selected
+hyperparameter was right — applying the *gated model's* threshold to every arm
+was not. The stateless control destabilized on one family, reaching a mean error
+of `1.6e-01` against the gated model's `2.2e-03`, and the comparison reported a
+hidden-state advantage thirty times too large. Repaired by selecting the
+learning rate and clip separately per architecture, while ablations keep sharing
+the primary's configuration exactly. With fair hyperparameters the hidden-state
+effect is `+2.49e-04` and **Q4 moves from `NEGATIVE` to `INCONCLUSIVE`**: the
+finding that gating loses did not survive giving the ungated control a fair
+learning rate (`AAA-156`).
+
+**Gating buys stability, which round 1 never noticed.** Unclipped, the ungated
+control diverges at a learning rate of 0.1 where the gated model survives to
+0.3, so the same stability margin allows it only a third of the rate.
+
+**Three open questions closed by development probes.** `coarse_speed_v1` really
+does measure hidden-regime inference — with the speed fixed the recurrent model
+is *worse* than the stateless control. The ungated control's win was largely a
+shared-learning-rate artefact. The clip rate was not masking a problem; it was
+the problem.
+
+Also: disjoint hashed seed namespaces; a paired stream-level bootstrap that
+never resamples steps inside a trajectory; an error-head calibration analysis
+kept separate from prediction accuracy; a capability vector with no combined
+score; phase-scoped non-self-referential source identity with lineage metadata
+(`parent_model_id: null` — this is the lineage root); a read-only Matplotlib
+dashboard showing all sixteen real hidden activations and both gate vectors,
+with no interactive key bindings, because PR #12 already found what Matplotlib
+does with those; 93 new tests including deliberate failure injection; and mypy,
+coverage and packaging extended to cover `research/`.
+
+Adding this phase necessarily changes both repository-wide source fingerprints.
+No exclusion was added to prevent that; see `AAA-152`.
+
 ## Observation-noise engineering phase closure (2026-09-19)
 
 The current engineering line fixes the hosted artifact filename defect with a
