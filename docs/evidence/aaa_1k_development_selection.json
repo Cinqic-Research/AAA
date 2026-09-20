@@ -1,4 +1,24 @@
 {
+  "architecture_configurations": {
+    "AAA1KGRU": {
+      "error_loss_weight": 0.25,
+      "gradient_clip": 10.0,
+      "learning_rate": 0.03,
+      "tbptt_steps": 4
+    },
+    "StatelessMLPControl": {
+      "error_loss_weight": 0.25,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "tbptt_steps": 4
+    },
+    "VanillaRNNControl": {
+      "error_loss_weight": 0.25,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "tbptt_steps": 4
+    }
+  },
   "development_streams": [
     {
       "benchmark_version": "aaa.1k.benchmarks.v1",
@@ -272,11 +292,12 @@
   "error_weight_decision": "the predeclared default was retained: no alternative beat it by more than 2% on development data",
   "git": {
     "branch": "opus/aaa-1k-recurrent-core",
-    "commit": "3b39754ae99ed73b3204053c2f1412f28853d19a",
+    "commit": "ca4d6eaed61ed891993feebbb2316fc79996e0a3",
     "dirty": false,
-    "tree_hash": "90ffb8340ce6122620d4cbc6807707f6eae20891"
+    "tree_hash": "cdec246feaadbba02b0d280871ebfc9cef82e506"
   },
   "plan": {
+    "declared_gradient_clip": 1.0,
     "default_error_weight": 0.25,
     "development_families": [
       "motion_compat",
@@ -291,6 +312,13 @@
       0.1,
       0.25,
       0.5
+    ],
+    "gradient_clips": [
+      0.3,
+      1.0,
+      3.0,
+      10.0,
+      null
     ],
     "learning_rates": [
       0.001,
@@ -311,17 +339,20 @@
     ]
   },
   "schema": "aaa.1k.development_selection.v1",
-  "scientific_fingerprint": "88738d9762f9721c4c32dd36dc2f93b13f11769aa5895c29879699c26952e2bd",
+  "scientific_fingerprint": "333635d7e1c9faaaa7a0c7f07c5f3fea2983faf21100a77bd6edb730f749898b",
   "selected": {
     "error_loss_weight": 0.25,
+    "gradient_clip": 10.0,
     "learning_rate": 0.03,
     "tbptt_steps": 4
   },
+  "selected_gradient_clip": 10.0,
   "selected_key": "lr=0.03;T=4;lambda=0.25",
   "stage_one": [
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.001,
         "tbptt_steps": 4
       },
@@ -471,6 +502,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.003,
         "tbptt_steps": 4
       },
@@ -620,6 +652,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.01,
         "tbptt_steps": 4
       },
@@ -769,6 +802,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.03,
         "tbptt_steps": 4
       },
@@ -918,6 +952,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.1,
         "tbptt_steps": 4
       },
@@ -1067,6 +1102,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.3,
         "tbptt_steps": 4
       },
@@ -1216,6 +1252,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.001,
         "tbptt_steps": 8
       },
@@ -1365,6 +1402,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.003,
         "tbptt_steps": 8
       },
@@ -1514,6 +1552,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.01,
         "tbptt_steps": 8
       },
@@ -1663,6 +1702,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.03,
         "tbptt_steps": 8
       },
@@ -1812,6 +1852,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.1,
         "tbptt_steps": 8
       },
@@ -1961,6 +2002,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.3,
         "tbptt_steps": 8
       },
@@ -2110,6 +2152,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.001,
         "tbptt_steps": 16
       },
@@ -2259,6 +2302,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.003,
         "tbptt_steps": 16
       },
@@ -2408,6 +2452,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.01,
         "tbptt_steps": 16
       },
@@ -2557,6 +2602,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.03,
         "tbptt_steps": 16
       },
@@ -2706,6 +2752,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.1,
         "tbptt_steps": 16
       },
@@ -2855,6 +2902,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.3,
         "tbptt_steps": 16
       },
@@ -3004,6 +3052,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.001,
         "tbptt_steps": 32
       },
@@ -3153,6 +3202,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.003,
         "tbptt_steps": 32
       },
@@ -3302,6 +3352,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.01,
         "tbptt_steps": 32
       },
@@ -3451,6 +3502,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.03,
         "tbptt_steps": 32
       },
@@ -3600,6 +3652,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.1,
         "tbptt_steps": 32
       },
@@ -3749,6 +3802,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.3,
         "tbptt_steps": 32
       },
@@ -3972,10 +4026,528 @@
     "lr=0.001;T=8;lambda=0.25",
     "lr=0.001;T=4;lambda=0.25"
   ],
+  "stage_three_a_architecture_selections": {
+    "AAA1KGRU": {
+      "architecture": "AAA1KGRU",
+      "clip_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 0.3,
+          "mean_clip_rate": 0.6409240591397849,
+          "mean_mae": 0.002245030203245449,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "mean_clip_rate": 0.2430182198327359,
+          "mean_mae": 0.00149378040907088,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 3.0,
+          "mean_clip_rate": 0.07668881919553963,
+          "mean_mae": 0.0012661394189734864,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 10.0,
+          "mean_clip_rate": 0.007986111111111112,
+          "mean_mae": 0.0011616585682277466,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "mean_clip_rate": 0.0,
+          "mean_mae": 0.0011476433174187756,
+          "stable": true
+        }
+      ],
+      "eligible_learning_rates": [
+        0.001,
+        0.003,
+        0.01,
+        0.03
+      ],
+      "learning_rate_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.001,
+          "mean_mae": 0.0042069339457970305,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.003,
+          "mean_mae": 0.0033059685542272156,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.01,
+          "mean_mae": 0.002027297819172802,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0014344007202870622,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.1,
+          "mean_mae": 0.0011383009302268876,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.3,
+          "mean_mae": 0.0013783480631231217,
+          "stable": true
+        }
+      ],
+      "selected": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 10.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 4
+      },
+      "unclipped_divergence_boundary": 0.3,
+      "unclipped_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.001,
+          "mean_mae": 0.0026917724467113717,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.003,
+          "mean_mae": 0.001887566355754815,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.01,
+          "mean_mae": 0.0013636614001354935,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0011119655224517105,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.1,
+          "mean_mae": 0.03320485152823804,
+          "stable": true
+        },
+        {
+          "diverged_streams": [
+            "motion_compat:bouncing:2146409619: ValueError",
+            "motion_compat:bouncing:1764231905: ValueError",
+            "motion_compat:changed:2135368761: ValueError",
+            "occlusion_v1:1280439271: ValueError",
+            "coarse_speed_v1:401945564: ValueError",
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:2115706035: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.3,
+          "mean_mae": Infinity,
+          "stable": false
+        }
+      ]
+    },
+    "StatelessMLPControl": {
+      "architecture": "StatelessMLPControl",
+      "clip_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 0.3,
+          "mean_clip_rate": 0.917650462962963,
+          "mean_mae": 0.0035354967807075433,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "mean_clip_rate": 0.4477764088012744,
+          "mean_mae": 0.0022095732352547504,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 3.0,
+          "mean_clip_rate": 0.1128329101951414,
+          "mean_mae": 0.0016270635359894783,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 10.0,
+          "mean_clip_rate": 0.013387345679012345,
+          "mean_mae": 0.0014727157837047076,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "mean_clip_rate": 0.0,
+          "mean_mae": 0.0013987855691978386,
+          "stable": true
+        }
+      ],
+      "eligible_learning_rates": [
+        0.001,
+        0.003,
+        0.01
+      ],
+      "learning_rate_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.001,
+          "mean_mae": 0.004348586385603039,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.003,
+          "mean_mae": 0.0035615314686190127,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.01,
+          "mean_mae": 0.0022304965126361802,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.03,
+          "mean_mae": 0.001505658479492582,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.1,
+          "mean_mae": 0.0012256351414839364,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.3,
+          "mean_mae": 0.011200970868851004,
+          "stable": true
+        }
+      ],
+      "selected": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": null,
+        "learning_rate": 0.01,
+        "tbptt_steps": 4
+      },
+      "unclipped_divergence_boundary": 0.1,
+      "unclipped_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.001,
+          "mean_mae": 0.003023955317896653,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.003,
+          "mean_mae": 0.0021629409361129132,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.01,
+          "mean_mae": 0.00142383361650934,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0010733990673456727,
+          "stable": true
+        },
+        {
+          "diverged_streams": [
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.1,
+          "mean_mae": Infinity,
+          "stable": false
+        },
+        {
+          "diverged_streams": [
+            "motion_compat:bouncing:2146409619: ValueError",
+            "motion_compat:bouncing:1764231905: ValueError",
+            "motion_compat:changed:2135368761: ValueError",
+            "motion_compat:dynamics_change:1261182130: ValueError",
+            "occlusion_v1:1280439271: ValueError",
+            "coarse_speed_v1:401945564: ValueError",
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:2115706035: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.3,
+          "mean_mae": Infinity,
+          "stable": false
+        }
+      ]
+    },
+    "VanillaRNNControl": {
+      "architecture": "VanillaRNNControl",
+      "clip_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 0.3,
+          "mean_clip_rate": 0.9738618827160492,
+          "mean_mae": 0.003180027228531702,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "mean_clip_rate": 0.438345405217045,
+          "mean_mae": 0.0018355565264294407,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 3.0,
+          "mean_clip_rate": 0.11312039526085223,
+          "mean_mae": 0.001312198750068051,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 10.0,
+          "mean_clip_rate": 0.01465800477897252,
+          "mean_mae": 0.001183517097323986,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "mean_clip_rate": 0.0,
+          "mean_mae": 0.0011257377318403244,
+          "stable": true
+        }
+      ],
+      "eligible_learning_rates": [
+        0.001,
+        0.003,
+        0.01
+      ],
+      "learning_rate_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.001,
+          "mean_mae": 0.004186336447265141,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.003,
+          "mean_mae": 0.003188641395717387,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.01,
+          "mean_mae": 0.0018422939381788498,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0012469903303989165,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.1,
+          "mean_mae": 0.0010852254889763809,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "learning_rate": 0.3,
+          "mean_mae": 0.0016840867128255497,
+          "stable": true
+        }
+      ],
+      "selected": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": null,
+        "learning_rate": 0.01,
+        "tbptt_steps": 4
+      },
+      "unclipped_divergence_boundary": 0.1,
+      "unclipped_records": [
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.001,
+          "mean_mae": 0.002421039568927696,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.003,
+          "mean_mae": 0.001629948806323296,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.01,
+          "mean_mae": 0.0011532122689884678,
+          "stable": true
+        },
+        {
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "learning_rate": 0.03,
+          "mean_mae": 0.0011519574207710928,
+          "stable": true
+        },
+        {
+          "diverged_streams": [
+            "motion_compat:bouncing:2146409619: ValueError",
+            "motion_compat:bouncing:1764231905: ValueError",
+            "motion_compat:changed:2135368761: ValueError",
+            "occlusion_v1:1280439271: ValueError",
+            "coarse_speed_v1:401945564: ValueError",
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:2115706035: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.1,
+          "mean_mae": Infinity,
+          "stable": false
+        },
+        {
+          "diverged_streams": [
+            "motion_compat:bouncing:2146409619: ValueError",
+            "motion_compat:bouncing:1764231905: ValueError",
+            "motion_compat:changed:824499729: ValueError",
+            "motion_compat:changed:2135368761: ValueError",
+            "motion_compat:dynamics_change:1261182130: ValueError",
+            "motion_compat:dynamics_change:1189567216: ValueError",
+            "occlusion_v1:1683942133: ValueError",
+            "occlusion_v1:1280439271: ValueError",
+            "coarse_speed_v1:401945564: ValueError",
+            "coarse_speed_v1:398354074: ValueError",
+            "aba_v1:2115706035: ValueError",
+            "aba_v1:1645197752: ValueError"
+          ],
+          "gradient_clip": null,
+          "learning_rate": 0.3,
+          "mean_mae": Infinity,
+          "stable": false
+        }
+      ]
+    }
+  },
+  "stage_three_gradient_clip": {
+    "declared_clip_rate": 0.2430182198327359,
+    "declared_cost_versus_best": 0.3016068550206168,
+    "declared_gradient_clip": 1.0,
+    "records": [
+      {
+        "diverged_streams": [],
+        "gradient_clip": 0.3,
+        "initializations": 3,
+        "mean_clip_rate": 0.6409240591397849,
+        "mean_mae": 0.002245030203245449,
+        "stable": true
+      },
+      {
+        "diverged_streams": [],
+        "gradient_clip": 1.0,
+        "initializations": 3,
+        "mean_clip_rate": 0.2430182198327359,
+        "mean_mae": 0.00149378040907088,
+        "stable": true
+      },
+      {
+        "diverged_streams": [],
+        "gradient_clip": 3.0,
+        "initializations": 3,
+        "mean_clip_rate": 0.07668881919553963,
+        "mean_mae": 0.0012661394189734864,
+        "stable": true
+      },
+      {
+        "diverged_streams": [],
+        "gradient_clip": 10.0,
+        "initializations": 3,
+        "mean_clip_rate": 0.007986111111111112,
+        "mean_mae": 0.0011616585682277466,
+        "stable": true
+      },
+      {
+        "diverged_streams": [],
+        "gradient_clip": null,
+        "initializations": 3,
+        "mean_clip_rate": 0.0,
+        "mean_mae": 0.0011476433174187756,
+        "stable": true
+      }
+    ],
+    "rule": "the most conservative threshold within the practical margin of the best stable one; a bare threshold is chosen only when no finite threshold is close",
+    "selected_clip_rate": 0.007986111111111112,
+    "selected_gradient_clip": 10.0
+  },
   "stage_two": [
     {
       "configuration": {
         "error_loss_weight": 0.0,
+        "gradient_clip": 1.0,
         "learning_rate": 0.03,
         "tbptt_steps": 4
       },
@@ -4125,6 +4697,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.1,
+        "gradient_clip": 1.0,
         "learning_rate": 0.03,
         "tbptt_steps": 4
       },
@@ -4274,6 +4847,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.25,
+        "gradient_clip": 1.0,
         "learning_rate": 0.03,
         "tbptt_steps": 4
       },
@@ -4423,6 +4997,7 @@
     {
       "configuration": {
         "error_loss_weight": 0.5,
+        "gradient_clip": 1.0,
         "learning_rate": 0.03,
         "tbptt_steps": 4
       },
