@@ -40,8 +40,8 @@
         "arms": 12,
         "initializations": 5,
         "scored_transitions": 206400,
-        "transitions_per_second": 746.2532935731838,
-        "wall_seconds": 276.5816938799999
+        "transitions_per_second": 752.2057008370831,
+        "wall_seconds": 274.3930280909999
       },
       "numerical_stability": {
         "max_clip_rate": 0.16071428571428573,
@@ -84895,9 +84895,9 @@
   },
   "git": {
     "branch": "opus/aaa-1k-recurrent-core",
-    "commit": "f9c0289124db9f5e018c4e72400c1f7be6f17309",
+    "commit": "9f9ff7903ceaad5d61abcb312ba0edbb6e3ef750",
     "dirty": false,
-    "tree_hash": "b6faa6ba55a55969def3ccc32217a0b99e5acce7"
+    "tree_hash": "866c891ded7a71e5faf99108e43121f7f444d107"
   },
   "model_accounting": {
     "parameter_count": 994,
@@ -84989,12 +84989,12 @@
     "arms": 12,
     "initializations": 5,
     "scored_transitions": 206400,
-    "transitions_per_second": 746.2532935731838,
-    "wall_seconds": 276.5816938799999
+    "transitions_per_second": 752.2057008370831,
+    "wall_seconds": 274.3930280909999
   },
   "round": 2,
   "schema": "aaa.1k.experiments.v2",
-  "scientific_fingerprint": "333635d7e1c9faaaa7a0c7f07c5f3fea2983faf21100a77bd6edb730f749898b",
+  "scientific_fingerprint": "60ab9aa04f2e7f99359e1ec2b41a0e86af58f0c78727307017ab3b17ad90978a",
   "streams": [
     {
       "benchmark_version": "aaa.1k.benchmarks.v1",

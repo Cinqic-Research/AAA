@@ -16,7 +16,7 @@ AAA-1K is a research seed, not Juniper and not an agent. It is one primitive: a 
 | Item | Value |
 |---|---|
 | phase | `aaa.1k.v1` |
-| scientific fingerprint | `86c60f2d50e09c37da0b1a7393b478e35d9ef4f976aea20e62d57a9247d45cfd` |
+| scientific fingerprint | `60ab9aa04f2e7f99359e1ec2b41a0e86af58f0c78727307017ab3b17ad90978a` |
 | trainable parameters | 994 |
 | initializations | 5 |
 | streams per family | 24 |
@@ -187,8 +187,8 @@ the comparison is inconclusive once each architecture is tuned separately, so Q4
 | trained steps | 199575 |
 | targets skipped as unavailable | 6825 |
 | scored transitions | 206400 |
-| transitions per second | 746 |
-| wall seconds | 276.6 |
+| transitions per second | 752 |
+| wall seconds | 274.4 |
 
 Round 1 clipped on 22% of updates at a threshold that was asserted rather than selected, and a probe found that threshold costing 29% of development error. The threshold is now chosen by the same rule as every other hyperparameter, and the activation rate above is what a guard rather than a decision-maker looks like.
 
