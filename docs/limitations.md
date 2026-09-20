@@ -106,3 +106,56 @@ The noise model corrupts observations only. It does not study process noise,
 dropout, bias, irregular sampling, hidden state, actions, goals, language,
 vision, or general intelligence. A favorable detector response to a sensor
 shift is not evidence that a physical-law change was detected.
+
+## AAA-1K (`aaa.1k.v1`)
+
+The 994-parameter recurrent phase has its own limitations, and they are
+different in kind from the v2.1 ones.
+
+**What it does not show.** It does not show adaptation. The online-versus-frozen
+result that looked like adaptation reproduces at 95% strength when the branch
+is placed where nothing happens, so it measures continued learning
+(`AAA-153`). It does not show retention: the A/B/A design confounds "came back
+to A intact" with "had three times as much total experience by then"
+(`AAA-154`). It does not show generalization beyond unseen trajectories of the
+same four families; no unseen family was tested.
+
+**What it does show, within those bounds.** Online learning on every family.
+Persistent recurrent state beating both a state-reset ablation and a
+matched-capacity stateless control, most clearly on steps whose target the
+agent never saw. Gating *failing* to pay for itself against a smaller ungated
+control -- the opposite of what the small-gated-network literature reports for
+stochastic, changing environments, and the most interesting negative result of
+the phase.
+
+**Where the evidence is thin.** The declared precision objective was missed by
+a factor of nearly twenty: 599 replicas per family were indicated, 32 were run
+under a declared bound. Every interval is wider than the design asked for, and
+effects near zero are unresolved rather than absent. Every effect is also
+conditional on a single model initialization; a five-seed probe found the
+directions stable and the magnitudes varying by up to a factor of two.
+
+**Mechanisms that are programmed, not learned.** Boundary reflection, target
+unfolding, the holding of unobserved steps, and the rule that a learner updates
+only on transitions whose both ends it was shown. All four are public knowledge
+of the observation format applied identically to every arm, and the
+dead-reckoning and reflected constant-motion baselines exist so that none of
+them is mistaken for a capability.
+
+**Benchmark provenance.** `occlusion_v1` and `coarse_speed_v1` are new,
+designed by the same implementer whose model they evaluate, and reviewed by
+nobody. That is the weakest kind of benchmark, and it is the first thing an
+independent reviewer should attack.
+
+**Gradient clipping activated on 22% of updates.** It is a declared mechanism
+with a declared threshold, but at that rate it is shaping the optimization
+rather than merely guarding it.
+
+**The most useful next experiments**, in order: a difference-of-differences
+design against a matched no-change stream, so adaptation can be separated from
+learning; a frozen probe bank measured at both A/B/A boundaries, so retention
+can be separated from accumulated experience; initialization as a second
+bootstrap level; and a benchmark with genuine long-range dependence, without
+which the truncation horizon does not matter and an unbiased online recurrent
+learner has nothing to fix.
+

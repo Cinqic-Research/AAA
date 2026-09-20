@@ -1378,3 +1378,63 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Regression** Focused tests inject insufficient and sufficient filesystem
   states and verify refusal and provenance without hard-coding a deployment
   path into AAA source.
+
+### AAA-152 — a new research phase necessarily changes both repository-wide source fingerprints
+- **Source** AAA-1K phase construction, 2026-09-19 · **Severity** medium · **Status** open; accepted and documented
+- **Reproduction** `aaa/benchmark/source_identity.py` and
+  `aaa/noise/scientific_identity.py` both hash every tracked, non-generated
+  file. Adding `research/aaa_1k/` therefore changes both digests, so the
+  working tree no longer reproduces the fingerprints recorded in
+  `benchmarks/freeze_manifest.json` and
+  `benchmarks/observation_noise_source_freeze.json`.
+- **Rejected repair** Adding `research/` to either module's excluded prefixes.
+  That is a convenience exclusion whose only purpose is to make an old hash
+  keep matching, and `AAA-121` already established what incomplete source
+  identity costs.
+- **Accepted disposition** AAA-1K is a separate versioned phase with its own
+  non-self-referential fingerprint over its own source, the shared `aaa/`
+  modules it executes, its tests, its protocol documents and the dependency
+  lock (`python -m research.aaa_1k fingerprint`). Historical evidence stays
+  reproducible from its historical checkout: the annotated tags
+  `aaa-pre-next-phase-2026-09-19` and
+  `aaa-pre-next-phase-closure-2026-09-19` mark those trees exactly. Every
+  v2.1 confirmation batch is already spent or retired, so no pending
+  confirmation is blocked. One hash is not asked to describe two worlds.
+- **Regression** `tests/test_aaa_1k.py::IdentityTests` asserts the phase
+  fingerprint covers the phase source and the shared modules, and excludes the
+  documents this phase generates so the identity cannot become
+  self-referential. No existing fingerprint test was weakened.
+
+### AAA-153 — the AAA-1K online/frozen comparison does not isolate adaptation
+- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** open; measured, disclosed, not repaired
+- **Reproduction** `python -m research.aaa_1k adversarial-probes`. Branching an
+  online/frozen pair at step 60, where nothing happens, reproduces 95% of the
+  advantage measured at the declared change point at step 100
+  (+7.65e-04 against +8.07e-04).
+- **Root cause** The model improves throughout every stream, so "online beat
+  its frozen twin after a change" is equally consistent with "continued
+  learning helps everywhere". The single-branch design cannot separate them.
+- **Disposition** The measurement stands; the interpretation was corrected. The
+  report and the claim ladder now say the result supports *continued updating
+  helps* and not *the model adapts to change*. The repair is a
+  difference-of-differences design against a matched no-change stream, which is
+  recorded as the first item of AAA-1K's next-experiment list rather than
+  retrofitted onto observed evidence.
+- **Regression** The probe is committed as a command and its output is retained
+  at `docs/evidence/aaa_1k_adversarial_probes.json`.
+
+### AAA-154 — the AAA-1K A/B/A benchmark does not measure retention
+- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** open; measured, disclosed, not repaired
+- **Reproduction** In `docs/evidence/aaa_1k_evaluation.json`, every learning arm
+  has a *lower* error in the final A segment than in the first, which reads as
+  "no catastrophic forgetting" but is confounded: by A2 the model has had three
+  times as much total experience. The non-learning control
+  (`constant_motion_reflected`) is flat across A1 and A2, as it must be.
+- **Disposition** `retention_exists` is reported as `SUPPORTED, WITH A
+  CONFOUND` in the claim ladder and the report states that this design cannot
+  separate retention from continued learning. No replay mechanism was added:
+  adding one would make the result prettier while removing the failure mode a
+  later phase needs to target. The repair is a fixed frozen probe bank
+  evaluated at both segment boundaries.
+- **Regression** None yet; this is a benchmark-design defect, not a code
+  defect, and the next phase owns it.

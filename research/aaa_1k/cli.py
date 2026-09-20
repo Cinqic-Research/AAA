@@ -6,6 +6,7 @@
     python -m research.aaa_1k evaluate    --output docs/evidence/aaa_1k_evaluation.json
     python -m research.aaa_1k report      --evidence ... --selection ... --output docs/aaa_1k_report.md
     python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation.json
+    python -m research.aaa_1k adversarial-probes --selection ... --output docs/evidence/aaa_1k_adversarial_probes.json
     python -m research.aaa_1k visualize   --family occlusion_v1 --output runs/aaa_1k/dashboard.png
     python -m research.aaa_1k gradient-check --full
 
@@ -246,6 +247,27 @@ def command_recompute(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_probes(args: argparse.Namespace) -> int:
+    """Run the adversarial probes that try to break this phase's conclusions."""
+
+    from .adversarial import run_probes
+
+    selection = json.loads(Path(args.selection).read_text(encoding="utf-8"))
+    chosen = selection["selected"]
+    report = run_probes(
+        Configuration(
+            float(chosen["learning_rate"]),
+            int(chosen["tbptt_steps"]),
+            float(chosen["error_loss_weight"]),
+        )
+    )
+    for probe in report["probes"]:
+        print(f"{probe['probe']}: {probe['finding']}")
+    if args.output:
+        _write(Path(args.output), report)
+    return 0
+
+
 def command_visualize(args: argparse.Namespace) -> int:
     from .streams import build_stream
     from .visualize import record_trace, render
@@ -327,6 +349,11 @@ def build_parser() -> argparse.ArgumentParser:
     recompute = sub.add_parser("recompute", help="rebuild headline statistics from primitives")
     recompute.add_argument("--evidence", required=True)
     recompute.set_defaults(handler=command_recompute)
+
+    probes = sub.add_parser("adversarial-probes", help="try to break the phase's own conclusions")
+    probes.add_argument("--selection", required=True)
+    probes.add_argument("--output")
+    probes.set_defaults(handler=command_probes)
 
     visualize = sub.add_parser("visualize", help="render the diagnostic dashboard")
     visualize.add_argument("--family", default="occlusion_v1")

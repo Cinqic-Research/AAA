@@ -137,6 +137,13 @@ def git_provenance(project_root: str | Path) -> dict[str, Any]:
         return {"commit": None, "tree_hash": None, "branch": None, "dirty": None}
 
 
+def _optional_fingerprint(project_root: str | Path) -> str | None:
+    try:
+        return str(phase_fingerprint(project_root)["sha256"])
+    except (PhaseIdentityError, OSError):
+        return None
+
+
 def lineage_record(
     *,
     model_state_hash: str,
@@ -164,7 +171,10 @@ def lineage_record(
         "initialization_seed": initialization_seed,
         "state_hash": model_state_hash,
         "benchmark_version": benchmark_version,
+        # A lineage record is architecture provenance and must not require a
+        # Git checkout: the parameter audit has to work from an installed
+        # wheel. A missing repository is recorded as absent, never faked.
         "source_commit": git_provenance(project_root)["commit"],
-        "scientific_fingerprint": phase_fingerprint(project_root)["sha256"],
+        "scientific_fingerprint": _optional_fingerprint(project_root),
         "growth_status": "no growth is implemented in this phase; future parameters must be earned",
     }

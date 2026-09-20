@@ -58,6 +58,29 @@ jobs:
           python -m coverage report
           python -m coverage xml
 
+      - name: AAA-1K architecture and gradient verification
+        run: |
+          python -m research.aaa_1k parameter-audit
+          python -m research.aaa_1k gradient-check --full
+          python -m research.aaa_1k fingerprint
+
+      - name: AAA-1K evidence regeneration and independent recomputation
+        run: |
+          python -m research.aaa_1k select \
+            --output "${RUNNER_TEMP}/aaa1k/development_selection.json"
+          python -m research.aaa_1k evaluate \
+            --selection "${RUNNER_TEMP}/aaa1k/development_selection.json" \
+            --replicas 4 \
+            --output "${RUNNER_TEMP}/aaa1k/evaluation.json"
+          python -m research.aaa_1k recompute \
+            --evidence "${RUNNER_TEMP}/aaa1k/evaluation.json"
+          python -m research.aaa_1k report \
+            --evidence "${RUNNER_TEMP}/aaa1k/evaluation.json" \
+            --selection "${RUNNER_TEMP}/aaa1k/development_selection.json" \
+            --output "${RUNNER_TEMP}/aaa1k/report.md"
+          python -m research.aaa_1k visualize \
+            --family occlusion_v1 --output "${RUNNER_TEMP}/aaa1k/dashboard.png"
+
       - name: Canonical specification identity
         run: python -m aaa.cli spec-hash
 
@@ -94,6 +117,7 @@ jobs:
           path: |
             ${{ runner.temp }}/aaa-runs
             ${{ runner.temp }}/aaa-noise-runs
+            ${{ runner.temp }}/aaa1k
             coverage.xml
             lock-hash.txt
           retention-days: 14

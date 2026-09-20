@@ -214,6 +214,13 @@ def render(trace: Trace, path: str | Path, *, title: str = "AAA-1K") -> Path:
         f"learning ({'weights updating' if trace.online else 'weights frozen, recurrence still running'})"
     )
 
+    # The hidden-state panel is drawn with imshow, which sets its own limits;
+    # without this the heat map is offset from the curves above and below it
+    # and a reader lines up the wrong step with the wrong activation.
+    span = (float(steps[0]), float(steps[-1]))
+    for axis in axes:
+        axis.set_xlim(*span)
+
     figure.tight_layout()
     destination = Path(path)
     destination.parent.mkdir(parents=True, exist_ok=True)

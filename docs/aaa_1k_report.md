@@ -7,7 +7,7 @@ AAA-1K is a research seed, not Juniper and not an agent. It is one primitive: a 
 | Item | Value |
 |---|---|
 | phase | `aaa.1k.v1` |
-| scientific fingerprint | `677dfe4941b74a7793cd0532b4adcd6a1fc99512edf143adb20741f39d2deace` |
+| scientific fingerprint | `ae020a100b30ae876110291db8368b8f8fc5cd801ad15177c1919f67f75514df` |
 | files covered | 23 |
 | trainable parameters | 994 |
 | selected configuration | lr=0.03, T=4, lambda=0.25 |
@@ -20,8 +20,9 @@ AAA-1K is a research seed, not Juniper and not an agent. It is one primitive: a 
 |---|---|
 | hidden state scalars | 16 |
 | optimizer state scalars | 0 |
-| tbptt buffer scalars | 0 |
-| total adaptive state scalars | 1010 |
+| tbptt buffer scalars capacity | 404 |
+| tbptt buffer scalars current | 0 |
+| total adaptive state scalars | 1414 |
 | trainable parameters | 994 |
 
 The optimizer is plain SGD and holds no state, so the adaptive footprint is the parameters, the 16-value hidden state, and the truncation buffer. There is no hidden second model.
@@ -45,6 +46,8 @@ Reported as separate dimensions. There is deliberately no combined score: one nu
 | Q4 gating | NEGATIVE | -1.89e-04 [-2.37e-04, -1.42e-04] (44/192 streams) |
 | Q2 online vs frozen | POSITIVE | +9.76e-04 [+7.80e-04, +1.20e-03] (96/96 streams) |
 
+**The declared precision objective was NOT met.** The development pilot measured a primary effect of 7.13e-05 with a per-stream spread of 2.22e-04; resolving a quarter of that effect at 95% would have needed 599 replicas per family, and the declared bound of 32 was applied. Every interval below is therefore wider than the design asked for, and effects near zero should be read as unresolved rather than absent.
+
 ### Q1 -- can it learn online?
 
 Overall: **POSITIVE**, +5.19e-04 [+4.47e-04, +5.91e-04] (176/192 streams).
@@ -59,6 +62,8 @@ Overall: **POSITIVE**, +5.19e-04 [+4.47e-04, +5.91e-04] (176/192 streams).
 ### Q2 -- does continued learning help after a change?
 
 Overall: **POSITIVE**, +9.76e-04 [+7.80e-04, +1.20e-03] (96/96 streams).
+
+**Important qualification, from an adversarial probe.** Branching at a point where *nothing changes* reproduces 95% of this effect. Q2 therefore measures continued learning in general far more than it measures adaptation specific to the change. The headline number is real; the natural reading of it is wrong. See `docs/evidence/aaa_1k_adversarial_probes.json` and `docs/aaa_1k_self_review.md`.
 
 Every branch started from a clone whose complete model-state hash matched its twin: `clone_hashes_matched = True`. The frozen arm kept running its recurrence and its previous-error input; only its weights stopped moving.
 
@@ -87,6 +92,8 @@ Restricted to steps whose target was never shown to the agent:
 
 the ungated control has 954 parameters against 994, so this compares mechanisms at close to matched capacity, not a large model against a small one.
 
+**Read the capacity match carefully.** Parameter counts are close (954 against 994), but the ungated control carries 28 hidden units to the gated model's 16. Matching on parameters buys the ungated arm more state, which is exactly the trade a gate costs you. The comparison is the honest one for a fixed parameter budget, and it is not a comparison at matched hidden width.
+
 | Scope | Verdict | Ungated RNN minus AAA-1K |
 |---|---|---|
 | all families | NEGATIVE | -1.89e-04 [-2.37e-04, -1.42e-04] (44/192 streams) |
@@ -95,6 +102,8 @@ the ungated control has 954 parameters against 994, so this compares mechanisms 
 ### Q5 -- what survives A, then B, then A again?
 
 A2 tail minus A1 tail; positive means the model came back worse.
+
+**Read this table carefully.** Every learning arm came back *better* than it left, so no catastrophic forgetting was detected. But A1 is the first segment a learner ever sees and A2 is the third, so by A2 the model has had three times as much experience in total. This design cannot separate "it retained A" from "it kept getting better at everything", and the next phase needs a fixed frozen probe bank measured at both boundaries to do so. The non-learning arms are the control: `constant_motion_reflected` is flat across A1 and A2, as it must be.
 
 | Arm | A1 tail | B tail | A2 tail | A2 - A1 |
 |---|---|---|---|---|
@@ -145,24 +154,26 @@ Baselines AAA-1K beat outright, by family:
 | trained steps | 53225 |
 | targets skipped as unavailable | 1815 |
 | scored transitions | 55040 |
-| transitions per second | 756 |
-| wall seconds | 72.8 |
+| transitions per second | 754 |
+| wall seconds | 73.0 |
 | arms per stream | 12 |
 
 Gradient clipping is a declared mechanism with a declared threshold, not a silent safety net, so its activation count is part of the result.
 
 ## What these numbers do and do not support
 
-| Claim | What it would mean |
-|---|---|
-| implementation works | the code executes correctly and deterministically |
-| neural learning occurred | weights changed in a useful direction on some measured stream |
-| hidden state helps | persistent recurrence beat matched state-reset and stateless controls |
-| online adaptation helps | continued learning beat an identical frozen-weight clone |
-| retention exists | learning a new regime did not completely erase an old one |
-| error estimation informative | predicted error magnitude tracked realized error |
-| baseline competitiveness | the model beat the specified simple alternatives |
-| generalization | held-out trajectories, regimes or families support a generalization claim |
+| Claim | Status | What it would mean | What was actually measured |
+|---|---|---|---|
+| implementation works | **SUPPORTED** | the code executes correctly and deterministically | 0 non-finite events over 55040 scored transitions; the suite includes exhaustive finite-difference gradient checks and a resume-equals-uninterrupted test |
+| neural learning occurred | **SUPPORTED** | weights changed in a useful direction on some measured stream | Q1, +5.19e-04 [+4.47e-04, +5.91e-04] (176/192 streams) |
+| hidden state helps | **SUPPORTED** | persistent recurrence beat matched state-reset and stateless controls | Q3 against the stateless control on the memory families, +4.25e-04 [+3.77e-04, +4.76e-04] (64/64 streams) |
+| online adaptation helps | **SUPPORTED** | continued learning beat an identical frozen-weight clone | Q2, +9.76e-04 [+7.80e-04, +1.20e-03] (96/96 streams) |
+| retention exists | **SUPPORTED, WITH A CONFOUND** | learning a new regime did not completely erase an old one | the A2 tail was 5.91e-05 *lower* than the A1 tail, so no catastrophic forgetting was detected -- but the model has also had twice as much total experience by A2, so this run cannot separate retention from continued learning |
+| error estimation informative | **SUPPORTED, WEAKLY** | predicted error magnitude tracked realized error | mean rank correlation 0.47 between the predicted and realized error magnitude, but only 30 of 192 streams had a monotone quintile table |
+| baseline competitiveness | **MIXED** | the model beat the specified simple alternatives | beat constant_motion, constant_motion_reflected, linear_fit, persistence, rls_online on at least one family; lost to constant_motion, constant_motion_reflected, dead_reckoning, linear_fit, rls_online on at least one family |
+| generalization | **NOT CLAIMED** | held-out trajectories, regimes or families support a generalization claim | evaluation streams are held out from development, which supports a claim about unseen trajectories of the *same* families only. No unseen family was tested, so nothing here supports generalization to a new kind of world |
+
+Every effect above is conditional on a single model initialization: the evaluation gives every arm the same initialization seed so that an ablation differs from the primary in exactly one mechanism, and the intervals therefore resample streams but not initializations. A probe across five initializations found every comparison keeping its sign while magnitudes varied by up to a factor of two.
 
 None of these implies intelligence, general autonomy, causal understanding, physical understanding, AGI or consciousness. This is a 994-parameter network predicting where a dot goes next.
 

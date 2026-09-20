@@ -286,6 +286,14 @@ def render_report(evidence: dict[str, Any], selection: dict[str, Any], identity:
         add(f"Overall: **{_verdict(q2['overall'])}**, {_effect(q2['overall'])}.")
         add("")
         add(
+            "**Important qualification, from an adversarial probe.** Branching at a point where "
+            "*nothing changes* reproduces 95% of this effect. Q2 therefore measures continued "
+            "learning in general far more than it measures adaptation specific to the change. "
+            "The headline number is real; the natural reading of it is wrong. See "
+            "`docs/evidence/aaa_1k_adversarial_probes.json` and `docs/aaa_1k_self_review.md`."
+        )
+        add("")
+        add(
             f"Every branch started from a clone whose complete model-state hash matched its twin: "
             f"`clone_hashes_matched = {q2['clone_hashes_matched']}`. The frozen arm kept running "
             f"its recurrence and its previous-error input; only its weights stopped moving."
@@ -368,6 +376,14 @@ def render_report(evidence: dict[str, Any], selection: dict[str, Any], identity:
     q4 = dims["q4_gating"]
     add("")
     add(q4["note"] + ".")
+    add("")
+    add(
+        "**Read the capacity match carefully.** Parameter counts are close (954 against 994), "
+        "but the ungated control carries 28 hidden units to the gated model's 16. Matching on "
+        "parameters buys the ungated arm more state, which is exactly the trade a gate costs "
+        "you. The comparison is the honest one for a fixed parameter budget, and it is not a "
+        "comparison at matched hidden width."
+    )
     add("")
     add(
         "\n".join(
@@ -545,6 +561,14 @@ def render_report(evidence: dict[str, Any], selection: dict[str, Any], identity:
                 ["Claim", "Status", "What it would mean", "What was actually measured"],
             )
         )
+    )
+    add("")
+    add(
+        "Every effect above is conditional on a single model initialization: the evaluation "
+        "gives every arm the same initialization seed so that an ablation differs from the "
+        "primary in exactly one mechanism, and the intervals therefore resample streams but "
+        "not initializations. A probe across five initializations found every comparison "
+        "keeping its sign while magnitudes varied by up to a factor of two."
     )
     add("")
     add(

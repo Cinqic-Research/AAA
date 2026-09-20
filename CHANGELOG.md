@@ -1,5 +1,79 @@
 # Research history
 
+## aaa.1k.v1 — a recurrent predictive seed (2026-09-19)
+
+A new versioned research phase in `research/aaa_1k/`, isolated from the frozen
+v2.1 core and the observation-noise phase. Nothing under `aaa/`, `benchmarks/`
+or `results/` is modified, and no historical evidence is regenerated.
+
+**A 994-parameter GRU, written out by hand.** Three inputs, sixteen hidden
+units, two outputs, one bias vector per gate. No framework: at this size a
+framework costs transparency and buys nothing. Every parameter of every model
+is finite-difference verified against a *sequence* loss, exhaustively, to a
+maximum absolute error of 8.7e-10 — because a recurrent model can have a
+perfect one-step gradient and a broken temporal one, and an injected
+single-step backward pass is shown to be caught.
+
+**The optimizer holds nothing.** Plain SGD, zero optimizer state, counted and
+reported separately from the 16 hidden scalars and the 404-scalar truncation
+buffer. A "1K model" with a hidden 100K of optimizer state would deserve
+ridicule.
+
+**Mechanisms, not architectures.** Three ablations of the model itself — state
+reset, previous-error input removed, recurrent weights frozen — plus a
+982-parameter stateless MLP and a 954-parameter ungated RNN, all sharing one
+initialization seed so each differs in exactly one mechanism. The design is
+adapted from Foucault & Meyniel (2021), whose conclusion it then contradicts.
+
+**Two new benchmark families that recurrence could actually matter on**, since
+a GRU losing to a closed-form extrapolator on smooth motion teaches very
+little: `occlusion_v1` (periodic observation gaps; during a gap the displacement
+and error inputs are exactly zero for every arm) and `coarse_speed_v1` (a hidden
+speed regime behind a coarse deterministic quantizer). Plus `aba_v1`, one
+unlabelled A→B→A stream. A dead-reckoning baseline that carries velocity
+perfectly and for free was added so that "the network remembered the velocity"
+has to beat something that also remembered it.
+
+**The results, including the ones that are not flattering.** The model learns
+online on every family. Persistent hidden state helps, most clearly on steps
+whose target it never saw. **Gating does not pay for itself**: the smaller
+ungated control wins. The model loses to reflected constant motion, dead
+reckoning and the existing three-parameter RLS learner on smooth fully observed
+motion. Its self-error head is weakly informative and over-predicts.
+
+**A gate that fired.** The stability-margin rule was rewritten mid-phase after
+it was found to be vacuous — with the declared gradient clip in place, nothing
+in the search grid ever diverges, so "require the next higher rate to be
+stable" could not fail. A stage-0 probe with clipping disabled located a real
+boundary at `lr = 0.3`, and the repaired rule then **eliminated the four best
+development configurations**, costing 26% of development accuracy. The rule was
+declared before the numbers existed.
+
+**An adversarial probe that overturned a headline reading.** Q2 reported that
+an online arm beats its frozen twin after an unannounced change. Branching at a
+point where *nothing happens* reproduces 95% of that effect. The measurement
+stands; the word "adaptation" does not attach to it. Tracked as `AAA-153`,
+alongside `AAA-154` for the A→B→A design that turned out not to measure
+retention.
+
+**The precision objective was missed and is reported as missed.** The
+development pilot implied 599 replicas per family; 32 were run under a declared
+bound. Every interval is wider than the design asked for, and the report says
+so above the capability vector.
+
+Also: disjoint hashed seed namespaces; a paired stream-level bootstrap that
+never resamples steps inside a trajectory; an error-head calibration analysis
+kept separate from prediction accuracy; a capability vector with no combined
+score; phase-scoped non-self-referential source identity with lineage metadata
+(`parent_model_id: null` — this is the lineage root); a read-only Matplotlib
+dashboard showing all sixteen real hidden activations and both gate vectors,
+with no interactive key bindings, because PR #12 already found what Matplotlib
+does with those; 93 new tests including deliberate failure injection; and mypy,
+coverage and packaging extended to cover `research/`.
+
+Adding this phase necessarily changes both repository-wide source fingerprints.
+No exclusion was added to prevent that; see `AAA-152`.
+
 ## Observation-noise engineering phase closure (2026-09-19)
 
 The current engineering line fixes the hosted artifact filename defect with a

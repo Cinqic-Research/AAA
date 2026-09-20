@@ -10,6 +10,12 @@ The environment is one moving dot on a line. The learner has three parameters.
 Neither is an accident: the point of this version is not a capable system, it
 is a **measuring instrument you can check**.
 
+AAA is the research programme, not the dot. The long-term objective is a
+persistent agent called Juniper; the dot is one benchmark family, and the
+current learners are the smallest things that can be measured honestly on it.
+See [the research charter](docs/aaa_charter.md) before assuming the benchmark
+is the project.
+
 AAA makes no claim to general intelligence, physical understanding, or
 independent goal formation. "Autonomous" here means the observe / predict /
 score / update loop runs unattended after launch, and nothing more.
@@ -94,6 +100,39 @@ alongside everything else. No threshold was touched. See `AAA-120` in
   retired unobserved. Development evidence is not a confirmation result. See
   [`benchmarks/observation_noise_candidate_ledger.json`](benchmarks/observation_noise_candidate_ledger.json).
 
+## AAA-1K: a 994-parameter recurrent core
+
+The current research phase, isolated in [`research/aaa_1k/`](research/aaa_1k/).
+A hand-written NumPy GRU -- 3 inputs, 16 hidden units, 2 outputs, 994 trainable
+parameters and no optimizer state -- that learns online by truncated BPTT,
+keeps a persistent hidden state, is fed its own previous prediction error, and
+emits an estimate of how wrong it expects to be. It is compared against a
+matched-capacity stateless MLP (982 parameters), an ungated RNN (954
+parameters), three ablations of itself, and the full analytic baseline suite
+including the unmodified v2.1 RLS candidate.
+
+The headline results, in one line each:
+
+- it **learns online** on every family;
+- **persistent hidden state helps** -- it beats both a state-reset ablation and
+  a matched stateless control, most clearly on steps whose target was never
+  shown to it;
+- **gating does not pay for itself here**: the ungated 954-parameter control
+  beats it, which is the opposite of what the small-gated-network literature
+  reports for stochastic, changing environments;
+- it **loses** to reflected constant motion, dead reckoning and the existing
+  three-parameter RLS learner on smooth, fully observed motion, and wins only
+  where memory or coarse observation actually matter;
+- its **self-error head is weakly informative** (mean rank correlation 0.47)
+  and systematically over-predicts;
+- its apparent **adaptation result does not survive a control**: branching
+  where nothing changes reproduces 95% of the effect, so it measures continued
+  learning rather than adaptation.
+
+The full result is [`docs/aaa_1k_report.md`](docs/aaa_1k_report.md); read
+[`docs/aaa_1k_self_review.md`](docs/aaa_1k_self_review.md) first, because it is
+where the two qualifications above come from.
+
 ## The learner
 
 Feature vector, from the last four observed positions only:
@@ -155,6 +194,15 @@ python -m aaa.cli recompute runs/benchmark-v2_1/dev-001
 python -m aaa.cli diagnose --output docs/evidence/diagnosis
 python -m aaa.cli select-candidate
 python -m aaa.cli animate --checkpoint runs/<attempt>/checkpoints/replica-00.json
+
+# AAA-1K
+python -m research.aaa_1k parameter-audit         # 994 / 982 / 954, recounted three ways
+python -m research.aaa_1k gradient-check --full   # finite-difference every parameter
+python -m research.aaa_1k select   --output docs/evidence/aaa_1k_development_selection.json
+python -m research.aaa_1k evaluate --selection docs/evidence/aaa_1k_development_selection.json \
+    --output docs/evidence/aaa_1k_evaluation.json
+python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation.json
+python -m research.aaa_1k visualize --family occlusion_v1 --output runs/aaa_1k/dashboard.png
 ```
 
 Formal confirmation requires a predeclared batch, a committed freeze manifest,
@@ -183,6 +231,13 @@ result, and this repository is built to report that rather than to avoid it.
 
 | Document | What it covers |
 |---|---|
+| [Research charter](docs/aaa_charter.md) | what AAA is, what Juniper is, and why the dot is one benchmark |
+| [AAA-1K architecture](docs/aaa_1k_architecture.md) | the frozen 994-parameter specification |
+| [AAA-1K literature review](docs/aaa_1k_literature_review.md) | what was adopted from the literature, and what was refused |
+| [AAA-1K decisions](docs/aaa_1k_decisions.md) | every decision, including three departures from the phase brief |
+| [AAA-1K report](docs/aaa_1k_report.md) | the measured result, with its claim boundaries |
+| [AAA-1K self-review](docs/aaa_1k_self_review.md) | the attempt to break those results, and what it found |
+| [AAA-1K handoff](docs/aaa_1k_handoff.md) | everything an independent reviewer needs |
 | [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
 | [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
 | [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |

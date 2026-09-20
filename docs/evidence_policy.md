@@ -146,3 +146,29 @@ precision justification. Its declared v1.1 batches were retired unobserved.
 Any successor must be versioned and receive fresh batch identities before
 observation, and any claim of publication-grade durability still requires a
 genuine external archive plus independent retrieval.
+
+## AAA-1K
+
+The phase commits its development selection (every attempted configuration,
+including the eliminated ones and their scores), its held-out evaluation (the
+per-stream primitives every headline statistic is recomputed from), and its
+adversarial probes. Together those are about 1.4 MB of JSON.
+
+It does **not** commit dashboard images or per-step traces. A 994-parameter
+model has no excuse to generate another multi-gigabyte archive, and it does
+not: the entire evaluation is 55,040 scored transitions and about 73 seconds of
+CPU, so regeneration is cheaper than storage by a wide margin.
+
+The committed evidence is sufficient for independent recomputation without
+rerunning a model:
+
+```bash
+python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation.json
+```
+
+Failed and eliminated configurations are retained on the same terms as
+successful ones. The four development configurations that scored best and were
+then eliminated by the stability margin are in `stage_one_eliminated` with
+their scores intact, which is the only way a reader can check what the rule
+cost.
+

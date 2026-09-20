@@ -257,3 +257,42 @@ No GPU is required and none is used. The model has three parameters. Every
 attempt records the CPU model, core count, memory, OS, Python, NumPy, BLAS
 build metadata and available disk space, so a latency number can be read in
 context.
+
+## AAA-1K (`aaa.1k.v1`)
+
+A separate phase with its own identity; see
+[`aaa_1k_handoff.md`](aaa_1k_handoff.md) for the complete reviewer route. From
+a clean checkout with the locked environment installed:
+
+```bash
+python -m research.aaa_1k fingerprint                 # phase scientific source identity
+python -m research.aaa_1k parameter-audit             # 994 / 982 / 954, recounted three ways
+python -m research.aaa_1k gradient-check --full       # finite-difference every parameter
+python -m research.aaa_1k select \
+    --output docs/evidence/aaa_1k_development_selection.json
+python -m research.aaa_1k evaluate \
+    --selection docs/evidence/aaa_1k_development_selection.json \
+    --output docs/evidence/aaa_1k_evaluation.json
+python -m research.aaa_1k adversarial-probes \
+    --selection docs/evidence/aaa_1k_development_selection.json \
+    --output docs/evidence/aaa_1k_adversarial_probes.json
+python -m research.aaa_1k recompute \
+    --evidence docs/evidence/aaa_1k_evaluation.json
+python -m research.aaa_1k report \
+    --evidence docs/evidence/aaa_1k_evaluation.json \
+    --selection docs/evidence/aaa_1k_development_selection.json \
+    --output docs/aaa_1k_report.md
+```
+
+Everything is deterministic and CPU-only; the whole sequence takes about four
+minutes. `recompute` rebuilds 59 stored statistics from the retained per-stream
+primitives without running a model, and exits non-zero on any disagreement.
+
+The phase fingerprint covers this phase's source, the shared `aaa/` modules it
+executes, its tests, its protocol documents and the dependency lock. It is
+deliberately **not** the repository-wide v2.1 or observation-noise fingerprint;
+adding this phase changes both of those, which is correct and is recorded as
+`AAA-152`. Historical v2.1 and observation-noise evidence reproduces from its
+historical checkout at the tags `aaa-pre-next-phase-2026-09-19` and
+`aaa-pre-next-phase-closure-2026-09-19`.
+
