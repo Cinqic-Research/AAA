@@ -1,6 +1,6 @@
 """AAA-1K evaluation round 2: the corrected designs, on fresh stream identities.
 
-Round 1 is retained unchanged at `docs/evidence/aaa_1k_evaluation.json`. It is
+Round 1 is retained unchanged at `docs/evidence/aaa_1k_evaluation_round1_superseded.json`. It is
 superseded, not deleted, and its two design defects are exactly why this round
 exists:
 
@@ -318,6 +318,17 @@ def q6_calibration(cells: list[dict[str, Any]]) -> dict[str, Any]:
     measured = [cell["calibration"] for cell in cells if cell["calibration"]["status"] == "MEASURED"]
     if not measured:
         return {"question": "Can the model estimate its own likely error?", "status": "INSUFFICIENT_EVIDENCE"}
+
+    def summaries(records: list[dict[str, Any]]) -> dict[str, Any]:
+        return {
+            "spearman": summarize_values([entry["spearman"] for entry in records]),
+            "pearson": summarize_values([entry["pearson"] for entry in records]),
+            "slope": summarize_values([entry["slope"] for entry in records]),
+            "bias": summarize_values([entry["bias"] for entry in records]),
+            "cells_with_monotone_bins": int(sum(entry["bins_monotone"] for entry in records)),
+            "cells_measured": len(records),
+        }
+
     return {
         "question": "Can the model estimate its own likely error?",
         "status": "MEASURED",
@@ -328,6 +339,16 @@ def q6_calibration(cells: list[dict[str, Any]]) -> dict[str, Any]:
         "bias": summarize_values([entry["bias"] for entry in measured]),
         "cells_with_monotone_bins": int(sum(entry["bins_monotone"] for entry in measured)),
         "cells_measured": len(measured),
+        "by_family": {
+            family: summaries(
+                [
+                    cell["calibration"]
+                    for cell in cells
+                    if cell["family"] == family and cell["calibration"]["status"] == "MEASURED"
+                ]
+            )
+            for family in sorted({cell["family"] for cell in cells})
+        },
         "caveat": (
             "a learned error-magnitude estimate, not a calibrated predictive distribution and "
             "not a Bayesian posterior"
@@ -356,6 +377,10 @@ def q7_baselines(cells: list[dict[str, Any]]) -> dict[str, Any]:
         "statistic": "baseline minus AAA-1K mean normalized error",
         "positive_means": "AAA-1K was better",
         "decision_rule": "a win requires the whole 95% interval above zero, declared in advance",
+        "inference_scope": (
+            "exploratory descriptive comparisons; no family-baseline cell is promoted as a "
+            "multiplicity-adjusted confirmatory claim"
+        ),
         "by_family": table,
         "wins_by_family": wins,
         "losses_by_family": losses,
@@ -411,7 +436,7 @@ def run_round2(
     return {
         "schema": ROUND2_SCHEMA,
         "round": 2,
-        "supersedes": "aaa.1k.experiments.v1 at docs/evidence/aaa_1k_evaluation.json",
+        "supersedes": "aaa.1k.experiments.v1 at docs/evidence/aaa_1k_evaluation_round1_superseded.json",
         "configuration": configuration.to_dict(),
         "architecture_configurations": architecture_configurations
         or {"note": "all arms shared the primary configuration"},

@@ -8,6 +8,44 @@ The ordering rule applied throughout, declared in the brief: scientific
 validity → causal correctness → reproducibility → simplicity → long-term AAA
 usefulness → performance.
 
+## D-13 — Supersede round 2 with fresh round-3 identities after independent review
+
+**Decision.** Preserve round 2 unchanged. Round 3 uses fresh offsets 40,000,
+50,000, and 60,000 for main streams, adaptation environments, and retention
+environments respectively.
+
+**Reason.** Independent review found that Q1's first-versus-last contrast did
+not identify weight learning and that Q2/Q5 flattened trials sharing five model
+initializations. These are claim-critical estimator/design changes after round 2
+was observed, so editing its result would be a retcon. Round 3 instead compares
+online with a matched frozen copy for Q1 and fully crosses initialization and
+environment factors for Q2/Q5 before independently resampling both.
+
+**Not changed.** Architecture, learning rate, clipping, TBPTT horizon, loss
+weight, benchmark construction, and decision thresholds. No round-2 result was
+used to tune them.
+
+## D-14 — Complete interaction state defines branch identity
+
+**Decision.** Equality at a scientific branch means equality of all
+future-affecting model, adapter, tracker, cache, and counter state, excluding
+only the assigned arm name and whether updates are enabled.
+
+**Reason.** A weight/model-only hash cannot establish that two agents begin in
+the same causal state. The complete hash and fail-closed checkpoint validation
+make the documented identity claim executable.
+
+## D-15 — Keep both gating comparisons separate
+
+**Decision.** Q4 remains the frozen near-equal-parameter comparison (994 gated
+parameters/16 units versus 954 ungated parameters/28 units). A development-only
+16-versus-16 characterization is reported separately and never substituted for
+Q4.
+
+**Reason.** Fixed parameter budget and fixed state width answer different
+questions. The latter gives the ungated model 354 parameters and isolates the
+width tradeoff; it cannot retroactively redefine the predeclared evaluation.
+
 ---
 
 ## D-1. Start from `main`, not from the PR #12 branch
@@ -343,4 +381,3 @@ would be a mechanism with no failure mode to fix, and would have to be justified
 by measured inadequacy rather than by the literature recommending it. Rolnick et
 al.'s CLEAR remains the right reference *when* a benchmark produces forgetting;
 this one does not.
-

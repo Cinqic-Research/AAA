@@ -154,31 +154,33 @@ including the eliminated ones and their scores), its held-out evaluation (the
 per-cell primitives every headline statistic is recomputed from), its
 development characterization probes, and its adversarial probes.
 
-**Round 1 is retained, superseded.** It was completed, probed, and found to
-contain four design defects; all four are repaired in round 2 on fresh stream
-identities. Round 1's evidence and its rendered report are kept unchanged at
-`aaa_1k_evaluation_round1_superseded.json` and
-`aaa_1k_report_round1_superseded.md`, with a banner naming what was wrong. A
+**Rounds 1 and 2 are retained, superseded.** Round 1 contained four design
+defects. Independent review then found round-2 Q1 identification and Q2/Q5
+uncertainty defects. Round 3 uses fresh identities. Earlier evidence remains at
+`aaa_1k_evaluation_round1_superseded.json`,
+`aaa_1k_report_round1_superseded.md`,
+`aaa_1k_evaluation_round2_superseded.json`, and
+`aaa_1k_report_round2_superseded.md`. A
 round that produced a misleading result is evidence on exactly the same terms as
 one that did not — particularly this one, since the largest defect inflated a
 headline effect thirty-fold and was caught by reading a per-arm table.
 
-Together those are about 4.6 MB of JSON, of which 3.2 MB is round 2's 720
-per-cell records and 1.2 MB is the retained round 1. That is the price of
+Together the three evaluations are about 8.8 MB of JSON: 4.35 MB current round
+3, 3.21 MB superseded round 2, and 1.23 MB superseded round 1. That is the price of
 independent recomputation without rerunning a model, and it is paid
 deliberately: the per-cell table is what exposed the stateless control's
 instability that a summary had already averaged away.
 
 It does **not** commit dashboard images or per-step traces. A 994-parameter
 model has no excuse to generate another multi-gigabyte archive, and it does
-not: the whole round-2 evaluation is 206,400 scored transitions and about five
+not: the current evaluation is deterministic and takes about five
 minutes of CPU, so regenerating a trace is far cheaper than storing one.
 
 The committed evidence is sufficient for independent recomputation without
 rerunning a model:
 
 ```bash
-python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation_round2.json
+python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation_round3.json
 ```
 
 Failed and eliminated configurations are retained on the same terms as
@@ -186,4 +188,3 @@ successful ones. The four development configurations that scored best and were
 then eliminated by the stability margin are in `stage_one_eliminated` with
 their scores intact, which is the only way a reader can check what the rule
 cost.
-

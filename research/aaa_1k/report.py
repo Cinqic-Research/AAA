@@ -624,7 +624,7 @@ def _round2_claims(evidence: dict[str, Any]) -> dict[str, tuple[str, str]]:
             status(q2, "SUPPORTED", "CONTRADICTED", "INCONCLUSIVE"),
             f"Q2 difference-of-differences against a bit-identical unchanged world, {_effect(q2)}",
         ),
-        "retention_exists": (
+        "probe_bank_forgetting": (
             "SUPPORTED" if _verdict(q5) in ("NEGATIVE", "INCONCLUSIVE") else "CONTRADICTED",
             f"probe-bank error after regime B minus after regime A1, {_effect(q5)}; a positive "
             f"value would be forgetting",
@@ -665,8 +665,9 @@ def render_round2_report(
     dims = evidence["capability_vector"]["dimensions"]
     lines: list[str] = []
     add = lines.append
+    round_number = int(evidence.get("round", 2))
 
-    add("# AAA-1K round 2: a 994-parameter recurrent predictive core")
+    add(f"# AAA-1K round {round_number}: a 994-parameter recurrent predictive core")
     add("")
     add(
         "AAA-1K is a research seed, not Juniper and not an agent. It is one primitive: a "
@@ -675,42 +676,81 @@ def render_round2_report(
         "on a moving dot."
     )
     add("")
-    add(
-        "**This round supersedes round 1.** Round 1 is retained unchanged at "
-        "`docs/evidence/aaa_1k_evaluation.json`. Four defects in it were found by probing its "
-        "own conclusions, and all four are repaired here rather than annotated."
-    )
+    if round_number == 3:
+        add(
+            "**This round supersedes round 2.** Round 2 is retained unchanged at "
+            "`docs/evidence/aaa_1k_evaluation_round2_superseded.json`. Independent review "
+            "found that Q1's time contrast did not identify weight learning and that Q2/Q5 "
+            "flattened trials sharing model initializations. Round 3 uses fresh identities, a "
+            "matched frozen Q1 arm, and complete crossed Q2/Q5 designs."
+        )
+    else:
+        add(
+            "**This round supersedes round 1.** Round 1 is retained unchanged at "
+            "`docs/evidence/aaa_1k_evaluation_round1_superseded.json`. Four defects in it were "
+            "found by probing its own conclusions, and all four are repaired here."
+        )
     add("")
+    corrections = (
+        [
+            [
+                "Q1 identification",
+                "first-quarter minus last-quarter error",
+                "matched online minus frozen effect",
+                "`AAA-159`",
+            ],
+            [
+                "Q2/Q5 uncertainty",
+                "trials cycled five initializations then used a flat bootstrap",
+                "complete initialization by environment crossings",
+                "`AAA-160`",
+            ],
+            [
+                "checkpoint boundary",
+                "malformed cache/tracker/adapter state could load",
+                "fail-closed complete-state validation",
+                "`AAA-157`",
+            ],
+            ["branch identity", "model-state hash only", "complete interaction-state hash", "`AAA-158`"],
+        ]
+        if round_number == 3
+        else [
+            [
+                "adaptation (Q2)",
+                "a single online/frozen branch, which a control showed was 95% reproduced where nothing changed",
+                "difference-of-differences against a bit-identical unchanged world",
+                "`AAA-153`",
+            ],
+            [
+                "retention (Q5)",
+                "segment tails, confounded with three times the accumulated experience",
+                "a fixed frozen probe bank asked the same questions at every checkpoint",
+                "`AAA-154`",
+            ],
+            [
+                "uncertainty",
+                "intervals resampled streams only, treating the starting weights as fixed by nature",
+                "a crossed bootstrap over initializations and streams",
+                "`AAA-155`",
+            ],
+            [
+                "baseline fairness",
+                "one architecture's clip threshold imposed on all arms",
+                "each architecture on its own rule-selected learning rate and clip",
+                "`AAA-156`",
+            ],
+        ]
+    )
     add(
         "\n".join(
             _table(
+                corrections,
                 [
-                    [
-                        "adaptation (Q2)",
-                        "a single online/frozen branch, which a control showed was 95% reproduced where nothing changed",
-                        "difference-of-differences against a bit-identical unchanged world",
-                        "`AAA-153`",
-                    ],
-                    [
-                        "retention (Q5)",
-                        "segment tails, confounded with three times the accumulated experience",
-                        "a fixed frozen probe bank asked the same questions at every checkpoint",
-                        "`AAA-154`",
-                    ],
-                    [
-                        "uncertainty",
-                        "intervals resampled streams only, treating the starting weights as fixed by nature",
-                        "a crossed bootstrap over initializations and streams",
-                        "`AAA-155`",
-                    ],
-                    [
-                        "baseline fairness",
-                        "one architecture's clip threshold imposed on all arms",
-                        "each architecture on its own rule-selected learning rate and clip",
-                        "`AAA-156`",
-                    ],
+                    "What",
+                    "Round 2" if round_number == 3 else "Round 1",
+                    "Round 3" if round_number == 3 else "Round 2",
+                    "Tracked as",
                 ],
-                ["What", "Round 1", "Round 2", "Tracked as"],
             )
         )
     )
@@ -731,7 +771,7 @@ def render_round2_report(
                     ["evaluation cells", str(len(evidence["cells"]))],
                     ["adaptation trials", str(design["adaptation_trials"])],
                     ["retention trials", str(design["retention_trials"])],
-                    ["stream identities", "fresh; no round-1 stream is reused"],
+                    ["stream identities", "fresh; no earlier round stream is reused"],
                 ],
                 ["Item", "Value"],
             )
@@ -938,7 +978,7 @@ def render_round2_report(
         f"Adaptation accounts for {q2['adaptation_share_of_total']:.0%} of the total online "
         f"advantage; the rest is the ordinary benefit of continuing to learn, which round 1 "
         f"reported as if it were all adaptation. Every paired trial's two trunks reached an "
-        f"identical model state at the branch: `trunks_matched = {q2['trunks_matched']}`."
+        f"identical complete interaction state at the branch: `trunks_matched = {q2['trunks_matched']}`."
     )
     add("")
 
@@ -1050,6 +1090,8 @@ def render_round2_report(
     q7 = dims["q7_baseline_competitiveness"]
     add("")
     add(q7["decision_rule"] + ".")
+    add("")
+    add(q7.get("inference_scope", "These comparisons are exploratory and descriptive.") + ".")
     add("")
     families = sorted(q7["by_family"])
     baselines = sorted(next(iter(q7["by_family"].values())))

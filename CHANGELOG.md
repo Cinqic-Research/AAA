@@ -49,26 +49,28 @@ boundary at `lr = 0.3`, and the repaired rule then **eliminated the four best
 development configurations**, costing 26% of development accuracy. The rule was
 declared before the numbers existed.
 
-**The evaluation ran twice, and the second round is the result.** Round 1 was
+**The evaluation ran three times, and round 3 is current.** Round 1 was
 completed, probed, and found to contain four design defects. All four were
 repaired and re-measured on fresh stream identities; round 1 is retained,
-superseded, with its report and a banner naming what was wrong.
+superseded, with its report and a banner naming what was wrong. Independent
+review then superseded round 2 because Q1 did not identify weight learning and
+Q2/Q5 flattened reused initialization identities.
 
 **Q2 did not measure adaptation.** Branching an online/frozen pair where
 *nothing happens* reproduced 95% of the effect, so the result was mostly about
 continuing to learn. Repaired with a `paired_change_v1` family that emits two
 streams bit-identical until a declared step, after which one changes and one
 does not; the estimator is the difference of the two advantages, so the ordinary
-benefit of learning cancels. Adaptation is real and about a third smaller than
-round 1 implied: `+9.50e-04 [+5.63e-04, +1.33e-03]`, roughly 65% of the total
-online advantage (`AAA-153`).
+benefit of learning cancels. Round 3 measures
+`+5.12e-04 [+1.69e-04, +8.67e-04]`, 43% of the combined adaptation plus
+ordinary continued-learning advantage (`AAA-153`, `AAA-160`).
 
 **Q5 did not measure retention.** The A→B→A comparison confounded "came back
 intact" with "had three times the experience". Repaired with a fixed bank of
 held-out regime-A episodes, never trained on, evaluated by a frozen clone at
-every segment boundary. Regime-A ability *improved* while the model trained on
-regime B, so there is no forgetting on this benchmark and no replay was added
-(`AAA-154`).
+every segment boundary. Round 3 measures no statistically resolved forgetting:
+`-2.02e-04 [-6.42e-04, +1.26e-04]`. This is not general retention immunity and
+no replay was added (`AAA-154`, `AAA-160`).
 
 **The intervals were too narrow.** They resampled streams while treating the
 starting weights as fixed by nature. Repaired with five initializations and a

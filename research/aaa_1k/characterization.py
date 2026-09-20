@@ -42,8 +42,8 @@ from .selection import (
     development_streams,
     eligible_learning_rates,
 )
-from .stats import paired_difference
-from .streams import coarse_speed_stream
+from .stats import paired_difference, summarize_values
+from .streams import Stream, StreamStep, coarse_speed_stream, occlusion_stream
 
 CHARACTERIZATION_SCHEMA = "aaa.1k.characterization.v1"
 
@@ -335,6 +335,108 @@ def per_architecture_selection(configuration: Configuration, *, model_seed_index
     }
 
 
+def width_matched_gating(
+    configuration: Configuration, *, streams: int = 8, initializations: int = 3
+) -> dict[str, Any]:
+    """Development characterization at equal hidden width (16 units)."""
+
+    gated: list[float] = []
+    ungated: list[float] = []
+    bank = development_streams()[:streams]
+    for initialization in range(initializations):
+        seed = derive_seed("model_init", initialization)
+        shared: dict[str, Any] = {"seed": seed, **configuration.model_kwargs()}
+        for stream in bank:
+            agents = [
+                _agent(AAA1KGRU(**shared), "gated_16"),
+                _agent(VanillaRNNControl(**shared, hidden_size=16), "ungated_16"),
+            ]
+            result = run_stream(stream, agents)
+            gated.append(result.mean_absolute_error("gated_16"))
+            ungated.append(result.mean_absolute_error("ungated_16"))
+    comparison = paired_difference(gated, ungated, bootstrap_index=8)
+    return {
+        "probe": "width_matched_gating",
+        "question": "what happens when gated and ungated recurrence both have 16 hidden units?",
+        "gated_parameters": 994,
+        "ungated_parameters": int(VanillaRNNControl(hidden_size=16).parameter_count()),
+        "comparison": comparison,
+        "finding": (
+            "at fixed hidden width, ungated minus gated error is "
+            f"{comparison['mean_difference']:+.2e} with interval "
+            f"[{comparison['ci_low']:+.2e}, {comparison['ci_high']:+.2e}]. This is a "
+            "mechanism-at-fixed-state-width characterization, not a replacement for the "
+            "frozen near-equal-parameter Q4 comparison"
+        ),
+    }
+
+
+def occlusion_sensitivity(configuration: Configuration, *, initializations: int = 3) -> dict[str, Any]:
+    """Reviewer-designed development characterization of occlusion mechanics."""
+
+    conditions = [
+        ("short_frequent", {"gap_period": 12, "gap_length": 2, "warmup": 8}),
+        ("declared", {"gap_period": 20, "gap_length": 4, "warmup": 12}),
+        ("long_sparse", {"gap_period": 32, "gap_length": 8, "warmup": 17}),
+        ("phase_shifted", {"gap_period": 20, "gap_length": 4, "warmup": 18}),
+    ]
+    rows: dict[str, dict[str, Any]] = {}
+    for label, options in conditions:
+        gru: list[float] = []
+        reset: list[float] = []
+        for initialization in range(initializations):
+            seed = derive_seed("model_init", initialization)
+            shared: dict[str, Any] = {"seed": seed, **configuration.model_kwargs()}
+            for index in range(6):
+                stream = occlusion_stream(
+                    derive_seed("development_env", 800 + index),
+                    steps=180,
+                    gap_period=options["gap_period"],
+                    gap_length=options["gap_length"],
+                    warmup=options["warmup"],
+                )
+                agents = [
+                    _agent(AAA1KGRU(**shared), "gru"),
+                    _agent(AAA1KGRU(**shared, reset_state_every_step=True), "reset"),
+                ]
+                result = run_stream(stream, agents).where(target_observed=False)
+                gru.append(result.mean_absolute_error("gru"))
+                reset.append(result.mean_absolute_error("reset"))
+        rows[label] = paired_difference(gru, reset, bootstrap_index=9)
+
+    stationary_steps = tuple(
+        StreamStep(
+            index=index, true_position=0.5, observed=(index == 0 or index % 5 != 0), regime="stationary"
+        )
+        for index in range(121)
+    )
+    stationary = Stream(
+        family="occlusion_v1",
+        stream_id="review_stationary_occlusion",
+        seed=0,
+        steps=stationary_steps,
+        metadata={"purpose": "legitimate zero displacement and zero error ambiguity"},
+    )
+    stationary_errors: list[float] = []
+    for initialization in range(initializations):
+        agent = _agent(
+            AAA1KGRU(seed=derive_seed("model_init", initialization), **configuration.model_kwargs()),
+            "gru",
+        )
+        stationary_errors.append(run_stream(stationary, [agent]).mean_absolute_error("gru"))
+    return {
+        "probe": "occlusion_sensitivity",
+        "question": "is the hidden-state effect robust to gap length, period, phase, initial conditions, and legitimate zeros?",
+        "conditions": rows,
+        "stationary_zero_displacement": summarize_values(stationary_errors),
+        "finding": (
+            "development-only gap-period, gap-length, phase, initialization and stationary-zero "
+            "conditions are reported separately; the all-zero missingness code remains ambiguous "
+            "with genuine stationarity and is not treated as an explicit missingness indicator"
+        ),
+    }
+
+
 def run_characterization(configuration: Configuration) -> dict[str, Any]:
     return {
         "schema": CHARACTERIZATION_SCHEMA,
@@ -344,5 +446,7 @@ def run_characterization(configuration: Configuration) -> dict[str, Any]:
             clipping_probe(configuration),
             coarse_speed_decomposition(configuration),
             per_architecture_selection(configuration),
+            width_matched_gating(configuration),
+            occlusion_sensitivity(configuration),
         ],
     }

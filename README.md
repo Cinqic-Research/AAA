@@ -111,21 +111,18 @@ matched-capacity stateless MLP (982 parameters), an ungated RNN (954
 parameters), three ablations of itself, and the full analytic baseline suite
 including the unmodified v2.1 RLS candidate.
 
-The evaluation ran **twice**. Round 1 was completed, probed, and found to
-contain four design defects; all four were repaired and re-measured on fresh
-stream identities. Round 1 is retained, superseded. The headline results, in
-one line each:
+The evaluation ran **three times**. Rounds 1 and 2 are retained as superseded
+evidence. Independent Sol review found that round 2's Q1 time contrast did not
+identify weight learning and that Q2/Q5 flattened trials sharing model
+initializations. Round 3 uses fresh identities and corrected designs.
 
 - it **learns online** on every family;
-- **persistent hidden state helps** -- it beats both a state-reset ablation and
-  a matched stateless control, most clearly on steps whose target was never
-  shown to it;
-- **it adapts**, and by about a third less than round 1 implied: a
-  difference-of-differences against a bit-identical unchanged world puts
-  adaptation at roughly 65% of the total online advantage, with the rest being
-  the ordinary benefit of continuing to learn;
-- **it does not forget**: measured against a fixed probe bank of held-out
-  episodes, regime-A ability *improved* while the model trained on regime B;
+- **persistent hidden state helps on these families** -- it beats both the
+  direct state-reset ablation and matched stateless control;
+- **it adapts on the paired-change benchmark**: the change-specific component
+  is `+5.12e-04` and 43% of the combined online advantage;
+- **no forgetting was measured on the fixed probe bank**, but the corrected
+  interval crosses zero; this is not general retention immunity;
 - **whether gating pays for itself is inconclusive**. Round 1 said it loses;
   that did not survive giving the ungated control its own rule-selected
   learning rate. Gating does buy stability -- the ungated arm diverges at a
@@ -209,9 +206,10 @@ python -m research.aaa_1k gradient-check --full   # finite-difference every para
 python -m research.aaa_1k select       --output docs/evidence/aaa_1k_development_selection.json
 python -m research.aaa_1k characterize --selection docs/evidence/aaa_1k_development_selection.json \
     --output docs/evidence/aaa_1k_characterization.json
-python -m research.aaa_1k round2      --selection docs/evidence/aaa_1k_development_selection.json \
-    --output docs/evidence/aaa_1k_evaluation_round2.json
-python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation_round2.json
+python -m research.aaa_1k round3      --selection docs/evidence/aaa_1k_development_selection.json \
+    --characterization docs/evidence/aaa_1k_characterization.json \
+    --output docs/evidence/aaa_1k_evaluation_round3.json
+python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation_round3.json
 python -m research.aaa_1k visualize --family occlusion_v1 --output runs/aaa_1k/dashboard.png
 ```
 

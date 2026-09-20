@@ -100,8 +100,7 @@ class _NeuralControl:
         self.nonfinite_events = 0
 
     # -- construction ---------------------------------------------------
-    @staticmethod
-    def _initialize(seed: int) -> dict[str, np.ndarray]:
+    def _initialize(self, seed: int) -> dict[str, np.ndarray]:
         raise NotImplementedError
 
     def _shapes(self) -> dict[str, tuple[int, ...]]:
@@ -410,8 +409,13 @@ class VanillaRNNControl(_NeuralControl):
         error_loss_weight: float = 0.25,
         gradient_clip: float | None = 1.0,
         zero_error_input: bool = False,
+        hidden_size: int = RNN_HIDDEN,
         parameters: Mapping[str, Any] | None = None,
     ) -> None:
+        if isinstance(hidden_size, bool) or not isinstance(hidden_size, int) or hidden_size < 1:
+            raise InvalidModelState("hidden_size must be a positive integer")
+        self.hidden_size = hidden_size
+        self.architecture_id = f"VanillaRNN-3x{hidden_size}x2"
         super().__init__(
             seed=seed,
             learning_rate=learning_rate,
@@ -421,31 +425,30 @@ class VanillaRNNControl(_NeuralControl):
             zero_error_input=zero_error_input,
             parameters=parameters,
         )
-        self.hidden = np.zeros(RNN_HIDDEN, dtype=float)
+        self.hidden = np.zeros(self.hidden_size, dtype=float)
         self._caches: deque[_RNNCache] = deque(maxlen=self.tbptt_steps)
 
     def _shapes(self) -> dict[str, tuple[int, ...]]:
         return {
-            "W": (RNN_HIDDEN, INPUT_SIZE),
-            "U": (RNN_HIDDEN, RNN_HIDDEN),
-            "b": (RNN_HIDDEN,),
-            "W_o": (OUTPUT_SIZE, RNN_HIDDEN),
+            "W": (self.hidden_size, INPUT_SIZE),
+            "U": (self.hidden_size, self.hidden_size),
+            "b": (self.hidden_size,),
+            "W_o": (OUTPUT_SIZE, self.hidden_size),
             "b_o": (OUTPUT_SIZE,),
         }
 
-    @staticmethod
-    def _initialize(seed: int) -> dict[str, np.ndarray]:
+    def _initialize(self, seed: int) -> dict[str, np.ndarray]:
         rng = np.random.default_rng(seed)
         return {
-            "W": _glorot(rng, RNN_HIDDEN, INPUT_SIZE),
-            "U": _glorot(rng, RNN_HIDDEN, RNN_HIDDEN),
-            "b": np.zeros(RNN_HIDDEN, dtype=float),
-            "W_o": np.zeros((OUTPUT_SIZE, RNN_HIDDEN), dtype=float),
+            "W": _glorot(rng, self.hidden_size, INPUT_SIZE),
+            "U": _glorot(rng, self.hidden_size, self.hidden_size),
+            "b": np.zeros(self.hidden_size, dtype=float),
+            "W_o": np.zeros((OUTPUT_SIZE, self.hidden_size), dtype=float),
             "b_o": np.zeros(OUTPUT_SIZE, dtype=float),
         }
 
     def reset_state(self) -> None:
-        self.hidden = np.zeros(RNN_HIDDEN, dtype=float)
+        self.hidden = np.zeros(self.hidden_size, dtype=float)
         self._caches.clear()
 
     def forward(self, inputs: ArrayLike, *, record: bool = True) -> np.ndarray:
@@ -503,8 +506,13 @@ class VanillaRNNControl(_NeuralControl):
             ],
         }
 
+    def state_dict(self, *, parent_model_id: str | None = None) -> dict[str, Any]:
+        state = super().state_dict(parent_model_id=parent_model_id)
+        state["config"]["hidden_size"] = self.hidden_size
+        return state
+
     def state_footprint(self) -> dict[str, int]:
-        per_step = INPUT_SIZE + 2 * RNN_HIDDEN + OUTPUT_SIZE
+        per_step = INPUT_SIZE + 2 * self.hidden_size + OUTPUT_SIZE
         trainable = self.parameter_count()
         capacity = per_step * self.tbptt_steps
         return {
@@ -530,6 +538,10 @@ class VanillaRNNControl(_NeuralControl):
         if state.get("format_version") != RNN_FORMAT_VERSION:
             raise InvalidModelState("unsupported VanillaRNNControl checkpoint format")
         config = dict(state["config"])
+        hidden_size = int(config.get("hidden_size", RNN_HIDDEN))
+        expected_architecture = f"VanillaRNN-3x{hidden_size}x2"
+        if state.get("architecture_id") != expected_architecture:
+            raise InvalidModelState("checkpoint architecture does not match VanillaRNNControl")
         model = cls(
             seed=int(config["seed"]),
             learning_rate=float(config["learning_rate"]),
@@ -537,10 +549,11 @@ class VanillaRNNControl(_NeuralControl):
             error_loss_weight=float(config["error_loss_weight"]),
             gradient_clip=(None if config["gradient_clip"] is None else float(config["gradient_clip"])),
             zero_error_input=bool(config["zero_error_input"]),
+            hidden_size=hidden_size,
             parameters={name: np.asarray(v, dtype=float) for name, v in state["parameters"].items()},
         )
         hidden = np.asarray(state["hidden"], dtype=float)
-        if hidden.shape != (RNN_HIDDEN,) or not np.all(np.isfinite(hidden)):
+        if hidden.shape != (hidden_size,) or not np.all(np.isfinite(hidden)):
             raise InvalidModelState("checkpoint hidden state is invalid")
         model.hidden = hidden
         model._caches = deque(

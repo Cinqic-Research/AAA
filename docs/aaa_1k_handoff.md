@@ -1,8 +1,9 @@
 # AAA-1K independent-review handoff
 
 For a reviewer who should be able to verify every claim without trusting the
-implementer's summary. Written by the implementer; **not** an approval, and not
-a substitute for independent review.
+implementer's summary. Originally written by the implementer, then updated
+after independent Sol review. The permanent verdict is in
+`aaa_1k_sol_review.md`.
 
 ## 1. Identity
 
@@ -10,20 +11,18 @@ a substitute for independent review.
 |---|---|
 | phase | `aaa.1k.v1` |
 | base commit (`main`) | `02c3b20dd163c11a99502e846a2816b3e6c761de` |
-| branch | `opus/aaa-1k-recurrent-core` |
+| branch | `codex/aaa-1k-sol-review` |
 | head commit | recorded in the pull request; `git log -1 --format=%H` |
 | phase scientific fingerprint | `python -m research.aaa_1k fingerprint` |
 | model format | `aaa.1k.gru.v1`, architecture `AAA1KGRU-3x16x2` |
 | benchmark families | `aaa.1k.benchmarks.v1` |
 
 Baseline before any change: the full suite was 445 tests, green, on
-`02c3b20`. After this phase it is 562 tests, green.
+`02c3b20`. The independent reviewer head has 570 tests, green.
 
-**The evaluation ran twice.** Round 1 was completed, then probed, and four
-design defects were found in it. All four are repaired and round 2 is the
-current result, on fresh stream identities. Round 1 is retained, superseded, at
-`docs/evidence/aaa_1k_evaluation_round1_superseded.json` with its report
-alongside. Read `aaa_1k_self_review.md` for what was wrong and what changed.
+**The evaluation ran three times.** Rounds 1 and 2 are retained as superseded
+evidence. Independent review repaired Q1 identification, Q2/Q5 dependence,
+checkpoint validation, and complete-state branch identity. Round 3 is current.
 
 ## 2. What to read, in order
 
@@ -55,14 +54,16 @@ Implementation, `research/aaa_1k/`:
 | `adversarial.py` | the two probes that try to break the conclusions |
 | `measurements.py` | difference-of-differences adaptation; retention against a frozen probe bank |
 | `round2.py` | the corrected evaluation round on fresh identities |
+| `round3.py` | independent-review round: matched frozen Q1 and fully crossed Q2/Q5 |
 | `characterization.py` | development probes for the clip, the coarse family and tuning fairness |
 | `report.py`, `visualize.py`, `identity.py`, `seeds.py`, `cli.py` | reporting, dashboard, identity, seeds, entry point |
 
-Tests: `tests/test_aaa_1k.py`, 117 tests. Evidence:
+Tests: `tests/test_aaa_1k.py`, 125 tests. Evidence:
 `docs/evidence/aaa_1k_development_selection.json`,
-`docs/evidence/aaa_1k_evaluation_round2.json` (current),
+`docs/evidence/aaa_1k_evaluation_round3.json` (current),
 `docs/evidence/aaa_1k_characterization.json`,
 `docs/evidence/aaa_1k_adversarial_probes.json`,
+`docs/evidence/aaa_1k_evaluation_round2_superseded.json` (retained),
 `docs/evidence/aaa_1k_evaluation_round1_superseded.json` (retained).
 
 Nothing under `aaa/`, `benchmarks/` or `results/` is modified. `pyproject.toml`
@@ -182,15 +183,15 @@ python -m research.aaa_1k select      --output docs/evidence/aaa_1k_development_
 python -m research.aaa_1k characterize \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --output docs/evidence/aaa_1k_characterization.json
-python -m research.aaa_1k round2 \
+python -m research.aaa_1k round3 \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --characterization docs/evidence/aaa_1k_characterization.json \
-    --output docs/evidence/aaa_1k_evaluation_round2.json
+    --output docs/evidence/aaa_1k_evaluation_round3.json
 python -m research.aaa_1k adversarial-probes \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --output docs/evidence/aaa_1k_adversarial_probes.json
-python -m research.aaa_1k report2 \
-    --evidence docs/evidence/aaa_1k_evaluation_round2.json \
+python -m research.aaa_1k report3 \
+    --evidence docs/evidence/aaa_1k_evaluation_round3.json \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --characterization docs/evidence/aaa_1k_characterization.json \
     --output docs/aaa_1k_report.md
@@ -200,7 +201,7 @@ Independently recompute the headline statistics from the retained primitives,
 without rerunning a model:
 
 ```bash
-python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation_round2.json
+python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation_round3.json
 ```
 
 It rebuilds 99 stored values — Q1, Q3, Q4, every adaptation and retention

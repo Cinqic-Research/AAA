@@ -3,12 +3,12 @@
     python -m research.aaa_1k fingerprint
     python -m research.aaa_1k parameter-audit
     python -m research.aaa_1k select      --output docs/evidence/aaa_1k_development_selection.json
-    python -m research.aaa_1k evaluate    --output docs/evidence/aaa_1k_evaluation.json
+    python -m research.aaa_1k evaluate    --output docs/evidence/aaa_1k_evaluation_round1_superseded.json
     python -m research.aaa_1k report      --evidence ... --selection ... --output docs/aaa_1k_report.md
     python -m research.aaa_1k characterize --selection ... --output docs/evidence/aaa_1k_characterization.json
-    python -m research.aaa_1k round2     --selection ... --output docs/evidence/aaa_1k_evaluation_round2.json
+    python -m research.aaa_1k round3     --selection ... --output docs/evidence/aaa_1k_evaluation_round3.json
     python -m research.aaa_1k report2    --evidence ... --selection ... --output docs/aaa_1k_report.md
-    python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation.json
+    python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation_round3.json
     python -m research.aaa_1k adversarial-probes --selection ... --output docs/evidence/aaa_1k_adversarial_probes.json
     python -m research.aaa_1k visualize   --family occlusion_v1 --output runs/aaa_1k/dashboard.png
     python -m research.aaa_1k gradient-check --full
@@ -257,6 +257,63 @@ def _recompute_round2(evidence: dict[str, Any]) -> int:
     return 0
 
 
+def _recompute_round3(evidence: dict[str, Any]) -> int:
+    """Rebuild round 3 from crossed retained cells and trials."""
+
+    from .round2 import MEMORY_FAMILIES, _crossed, _in_families
+    from .round3 import FROZEN_PRIMARY, _matrix, _trial_matrix
+    from .stats import crossed_paired_difference
+
+    cells = evidence["cells"]
+    dims = evidence["capability_vector"]["dimensions"]
+    failures: list[str] = []
+    checks = 0
+
+    def compare(label: str, stored: float, recomputed: float) -> None:
+        nonlocal checks
+        checks += 1
+        if not (math.isfinite(stored) and math.isfinite(recomputed)):
+            if math.isfinite(stored) != math.isfinite(recomputed):
+                failures.append(f"{label}: stored={stored} recomputed={recomputed}")
+            return
+        if abs(stored - recomputed) > RECOMPUTE_TOLERANCE * max(1.0, abs(stored)):
+            failures.append(f"{label}: stored={stored!r} recomputed={recomputed!r}")
+
+    q1 = crossed_paired_difference(
+        _matrix(cells, PRIMARY), _matrix(cells, FROZEN_PRIMARY), bootstrap_index=11
+    )
+    for field in ("mean_difference", "ci_low", "ci_high"):
+        compare(f"q1.{field}", dims["q1_online_learning"]["overall"][field], q1[field])
+    memory = _in_families(cells, MEMORY_FAMILIES)
+    for label, source, control, stored in (
+        ("q3.state_reset", memory, "aaa1k_state_reset", dims["q3_hidden_state"]["versus_state_reset"]),
+        ("q3.stateless", memory, "mlp_control", dims["q3_hidden_state"]["versus_stateless_mlp"]),
+        ("q4.all", cells, "rnn_control", dims["q4_gating"]["all_families"]),
+    ):
+        recomputed = _crossed(source, PRIMARY, control)
+        for field in ("mean_difference", "ci_low", "ci_high"):
+            compare(f"{label}.{field}", stored[field], recomputed[field])
+    for key, dimension, field, bootstrap_index in (
+        ("adaptation_effect", "q2_adaptation", "adaptation_effect", 13),
+        ("continued_learning_effect", "q2_adaptation", "continued_learning_effect", 14),
+        ("forgetting", "q5_retention", "forgetting", 15),
+    ):
+        trials = dims[dimension]["trials"]
+        matrix = _trial_matrix(trials, key)
+        recomputed = crossed_paired_difference(np.zeros_like(matrix), matrix, bootstrap_index=bootstrap_index)
+        stored = dims[dimension][field]
+        for statistic in ("mean_difference", "ci_low", "ci_high"):
+            compare(f"{dimension}.{statistic}", stored[statistic], recomputed[statistic])
+    print(f"recomputed {checks} stored values from retained primitives (round 3)")
+    if failures:
+        print(f"MISMATCH on {len(failures)} value(s):")
+        for failure in failures[:20]:
+            print(f"  {failure}")
+        return 1
+    print("all recomputed values agree")
+    return 0
+
+
 def command_report2(args: argparse.Namespace) -> int:
     from .report import render_round2_report
 
@@ -280,6 +337,8 @@ def command_recompute(args: argparse.Namespace) -> int:
     """
 
     evidence = json.loads(Path(args.evidence).read_text(encoding="utf-8"))
+    if evidence.get("schema") == "aaa.1k.experiments.v3":
+        return _recompute_round3(evidence)
     if evidence.get("schema") == "aaa.1k.experiments.v2":
         return _recompute_round2(evidence)
     per_stream = evidence["per_stream"]
@@ -421,6 +480,50 @@ def command_round2(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_round3(args: argparse.Namespace) -> int:
+    """Run the reviewer-corrected evaluation on fresh, fully crossed identities."""
+
+    from .round3 import run_round3
+
+    configuration = _configuration(args.selection)
+    selection = json.loads(Path(args.selection).read_text(encoding="utf-8"))
+    fairness = None
+    if args.characterization:
+        report = json.loads(Path(args.characterization).read_text(encoding="utf-8"))
+        fairness = next((p for p in report["probes"] if p["probe"] == "per_architecture_selection"), None)
+    evidence = run_round3(
+        configuration,
+        architecture_configurations=selection.get("architecture_configurations"),
+        replicas=args.replicas,
+        initializations=args.initializations,
+        adaptation_environments=args.adaptation_environments,
+        retention_environments=args.retention_environments,
+        fairness=fairness,
+    )
+    evidence["git"] = git_provenance(project_root())
+    evidence["scientific_fingerprint"] = phase_fingerprint(project_root())["sha256"]
+    if args.output:
+        _write(Path(args.output), evidence)
+    dims = evidence["capability_vector"]["dimensions"]
+    print(
+        f"cells: {len(evidence['cells'])}; adaptation trials: {len(dims['q2_adaptation']['trials'])}; "
+        f"retention trials: {len(dims['q5_retention']['trials'])}"
+    )
+    for key, field in (
+        ("q1_online_learning", "overall"),
+        ("q2_adaptation", "adaptation_effect"),
+        ("q3_hidden_state", "versus_stateless_mlp"),
+        ("q4_gating", "all_families"),
+        ("q5_retention", "forgetting"),
+    ):
+        record = dims[key][field]
+        print(
+            f"{key:26s} mean={record['mean_difference']:+.3e} "
+            f"ci=[{record['ci_low']:+.3e},{record['ci_high']:+.3e}]"
+        )
+    return 0
+
+
 def command_probes(args: argparse.Namespace) -> int:
     """Run the adversarial probes that try to break this phase's conclusions."""
 
@@ -519,6 +622,13 @@ def build_parser() -> argparse.ArgumentParser:
     report2.add_argument("--output", required=True)
     report2.set_defaults(handler=command_report2)
 
+    report3 = sub.add_parser("report3", help="render the round-3 research report")
+    report3.add_argument("--evidence", required=True)
+    report3.add_argument("--selection", required=True)
+    report3.add_argument("--characterization")
+    report3.add_argument("--output", required=True)
+    report3.set_defaults(handler=command_report2)
+
     recompute = sub.add_parser("recompute", help="rebuild headline statistics from primitives")
     recompute.add_argument("--evidence", required=True)
     recompute.set_defaults(handler=command_recompute)
@@ -544,6 +654,16 @@ def build_parser() -> argparse.ArgumentParser:
     round2.add_argument("--retention-trials", type=int, default=12)
     round2.add_argument("--output")
     round2.set_defaults(handler=command_round2)
+
+    round3 = sub.add_parser("round3", help="run the reviewer-corrected evaluation round")
+    round3.add_argument("--selection", required=True)
+    round3.add_argument("--characterization")
+    round3.add_argument("--replicas", type=int, default=24)
+    round3.add_argument("--initializations", type=int, default=5)
+    round3.add_argument("--adaptation-environments", type=int, default=24)
+    round3.add_argument("--retention-environments", type=int, default=12)
+    round3.add_argument("--output")
+    round3.set_defaults(handler=command_round3)
 
     visualize = sub.add_parser("visualize", help="render the diagnostic dashboard")
     visualize.add_argument("--family", default="occlusion_v1")

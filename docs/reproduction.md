@@ -273,26 +273,26 @@ python -m research.aaa_1k select \
 python -m research.aaa_1k characterize \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --output docs/evidence/aaa_1k_characterization.json
-python -m research.aaa_1k round2 \
+python -m research.aaa_1k round3 \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --characterization docs/evidence/aaa_1k_characterization.json \
-    --output docs/evidence/aaa_1k_evaluation_round2.json
+    --output docs/evidence/aaa_1k_evaluation_round3.json
 python -m research.aaa_1k adversarial-probes \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --output docs/evidence/aaa_1k_adversarial_probes.json
 python -m research.aaa_1k recompute \
-    --evidence docs/evidence/aaa_1k_evaluation_round2.json
-python -m research.aaa_1k report2 \
-    --evidence docs/evidence/aaa_1k_evaluation_round2.json \
+    --evidence docs/evidence/aaa_1k_evaluation_round3.json
+python -m research.aaa_1k report3 \
+    --evidence docs/evidence/aaa_1k_evaluation_round3.json \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --characterization docs/evidence/aaa_1k_characterization.json \
     --output docs/aaa_1k_report.md
 ```
 
 Everything is deterministic and CPU-only; the whole sequence takes about eight
-minutes. `recompute` rebuilds 99 stored statistics from the retained cells
+minutes. `recompute` rebuilds the stored headline statistics from retained cells
 without running a model, and exits non-zero on any disagreement. The same
-command on `aaa_1k_evaluation_round1_superseded.json` rebuilds that round's 59.
+command also supports both explicitly superseded evidence rounds.
 
 The phase fingerprint covers this phase's source, the shared `aaa/` modules it
 executes, its tests, its protocol documents and the dependency lock. It is
@@ -301,4 +301,3 @@ adding this phase changes both of those, which is correct and is recorded as
 `AAA-152`. Historical v2.1 and observation-noise evidence reproduces from its
 historical checkout at the tags `aaa-pre-next-phase-2026-09-19` and
 `aaa-pre-next-phase-closure-2026-09-19`.
-

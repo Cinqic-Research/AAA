@@ -55,6 +55,7 @@ from research.aaa_1k.model import (
     sigmoid,
     softplus,
 )
+from research.aaa_1k.round3 import _trial_matrix, q1_online_learning, run_round3_pass
 from research.aaa_1k.runner import run_online_frozen_branch, run_stream
 from research.aaa_1k.seeds import NAMESPACES, derive_seed
 from research.aaa_1k.selection import (
@@ -1087,6 +1088,69 @@ class AdaptationMeasurementTests(unittest.TestCase):
         self.assertTrue(trial["trunks_matched"])
         self.assertEqual(len(trial["trunk_state_hash"]), 64)
 
+    def test_branch_hash_covers_adapter_state_not_only_weights(self):
+        agent = NeuralAgent(fresh_model(), name="source")
+        run_stream(small_stream(), [agent])
+        first = agent.branch(name="online", update_enabled=True)
+        second = agent.branch(name="frozen", update_enabled=False)
+        self.assertEqual(first.interaction_state_hash(), second.interaction_state_hash())
+        second.previous_signed_error += 0.25
+        self.assertNotEqual(first.interaction_state_hash(), second.interaction_state_hash())
+
+
+class CheckpointBoundaryTests(unittest.TestCase):
+    def _state(self):
+        model = fresh_model()
+        model.forward(np.asarray([0.1, -0.2, 0.3]))
+        return json.loads(json.dumps(model.state_dict()))
+
+    def test_oversized_tbptt_buffer_is_rejected_not_truncated(self):
+        state = self._state()
+        state["tbptt_buffer"] *= state["config"]["tbptt_steps"] + 1
+        with self.assertRaises(InvalidModelState):
+            AAA1KGRU.from_state_dict(state)
+
+    def test_nonfinite_and_wrong_shape_cache_entries_are_rejected(self):
+        for field, value in (("x", [0.0]), ("h", [float("nan")] * HIDDEN_SIZE)):
+            with self.subTest(field=field):
+                state = self._state()
+                state["tbptt_buffer"][0][field] = value
+                with self.assertRaises(InvalidModelState):
+                    AAA1KGRU.from_state_dict(state)
+
+    def test_boolean_and_negative_counters_are_rejected(self):
+        for value in (True, -1):
+            with self.subTest(value=value):
+                state = self._state()
+                state["counters"]["update_count"] = value
+                with self.assertRaises(InvalidModelState):
+                    AAA1KGRU.from_state_dict(state)
+
+    def test_tracker_rejects_impossible_gap_state(self):
+        tracker = ObservationTracker()
+        with self.assertRaises(ValueError):
+            tracker.load(
+                {
+                    "known": 0.2,
+                    "previous_known": 0.1,
+                    "gap": 0,
+                    "observed_last": False,
+                    "pending": 4,
+                    "steps_seen": 1,
+                }
+            )
+
+    def test_agent_load_restores_the_serialized_model_and_rejects_nonfinite_adapter_state(self):
+        source = NeuralAgent(fresh_model(), name="source")
+        run_stream(small_stream(), [source])
+        state = json.loads(json.dumps(source.state_dict()))
+        restored = NeuralAgent(AAA1KGRU(seed=99), name="restored")
+        restored.load_state(state)
+        self.assertEqual(restored.model.state_hash(), source.model.state_hash())
+        state["previous_signed_error"] = float("inf")
+        with self.assertRaises(ValueError):
+            restored.load_state(state)
+
     def test_the_effect_is_the_declared_difference_of_differences(self):
         trial = adaptation_difference_of_differences(ROUND2_CONFIG, seed=203, steps=160, change_step=80)
         self.assertAlmostEqual(
@@ -1169,6 +1233,23 @@ class CrossedBootstrapTests(unittest.TestCase):
         self.assertEqual(precision["status"], "MEASURED")
         self.assertAlmostEqual(precision["effect"], 1.0, places=9)
         self.assertTrue(precision["meets_quarter_effect_target"])
+
+    def test_round3_trial_matrix_requires_a_complete_crossing(self):
+        trials = [
+            {"model_seed_index": 0, "environment_index": 0, "effect": 1.0},
+            {"model_seed_index": 1, "environment_index": 0, "effect": 2.0},
+            {"model_seed_index": 0, "environment_index": 1, "effect": 3.0},
+        ]
+        with self.assertRaises(ValueError):
+            _trial_matrix(trials, "effect")
+
+    def test_q1_uses_a_matched_frozen_arm_not_wall_clock_quarters(self):
+        streams = [motion_compat_stream("bouncing", 991, steps=60, change_step=None)]
+        cells = run_round3_pass(ROUND2_CONFIG, streams, initializations=2)["cells"]
+        result = q1_online_learning(cells)
+        self.assertEqual(result["statistic"], "frozen minus online mean normalized error")
+        self.assertEqual(result["overall"]["initializations"], 2)
+        self.assertEqual(result["overall"]["streams"], 1)
 
 
 class PerArchitectureSelectionTests(unittest.TestCase):

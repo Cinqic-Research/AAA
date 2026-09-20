@@ -242,9 +242,9 @@ def run_online_frozen_branch(
     online = trunk_agent.branch(name=f"{trunk_agent.name}__online", update_enabled=True)
     frozen = trunk_agent.branch(name=f"{trunk_agent.name}__frozen", update_enabled=False)
     if isinstance(online, NeuralAgent) and isinstance(frozen, NeuralAgent):
-        clone_hash = online.model.state_hash()
-        if clone_hash != frozen.model.state_hash():
-            raise RuntimeError("online and frozen clones did not start from identical model state")
+        clone_hash = online.interaction_state_hash()
+        if clone_hash != frozen.interaction_state_hash():
+            raise RuntimeError("online and frozen clones did not start from identical interaction state")
     else:
         clone_hash = "n/a"
     branch = run_stream(

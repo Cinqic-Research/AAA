@@ -38,6 +38,8 @@ different and much less interesting question.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from collections.abc import Mapping, Sequence
 from typing import Any, Protocol
@@ -132,12 +134,31 @@ class ObservationTracker:
         }
 
     def load(self, state: Mapping[str, Any]) -> None:
-        self.known = None if state["known"] is None else float(state["known"])
-        self.previous_known = None if state["previous_known"] is None else float(state["previous_known"])
-        self.gap = int(state["gap"])
-        self.observed_last = bool(state["observed_last"])
-        self._pending = int(state["pending"])
-        self.steps_seen = int(state["steps_seen"])
+        expected = {"known", "previous_known", "gap", "observed_last", "pending", "steps_seen"}
+        if set(state) != expected:
+            raise ValueError("tracker state has invalid fields")
+        known = None if state["known"] is None else float(state["known"])
+        previous = None if state["previous_known"] is None else float(state["previous_known"])
+        if known is not None and not math.isfinite(known):
+            raise ValueError("tracker known observation must be finite")
+        if previous is not None and not math.isfinite(previous):
+            raise ValueError("tracker previous observation must be finite")
+        for field in ("gap", "pending", "steps_seen"):
+            value = state[field]
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"tracker {field} must be a non-negative integer")
+        if not isinstance(state["observed_last"], bool):
+            raise ValueError("tracker observed_last must be boolean")
+        gap, pending, steps_seen = state["gap"], state["pending"], state["steps_seen"]
+        if gap < 1 or pending > steps_seen or (known is None) != (steps_seen == 0):
+            raise ValueError("tracker state describes an impossible observation history")
+        if state["observed_last"] and (known is None or pending != 0):
+            raise ValueError("tracker observed-last state is inconsistent")
+        if not state["observed_last"] and steps_seen > 0 and pending == 0:
+            raise ValueError("tracker pending-gap state is inconsistent")
+        self.known, self.previous_known = known, previous
+        self.gap, self.observed_last = gap, state["observed_last"]
+        self._pending, self.steps_seen = pending, steps_seen
 
 
 class NeuralAgent:
@@ -260,6 +281,7 @@ class NeuralAgent:
             "unfold_target": self.unfold_target,
             "scales": self.scales.to_dict(),
             "previous_signed_error": self.previous_signed_error,
+            "error_estimate": self.error_estimate if math.isfinite(self.error_estimate) else None,
             "tracker": self.tracker.to_dict(),
             "raw_prediction": self._raw_prediction,
             "scored_prediction": self._scored_prediction,
@@ -267,22 +289,77 @@ class NeuralAgent:
             "input_position": self._input_position,
             "skipped_targets": self.skipped_targets,
             "trained_steps": self.trained_steps,
+            "last_update": dict(self.last_update),
             "model": self.model.state_dict(),
         }
 
     def load_state(self, state: Mapping[str, Any]) -> None:
         if state.get("agent_format_version") != AGENT_STATE_VERSION:
             raise ValueError("unsupported agent state format")
-        self.previous_signed_error = float(state["previous_signed_error"])
-        self.tracker.load(state["tracker"])
-        self._raw_prediction = None if state["raw_prediction"] is None else float(state["raw_prediction"])
-        self._scored_prediction = (
-            None if state["scored_prediction"] is None else float(state["scored_prediction"])
+        restored_model = type(self.model).from_state_dict(state["model"])
+        if state.get("scales") != self.scales.to_dict():
+            raise ValueError("checkpoint public scales do not match this agent")
+        for field in ("update_enabled", "reflect", "unfold_target", "input_observed"):
+            if not isinstance(state.get(field), bool):
+                raise ValueError(f"agent state {field} must be boolean")
+        finite_fields = (
+            "previous_signed_error",
+            "error_estimate",
+            "raw_prediction",
+            "scored_prediction",
+            "input_position",
         )
-        self._input_observed = bool(state["input_observed"])
-        self._input_position = None if state["input_position"] is None else float(state["input_position"])
-        self.skipped_targets = int(state["skipped_targets"])
-        self.trained_steps = int(state["trained_steps"])
+        values: dict[str, float | None] = {}
+        for field in finite_fields:
+            raw = state[field]
+            value = None if raw is None else float(raw)
+            if value is not None and not math.isfinite(value):
+                raise ValueError(f"agent state {field} must be finite or null")
+            values[field] = value
+        for field in ("skipped_targets", "trained_steps"):
+            value = state[field]
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"agent state {field} must be a non-negative integer")
+        if (values["raw_prediction"] is None) != (values["scored_prediction"] is None):
+            raise ValueError("agent prediction state is inconsistent")
+        if values["previous_signed_error"] is None:
+            raise ValueError("agent previous signed error cannot be null")
+        if values["raw_prediction"] is not None and values["input_position"] is None:
+            raise ValueError("agent prediction is missing its input position")
+        last_update = state["last_update"]
+        if not isinstance(last_update, Mapping) or not all(
+            isinstance(key, str) and math.isfinite(float(value)) for key, value in last_update.items()
+        ):
+            raise ValueError("agent last-update diagnostics are invalid")
+        self.model = restored_model
+        previous_signed_error = values["previous_signed_error"]
+        assert previous_signed_error is not None
+        self.previous_signed_error = float(previous_signed_error)
+        self.error_estimate = (
+            float("nan") if values["error_estimate"] is None else float(values["error_estimate"])
+        )
+        self.tracker.load(state["tracker"])
+        self._raw_prediction = values["raw_prediction"]
+        self._scored_prediction = values["scored_prediction"]
+        self._input_observed = state["input_observed"]
+        self._input_position = values["input_position"]
+        self.skipped_targets = state["skipped_targets"]
+        self.trained_steps = state["trained_steps"]
+        self.last_update = {str(key): float(value) for key, value in last_update.items()}
+
+    def interaction_state_hash(self) -> str:
+        """Hash every branch initial condition, excluding treatment labels.
+
+        ``name`` and ``update_enabled`` intentionally differ between the online
+        and frozen arms. Everything that can otherwise affect a future
+        prediction or update is included.
+        """
+
+        state = self.state_dict()
+        state.pop("name")
+        state.pop("update_enabled")
+        payload = json.dumps(state, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def branch(self, *, name: str, update_enabled: bool) -> NeuralAgent:
         """Clone the *entire* agent at a declared branch point.

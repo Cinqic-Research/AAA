@@ -1,10 +1,29 @@
 # AAA-1K architecture specification
 
+> **Independent-review correction (2026-09-20).** The network architecture and
+> selected hyperparameters remain unchanged. Evaluation round 3 changes only
+> claim identification and uncertainty: Q1 uses a matched frozen-weight copy;
+> Q2/Q5 fully cross initializations with environments. Round 2 is retained as
+> superseded evidence.
+
 Phase identity: `aaa.1k.v1`. Benchmark family version: `aaa.1k.benchmarks.v1`.
 Model format: `aaa.1k.gru.v1`. Architecture id: `AAA1KGRU-3x16x2`.
 
 This is the frozen specification. Anything here that changes requires a new
 phase version *before* any fresh evaluation stream is observed.
+
+## Complete persistence boundary
+
+The 994 trainable parameters are not the complete agent state. Exact resume and
+branch identity also cover the 16-value hidden state, bounded TBPTT cache,
+previous signed error, observation tracker including pending gaps, pending raw
+and scored prediction, error estimate, counters, public scales, configuration,
+and update diagnostics. Only the branch treatment labels (`name` and
+`update_enabled`) are excluded from the equality hash because they intentionally
+differ between online and frozen arms. Deserialization rejects unknown fields,
+wrong shapes, non-finite cache values, oversized buffers, boolean/negative
+counters, impossible gaps, and inconsistent pending predictions before state is
+mutated.
 
 ## 1. The model
 

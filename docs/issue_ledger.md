@@ -1422,7 +1422,9 @@ corruption, missing scientific gates, and strict-type substitutions.
   `advantage(changed) - advantage(control)`, so the ordinary benefit of
   continuing to learn cancels. Measured on fresh evaluation identities in
   round 2: the adaptation component is `+9.50e-04` with a 95% interval of
-  `[+5.63e-04, +1.33e-03]`, about 65% of the total online advantage. The
+  `[+5.63e-04, +1.33e-03]`, about 49% under the canonical
+  `adaptation / (adaptation + continued learning)` definition. Earlier 65%
+  wording was an arithmetic/documentation error. The
   round-1 claim was therefore *directionally* right and *quantitatively*
   overstated by roughly a third.
 - **Regression** `Round2FailureInjectionTests` substitutes an unpaired control
@@ -1433,7 +1435,7 @@ corruption, missing scientific gates, and strict-type substitutions.
 
 ### AAA-154 — the AAA-1K A/B/A benchmark does not measure retention
 - **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** repaired
-- **Reproduction** In `docs/evidence/aaa_1k_evaluation.json`, every learning arm
+- **Reproduction** In `docs/evidence/aaa_1k_evaluation_round1_superseded.json`, every learning arm
   has a *lower* error in the final A segment than in the first, which reads as
   "no catastrophic forgetting" but is confounded: by A2 the model has had three
   times as much total experience. The non-learning control
@@ -1497,3 +1499,73 @@ corruption, missing scientific gates, and strict-type substitutions.
   parameters, and that each ablation differs from the primary in exactly one
   declared mechanism.
 
+### AAA-157 — AAA-1K checkpoint restoration accepted malformed persistent state
+- **Source** independent Sol review of PR #16, 2026-09-20 · **Severity** high · **Status** repaired and verified
+- **Reproduction** The reviewed head accepted wrong-shaped and non-finite TBPTT
+  cache entries, silently truncated an oversized cache through `deque(maxlen=...)`,
+  accepted negative or boolean counters, and loaded impossible observation-gap
+  states. `NeuralAgent.load_state` ignored the serialized model entirely, so its
+  advertised complete-resume boundary was not actually complete.
+- **Scientific impact** An exact-resume or identical-branch claim is not valid
+  when malformed state can enter the claim-critical path and fail only later.
+- **Repair** Model, cache, counter, tracker, and adapter state now validate
+  schemas, types, shapes, finiteness, ranges, and cross-field invariants before
+  mutation. Agent restoration restores the serialized model and previously
+  omitted error-estimate/update-diagnostic state.
+- **Regression** `CheckpointBoundaryTests` injects oversized, non-finite,
+  wrong-shaped, negative, boolean, and impossible state and requires fail-closed
+  rejection; it also verifies exact model restoration.
+
+### AAA-158 — branch identity covered the model but not the complete interaction state
+- **Source** independent Sol review of PR #16, 2026-09-20 · **Severity** high · **Status** repaired and verified
+- **Reproduction** `run_online_frozen_branch` recorded and compared only
+  `model.state_hash()`, despite documentation claiming equality of weights,
+  hidden/cache state, previous error, observation tracker, pending prediction,
+  and adapter counters. Mutating `previous_signed_error` did not affect the
+  asserted branch identity.
+- **Scientific impact** Online/frozen and changed/control comparisons could
+  claim identical starting agents while adapter state differed.
+- **Repair** The branch hash now canonically covers every future-affecting model
+  and interaction field, excluding only the intentional treatment labels
+  `name` and `update_enabled`.
+- **Regression** A failure-injection test mutates adapter state with identical
+  weights and proves the complete-interaction hash changes.
+
+### AAA-159 — Q1's time contrast did not causally identify online learning
+- **Source** independent Sol review of PR #16, 2026-09-20 · **Severity** high · **Status** repaired and measured in round 3
+- **Reproduction** Round 2 called first-quarter minus last-quarter error
+  "learning." A stream whose later portion is easier produces the same sign
+  even when no weights update; no matched non-learning arm removed this time
+  structure.
+- **Scientific impact** The headline Q1 claim was stronger than its estimator.
+- **Repair** Round 3 compares the online model with an otherwise identical
+  frozen-weight copy on every initialization-stream cell. Both arms see the
+  same temporal structure and start from the same complete interaction state.
+  Positive frozen-minus-online error now identifies the effect of updating
+  weights under this benchmark.
+- **Regression** The round-3 Q1 test requires the matched frozen-arm statistic
+  and complete crossed design; the old quarter contrast remains only in
+  superseded evidence.
+- **Outcome** Matched frozen-minus-online error is `+3.299e-03`, 95% interval
+  `[+3.013e-03, +3.590e-03]`; every initialization mean and all 144 stream
+  averages have the favorable sign.
+
+### AAA-160 — Q2 and Q5 treated reused initializations as independent trials
+- **Source** independent Sol review of PR #16, 2026-09-20 · **Severity** high · **Status** repaired and measured in round 3
+- **Reproduction** Round 2 cycled `trial_index % 5` across 24 adaptation and 12
+  retention trials, then applied a one-dimensional paired bootstrap. Trials
+  sharing starting weights were treated as independent even though the general
+  round-2 description claimed initialization resampling.
+- **Scientific impact** Q2/Q5 uncertainty could be materially understated and
+  was inconsistent with the estimator used for Q1/Q3/Q4.
+- **Repair** Round 3 fully crosses every declared initialization with every
+  adaptation or retention environment and independently resamples both factors.
+  A ragged or incomplete crossing is rejected rather than flattened.
+- **Regression** `_trial_matrix` refuses an incomplete grid; independent
+  recomputation reconstructs all Q2/Q5 interval endpoints from retained trials.
+- **Outcome** Q2 adaptation is `+5.121e-04`
+  `[+1.689e-04, +8.667e-04]`; its share of the combined adaptation plus
+  continued-learning advantage is 43.15%. Q5 forgetting is inconclusive at
+  `-2.025e-04` `[-6.418e-04, +1.257e-04]`. The truthful claim is that no
+  forgetting was measured on this probe bank, not that retention immunity was
+  established.

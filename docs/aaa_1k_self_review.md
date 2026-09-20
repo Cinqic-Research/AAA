@@ -1,5 +1,12 @@
 # AAA-1K adversarial self-review
 
+> **Historical implementer self-review.** Independent Sol review subsequently
+> found four additional blockers (`AAA-157` through `AAA-160`) and superseded
+> round 2. The current result is round 3 at
+> `docs/evidence/aaa_1k_evaluation_round3.json`; see
+> `docs/aaa_1k_sol_review.md`. Round-2 numbers below are retained as historical
+> evidence, not current conclusions.
+
 An attempt to prove the phase's own conclusions wrong. It succeeded four times,
 and all four findings are now repaired rather than annotated. Round 1's evidence
 is retained unchanged at
@@ -39,7 +46,9 @@ variants branch from the same model state — asserted by complete state hash,
 not assumed. The estimator is `advantage(changed) − advantage(control)`.
 
 **What it changed.** Adaptation is real, and smaller than round 1 implied:
-**+9.50e-04 [+5.63e-04, +1.33e-03]**, about 65% of the total online advantage.
+**+9.50e-04 [+5.63e-04, +1.33e-03]**, about 49% under the canonical
+`adaptation / (adaptation + continued learning)` definition. The earlier 65%
+wording was incorrect.
 Round 1's claim was directionally right and overstated by roughly a third.
 
 ### SR-2. Q5 did not measure retention — REPAIRED (`AAA-154`)

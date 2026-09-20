@@ -110,17 +110,18 @@ shift is not evidence that a physical-law change was detected.
 ## AAA-1K (`aaa.1k.v1`)
 
 The 994-parameter recurrent phase has its own limitations, and they are
-different in kind from the v2.1 ones. Its evaluation ran twice: round 1 was
-completed, probed, and found to contain four design defects, all of which are
-repaired in round 2. Round 1 is retained as superseded evidence.
+different in kind from the v2.1 ones. Its evaluation ran three times. Rounds 1
+and 2 are retained as superseded evidence; round 3 repairs Q1 identification
+and Q2/Q5 initialization dependence on fresh identities.
 
-**What round 2 shows.** Online learning on every family. Persistent recurrent
+**What round 3 shows.** Online weight updating beats a matched frozen copy.
+Persistent recurrent
 state beating both a state-reset ablation and a matched-capacity stateless
 control, most clearly on steps whose target the agent never saw. Genuine
 adaptation, isolated from ordinary continued learning by a
-difference-of-differences against a bit-identical unchanged world, at roughly
-65% of the total online advantage. No forgetting, measured against a fixed probe
-bank rather than inferred from segment tails.
+difference-of-differences against a bit-identical unchanged world, accounting
+for about 43% of the combined advantage. No statistically resolved forgetting
+on the fixed probe bank; the interval crosses zero.
 
 **What it does not show.** Generalization beyond unseen trajectories of the same
 four families; no unseen family was tested. Whether gating pays for itself:

@@ -1,5 +1,15 @@
 # AAA-1K literature review: what was adopted, what was rejected, and why
 
+> **Current-status note (2026-09-20).** Statements below about round 1 and
+> round 2 are historical where labeled. Independent review superseded round 2
+> because Q1 did not causally isolate weight learning and Q2/Q5 did not model
+> reused initialization identities. Round 3 changes those estimands/statistics
+> without changing the model or its selected hyperparameters. The fixed-budget
+> gating result remains inconclusive; a separate width-matched development
+> characterization slightly favors the ungated arm but its interval reaches
+> zero. Retention is stated only as what the fixed probe bank measured, never as
+> general immunity to catastrophic forgetting.
+
 Conducted before the AAA-1K design was frozen. The rule applied throughout: do
 not copy an architecture because a large lab uses it. Extract the *mechanism*,
 ask whether it is testable at 994 parameters on a moving dot, and reject it

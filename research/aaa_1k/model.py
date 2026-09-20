@@ -583,17 +583,60 @@ class AAA1KGRU:
 
     @classmethod
     def from_state_dict(cls, state: Mapping[str, Any]) -> AAA1KGRU:
+        expected_top = {
+            "format_version",
+            "architecture_id",
+            "parameter_count",
+            "parent_model_id",
+            "config",
+            "parameters",
+            "hidden",
+            "tbptt_buffer",
+            "counters",
+        }
+        if set(state) != expected_top:
+            raise InvalidModelState("checkpoint has invalid top-level fields")
         if state.get("format_version") != MODEL_FORMAT_VERSION:
             raise InvalidModelState(
                 f"unsupported model format {state.get('format_version')!r}; expected {MODEL_FORMAT_VERSION!r}"
             )
         if state.get("architecture_id") != ARCHITECTURE_ID:
             raise InvalidModelState("checkpoint architecture does not match AAA1KGRU")
+        if state.get("parameter_count") != expected_parameter_count():
+            raise InvalidModelState("checkpoint parameter count does not match AAA1KGRU")
         config = dict(state["config"])
+        expected_config = {
+            "seed",
+            "learning_rate",
+            "tbptt_steps",
+            "error_loss_weight",
+            "gradient_clip",
+            "freeze_recurrent",
+            "reset_state_every_step",
+            "zero_error_input",
+        }
+        if set(config) != expected_config:
+            raise InvalidModelState("checkpoint config has invalid fields")
+        for field in ("freeze_recurrent", "reset_state_every_step", "zero_error_input"):
+            if not isinstance(config.get(field), bool):
+                raise InvalidModelState(f"checkpoint config {field} must be boolean")
+        seed = config.get("seed")
+        tbptt_steps = config.get("tbptt_steps")
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise InvalidModelState("checkpoint seed must be an integer")
+        if isinstance(tbptt_steps, bool) or not isinstance(tbptt_steps, int):
+            raise InvalidModelState("checkpoint tbptt_steps must be an integer")
+        for field in ("learning_rate", "error_loss_weight"):
+            if isinstance(config[field], bool) or not isinstance(config[field], (int, float)):
+                raise InvalidModelState(f"checkpoint config {field} must be numeric")
+        if config["gradient_clip"] is not None and (
+            isinstance(config["gradient_clip"], bool) or not isinstance(config["gradient_clip"], (int, float))
+        ):
+            raise InvalidModelState("checkpoint gradient_clip must be numeric or null")
         model = cls(
-            seed=int(config["seed"]),
+            seed=seed,
             learning_rate=float(config["learning_rate"]),
-            tbptt_steps=int(config["tbptt_steps"]),
+            tbptt_steps=tbptt_steps,
             error_loss_weight=float(config["error_loss_weight"]),
             gradient_clip=(None if config["gradient_clip"] is None else float(config["gradient_clip"])),
             freeze_recurrent=bool(config["freeze_recurrent"]),
@@ -605,27 +648,42 @@ class AAA1KGRU:
         if hidden.shape != (HIDDEN_SIZE,) or not np.all(np.isfinite(hidden)):
             raise InvalidModelState("checkpoint hidden state is invalid")
         model.hidden = hidden
-        model._caches = deque(
-            (
-                StepCache(
-                    x=np.asarray(entry["x"], dtype=float),
-                    h_prev=np.asarray(entry["h_prev"], dtype=float),
-                    z=np.asarray(entry["z"], dtype=float),
-                    r=np.asarray(entry["r"], dtype=float),
-                    n=np.asarray(entry["n"], dtype=float),
-                    hr=np.asarray(entry["hr"], dtype=float),
-                    h=np.asarray(entry["h"], dtype=float),
-                    output=np.asarray(entry["output"], dtype=float),
-                )
-                for entry in state["tbptt_buffer"]
-            ),
-            maxlen=model.tbptt_steps,
-        )
+        raw_caches = state["tbptt_buffer"]
+        if not isinstance(raw_caches, list) or len(raw_caches) > model.tbptt_steps:
+            raise InvalidModelState("checkpoint TBPTT buffer length is invalid")
+        cache_shapes = {
+            "x": (INPUT_SIZE,),
+            "h_prev": (HIDDEN_SIZE,),
+            "z": (HIDDEN_SIZE,),
+            "r": (HIDDEN_SIZE,),
+            "n": (HIDDEN_SIZE,),
+            "hr": (HIDDEN_SIZE,),
+            "h": (HIDDEN_SIZE,),
+            "output": (OUTPUT_SIZE,),
+        }
+        caches: list[StepCache] = []
+        for entry in raw_caches:
+            if not isinstance(entry, Mapping) or set(entry) != set(cache_shapes):
+                raise InvalidModelState("checkpoint TBPTT entry has invalid fields")
+            arrays = {name: np.asarray(entry[name], dtype=float) for name in cache_shapes}
+            for name, shape in cache_shapes.items():
+                if arrays[name].shape != shape or not np.all(np.isfinite(arrays[name])):
+                    raise InvalidModelState(f"checkpoint TBPTT field {name} is invalid")
+            if np.any((arrays["z"] < 0) | (arrays["z"] > 1)) or np.any((arrays["r"] < 0) | (arrays["r"] > 1)):
+                raise InvalidModelState("checkpoint gate cache is outside [0, 1]")
+            caches.append(StepCache(**arrays))
+        model._caches = deque(caches, maxlen=model.tbptt_steps)
         counters = dict(state["counters"])
-        model.update_count = int(counters["update_count"])
-        model.forward_count = int(counters["forward_count"])
-        model.clip_events = int(counters["clip_events"])
-        model.nonfinite_events = int(counters["nonfinite_events"])
+        expected_counters = {"update_count", "forward_count", "clip_events", "nonfinite_events"}
+        if set(counters) != expected_counters:
+            raise InvalidModelState("checkpoint counters have invalid fields")
+        for name in expected_counters:
+            value = counters[name]
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise InvalidModelState(f"checkpoint counter {name} must be a non-negative integer")
+            setattr(model, name, value)
+        if model.update_count > model.forward_count or model.clip_events > model.update_count:
+            raise InvalidModelState("checkpoint counters describe an impossible model history")
         return model
 
     def clone(self) -> AAA1KGRU:
