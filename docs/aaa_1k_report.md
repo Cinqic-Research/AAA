@@ -7,8 +7,8 @@ AAA-1K is a research seed, not Juniper and not an agent. It is one primitive: a 
 | Item | Value |
 |---|---|
 | phase | `aaa.1k.v1` |
-| scientific fingerprint | `ae020a100b30ae876110291db8368b8f8fc5cd801ad15177c1919f67f75514df` |
-| files covered | 23 |
+| scientific fingerprint | `88738d9762f9721c4c32dd36dc2f93b13f11769aa5895c29879699c26952e2bd` |
+| files covered | 28 |
 | trainable parameters | 994 |
 | selected configuration | lr=0.03, T=4, lambda=0.25 |
 | replicas per family | 32 |
@@ -154,8 +154,8 @@ Baselines AAA-1K beat outright, by family:
 | trained steps | 53225 |
 | targets skipped as unavailable | 1815 |
 | scored transitions | 55040 |
-| transitions per second | 754 |
-| wall seconds | 73.0 |
+| transitions per second | 759 |
+| wall seconds | 72.5 |
 | arms per stream | 12 |
 
 Gradient clipping is a declared mechanism with a declared threshold, not a silent safety net, so its activation count is part of the result.

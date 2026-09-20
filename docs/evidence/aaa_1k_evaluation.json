@@ -24,8 +24,8 @@
       "compute_cost": {
         "arms": 12,
         "scored_transitions": 55040,
-        "transitions_per_second": 753.6758766238537,
-        "wall_seconds": 73.02874048000012
+        "transitions_per_second": 758.9893726183283,
+        "wall_seconds": 72.51748441499967
       },
       "numerical_stability": {
         "total_clip_events": 12234,
@@ -5517,9 +5517,9 @@
   ],
   "git": {
     "branch": "opus/aaa-1k-recurrent-core",
-    "commit": "87b77295a268463c3d4fa2e6da8d74f7e01186b1",
-    "dirty": true,
-    "tree_hash": "fea5beb7c180a771b144346c30ec4ba17990a04d"
+    "commit": "ad555220603fa9b801342462acaf8bb0be25cb34",
+    "dirty": false,
+    "tree_hash": "bd119b42768cba7f91947da22a89ba665006c61e"
   },
   "model_accounting": {
     "parameter_count": 994,
@@ -29676,8 +29676,8 @@
   "performance": {
     "arms": 12,
     "scored_transitions": 55040,
-    "transitions_per_second": 753.6758766238537,
-    "wall_seconds": 73.02874048000012
+    "transitions_per_second": 758.9893726183283,
+    "wall_seconds": 72.51748441499967
   },
   "precision_objective_met": false,
   "replicas_per_family": 32,
@@ -29697,7 +29697,7 @@
     "selected_replicas": 32
   },
   "schema": "aaa.1k.experiments.v1",
-  "scientific_fingerprint": "388851cac1aa85101d4407e9e69b42cc376c32e5028661a019bbde18e6a11eec",
+  "scientific_fingerprint": "88738d9762f9721c4c32dd36dc2f93b13f11769aa5895c29879699c26952e2bd",
   "selection_key": "lr=0.03;T=4;lambda=0.25",
   "streams": [
     {
