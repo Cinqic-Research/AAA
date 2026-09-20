@@ -17,7 +17,13 @@ a substitute for independent review.
 | benchmark families | `aaa.1k.benchmarks.v1` |
 
 Baseline before any change: the full suite was 445 tests, green, on
-`02c3b20`. After this phase it is 538 tests, green.
+`02c3b20`. After this phase it is 562 tests, green.
+
+**The evaluation ran twice.** Round 1 was completed, then probed, and four
+design defects were found in it. All four are repaired and round 2 is the
+current result, on fresh stream identities. Round 1 is retained, superseded, at
+`docs/evidence/aaa_1k_evaluation_round1_superseded.json` with its report
+alongside. Read `aaa_1k_self_review.md` for what was wrong and what changed.
 
 ## 2. What to read, in order
 
@@ -47,12 +53,17 @@ Implementation, `research/aaa_1k/`:
 | `stats.py` | paired stream-level bootstrap, calibration, capability vector |
 | `gradcheck.py` | finite-difference verification |
 | `adversarial.py` | the two probes that try to break the conclusions |
+| `measurements.py` | difference-of-differences adaptation; retention against a frozen probe bank |
+| `round2.py` | the corrected evaluation round on fresh identities |
+| `characterization.py` | development probes for the clip, the coarse family and tuning fairness |
 | `report.py`, `visualize.py`, `identity.py`, `seeds.py`, `cli.py` | reporting, dashboard, identity, seeds, entry point |
 
-Tests: `tests/test_aaa_1k.py`, 93 tests. Evidence:
+Tests: `tests/test_aaa_1k.py`, 117 tests. Evidence:
 `docs/evidence/aaa_1k_development_selection.json`,
-`docs/evidence/aaa_1k_evaluation.json`,
-`docs/evidence/aaa_1k_adversarial_probes.json`.
+`docs/evidence/aaa_1k_evaluation_round2.json` (current),
+`docs/evidence/aaa_1k_characterization.json`,
+`docs/evidence/aaa_1k_adversarial_probes.json`,
+`docs/evidence/aaa_1k_evaluation_round1_superseded.json` (retained).
 
 Nothing under `aaa/`, `benchmarks/` or `results/` is modified. `pyproject.toml`
 is modified only to bring `research/` under mypy, coverage and packaging.
@@ -123,9 +134,14 @@ Complete, in `docs/evidence/aaa_1k_development_selection.json`:
 - **stage 1**, 24 configurations (6 learning rates x 4 horizons) at
   `lambda = 0.25`; every attempt recorded, 8 eliminated by the stability
   margin with their scores retained;
-- **stage 2**, 4 auxiliary weights at the selected `(lr, T)`.
+- **stage 2**, 4 auxiliary weights at the selected `(lr, T)`;
+- **stage 3**, 5 gradient-clip thresholds averaged over 3 initializations;
+- **stage 3a**, the whole selection re-run independently for each of the three
+  architectures.
 
-Selected: `lr = 0.03`, `T = 4`, `lambda = 0.25`.
+Selected for the gated model: `lr = 0.03`, `T = 4`, `lambda = 0.25`,
+`clip = 10.0`. The two controls get `lr = 0.01` and no clip, by the same rules.
+Ablations share the gated model's row exactly.
 
 **The margin rule eliminated the best development configurations**, at a 26%
 development cost (1.138e-03 → 1.434e-03). Check this: the eliminated entries
@@ -158,18 +174,25 @@ python -m research.aaa_1k parameter-audit
 python -m research.aaa_1k gradient-check --full
 ```
 
-Regenerate every piece of evidence (about four minutes on the reference CPU):
+Regenerate every piece of evidence (about eight minutes on the reference CPU):
 
 ```bash
 python -m research.aaa_1k fingerprint
-python -m research.aaa_1k select   --output docs/evidence/aaa_1k_development_selection.json
-python -m research.aaa_1k evaluate --selection docs/evidence/aaa_1k_development_selection.json \
-                                   --output docs/evidence/aaa_1k_evaluation.json
+python -m research.aaa_1k select      --output docs/evidence/aaa_1k_development_selection.json
+python -m research.aaa_1k characterize \
+    --selection docs/evidence/aaa_1k_development_selection.json \
+    --output docs/evidence/aaa_1k_characterization.json
+python -m research.aaa_1k round2 \
+    --selection docs/evidence/aaa_1k_development_selection.json \
+    --characterization docs/evidence/aaa_1k_characterization.json \
+    --output docs/evidence/aaa_1k_evaluation_round2.json
 python -m research.aaa_1k adversarial-probes \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --output docs/evidence/aaa_1k_adversarial_probes.json
-python -m research.aaa_1k report --evidence docs/evidence/aaa_1k_evaluation.json \
+python -m research.aaa_1k report2 \
+    --evidence docs/evidence/aaa_1k_evaluation_round2.json \
     --selection docs/evidence/aaa_1k_development_selection.json \
+    --characterization docs/evidence/aaa_1k_characterization.json \
     --output docs/aaa_1k_report.md
 ```
 
@@ -177,12 +200,13 @@ Independently recompute the headline statistics from the retained primitives,
 without rerunning a model:
 
 ```bash
-python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation.json
+python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation_round2.json
 ```
 
-It rebuilds 59 stored values — Q1, Q3, Q4, every per-family mean and the
-stability counters — from the per-stream entries beside them and exits non-zero
-on any disagreement.
+It rebuilds 99 stored values — Q1, Q3, Q4, every adaptation and retention
+trial, every per-family mean and the stability counters — from the cells beside
+them and exits non-zero on any disagreement. The same command on the superseded
+round-1 file rebuilds its 59.
 
 Dashboard:
 
@@ -201,38 +225,39 @@ python -m aaa.cli smoke --output-root runs
 python tools/check_exit_codes.py
 ```
 
-## 10. Known failures, confounds and accepted limitations
+## 10. Known limitations, ranked by how much they should move confidence
 
-Ranked by how much they should change a reader's confidence.
+Round 1's top four entries were defects and are now repaired; see
+`aaa_1k_self_review.md` and `AAA-153` through `AAA-156`. What remains:
 
-1. **Q2 measures continued learning, not adaptation to change.** Branching at a
-   quiet point reproduces 95% of the effect. `SR-1`.
-2. **Q5 did not measure retention.** A2 is confounded with three times as much
-   total experience. Read `retention_exists` as `NOT MEASURED`. `SR-3` in the
-   report, item 3 in the self-review.
-3. **The precision objective was missed by a factor of nearly twenty.** 599
-   replicas per family were needed; 32 were run under a declared bound. Every
-   interval is wider than the design asked for. `D-13`.
-4. **Every effect is conditional on one model initialization.** Directions are
-   stable across five seeds; magnitudes vary by up to 2x. `SR-2`.
-5. **Q4's capacity match gives the ungated control 28 hidden units to the
-   gated model's 16.** Honest for a fixed parameter budget, not a width-matched
-   comparison. `SR-3`.
-6. **The missingness code is weak.** During a gap inputs 2 and 3 are both
+1. **Q4 is inconclusive overall but negative on the memory families.** Gating
+   does not clearly help, and looks actively unhelpful where memory matters —
+   but the ungated control is the less stable architecture, diverging at a
+   learning rate of 0.1 where the gated model survives to 0.3. Three claims,
+   two measured.
+2. **Q4's mean and median disagree in sign.** The gated model is slightly better
+   on 117 of 144 streams and much worse on the rest. That structure wants a
+   distributional analysis this phase does not have.
+3. **The two memory benchmarks were designed by the implementer whose model
+   they evaluate**, and reviewed by nobody. The decomposition probe addresses
+   `coarse_speed_v1` — with the speed fixed the recurrent model is *worse*, so
+   the family genuinely tests regime inference — but `occlusion_v1` has no
+   equivalent check.
+4. **Q6 is weak.** Mean rank correlation 0.44; 106 of 720 cells have a monotone
+   quintile table; the head over-predicts.
+5. **The missingness code is weak.** During a gap inputs 2 and 3 are both
    exactly zero, which a genuine zero displacement and zero error would also
-   produce. A clean flag needs a fourth input and a new architecture. `D-5`.
-7. **Gradient clipping activated 12,234 times** across 55,040 scored
-   transitions (22%). It is a declared mechanism with a declared threshold, but
-   at that rate it is shaping the optimization, not just guarding it.
+   produce. A clean flag needs a fourth input and a new architecture (`D-5`).
+6. **Five initializations is a small second bootstrap level**, and the crossed
+   interval is itself estimated from five points.
+7. **Beating `rls_online` on `coarse_speed_v1`** is beating it outside its
+   declared operating envelope.
 8. **TBPTT's truncation bias is real but measured to be negligible here**, and
-   this benchmark does not exercise long-range credit assignment at all.
-   `D-12`.
-9. **`coarse_speed_v1` and `occlusion_v1` are new and unvalidated by anyone
-   else.** They have never been reviewed, and a benchmark that its own author
-   designed to show a mechanism is the weakest kind.
-10. **Beating `rls_online` on `coarse_speed_v1` is beating it outside its
-    declared operating envelope**, since the v2.1 candidate was selected and
-    frozen for smooth, fully observed motion.
+   this benchmark does not exercise long-range credit assignment at all
+   (`D-12`).
+9. **No generalization claim.** Evaluation streams are held out from
+   development and from round 1, which supports a claim about unseen
+   trajectories of the same families only. No unseen family was tested.
 
 ## 11. Effect on the existing repository-wide fingerprints
 
@@ -264,17 +289,24 @@ with 95% intervals and per-stream sign counts, the A/B/A segment table, the
 calibration summary, and the claim ladder with a status and supporting number
 on every rung.
 
-## 13. Unresolved concerns I could not settle
+## 13. The three concerns round 1 could not settle, and what settled them
 
-- Whether `coarse_speed_v1` measures memory or measures tolerance to
-  quantization. The two are entangled in its design and I did not separate
-  them.
-- Whether the GRU losing to the ungated RNN is a property of gating at this
-  scale, of these particular streams, or of the shared learning rate being
-  better suited to the ungated arm. A per-architecture learning-rate selection
-  would answer it and would also open a tuning-fairness question of its own.
-- Whether the 22% clip rate is masking a learning-rate problem the stability
-  margin pushed me into.
+All three were open in the round-1 handoff. Each now has a measurement.
+
+- **Does `coarse_speed_v1` measure memory or tolerance to quantization?**
+  Settled: memory. With the speed held fixed — the quantizer alone — the
+  recurrent model is 6.32e-04 *worse* than the stateless control, and becomes
+  better only once the speed starts switching.
+- **Is the ungated control's win an artefact of a shared learning rate?**
+  Settled: largely yes. Tuned separately by the same rules, the comparison is
+  inconclusive, and the ungated arm was winning at a rate its own stability
+  rule forbids.
+- **Is the 22% clip rate masking a problem?** Settled: it was the problem. The
+  asserted threshold cost 29% of development error. It is now selected, per
+  architecture, and fires on under 1% of updates.
+
+Concerns I still cannot settle are in section 10; the sharpest is that I
+designed the benchmarks my own model is measured on.
 
 ## 14. What I did not do
 

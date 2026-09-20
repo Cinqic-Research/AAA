@@ -981,7 +981,8 @@ def render_round2_report(
             f"{gated['unclipped_divergence_boundary']} for the gated model, so the same declared "
             f"stability margin allows it only {ungated['selected_learning_rate']:g} where the "
             f"gated model gets {gated['selected_learning_rate']:g}. Round 1 ran both at the "
-            f"gated model's rate and reported that gating loses. {fairness['finding'].capitalize()}."
+            f"gated model's rate and reported that gating loses. Tuned separately, "
+            f"{fairness['finding']}."
         )
         add("")
 

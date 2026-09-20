@@ -177,8 +177,14 @@ alternatives and are deliberately *not* implemented here; see
 [`aaa_1k_literature_review.md`](aaa_1k_literature_review.md) for why.
 
 **Optimizer:** plain SGD, no momentum, no adaptive rates. Global gradient-norm
-clipping at 1.0 is a declared mechanism with a declared threshold, and its
-activation count is reported as part of every result.
+clipping is a declared mechanism whose threshold is **selected**, not asserted:
+a threshold of 1.0 was originally declared and a development probe found it
+firing on 24% of updates and costing 29% of development error, which makes it a
+hyperparameter deciding what is learned rather than a guard. Stage 3 of the
+development selection chooses it by the same rules as everything else,
+preferring the most conservative threshold within the practical margin of the
+best. The selected threshold fires on under 1% of updates, and the activation
+rate is reported as part of every result.
 
 **A non-finite gradient or parameter raises.** Divergence is evidence. Nothing
 is silently reset.
@@ -251,6 +257,16 @@ constant motion, dead reckoning, an eight-point windowed linear fit, and the
 unmodified v2.1 RLS candidate with its declared mechanism set copied exactly
 from the frozen specification.
 
+**Hyperparameters are selected per architecture.** The gated model, the
+stateless control and the ungated control each get the learning rate and clip
+threshold the same declared rules select for them, on the same development
+streams. Imposing one architecture's hyperparameters on another turns a
+comparison into a handicap: doing so destabilized the stateless control by two
+orders of magnitude on one family and inflated the reported hidden-state
+advantage thirty-fold. The three **ablations** do share the gated model's
+configuration exactly, because an ablation is the same architecture with one
+mechanism removed and must differ in exactly that.
+
 The purpose is not an architecture beauty contest. It is to ask whether memory
 matters, whether recurrence matters, whether gates matter, whether explicit
 prediction-error feedback matters, and whether training recurrent connections
@@ -264,10 +280,24 @@ matters — the mechanism-by-mechanism design Foucault & Meyniel (2021) used.
 | `occlusion_v1` | holding state through blindness: periodic observation gaps |
 | `coarse_speed_v1` | integrating over history: a hidden speed regime behind a coarse quantizer |
 | `aba_v1` | continual adaptation: one unlabelled stream, A then B then A |
+| `paired_change_v1` | adaptation, isolated: two streams bit-identical until a declared step, after which one changes and one does not |
 
 Under occlusion the evaluator scores against latent truth the agent never saw;
 under `coarse_speed_v1` the agent is scored on the quantized observable, which
 is what is actually revealed. Both are stated in each family's metadata.
+
+`paired_change_v1` exists because a single online/frozen branch cannot separate
+"continued learning helps after a change" from "continued learning helps". A
+probe measured that difference at 5%. Running one model through the shared
+prefix of a matched pair and differencing the two advantages removes everything
+the two worlds have in common; both trunks are asserted to reach an identical
+model-state hash at the branch.
+
+Retention is measured against a **fixed frozen probe bank**: eight held-out
+regime-A episodes, generated once, never trained on, and evaluated by a frozen
+clone with its hidden state reset at the end of each A/B/A segment. Because the
+same questions are asked at every checkpoint, accumulated experience cannot
+flatter the later ones.
 
 ## 11. Lineage
 

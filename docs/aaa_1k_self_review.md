@@ -1,13 +1,16 @@
 # AAA-1K adversarial self-review
 
-This is an attempt to prove the phase's own conclusions wrong. Two probes found
-something substantial, and one of them changes how the headline Q2 result
-should be read. Both are reproducible:
+An attempt to prove the phase's own conclusions wrong. It succeeded four times,
+and all four findings are now repaired rather than annotated. Round 1's evidence
+is retained unchanged at
+[`evidence/aaa_1k_evaluation_round1_superseded.json`](evidence/aaa_1k_evaluation_round1_superseded.json);
+round 2 is the corrected result.
+
+Everything below is reproducible:
 
 ```bash
-python -m research.aaa_1k adversarial-probes \
-    --selection docs/evidence/aaa_1k_development_selection.json \
-    --output docs/evidence/aaa_1k_adversarial_probes.json
+python -m research.aaa_1k adversarial-probes --selection <selection> --output <path>
+python -m research.aaa_1k characterize       --selection <selection> --output <path>
 ```
 
 This is an implementer's self-review. It is **not** independent review, and
@@ -15,123 +18,134 @@ nothing here should be read as approval.
 
 ---
 
-## Findings that changed a claim
+## Defects found, and what they did to the result
 
-### SR-1. Q2 does not measure what its name suggests — CONFIRMED DEFECT IN THE READING
+### SR-1. Q2 measured continued learning, not adaptation — REPAIRED (`AAA-153`)
 
-**Hypothesis tested.** "An online arm beats its frozen twin after an
-unannounced change" is also exactly what you would observe if continued
-learning simply helped everywhere, change or no change. Q2's design cannot tell
-those apart, because the model is still improving on every family throughout
-every stream (that is Q1's result).
-
-**Probe.** Branch the same streams at step 60, where nothing whatsoever
+**Probe.** Branch an online/frozen pair at step 60, where nothing whatsoever
 happens, and compare against the declared change point at step 100.
 
 | Branch point | Frozen minus online | 95% interval |
 |---|---|---|
-| declared change (step 100) | +8.07e-04 | [+6.17e-04, +1.03e-03] |
-| quiet control (step 60) | +7.65e-04 | [+5.77e-04, +9.76e-04] |
+| declared change | +8.07e-04 | [+6.17e-04, +1.03e-03] |
+| quiet control | +7.65e-04 | [+5.77e-04, +9.76e-04] |
 
-**The control reproduces 95% of the effect.**
+The control reproduced **95%** of the effect.
 
-**Disposition.** The measurement is correct; the natural interpretation of it is
-not. Q2 supports "continued updating helps" and does **not** support "the model
-adapts to change". The report now says so at the point of the claim. Isolating
-adaptation needs a design this phase does not have: a matched pair of streams
-identical up to the branch, one of which then changes and one of which does
-not, with the effect defined as the *difference of differences*. That is a
-concrete, cheap next experiment.
+**Repair.** A `paired_change_v1` family emits two streams that are
+bit-identical until a declared step, after which one changes speed and the
+other does not. A single model is driven through the shared prefix, so both
+variants branch from the same model state — asserted by complete state hash,
+not assumed. The estimator is `advantage(changed) − advantage(control)`.
 
-### SR-2. Every headline effect is conditional on one initialization — CONFIRMED LIMITATION
+**What it changed.** Adaptation is real, and smaller than round 1 implied:
+**+9.50e-04 [+5.63e-04, +1.33e-03]**, about 65% of the total online advantage.
+Round 1's claim was directionally right and overstated by roughly a third.
 
-**Hypothesis tested.** The evaluation gives every arm the same `model_init`
-seed, deliberately, so that an ablation differs from the primary in exactly one
-mechanism. The bootstrap then resamples streams. Initialization variance is
-therefore **entirely unsampled**, and the intervals are narrower than the
-uncertainty that actually exists.
+### SR-2. Q5 did not measure retention — REPAIRED (`AAA-154`)
 
-**Probe.** Repeat the key comparisons across five initializations on 16 memory-
-family streams.
+**Problem.** Every learning arm returned to regime A better than it left, which
+reads as "no forgetting" but is confounded: by A2 the model has had three times
+as much total experience.
 
-| seed index | Q3 vs stateless MLP | Q3 vs state reset | Q4 vs ungated RNN |
-|---|---|---|---|
-| 0 | +4.43e-04 | +7.06e-04 | -3.34e-04 |
-| 1 | +2.98e-04 | +7.27e-04 | -5.02e-04 |
-| 2 | +3.44e-04 | +6.94e-04 | -3.90e-04 |
-| 3 | +3.60e-04 | +6.69e-04 | -4.95e-04 |
-| 4 | +2.26e-04 | +5.41e-04 | -4.89e-04 |
+**Repair.** A fixed bank of eight held-out regime-A episodes, generated once and
+never trained on, evaluated by a frozen clone with its hidden state reset, at
+the end of each of A1, B and A2. The same questions at every checkpoint, so
+accumulated experience cannot flatter the later ones.
 
-**Every comparison kept its sign.** Magnitudes vary by up to a factor of two.
+**What it changed.** Probe error after B minus after A1 is
+**−3.74e-04 [−7.99e-04, −9.52e-07]**. Regime-A ability *improved* while the
+model trained on regime B. There is no forgetting here to target, which is why
+no replay mechanism was added — adding one would have decorated a
+non-problem.
 
-**Disposition.** The *directions* of Q3 and Q4 are robust to initialization;
-the *magnitudes* in the report are conditional on one. The report states this.
-A proper design would treat initialization as a second resampling level in a
-hierarchical bootstrap, which is what the v2.1 protocol already does for
-replicas and episodes, and which this phase should have copied.
+### SR-3. Intervals ignored initialization variance — REPAIRED (`AAA-155`)
 
-### SR-3. Q4's capacity match gives the ungated arm more state — DISCLOSED, NOT A DEFECT
+**Problem.** Round 1 gave every arm one initialization seed, deliberately, then
+resampled only streams. A five-seed probe found magnitudes varying by up to a
+factor of two while the intervals claimed a precision that did not account for
+it.
 
-The ungated control has 954 parameters against the GRU's 994, but 28 hidden
-units against 16. Matching on parameter count necessarily buys the ungated arm
-more state, because that is precisely what a gate costs. The comparison is the
-right one for a fixed parameter budget and is the one the phase brief
-specified, but it is not a comparison at matched hidden width, and the report
-now says so. A width-matched comparison (16 ungated units, ~370 parameters)
-would answer a different and also interesting question.
+**Repair.** Five initializations, and a crossed bootstrap that resamples
+initializations and streams independently. Per-initialization effects are
+reported alongside the mean.
+
+**What it changed.** Intervals widened, and every conclusion now states whether
+all five initializations agreed on the sign. Q3's do.
+
+### SR-4. The controls were handicapped — REPAIRED (`AAA-156`)
+
+**This is the one that would have produced a false headline.**
+
+The gradient-clip threshold was *asserted* at 1.0, never selected. A probe found
+it activating on 24% of updates and costing 29% of development error. So I made
+it a selected hyperparameter — and then applied the *gated model's* selected
+threshold to every arm.
+
+The stateless control destabilized on `coarse_speed_v1`: mean error **1.6e-01**
+against the gated model's 2.2e-03. The crossed comparison duly reported a
+hidden-state advantage of **+1.28e-02** — thirty times the true effect. Had I
+not looked at the per-arm table, "hidden state helps, decisively" would have
+gone into the report.
+
+**Repair.** Stage 3a selects the learning rate *and* the clip separately for
+each architecture, by the same declared rules, on the same development streams.
+Ablations of the gated model still share its hyperparameters exactly, because
+an ablation is the same architecture with one mechanism removed.
+
+**What it changed.** The hidden-state effect fell to its honest **+2.49e-04**,
+and **Q4 moved from `NEGATIVE` to `INCONCLUSIVE`**: the round-1 finding that
+gating loses did not survive giving the ungated control a fair learning rate.
 
 ---
 
-## Defects found and fixed during the phase
+## What the development probes settled
 
-### SR-4. A benchmark family that would have measured nothing — FIXED BEFORE ANY EVALUATION
+**The clip was deciding, not guarding.** At the declared 1.0 it fired on 24% of
+updates and cost 29% of development error. The selected threshold of 10.0 fires
+on under 1%. That is the difference between a hyperparameter and a safety net.
 
-The third family was originally specified as reflecting motion with a hidden
-speed regime observed on every *other* step. Under the declared rule that a
+**`coarse_speed_v1` really does measure hidden-regime inference.** With the
+speed held fixed — the quantizer alone — the recurrent model is **6.32e-04
+worse** than the stateless control. It only becomes better once the speed starts
+switching. My worry that the family measured nothing but tolerance to a coarse
+grid was wrong, and the opposite is true: the grid alone favours the stateless
+arm.
+
+**Gating buys stability, which round 1 never noticed.** Run without a clip, the
+ungated control diverges at a learning rate of 0.1; the gated model survives to
+0.3. The same declared stability margin therefore allows the ungated arm only
+0.01 where the gated model gets 0.03. Round 1 ran both at the gated model's rate
+and concluded that gating loses. Tuned separately, the comparison is
+inconclusive — and the *reason* the ungated arm looked good is that it was being
+run at a rate its own stability rule forbids.
+
+---
+
+## Defects caught before they reached any evaluation
+
+**A family that would have measured nothing.** The third family was originally
+specified as showing only every other step. Under the declared rule that a
 learner updates only on transitions whose both ends it was shown, no two
-consecutive steps are ever observed after the warm-up, so the learner would
-have trained **zero times** on that family. The benchmark would have run,
-produced plausible numbers, and measured nothing at all.
+consecutive steps are ever observed after the warm-up — the learner would have
+trained **zero times**. The benchmark would have run and produced plausible
+numbers. Replaced with `coarse_speed_v1` (`D-7`).
 
-Caught by reasoning through the training rule before generating any evaluation
-stream. Replaced with `coarse_speed_v1`, which hides observation *precision*
-rather than observation *presence*. Recorded as `D-7`.
+**A stability rule that could not fire.** The margin rule initially required
+only that the next higher learning rate also be stable. With clipping on,
+nothing in the grid ever diverges, so the rule was vacuous — exactly the disease
+the v2.1 repair existed to cure. A stage-0 probe with clipping disabled found a
+real boundary at `lr = 0.3`, and the repaired rule then eliminated the four best
+development configurations (`D-8`).
 
-### SR-5. A stability rule that could not fire — FIXED BEFORE SELECTION
+**An input that could not be measured.** Normalized as the brief specified,
+input 3 was numerically inert and its ablation was identical to the full model
+to five decimal places (`D-3`).
 
-The stability-margin rule initially required only that the next higher learning
-rate in the grid also be stable. With the declared gradient clip at 1.0,
-nothing in the declared grid ever diverges, so the rule was vacuous — a gate
-that cannot fail, which is exactly the disease the v2.1 repair existed to cure.
-
-Fixed by adding a stage-0 probe with clipping disabled, which located a real
-boundary at `lr = 0.3`, and by requiring two grid steps of margin. The repaired
-rule then **eliminated the four best-performing configurations**, costing 26%
-of development accuracy. Recorded as `D-8`.
-
-### SR-6. An input that could not be measured — FIXED BEFORE SELECTION
-
-Normalized as the brief specified, input 3 was numerically inert, and the
-`zero_error_input` ablation was identical to the full model to five decimal
-places. The mechanism the brief asked to be tested could not have been measured
-either way. Rescaled to the public displacement constant; the ablation now
-separates. Recorded as `D-3`.
-
-### SR-7. Baselines penalised by a gap they did not cause — FIXED BEFORE EVALUATION
-
-The first observation tracker exposed a raw displacement between the last two
-*observed* positions. After a gap of four steps, that hands every rule a
-displacement four times too large and then scores the rule on the overshoot.
-Fixed by dividing by the elapsed step count, so the feature is always a
-per-step velocity. Applies identically to the neural arms and the analytic
-baselines.
-
-### SR-8. A state-footprint figure measured on an empty buffer — FIXED
-
-`state_footprint()` reported the TBPTT buffer's *current occupancy*, which is
-zero for a freshly constructed model, so the first report claimed a total
-adaptive footprint of 1010 scalars. The honest figure is the buffer at
-capacity: 1414. Both are now reported.
+**Baselines penalised by a gap they did not cause.** The first observation
+tracker exposed a raw displacement across a gap, handing every rule a
+displacement four times too large and then scoring it on the overshoot (`SR-7`
+in round 1).
 
 ---
 
@@ -139,60 +153,61 @@ capacity: 1414. Both are now reported.
 
 | Checked | Method | Outcome |
 |---|---|---|
-| future leakage | `accept_observation` is the single channel and carries only `float | None`; a recording agent asserts nothing else arrives | clean |
-| evaluator metadata reaching a learner | regime, event, latent truth and hidden speed exist only on `StreamStep`, which the runner never passes on | clean |
-| targets never shown being trained against | `trained_steps` is asserted equal to the count of transitions with both ends observed; an injected greedy agent trains more and the test catches it | clean |
-| state sharing between clones | every array identity checked; mutating a clone does not touch the original; an injected shallow clone is caught | clean |
-| online/frozen asymmetry beyond weights | both arms branch from one `state_dict`, and the clone hashes are asserted equal at every branch | clean |
-| improper hidden-state resets | the hidden state is reset only on `begin_episode` or the declared ablation; a frozen arm's hidden state is asserted to keep moving | clean |
-| parameter miscounting | recomputed from array sizes, from the formula, and against the declared constant | 994 / 982 / 954, all three agree |
-| gradient correctness | every parameter of every model finite-differenced exhaustively against a sequence loss | max absolute error 8.7e-10 |
-| a broken temporal gradient hiding behind a correct one-step gradient | injected a backward pass that keeps only the last transition | caught |
-| stop-gradient not actually in effect | a finite-difference reference that lets the auxiliary target move | disagrees, as it must |
-| boundary-transform advantage | the GRU, reflected constant motion and dead reckoning use the identical public `reflect_prediction` | matched; the unreflected variant is also reported |
-| an unfair incumbent | the RLS arm's ten declared parameters are asserted equal to the frozen v2.1 specification's `candidate` block | unmodified |
+| future leakage | `accept_observation` is the single channel and carries only `float \| None` | clean |
+| evaluator metadata reaching a learner | regime, event, latent truth and hidden speed live only on `StreamStep` | clean |
+| training on targets never shown | `trained_steps` asserted equal to transitions with both ends observed; an injected greedy agent is caught | clean |
+| a retention probe that learns | injected a clone that still updates; the read-only assertion fires | caught |
+| a broken DiD pairing | injected an unpaired control stream; the identical-trunk assertion fires | caught |
+| state sharing between clones | array identities checked; an injected shallow clone is caught | clean |
+| online/frozen asymmetry beyond weights | both arms branch from one `state_dict`; clone hashes asserted equal | clean |
+| parameter miscounting | recomputed from arrays, from the formula, and against the declared constant | 994 / 982 / 954 |
+| gradient correctness | every parameter of every model finite-differenced exhaustively | max absolute error 8.7e-10 |
+| a broken temporal gradient | injected a backward pass keeping only the last transition | caught |
+| stop-gradient not in effect | a reference that lets the auxiliary target move | disagrees, as it must |
+| boundary-transform advantage | the GRU and the reflecting baselines share one public `reflect_prediction` | matched |
+| an unfair incumbent | the RLS arm's ten declared parameters asserted equal to the frozen v2.1 block | unmodified |
 | seed reuse across roles | five namespaces, 200 indices each, asserted pairwise disjoint | disjoint |
-| tuning on evaluation | selection reads only `development_env` streams; evaluation reads only `evaluation_env` | separated |
-| serialization / resume mismatch | a run interrupted at step 60 and resumed is asserted bitwise identical to the uninterrupted run | identical |
-| the renderer mutating model state | complete state hash compared across a render | unchanged |
-| `all([]) is True` style vacuity | empty comparisons raise; under-sampled calibration returns `INSUFFICIENT_EVIDENCE` | cannot pass vacuously |
-| broken legacy commands | the full 538-test suite, `aaa spec-hash`, the v2.1 development benchmark, `recompute` and the v1 smoke all run | unaffected |
+| round-1 stream reuse | round 2 draws from declared fresh offsets | no overlap |
+| tuning on evaluation | selection and characterization read `development_env` only | separated |
+| serialization / resume mismatch | a run interrupted at step 60 and resumed | bitwise identical |
+| the renderer mutating model state | complete state hash across a render | unchanged |
+| vacuous success | empty comparisons raise; under-sampled calibration returns `INSUFFICIENT_EVIDENCE` | cannot pass vacuously |
+| broken legacy commands | the full suite plus every `aaa.cli` path | unaffected |
 
 ---
 
-## Claims I would challenge if I were reviewing this
+## What I would still challenge if I were reviewing this
 
-1. **Q2's headline.** SR-1. The number is right and the word "adaptation"
-   should not be attached to it.
-2. **Q7's wins against `rls_online` on `coarse_speed_v1`.** The RLS candidate
-   was selected and frozen for smooth, fully observed motion. Beating it on a
-   quantized staircase is beating it outside its declared operating envelope.
-   That is worth knowing and is not evidence that the GRU is the better
-   learner.
-3. **Q5 entirely.** The A2 tail is lower than the A1 tail for every learning
-   arm, which reads as "no forgetting" but is confounded with "three times as
-   much total experience". This phase did not measure retention. It should be
-   redesigned around a frozen probe bank evaluated at both segment boundaries,
-   and until then `retention_exists` should be read as `NOT MEASURED` rather
-   than as supported.
-4. **Q6's usefulness.** A mean rank correlation of 0.47 with only 30 of 192
-   streams showing a monotone quintile table is a weak signal, and the head
-   over-predicts (bias +0.19 in normalized units, visible as the flat orange
-   line above the red one on the dashboard). "The model knows when it is about
-   to be wrong" would be an overstatement.
-5. **The precision objective.** It was not met, by a factor of nearly twenty.
-   Everything in the report is wider than the design asked for.
-
----
+1. **Q4 is inconclusive overall but negative on the memory families**
+   (−2.53e-04 [−4.45e-04, −1.04e-04]). "Gating does not clearly help, and looks
+   actively unhelpful where memory matters, but the ungated arm is the less
+   stable architecture" is three claims, and only the first two are measured
+   here.
+2. **Q4's mean and median disagree in sign.** The gated model is slightly better
+   on 117 of 144 streams and much worse on the rest. That structure deserves a
+   distributional analysis this phase does not have.
+3. **`occlusion_v1` and `coarse_speed_v1` were designed by the same implementer
+   whose model they evaluate**, and reviewed by nobody. That remains the weakest
+   part of the evidence, and the decomposition probe only addresses one of the
+   two.
+4. **Q6 is weak.** A mean rank correlation of 0.44 with 106 of 720 cells showing
+   a monotone quintile table, and a head that over-predicts. "The model knows
+   when it is about to be wrong" would be an overstatement.
+5. **Beating `rls_online` on `coarse_speed_v1`** is beating it outside its
+   declared operating envelope; the v2.1 candidate was frozen for smooth, fully
+   observed motion.
+6. **Five initializations is a small second level.** The crossed interval is
+   honest about the design but is itself estimated from five points.
 
 ## What I would do next, in order
 
-1. Redesign Q2 as a difference-of-differences against a matched no-change
-   stream (SR-1). Cheap, and it converts a misleading result into a real one.
-2. Redesign Q5 around a frozen probe bank measured at both segment boundaries,
-   then — and only then — consider replay.
-3. Make initialization a second level of the bootstrap (SR-2).
-4. Build a benchmark with genuine long-range dependence, so that the truncation
-   horizon matters and UORO becomes worth implementing (`D-12`).
-5. Leave the architecture alone. It loses to a *smaller* ungated control and to
-   parameterless analytic rules; that is not a capacity problem.
+1. A width-matched gating comparison (16 ungated units) to separate "gating" from
+   "fewer hidden units at the same parameter count".
+2. A distributional analysis of Q4's minority of large ungated wins — that is
+   where the mechanism is hiding.
+3. An independently designed memory benchmark, from someone who is not also
+   building the model.
+4. A benchmark with genuine long-range dependence, so the truncation horizon
+   matters and UORO becomes worth implementing (`D-12`).
+5. Leave the architecture alone. It is inconclusive against a *smaller* control
+   and loses to parameterless analytic rules; that is not a capacity problem.

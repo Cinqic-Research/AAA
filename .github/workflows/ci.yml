@@ -68,16 +68,19 @@ jobs:
         run: |
           python -m research.aaa_1k select \
             --output "${RUNNER_TEMP}/aaa1k/development_selection.json"
-          python -m research.aaa_1k evaluate \
+          python -m research.aaa_1k round2 \
             --selection "${RUNNER_TEMP}/aaa1k/development_selection.json" \
-            --replicas 4 \
-            --output "${RUNNER_TEMP}/aaa1k/evaluation.json"
+            --replicas 2 --initializations 2 \
+            --adaptation-trials 4 --retention-trials 2 \
+            --output "${RUNNER_TEMP}/aaa1k/round2.json"
           python -m research.aaa_1k recompute \
-            --evidence "${RUNNER_TEMP}/aaa1k/evaluation.json"
-          python -m research.aaa_1k report \
-            --evidence "${RUNNER_TEMP}/aaa1k/evaluation.json" \
+            --evidence "${RUNNER_TEMP}/aaa1k/round2.json"
+          python -m research.aaa_1k report2 \
+            --evidence "${RUNNER_TEMP}/aaa1k/round2.json" \
             --selection "${RUNNER_TEMP}/aaa1k/development_selection.json" \
             --output "${RUNNER_TEMP}/aaa1k/report.md"
+          python -m research.aaa_1k recompute \
+            --evidence docs/evidence/aaa_1k_evaluation_round2.json
           python -m research.aaa_1k visualize \
             --family occlusion_v1 --output "${RUNNER_TEMP}/aaa1k/dashboard.png"
 

@@ -110,30 +110,34 @@ shift is not evidence that a physical-law change was detected.
 ## AAA-1K (`aaa.1k.v1`)
 
 The 994-parameter recurrent phase has its own limitations, and they are
-different in kind from the v2.1 ones.
+different in kind from the v2.1 ones. Its evaluation ran twice: round 1 was
+completed, probed, and found to contain four design defects, all of which are
+repaired in round 2. Round 1 is retained as superseded evidence.
 
-**What it does not show.** It does not show adaptation. The online-versus-frozen
-result that looked like adaptation reproduces at 95% strength when the branch
-is placed where nothing happens, so it measures continued learning
-(`AAA-153`). It does not show retention: the A/B/A design confounds "came back
-to A intact" with "had three times as much total experience by then"
-(`AAA-154`). It does not show generalization beyond unseen trajectories of the
-same four families; no unseen family was tested.
+**What round 2 shows.** Online learning on every family. Persistent recurrent
+state beating both a state-reset ablation and a matched-capacity stateless
+control, most clearly on steps whose target the agent never saw. Genuine
+adaptation, isolated from ordinary continued learning by a
+difference-of-differences against a bit-identical unchanged world, at roughly
+65% of the total online advantage. No forgetting, measured against a fixed probe
+bank rather than inferred from segment tails.
 
-**What it does show, within those bounds.** Online learning on every family.
-Persistent recurrent state beating both a state-reset ablation and a
-matched-capacity stateless control, most clearly on steps whose target the
-agent never saw. Gating *failing* to pay for itself against a smaller ungated
-control -- the opposite of what the small-gated-network literature reports for
-stochastic, changing environments, and the most interesting negative result of
-the phase.
+**What it does not show.** Generalization beyond unseen trajectories of the same
+four families; no unseen family was tested. Whether gating pays for itself:
+round 1's negative result did not survive giving the ungated control its own
+rule-selected learning rate, and the honest answer is now inconclusive overall
+and negative on the memory families.
 
-**Where the evidence is thin.** The declared precision objective was missed by
-a factor of nearly twenty: 599 replicas per family were indicated, 32 were run
-under a declared bound. Every interval is wider than the design asked for, and
-effects near zero are unresolved rather than absent. Every effect is also
-conditional on a single model initialization; a five-seed probe found the
-directions stable and the magnitudes varying by up to a factor of two.
+**The most dangerous thing that nearly happened.** Selecting a gradient-clip
+threshold on the gated model and applying it to every arm destabilized the
+stateless control on one family — mean error `1.6e-01` against the gated model's
+`2.2e-03` — and inflated the reported hidden-state advantage to thirty times its
+true value. It was caught by reading the per-arm table rather than the summary.
+Hyperparameters are now selected per architecture (`AAA-156`).
+
+**Where the evidence is thin.** Five initializations is a small second bootstrap
+level. Q4's mean and median disagree in sign, so a minority of streams carries
+the aggregate. The self-error head is weakly informative and over-predicts.
 
 **Mechanisms that are programmed, not learned.** Boundary reflection, target
 unfolding, the holding of unobserved steps, and the rule that a learner updates
@@ -142,20 +146,17 @@ of the observation format applied identically to every arm, and the
 dead-reckoning and reflected constant-motion baselines exist so that none of
 them is mistaken for a capability.
 
-**Benchmark provenance.** `occlusion_v1` and `coarse_speed_v1` are new,
-designed by the same implementer whose model they evaluate, and reviewed by
-nobody. That is the weakest kind of benchmark, and it is the first thing an
-independent reviewer should attack.
+**Benchmark provenance, still the weakest point.** `occlusion_v1` and
+`coarse_speed_v1` are new, designed by the same implementer whose model they
+evaluate, and reviewed by nobody. A decomposition probe established that
+`coarse_speed_v1` genuinely tests hidden-regime inference — with the speed held
+fixed the recurrent model is *worse* than the stateless control — but
+`occlusion_v1` has no equivalent check, and neither has been seen by anyone
+else.
 
-**Gradient clipping activated on 22% of updates.** It is a declared mechanism
-with a declared threshold, but at that rate it is shaping the optimization
-rather than merely guarding it.
-
-**The most useful next experiments**, in order: a difference-of-differences
-design against a matched no-change stream, so adaptation can be separated from
-learning; a frozen probe bank measured at both A/B/A boundaries, so retention
-can be separated from accumulated experience; initialization as a second
-bootstrap level; and a benchmark with genuine long-range dependence, without
-which the truncation horizon does not matter and an unbiased online recurrent
-learner has nothing to fix.
-
+**The most useful next experiments**, in order: a width-matched gating
+comparison, to separate "gating" from "fewer hidden units at the same parameter
+count"; a distributional analysis of the minority of streams where the ungated
+control wins large; an independently designed memory benchmark; and a benchmark
+with genuine long-range dependence, without which the truncation horizon does
+not matter and an unbiased online recurrent learner has nothing to fix.

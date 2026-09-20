@@ -111,27 +111,35 @@ matched-capacity stateless MLP (982 parameters), an ungated RNN (954
 parameters), three ablations of itself, and the full analytic baseline suite
 including the unmodified v2.1 RLS candidate.
 
-The headline results, in one line each:
+The evaluation ran **twice**. Round 1 was completed, probed, and found to
+contain four design defects; all four were repaired and re-measured on fresh
+stream identities. Round 1 is retained, superseded. The headline results, in
+one line each:
 
 - it **learns online** on every family;
 - **persistent hidden state helps** -- it beats both a state-reset ablation and
   a matched stateless control, most clearly on steps whose target was never
   shown to it;
-- **gating does not pay for itself here**: the ungated 954-parameter control
-  beats it, which is the opposite of what the small-gated-network literature
-  reports for stochastic, changing environments;
+- **it adapts**, and by about a third less than round 1 implied: a
+  difference-of-differences against a bit-identical unchanged world puts
+  adaptation at roughly 65% of the total online advantage, with the rest being
+  the ordinary benefit of continuing to learn;
+- **it does not forget**: measured against a fixed probe bank of held-out
+  episodes, regime-A ability *improved* while the model trained on regime B;
+- **whether gating pays for itself is inconclusive**. Round 1 said it loses;
+  that did not survive giving the ungated control its own rule-selected
+  learning rate. Gating does buy stability -- the ungated arm diverges at a
+  learning rate the gated one survives;
 - it **loses** to reflected constant motion, dead reckoning and the existing
   three-parameter RLS learner on smooth, fully observed motion, and wins only
   where memory or coarse observation actually matter;
-- its **self-error head is weakly informative** (mean rank correlation 0.47)
-  and systematically over-predicts;
-- its apparent **adaptation result does not survive a control**: branching
-  where nothing changes reproduces 95% of the effect, so it measures continued
-  learning rather than adaptation.
+- its **self-error head is weakly informative** and systematically
+  over-predicts.
 
 The full result is [`docs/aaa_1k_report.md`](docs/aaa_1k_report.md); read
 [`docs/aaa_1k_self_review.md`](docs/aaa_1k_self_review.md) first, because it is
-where the two qualifications above come from.
+where the four repairs come from -- including the one that would otherwise have
+published a hidden-state advantage thirty times too large.
 
 ## The learner
 
@@ -198,10 +206,12 @@ python -m aaa.cli animate --checkpoint runs/<attempt>/checkpoints/replica-00.jso
 # AAA-1K
 python -m research.aaa_1k parameter-audit         # 994 / 982 / 954, recounted three ways
 python -m research.aaa_1k gradient-check --full   # finite-difference every parameter
-python -m research.aaa_1k select   --output docs/evidence/aaa_1k_development_selection.json
-python -m research.aaa_1k evaluate --selection docs/evidence/aaa_1k_development_selection.json \
-    --output docs/evidence/aaa_1k_evaluation.json
-python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation.json
+python -m research.aaa_1k select       --output docs/evidence/aaa_1k_development_selection.json
+python -m research.aaa_1k characterize --selection docs/evidence/aaa_1k_development_selection.json \
+    --output docs/evidence/aaa_1k_characterization.json
+python -m research.aaa_1k round2      --selection docs/evidence/aaa_1k_development_selection.json \
+    --output docs/evidence/aaa_1k_evaluation_round2.json
+python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation_round2.json
 python -m research.aaa_1k visualize --family occlusion_v1 --output runs/aaa_1k/dashboard.png
 ```
 

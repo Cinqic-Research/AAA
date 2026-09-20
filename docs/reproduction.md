@@ -270,23 +270,29 @@ python -m research.aaa_1k parameter-audit             # 994 / 982 / 954, recount
 python -m research.aaa_1k gradient-check --full       # finite-difference every parameter
 python -m research.aaa_1k select \
     --output docs/evidence/aaa_1k_development_selection.json
-python -m research.aaa_1k evaluate \
+python -m research.aaa_1k characterize \
     --selection docs/evidence/aaa_1k_development_selection.json \
-    --output docs/evidence/aaa_1k_evaluation.json
+    --output docs/evidence/aaa_1k_characterization.json
+python -m research.aaa_1k round2 \
+    --selection docs/evidence/aaa_1k_development_selection.json \
+    --characterization docs/evidence/aaa_1k_characterization.json \
+    --output docs/evidence/aaa_1k_evaluation_round2.json
 python -m research.aaa_1k adversarial-probes \
     --selection docs/evidence/aaa_1k_development_selection.json \
     --output docs/evidence/aaa_1k_adversarial_probes.json
 python -m research.aaa_1k recompute \
-    --evidence docs/evidence/aaa_1k_evaluation.json
-python -m research.aaa_1k report \
-    --evidence docs/evidence/aaa_1k_evaluation.json \
+    --evidence docs/evidence/aaa_1k_evaluation_round2.json
+python -m research.aaa_1k report2 \
+    --evidence docs/evidence/aaa_1k_evaluation_round2.json \
     --selection docs/evidence/aaa_1k_development_selection.json \
+    --characterization docs/evidence/aaa_1k_characterization.json \
     --output docs/aaa_1k_report.md
 ```
 
-Everything is deterministic and CPU-only; the whole sequence takes about four
-minutes. `recompute` rebuilds 59 stored statistics from the retained per-stream
-primitives without running a model, and exits non-zero on any disagreement.
+Everything is deterministic and CPU-only; the whole sequence takes about eight
+minutes. `recompute` rebuilds 99 stored statistics from the retained cells
+without running a model, and exits non-zero on any disagreement. The same
+command on `aaa_1k_evaluation_round1_superseded.json` rebuilds that round's 59.
 
 The phase fingerprint covers this phase's source, the shared `aaa/` modules it
 executes, its tests, its protocol documents and the dependency lock. It is

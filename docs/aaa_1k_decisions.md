@@ -261,3 +261,86 @@ no key handler.
 actions, and the fix required releasing the default bindings. The cheapest way
 not to reproduce that defect is not to add the feature. The dashboard's job is
 to show real model state, not to be a product.
+
+---
+
+## D-15. Round 2 rather than a patched round 1
+
+**Decision.** Retain round 1 unchanged and run a second evaluation round on
+fresh stream identities, rather than re-analysing or re-running round 1.
+
+**Reason.** The four repairs change what is measured (Q2, Q5), how uncertainty
+is estimated (the crossed bootstrap) and what the controls run on (per-
+architecture hyperparameters). Applying new designs to already-observed streams
+would consume evaluation identities twice, which §22 of the phase brief forbids
+for exactly this reason. Round 2 draws from declared fresh offsets in the
+`evaluation_env` namespace: 10,000 for streams, 20,000 for adaptation trials and
+30,000 for retention trials.
+
+**Evidence impact.** Round 1 is `superseded`, not deleted, and is retained with
+its report at `docs/evidence/aaa_1k_evaluation_round1_superseded.json` and
+`docs/aaa_1k_report_round1_superseded.md`. Its rendered report carries a banner
+naming its four defects.
+
+---
+
+## D-16. The gradient clip became a selected hyperparameter
+
+**Decision.** Add stage 3 to the development selection and choose the clip
+threshold by rule.
+
+**Measurement that forced it.** The originally declared threshold of 1.0
+activated on 24% of updates and cost 29% of development error against the best
+stable alternative. A mechanism that active is deciding what gets learned.
+
+**Rule.** The most conservative threshold whose development error is within the
+2% practical margin of the best stable one — so given two thresholds that
+perform the same, the tighter one wins, because its cost is bounded and its
+benefit is insurance. Selected: 10.0 for the gated model, activating on under
+1% of updates.
+
+**Rejected.** Leaving the clip at 1.0 and reporting the cost as a limitation.
+An asserted hyperparameter that a probe shows is load-bearing is a defect, not
+a limitation.
+
+---
+
+## D-17. Hyperparameters are selected per architecture, ablations are not
+
+**Decision.** The learning rate and clip are selected separately for the gated
+model, the stateless control and the ungated control. The three ablations of the
+gated model share its configuration exactly.
+
+**Measurement that forced it.** Applying the gated model's selected clip to
+every arm destabilized the stateless control on `coarse_speed_v1` — mean error
+1.6e-01 against 2.2e-03 — and inflated the reported hidden-state advantage to
+thirty times its true value. That number would have been published as "hidden
+state helps, decisively".
+
+**Reason for the asymmetry.** A *control* is a different architecture, and
+imposing another architecture's hyperparameters on it turns a comparison into a
+handicap. An *ablation* is the same architecture with one mechanism removed, and
+must differ in exactly that mechanism or it stops being an ablation.
+
+**Consequence.** Q4 moved from `NEGATIVE` to `INCONCLUSIVE`. The round-1 finding
+that gating loses did not survive a fair comparison, and the reason the ungated
+arm looked good is that it was being run at a learning rate its own stability
+rule forbids.
+
+---
+
+## D-18. No replay, because there is no forgetting to target
+
+**Decision.** Do not add experience replay, now that retention is measured
+properly.
+
+**Measurement.** Probe-bank error on regime A *fell* while the model trained on
+regime B: −3.74e-04 [−7.99e-04, −9.52e-07].
+
+**Reason.** Round 1 deferred replay because forgetting had not been measured.
+Round 2 measured it and found none on this benchmark. Adding a replay buffer now
+would be a mechanism with no failure mode to fix, and would have to be justified
+by measured inadequacy rather than by the literature recommending it. Rolnick et
+al.'s CLEAR remains the right reference *when* a benchmark produces forgetting;
+this one does not.
+

@@ -1,131 +1,141 @@
-# AAA-1K: a 994-parameter recurrent predictive core
+# AAA-1K round 2: a 994-parameter recurrent predictive core
 
 AAA-1K is a research seed, not Juniper and not an agent. It is one primitive: a persistent gated recurrent predictor that learns online, keeps a hidden state, and estimates how wrong it expects to be. Everything below describes what was measured on a moving dot.
 
-## Identity
+**This round supersedes round 1.** Round 1 is retained unchanged at `docs/evidence/aaa_1k_evaluation.json`. Four defects in it were found by probing its own conclusions, and all four are repaired here rather than annotated.
+
+| What | Round 1 | Round 2 | Tracked as |
+|---|---|---|---|
+| adaptation (Q2) | a single online/frozen branch, which a control showed was 95% reproduced where nothing changed | difference-of-differences against a bit-identical unchanged world | `AAA-153` |
+| retention (Q5) | segment tails, confounded with three times the accumulated experience | a fixed frozen probe bank asked the same questions at every checkpoint | `AAA-154` |
+| uncertainty | intervals resampled streams only, treating the starting weights as fixed by nature | a crossed bootstrap over initializations and streams | `AAA-155` |
+| baseline fairness | one architecture's clip threshold imposed on all arms | each architecture on its own rule-selected learning rate and clip | `AAA-156` |
+
+## Identity and design
 
 | Item | Value |
 |---|---|
 | phase | `aaa.1k.v1` |
-| scientific fingerprint | `88738d9762f9721c4c32dd36dc2f93b13f11769aa5895c29879699c26952e2bd` |
-| files covered | 28 |
+| scientific fingerprint | `86c60f2d50e09c37da0b1a7393b478e35d9ef4f976aea20e62d57a9247d45cfd` |
 | trainable parameters | 994 |
-| selected configuration | lr=0.03, T=4, lambda=0.25 |
-| replicas per family | 32 |
-| evaluation streams | 192 |
+| initializations | 5 |
+| streams per family | 24 |
+| evaluation cells | 720 |
+| adaptation trials | 24 |
+| retention trials | 12 |
+| stream identities | fresh; no round-1 stream is reused |
 
-## Parameter and state accounting
+Each architecture runs on the hyperparameters the same declared rules select for it:
 
-| Scalar category | Count |
-|---|---|
-| hidden state scalars | 16 |
-| optimizer state scalars | 0 |
-| tbptt buffer scalars capacity | 404 |
-| tbptt buffer scalars current | 0 |
-| total adaptive state scalars | 1414 |
-| trainable parameters | 994 |
+| Architecture | learning rate | TBPTT | lambda | gradient clip |
+|---|---|---|---|---|
+| AAA1KGRU | 0.03 | 4 | 0.25 | 10 |
+| StatelessMLPControl | 0.01 | 4 | 0.25 | none |
+| VanillaRNNControl | 0.01 | 4 | 0.25 | none |
 
-The optimizer is plain SGD and holds no state, so the adaptive footprint is the parameters, the 16-value hidden state, and the truncation buffer. There is no hidden second model.
+Ablations of the gated model share its row exactly, because an ablation is the same architecture with one mechanism removed.
 
 ## Development selection
 
-The unclipped divergence probe put the boundary at a learning rate of 0.3. The declared stability margin therefore restricted the search to [0.001, 0.003, 0.01, 0.03], which **eliminated the best-performing configurations on development data**. That cost is real and is reported rather than quietly avoided: the rule was declared before the numbers existed, and a rule that never binds is not a rule.
+The unclipped divergence probe put the gated model's boundary at a learning rate of 0.3, and the declared stability margin restricted the search to [0.001, 0.003, 0.01, 0.03]. That rule **eliminated the best-performing development configurations**, which is what a rule that can bind looks like.
 
-Best eliminated configuration: `lr=0.1;T=32;lambda=0.25` at 1.138e-03 development error. Selected: `lr=0.03;T=4;lambda=0.25` at 1.434e-03, a 26% development penalty paid for the margin.
+Best eliminated configuration: `lr=0.1;T=32;lambda=0.25` at 1.138e-03 development error, discarded for sitting inside the margin.
 
-Auxiliary-weight decision: the predeclared default was retained: no alternative beat it by more than 2% on development data.
+Stage 3 then selected the clip threshold instead of asserting it. The originally declared 1.0 activated on 24% of updates and cost 30% of development error against the best stable threshold.
 
 ## Capability vector
 
-Reported as separate dimensions. There is deliberately no combined score: one number is the most efficient way to hide a failure inside a success.
-
 | Question | Verdict | Effect (normalized error) [95% CI] |
 |---|---|---|
-| Q1 online learning | POSITIVE | +5.19e-04 [+4.47e-04, +5.91e-04] (176/192 streams) |
-| Q3 hidden state | POSITIVE | +4.25e-04 [+3.77e-04, +4.76e-04] (64/64 streams) |
-| Q4 gating | NEGATIVE | -1.89e-04 [-2.37e-04, -1.42e-04] (44/192 streams) |
-| Q2 online vs frozen | POSITIVE | +9.76e-04 [+7.80e-04, +1.20e-03] (96/96 streams) |
+| Q1 online learning | POSITIVE | +2.94e-04 [+2.17e-04, +3.70e-04] (119/144 streams) |
+| Q2 adaptation (difference-of-differences) | POSITIVE | +9.50e-04 [+5.63e-04, +1.33e-03] (16/24 streams) |
+| Q3 hidden state vs stateless control | POSITIVE | +2.49e-04 [+9.87e-05, +3.47e-04] (42/48 streams) |
+| Q4 gating vs ungated control | INCONCLUSIVE | -4.51e-05 [-1.19e-04, +1.39e-05] (117/144 streams) |
+| Q5 forgetting (probe bank) | NEGATIVE | -3.74e-04 [-7.99e-04, -9.52e-07] (4/12 streams) |
 
-**The declared precision objective was NOT met.** The development pilot measured a primary effect of 7.13e-05 with a per-stream spread of 2.22e-04; resolving a quarter of that effect at 95% would have needed 599 replicas per family, and the declared bound of 32 was applied. Every interval below is therefore wider than the design asked for, and effects near zero should be read as unresolved rather than absent.
+For Q5 a *negative* effect is the good direction: it means probe-bank error on regime A fell while the model was training on regime B.
+
+### Achieved precision
+
+Reported against the effect actually measured, rather than only against a target sized from a pilot estimate of an effect nobody had seen.
+
+| Question | Effect | CI half-width | Resolution |
+|---|---|---|---|
+| Q1 online learning | +2.94e-04 | 7.61e-05 | 26% of the effect |
+| Q2 adaptation | +9.50e-04 | 3.86e-04 | 41% of the effect |
+| Q3 hidden state | +2.49e-04 | 1.24e-04 | 50% of the effect |
+| Q4 gating | -4.51e-05 | 6.63e-05 | 147% of the effect |
 
 ### Q1 -- can it learn online?
 
-Overall: **POSITIVE**, +5.19e-04 [+4.47e-04, +5.91e-04] (176/192 streams).
-
-| Family | Verdict | First quarter minus last quarter |
+| Comparison | Verdict | Effect |
 |---|---|---|
-| aba_v1 | POSITIVE | +3.99e-04 [+3.31e-04, +4.62e-04] (32/32 streams) |
-| coarse_speed_v1 | POSITIVE | +3.04e-04 [+2.34e-04, +3.70e-04] (29/32 streams) |
-| motion_compat | POSITIVE | +7.39e-04 [+6.33e-04, +8.48e-04] (96/96 streams) |
-| occlusion_v1 | POSITIVE | +1.90e-04 [+1.67e-05, +3.72e-04] (19/32 streams) |
-
-### Q2 -- does continued learning help after a change?
-
-Overall: **POSITIVE**, +9.76e-04 [+7.80e-04, +1.20e-03] (96/96 streams).
-
-**Important qualification, from an adversarial probe.** Branching at a point where *nothing changes* reproduces 95% of this effect. Q2 therefore measures continued learning in general far more than it measures adaptation specific to the change. The headline number is real; the natural reading of it is wrong. See `docs/evidence/aaa_1k_adversarial_probes.json` and `docs/aaa_1k_self_review.md`.
-
-Every branch started from a clone whose complete model-state hash matched its twin: `clone_hashes_matched = True`. The frozen arm kept running its recurrence and its previous-error input; only its weights stopped moving.
-
-| Family | Verdict | Frozen minus online |
-|---|---|---|
-| aba_v1 | POSITIVE | +1.53e-03 [+1.05e-03, +2.09e-03] (32/32 streams) |
-| motion_compat | POSITIVE | +6.97e-04 [+5.83e-04, +8.23e-04] (64/64 streams) |
+| all families | POSITIVE | +2.94e-04 [+2.17e-04, +3.70e-04] (119/144 streams) |
 
 ### Q3 -- is persistent recurrent state worth anything?
 
-| Comparison | Verdict | Control minus AAA-1K |
+| Comparison | Verdict | Effect |
 |---|---|---|
-| vs state-reset ablation, memory families | POSITIVE | +6.70e-04 [+6.14e-04, +7.23e-04] (64/64 streams) |
-| vs stateless MLP, memory families | POSITIVE | +4.25e-04 [+3.77e-04, +4.76e-04] (64/64 streams) |
-| vs state-reset, all families | POSITIVE | +4.80e-04 [+4.45e-04, +5.14e-04] (192/192 streams) |
-| vs stateless MLP, all families | POSITIVE | +1.21e-04 [+8.63e-05, +1.58e-04] (111/192 streams) |
+| vs state-reset ablation, memory families | INCONCLUSIVE | +1.26e-04 [-3.74e-05, +2.11e-04] (39/48 streams) |
+| vs stateless control, memory families | POSITIVE | +2.49e-04 [+9.87e-05, +3.47e-04] (42/48 streams) |
+| vs no-previous-error ablation, memory families | INCONCLUSIVE | +4.80e-05 [-1.16e-04, +9.88e-05] (46/48 streams) |
+| vs frozen-recurrent-weights ablation, memory families | INCONCLUSIVE | +5.20e-06 [-7.92e-06, +1.15e-05] (39/48 streams) |
+| vs state-reset, all families | POSITIVE | +1.80e-04 [+1.26e-04, +2.15e-04] (135/144 streams) |
+| vs stateless control, all families | POSITIVE | +2.19e-04 [+1.73e-04, +2.64e-04] (138/144 streams) |
 
 Restricted to steps whose target was never shown to the agent:
 
-| Comparison | Verdict | Control minus AAA-1K |
+| Comparison | Verdict | Effect |
 |---|---|---|
-| vs state-reset | POSITIVE | +9.66e-04 [+7.53e-04, +1.19e-03] (31/32 streams) |
-| vs stateless MLP | POSITIVE | +1.34e-03 [+1.11e-03, +1.57e-03] (32/32 streams) |
+| vs state-reset | POSITIVE | +4.94e-04 [+2.85e-04, +7.31e-04] (22/24 streams) |
+| vs stateless control | POSITIVE | +1.22e-03 [+1.01e-03, +1.43e-03] (24/24 streams) |
+
+### Q2 -- does continued learning help *because the world changed*?
+
+two bit-identical worlds diverging at a declared step, one changed and one not; the online-minus-frozen advantage on the unchanged world is subtracted from the advantage on the changed one.
+
+| Component | Verdict | Effect |
+|---|---|---|
+| adaptation (changed minus control) | POSITIVE | +9.50e-04 [+5.63e-04, +1.33e-03] (16/24 streams) |
+| continued learning (control alone) | POSITIVE | +9.75e-04 [+6.48e-04, +1.32e-03] (24/24 streams) |
+
+Adaptation accounts for 49% of the total online advantage; the rest is the ordinary benefit of continuing to learn, which round 1 reported as if it were all adaptation. Every paired trial's two trunks reached an identical model state at the branch: `trunks_matched = True`.
 
 ### Q4 -- do the gates earn their parameters?
 
-the ungated control has 954 parameters against 994, so this compares mechanisms at close to matched capacity, not a large model against a small one.
+954 parameters against 994, but 28 hidden units against 16. Matching on parameters necessarily buys the ungated arm more state, because that is what a gate costs. This is the honest comparison at a fixed parameter budget and is not a comparison at matched hidden width.
 
-**Read the capacity match carefully.** Parameter counts are close (954 against 994), but the ungated control carries 28 hidden units to the gated model's 16. Matching on parameters buys the ungated arm more state, which is exactly the trade a gate costs you. The comparison is the honest one for a fixed parameter budget, and it is not a comparison at matched hidden width.
-
-| Scope | Verdict | Ungated RNN minus AAA-1K |
+| Scope | Verdict | Effect (ungated minus gated) |
 |---|---|---|
-| all families | NEGATIVE | -1.89e-04 [-2.37e-04, -1.42e-04] (44/192 streams) |
-| memory families | NEGATIVE | -3.75e-04 [-5.02e-04, -2.49e-04] (31/64 streams) |
+| all families | INCONCLUSIVE | -4.51e-05 [-1.19e-04, +1.39e-05] (117/144 streams) |
+| memory families | NEGATIVE | -2.53e-04 [-4.45e-04, -1.04e-04] (24/48 streams) |
 
-### Q5 -- what survives A, then B, then A again?
+**The mean and the median disagree, and that is the finding.** The median stream favours the gated model (+5.59e-05) while the mean favours the ungated one (-4.51e-05): the gated model is slightly better on 117 of 144 streams and much worse on the rest. A single averaged number would have reported only half of that.
 
-A2 tail minus A1 tail; positive means the model came back worse.
+**The ungated control is the less stable architecture.** Run without a clip it diverges at a learning rate of 0.1, against 0.3 for the gated model, so the same declared stability margin allows it only 0.01 where the gated model gets 0.03. Round 1 ran both at the gated model's rate and reported that gating loses. Tuned separately, the comparison is inconclusive once each architecture is tuned separately, so Q4's negative result is weaker than the shared-rate comparison suggested.
 
-**Read this table carefully.** Every learning arm came back *better* than it left, so no catastrophic forgetting was detected. But A1 is the first segment a learner ever sees and A2 is the third, so by A2 the model has had three times as much experience in total. This design cannot separate "it retained A" from "it kept getting better at everything", and the next phase needs a fixed frozen probe bank measured at both boundaries to do so. The non-learning arms are the control: `constant_motion_reflected` is flat across A1 and A2, as it must be.
+### Q5 -- what survives learning a new regime?
 
-| Arm | A1 tail | B tail | A2 tail | A2 - A1 |
-|---|---|---|---|---|
-| aaa1k_frozen_recurrent | 9.357e-05 | 3.609e-04 | 3.734e-05 | -5.623e-05 |
-| aaa1k_gru | 9.406e-05 | 2.870e-04 | 3.500e-05 | -5.907e-05 |
-| aaa1k_no_error_input | 1.289e-04 | 6.823e-04 | 4.484e-05 | -8.408e-05 |
-| aaa1k_state_reset | 3.297e-04 | 4.695e-04 | 7.118e-05 | -2.585e-04 |
-| constant_motion_reflected | 4.597e-06 | 4.432e-04 | 9.331e-06 | +4.734e-06 |
-| mlp_control | 7.560e-05 | 3.188e-04 | 4.886e-05 | -2.674e-05 |
-| rls_online | 2.816e-05 | 1.143e-09 | 9.931e-06 | -1.823e-05 |
-| rnn_control | 8.027e-05 | 1.055e-04 | 4.300e-05 | -3.727e-05 |
+a fixed bank of held-out regime-A episodes, never trained on, evaluated by a frozen clone with its hidden state reset, at the end of each of A1, B and A2.
+
+| Probe-bank error | Mean |
+|---|---|
+| after A1 | 1.061e-03 |
+| after B | 6.865e-04 |
+| after A2 | 6.854e-04 |
+
+Forgetting: **NEGATIVE**, -3.74e-04 [-7.99e-04, -9.52e-07] (4/12 streams). A positive value would mean regime-A ability degraded while learning regime B. The probe bank is identical at all three checkpoints, so accumulated experience cannot flatter the later measurements -- which is exactly what round 1's design could not rule out.
 
 ### Q6 -- can it estimate its own error?
 
 | Measure | Mean | Median | Min | Max |
 |---|---|---|---|---|
-| rank correlation (Spearman) | 0.472 | 0.445 | 0.035 | 0.921 |
-| linear correlation (Pearson) | 0.358 | 0.399 | -0.052 | 0.713 |
-| calibration slope | 0.964 | 0.830 | -0.059 | 2.604 |
-| bias (predicted minus realized) | 0.193 | 0.317 | -0.597 | 0.473 |
+| rank correlation (Spearman) | 0.437 | 0.426 | -0.098 | 1.000 |
+| linear correlation (Pearson) | 0.303 | 0.331 | -0.011 | 0.670 |
+| calibration slope | 0.769 | 0.705 | -0.089 | 2.628 |
+| bias (predicted minus realized) | 0.247 | 0.349 | -1.281 | 0.476 |
 
-30 of 192 streams had a monotone quintile calibration table. this is a learned error-magnitude estimate, not a calibrated predictive distribution and not a Bayesian posterior.
+106 of 720 cells had a monotone quintile calibration table. a learned error-magnitude estimate, not a calibrated predictive distribution and not a Bayesian posterior.
 
 ### Q7 -- does it beat the simple alternatives?
 
@@ -134,46 +144,67 @@ a win requires the whole 95% interval above zero, declared in advance.
 | Family | constant_motion | constant_motion_reflected | dead_reckoning | linear_fit | persistence | rls_online |
 |---|---|---|---|---|---|---|
 | aba_v1 | NEGATIVE | NEGATIVE | NEGATIVE | POSITIVE | POSITIVE | NEGATIVE |
-| coarse_speed_v1 | POSITIVE | POSITIVE | NEGATIVE | NEGATIVE | POSITIVE | POSITIVE |
+| coarse_speed_v1 | POSITIVE | POSITIVE | INCONCLUSIVE | NEGATIVE | POSITIVE | POSITIVE |
 | motion_compat | NEGATIVE | NEGATIVE | NEGATIVE | POSITIVE | POSITIVE | NEGATIVE |
 | occlusion_v1 | POSITIVE | POSITIVE | NEGATIVE | NEGATIVE | POSITIVE | NEGATIVE |
 
-Baselines AAA-1K beat outright, by family:
+Baselines AAA-1K beat outright:
 
 - `aba_v1`: linear_fit, persistence
 - `coarse_speed_v1`: constant_motion, constant_motion_reflected, persistence, rls_online
 - `motion_compat`: linear_fit, persistence
 - `occlusion_v1`: constant_motion, constant_motion_reflected, persistence
 
+Baselines AAA-1K lost to outright:
+
+- `aba_v1`: constant_motion, constant_motion_reflected, dead_reckoning, rls_online
+- `coarse_speed_v1`: linear_fit
+- `motion_compat`: constant_motion, constant_motion_reflected, dead_reckoning, rls_online
+- `occlusion_v1`: dead_reckoning, linear_fit, rls_online
+
+## What the development probes settled
+
+**clipping_probe** -- is the declared gradient clip shaping the optimization or guarding it?
+
+the declared threshold of 1.0 activates on 24% of updates and costs 29% of development error against the best stable threshold. At that rate it is a hyperparameter deciding what gets learned, not a guard, and asserting it rather than selecting it was a defect. The threshold is now chosen by stage 3 of the development selection..
+
+**coarse_speed_decomposition** -- does coarse_speed_v1 measure hidden-regime inference or coarse-observation integration?
+
+with the speed held fixed the recurrent model is 6.32e-04 *worse* than the stateless control, and it is better only once the speed starts switching. `coarse_speed_v1` is therefore measuring inference of a hidden regime, not tolerance to a coarse grid -- the quantizer alone hands the advantage to the stateless arm.
+
+**per_architecture_selection** -- does Q4's negative result survive giving each architecture its own learning rate?
+
+the comparison is inconclusive once each architecture is tuned separately, so Q4's negative result is weaker than the shared-rate comparison suggested.
+
 ## Numerical stability and cost
 
 | Measure | Value |
 |---|---|
-| gradient-clip activations | 12234 |
+| gradient-clip activations | 552 |
+| mean clip rate | 0.20% |
+| max clip rate on any cell | 16.07% |
 | non-finite events | 0 |
-| trained steps | 53225 |
-| targets skipped as unavailable | 1815 |
-| scored transitions | 55040 |
-| transitions per second | 759 |
-| wall seconds | 72.5 |
-| arms per stream | 12 |
+| trained steps | 199575 |
+| targets skipped as unavailable | 6825 |
+| scored transitions | 206400 |
+| transitions per second | 746 |
+| wall seconds | 276.6 |
 
-Gradient clipping is a declared mechanism with a declared threshold, not a silent safety net, so its activation count is part of the result.
+Round 1 clipped on 22% of updates at a threshold that was asserted rather than selected, and a probe found that threshold costing 29% of development error. The threshold is now chosen by the same rule as every other hyperparameter, and the activation rate above is what a guard rather than a decision-maker looks like.
 
 ## What these numbers do and do not support
 
-| Claim | Status | What it would mean | What was actually measured |
-|---|---|---|---|
-| implementation works | **SUPPORTED** | the code executes correctly and deterministically | 0 non-finite events over 55040 scored transitions; the suite includes exhaustive finite-difference gradient checks and a resume-equals-uninterrupted test |
-| neural learning occurred | **SUPPORTED** | weights changed in a useful direction on some measured stream | Q1, +5.19e-04 [+4.47e-04, +5.91e-04] (176/192 streams) |
-| hidden state helps | **SUPPORTED** | persistent recurrence beat matched state-reset and stateless controls | Q3 against the stateless control on the memory families, +4.25e-04 [+3.77e-04, +4.76e-04] (64/64 streams) |
-| online adaptation helps | **SUPPORTED** | continued learning beat an identical frozen-weight clone | Q2, +9.76e-04 [+7.80e-04, +1.20e-03] (96/96 streams) |
-| retention exists | **SUPPORTED, WITH A CONFOUND** | learning a new regime did not completely erase an old one | the A2 tail was 5.91e-05 *lower* than the A1 tail, so no catastrophic forgetting was detected -- but the model has also had twice as much total experience by A2, so this run cannot separate retention from continued learning |
-| error estimation informative | **SUPPORTED, WEAKLY** | predicted error magnitude tracked realized error | mean rank correlation 0.47 between the predicted and realized error magnitude, but only 30 of 192 streams had a monotone quintile table |
-| baseline competitiveness | **MIXED** | the model beat the specified simple alternatives | beat constant_motion, constant_motion_reflected, linear_fit, persistence, rls_online on at least one family; lost to constant_motion, constant_motion_reflected, dead_reckoning, linear_fit, rls_online on at least one family |
-| generalization | **NOT CLAIMED** | held-out trajectories, regimes or families support a generalization claim | evaluation streams are held out from development, which supports a claim about unseen trajectories of the *same* families only. No unseen family was tested, so nothing here supports generalization to a new kind of world |
-
-Every effect above is conditional on a single model initialization: the evaluation gives every arm the same initialization seed so that an ablation differs from the primary in exactly one mechanism, and the intervals therefore resample streams but not initializations. A probe across five initializations found every comparison keeping its sign while magnitudes varied by up to a factor of two.
+| Claim | Status | What was actually measured |
+|---|---|---|
+| implementation works | **SUPPORTED** | 0 non-finite events over 206400 scored transitions; every parameter of every model is finite-difference verified and a resumed run is bitwise identical to an uninterrupted one |
+| neural learning occurred | **SUPPORTED** | Q1, +2.94e-04 [+2.17e-04, +3.70e-04] (119/144 streams) |
+| hidden state helps | **SUPPORTED** | Q3 against the stateless control on the memory families, +2.49e-04 [+9.87e-05, +3.47e-04] (42/48 streams); each control runs on its own rule-selected hyperparameters |
+| gating helps | **INCONCLUSIVE** | Q4, -4.51e-05 [-1.19e-04, +1.39e-05] (117/144 streams). Round 1 reported this as CONTRADICTED; that result did not survive giving each architecture its own rule-selected learning rate and clip |
+| online adaptation helps | **SUPPORTED** | Q2 difference-of-differences against a bit-identical unchanged world, +9.50e-04 [+5.63e-04, +1.33e-03] (16/24 streams) |
+| retention exists | **SUPPORTED** | probe-bank error after regime B minus after regime A1, -3.74e-04 [-7.99e-04, -9.52e-07] (4/12 streams); a positive value would be forgetting |
+| error estimation informative | **SUPPORTED, WEAKLY** | mean rank correlation 0.44 between predicted and realized error magnitude; only 106 of 720 cells had a monotone quintile table |
+| baseline competitiveness | **MIXED** | beat constant_motion, constant_motion_reflected, linear_fit, persistence, rls_online on at least one family; lost to constant_motion, constant_motion_reflected, dead_reckoning, linear_fit, rls_online on at least one family |
+| generalization | **NOT CLAIMED** | evaluation streams are held out from development and from round 1, which supports a claim about unseen trajectories of the same families only. No unseen family was tested |
 
 None of these implies intelligence, general autonomy, causal understanding, physical understanding, AGI or consciousness. This is a 994-parameter network predicting where a dot goes next.
 

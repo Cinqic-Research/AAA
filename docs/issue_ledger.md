@@ -1406,7 +1406,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   self-referential. No existing fingerprint test was weakened.
 
 ### AAA-153 — the AAA-1K online/frozen comparison does not isolate adaptation
-- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** open; measured, disclosed, not repaired
+- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** repaired
 - **Reproduction** `python -m research.aaa_1k adversarial-probes`. Branching an
   online/frozen pair at step 60, where nothing happens, reproduces 95% of the
   advantage measured at the declared change point at step 100
@@ -1414,27 +1414,86 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Root cause** The model improves throughout every stream, so "online beat
   its frozen twin after a change" is equally consistent with "continued
   learning helps everywhere". The single-branch design cannot separate them.
-- **Disposition** The measurement stands; the interpretation was corrected. The
-  report and the claim ladder now say the result supports *continued updating
-  helps* and not *the model adapts to change*. The repair is a
-  difference-of-differences design against a matched no-change stream, which is
-  recorded as the first item of AAA-1K's next-experiment list rather than
-  retrofitted onto observed evidence.
-- **Regression** The probe is committed as a command and its output is retained
-  at `docs/evidence/aaa_1k_adversarial_probes.json`.
+- **Repair** A new `paired_change_v1` family emits two streams that are
+  bit-identical until a declared step, after which one changes speed and the
+  other does not. One model is driven through the shared prefix, so both
+  variants branch from the same model state — asserted equal by complete
+  state hash, not assumed. The estimator is
+  `advantage(changed) - advantage(control)`, so the ordinary benefit of
+  continuing to learn cancels. Measured on fresh evaluation identities in
+  round 2: the adaptation component is `+9.50e-04` with a 95% interval of
+  `[+5.63e-04, +1.33e-03]`, about 65% of the total online advantage. The
+  round-1 claim was therefore *directionally* right and *quantitatively*
+  overstated by roughly a third.
+- **Regression** `Round2FailureInjectionTests` substitutes an unpaired control
+  stream and proves the identical-trunk assertion fires. The original probe
+  remains committed at `docs/evidence/aaa_1k_adversarial_probes.json`, and
+  round 1 is retained at
+  `docs/evidence/aaa_1k_evaluation_round1_superseded.json`.
 
 ### AAA-154 — the AAA-1K A/B/A benchmark does not measure retention
-- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** open; measured, disclosed, not repaired
+- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** repaired
 - **Reproduction** In `docs/evidence/aaa_1k_evaluation.json`, every learning arm
   has a *lower* error in the final A segment than in the first, which reads as
   "no catastrophic forgetting" but is confounded: by A2 the model has had three
   times as much total experience. The non-learning control
   (`constant_motion_reflected`) is flat across A1 and A2, as it must be.
-- **Disposition** `retention_exists` is reported as `SUPPORTED, WITH A
-  CONFOUND` in the claim ladder and the report states that this design cannot
-  separate retention from continued learning. No replay mechanism was added:
-  adding one would make the result prettier while removing the failure mode a
-  later phase needs to target. The repair is a fixed frozen probe bank
-  evaluated at both segment boundaries.
-- **Regression** None yet; this is a benchmark-design defect, not a code
-  defect, and the next phase owns it.
+- **Repair** A fixed bank of eight held-out regime-A episodes, generated once
+  from the benchmark-generation namespace and never trained on, is evaluated by
+  a frozen clone with its hidden state reset at the end of each of A1, B and
+  A2. Because the same questions are asked at every checkpoint, accumulated
+  experience cannot flatter the later ones. Measured in round 2: probe error
+  after B minus after A1 is `-3.74e-04`, interval `[-7.99e-04, -9.52e-07]` —
+  regime-A ability *improved* while the model trained on regime B, so there is
+  no forgetting to target and no replay is warranted.
+- **Regression** `Round2FailureInjectionTests` hands the probe an agent whose
+  clones still learn and proves the read-only assertion fires. Round 1's
+  confounded comparison is retained in the superseded evidence file.
+
+### AAA-155 — AAA-1K intervals resampled streams but not initializations
+- **Source** AAA-1K adversarial self-review, 2026-09-19 · **Severity** medium · **Status** repaired
+- **Reproduction** Round 1 gave every arm one `model_init` seed, deliberately,
+  so that an ablation differed from the primary in exactly one mechanism. The
+  bootstrap then resampled streams only. Initialization variance was therefore
+  entirely unsampled, and a five-seed probe found effect magnitudes varying by
+  up to a factor of two while the intervals claimed a precision that did not
+  account for it.
+- **Repair** Round 2 runs the whole design from five initializations and uses a
+  crossed bootstrap that resamples initializations and streams independently,
+  recomputing the mean over the selected cells. Per-initialization differences
+  are reported alongside the mean, and the record states whether every
+  initialization agreed on the sign. Achieved precision is now reported as the
+  interval half-width against the effect that was actually measured, replacing
+  a target sized from a pilot estimate of an effect nobody had seen.
+- **Regression** `CrossedBootstrapTests` builds a design whose initializations
+  genuinely disagree and asserts the crossed interval is more than three times
+  wider than the stream-only interval on the same data, so the old estimator's
+  optimism is a live check rather than a remembered argument.
+
+### AAA-156 — one architecture's hyperparameters were imposed on the others
+- **Source** AAA-1K round-2 construction, 2026-09-19 · **Severity** high · **Status** repaired
+- **Reproduction** The gradient-clip threshold was *asserted* at 1.0 rather
+  than selected. A development probe found it activating on 24% of updates and
+  costing 29% of development error against the best stable threshold — at that
+  rate it is a hyperparameter deciding what is learned, not a guard. Worse,
+  when the threshold was first selected on the gated model and then applied to
+  every arm, the stateless control destabilized on `coarse_speed_v1`: its mean
+  error reached `1.6e-01` against the gated model's `2.2e-03`, and the crossed
+  comparison reported a hidden-state advantage of `+1.28e-02`, thirty times the
+  true effect. That would have been published as "hidden state helps".
+- **Repair** Stage 3 of the development selection now chooses the clip
+  threshold by the same rules as every other hyperparameter, preferring the
+  most conservative threshold within the practical margin of the best. Stage 3a
+  runs the whole selection — learning rate *and* clip — **separately for each
+  architecture**, because imposing one architecture's hyperparameters on
+  another turns a comparison into a handicap. Ablations of the gated model
+  still share its hyperparameters exactly, since an ablation is the same
+  architecture with one mechanism removed. With fair hyperparameters the
+  hidden-state effect is `+2.49e-04` and the gating result moves from
+  `NEGATIVE` to `INCONCLUSIVE`.
+- **Regression** `PerArchitectureSelectionTests` asserts that each control
+  receives its own rule-selected learning rate and clip, that the primary and
+  its three ablations share one configuration and bitwise-identical initial
+  parameters, and that each ablation differs from the primary in exactly one
+  declared mechanism.
+

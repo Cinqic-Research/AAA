@@ -151,8 +151,17 @@ genuine external archive plus independent retrieval.
 
 The phase commits its development selection (every attempted configuration,
 including the eliminated ones and their scores), its held-out evaluation (the
-per-stream primitives every headline statistic is recomputed from), and its
-adversarial probes. Together those are about 1.4 MB of JSON.
+per-cell primitives every headline statistic is recomputed from), its
+development characterization probes, and its adversarial probes.
+
+**Round 1 is retained, superseded.** It was completed, probed, and found to
+contain four design defects; all four are repaired in round 2 on fresh stream
+identities. Round 1's evidence and its rendered report are kept unchanged at
+`aaa_1k_evaluation_round1_superseded.json` and
+`aaa_1k_report_round1_superseded.md`, with a banner naming what was wrong. A
+round that produced a misleading result is evidence on exactly the same terms as
+one that did not — particularly this one, since the largest defect inflated a
+headline effect thirty-fold and was caught by reading a per-arm table.
 
 It does **not** commit dashboard images or per-step traces. A 994-parameter
 model has no excuse to generate another multi-gigabyte archive, and it does
