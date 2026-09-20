@@ -350,7 +350,8 @@ class StatelessMLPControl(_NeuralControl):
             "trainable_parameters": trainable,
             "hidden_state_scalars": 0,
             "optimizer_state_scalars": 0,
-            "tbptt_buffer_scalars": 0,
+            "tbptt_buffer_scalars_current": 0,
+            "tbptt_buffer_scalars_capacity": 0,
             "total_adaptive_state_scalars": trainable,
         }
 
@@ -503,14 +504,16 @@ class VanillaRNNControl(_NeuralControl):
         }
 
     def state_footprint(self) -> dict[str, int]:
-        cache_scalars = sum(int(c.x.size + c.h_prev.size + c.h.size + c.output.size) for c in self._caches)
+        per_step = INPUT_SIZE + 2 * RNN_HIDDEN + OUTPUT_SIZE
         trainable = self.parameter_count()
+        capacity = per_step * self.tbptt_steps
         return {
             "trainable_parameters": trainable,
             "hidden_state_scalars": int(self.hidden.size),
             "optimizer_state_scalars": 0,
-            "tbptt_buffer_scalars": int(cache_scalars),
-            "total_adaptive_state_scalars": trainable + int(self.hidden.size) + int(cache_scalars),
+            "tbptt_buffer_scalars_current": per_step * len(self._caches),
+            "tbptt_buffer_scalars_capacity": capacity,
+            "total_adaptive_state_scalars": trainable + int(self.hidden.size) + capacity,
         }
 
     def diagnostics(self) -> dict[str, float]:

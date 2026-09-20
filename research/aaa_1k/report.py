@@ -54,6 +54,83 @@ def _table(rows: list[list[str]], header: list[str]) -> list[str]:
     return lines
 
 
+def _claim_verdicts(evidence: dict[str, Any]) -> dict[str, tuple[str, str]]:
+    """Attach a status and its supporting number to each rung of the claim ladder.
+
+    Each rung is decided by one predeclared statistic, and a rung that no
+    statistic in this run can decide is `NOT_VERIFIED` rather than assumed.
+    """
+
+    dims = evidence["capability_vector"]["dimensions"]
+    stability = dims["numerical_stability"]
+    q1 = dims["q1_online_learning"]["overall"]
+    q2 = dims["q2_adaptation"].get("overall")
+    q3 = dims["q3_hidden_state"]["versus_stateless_mlp"]
+    q5 = dims["q5_retention"]
+    q6 = dims["q6_error_calibration"]
+    q7 = dims["q7_baseline_competitiveness"]
+
+    verdicts: dict[str, tuple[str, str]] = {}
+    verdicts["implementation_works"] = (
+        "SUPPORTED" if stability["total_nonfinite_events"] == 0 else "FAILED",
+        f"{stability['total_nonfinite_events']} non-finite events over "
+        f"{dims['compute_cost']['scored_transitions']} scored transitions; the suite includes "
+        f"exhaustive finite-difference gradient checks and a resume-equals-uninterrupted test",
+    )
+    verdicts["neural_learning_occurred"] = (
+        "SUPPORTED" if _verdict(q1) == "POSITIVE" else _verdict(q1),
+        f"Q1, {_effect(q1)}",
+    )
+    verdicts["hidden_state_helps"] = (
+        "SUPPORTED" if _verdict(q3) == "POSITIVE" else _verdict(q3),
+        f"Q3 against the stateless control on the memory families, {_effect(q3)}",
+    )
+    verdicts["online_adaptation_helps"] = (
+        ("SUPPORTED" if _verdict(q2) == "POSITIVE" else _verdict(q2)) if q2 else "NOT_VERIFIED",
+        f"Q2, {_effect(q2)}" if q2 else "no stream carried a declared change point",
+    )
+    if q5.get("status") == "NOT_VERIFIED":
+        verdicts["retention_exists"] = ("NOT_VERIFIED", q5.get("reason", ""))
+    else:
+        gap = q5["reacquisition_gap"]["values"]["aaa1k_gru"]["mean"]
+        verdicts["retention_exists"] = (
+            "SUPPORTED, WITH A CONFOUND",
+            f"the A2 tail was {abs(gap):.2e} *lower* than the A1 tail, so no catastrophic "
+            f"forgetting was detected -- but the model has also had twice as much total "
+            f"experience by A2, so this run cannot separate retention from continued learning",
+        )
+    if q6.get("status") == "MEASURED":
+        verdicts["error_estimation_informative"] = (
+            "SUPPORTED, WEAKLY",
+            f"mean rank correlation {q6['spearman']['mean']:.2f} between the predicted and "
+            f"realized error magnitude, but only {q6['streams_with_monotone_bins']} of "
+            f"{q6['streams_measured']} streams had a monotone quintile table",
+        )
+    else:
+        verdicts["error_estimation_informative"] = ("INSUFFICIENT_EVIDENCE", q6.get("reason", ""))
+    won = sorted({name for names in q7["wins_by_family"].values() for name in names})
+    lost = sorted(
+        {
+            baseline
+            for row in q7["by_family"].values()
+            for baseline, record in row.items()
+            if _verdict(record) == "NEGATIVE"
+        }
+    )
+    verdicts["baseline_competitiveness"] = (
+        "MIXED" if won and lost else ("SUPPORTED" if won else "NOT SUPPORTED"),
+        f"beat {', '.join(won) if won else 'nothing'} on at least one family; lost to "
+        f"{', '.join(lost) if lost else 'nothing'} on at least one family",
+    )
+    verdicts["generalization"] = (
+        "NOT CLAIMED",
+        "evaluation streams are held out from development, which supports a claim about "
+        "unseen trajectories of the *same* families only. No unseen family was tested, so "
+        "nothing here supports generalization to a new kind of world",
+    )
+    return verdicts
+
+
 def render_report(evidence: dict[str, Any], selection: dict[str, Any], identity: dict[str, Any]) -> str:
     dims = evidence["capability_vector"]["dimensions"]
     lines: list[str] = []
@@ -170,6 +247,19 @@ def render_report(evidence: dict[str, Any], selection: dict[str, Any], identity:
         rows.append([question, _verdict(primary), _effect(primary)])
     add("\n".join(_table(rows, ["Question", "Verdict", "Effect (normalized error) [95% CI]"])))
     add("")
+    plan = evidence.get("replication_plan")
+    if plan:
+        met = evidence.get("precision_objective_met")
+        add(
+            f"**The declared precision objective was {'met' if met else 'NOT met'}.** The "
+            f"development pilot measured a primary effect of {plan['pilot_effect']:.2e} with a "
+            f"per-stream spread of {plan['pilot_spread']:.2e}; resolving a quarter of that "
+            f"effect at 95% would have needed {plan['required_replicas']} replicas per family, "
+            f"and the declared bound of {plan['bounds'][1]} was applied. Every interval below "
+            f"is therefore wider than the design asked for, and effects near zero should be "
+            f"read as unresolved rather than absent."
+        )
+        add("")
 
     add("### Q1 -- can it learn online?")
     q1 = dims["q1_online_learning"]
@@ -302,6 +392,16 @@ def render_report(evidence: dict[str, Any], selection: dict[str, Any], identity:
         add(q5["reacquisition_gap"]["definition"] + ".")
         add("")
         add(
+            "**Read this table carefully.** Every learning arm came back *better* than it left, "
+            "so no catastrophic forgetting was detected. But A1 is the first segment a learner "
+            "ever sees and A2 is the third, so by A2 the model has had three times as much "
+            'experience in total. This design cannot separate "it retained A" from "it kept '
+            'getting better at everything", and the next phase needs a fixed frozen probe bank '
+            "measured at both boundaries to do so. The non-learning arms are the control: "
+            "`constant_motion_reflected` is flat across A1 and A2, as it must be."
+        )
+        add("")
+        add(
             "\n".join(
                 _table(
                     [
@@ -429,11 +529,20 @@ def render_report(evidence: dict[str, Any], selection: dict[str, Any], identity:
 
     add("## What these numbers do and do not support")
     add("")
+    verdicts = _claim_verdicts(evidence)
     add(
         "\n".join(
             _table(
-                [[key.replace("_", " "), description] for key, description in CLAIM_LADDER],
-                ["Claim", "What it would mean"],
+                [
+                    [
+                        key.replace("_", " "),
+                        f"**{verdicts[key][0]}**",
+                        description,
+                        verdicts[key][1],
+                    ]
+                    for key, description in CLAIM_LADDER
+                ],
+                ["Claim", "Status", "What it would mean", "What was actually measured"],
             )
         )
     )

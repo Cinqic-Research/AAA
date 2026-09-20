@@ -299,18 +299,17 @@ class AAA1KGRU:
         zero here: plain SGD has none.
         """
 
-        cache_scalars = sum(
-            int(cache.x.size + cache.h_prev.size + cache.z.size + cache.r.size + cache.n.size)
-            + int(cache.hr.size + cache.h.size + cache.output.size)
-            for cache in self._caches
-        )
+        per_step = INPUT_SIZE + 6 * HIDDEN_SIZE + OUTPUT_SIZE
+        capacity = per_step * self.tbptt_steps
+        occupied = per_step * len(self._caches)
         trainable = self.parameter_count()
         return {
             "trainable_parameters": trainable,
             "hidden_state_scalars": int(self.hidden.size),
             "optimizer_state_scalars": 0,
-            "tbptt_buffer_scalars": int(cache_scalars),
-            "total_adaptive_state_scalars": trainable + int(self.hidden.size) + int(cache_scalars),
+            "tbptt_buffer_scalars_current": occupied,
+            "tbptt_buffer_scalars_capacity": capacity,
+            "total_adaptive_state_scalars": trainable + int(self.hidden.size) + capacity,
         }
 
     # ------------------------------------------------------------------

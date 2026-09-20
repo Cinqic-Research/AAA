@@ -122,6 +122,11 @@ class ArchitectureTests(unittest.TestCase):
         self.assertEqual(footprint["optimizer_state_scalars"], 0)
         self.assertEqual(footprint["trainable_parameters"], 994)
         self.assertEqual(footprint["hidden_state_scalars"], 16)
+        # the buffer is reported at capacity, not at whatever happens to be in
+        # it when the question is asked
+        self.assertEqual(footprint["tbptt_buffer_scalars_current"], 0)
+        self.assertEqual(footprint["tbptt_buffer_scalars_capacity"], (3 + 6 * 16 + 2) * 4)
+        self.assertEqual(footprint["total_adaptive_state_scalars"], 994 + 16 + (3 + 6 * 16 + 2) * 4)
 
     def test_invalid_construction_is_refused(self):
         for options in (
