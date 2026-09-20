@@ -94,6 +94,109 @@ def paired_difference(
     }
 
 
+def crossed_paired_difference(
+    first: ArrayLike,
+    second: ArrayLike,
+    *,
+    draws: int = BOOTSTRAP_DRAWS,
+    confidence: float = CONFIDENCE_LEVEL,
+    bootstrap_index: int = 1,
+) -> dict[str, Any]:
+    """Summarize ``second - first`` over a crossed initialization-by-stream design.
+
+    Every arm runs on every stream from every initialization, so the design is
+    crossed rather than nested, and *both* factors are sources of uncertainty.
+    Resampling only streams -- which is what a single-initialization interval
+    does -- treats the model's starting weights as if they were fixed by
+    nature, and reports an interval narrower than the evidence supports.
+
+    Each bootstrap draw therefore resamples initializations and streams
+    independently with replacement and recomputes the mean over the selected
+    cells. The per-initialization means are reported alongside, because a mean
+    difference that hides one initialization disagreeing with four is not a
+    summary.
+    """
+
+    a = np.asarray(first, dtype=float)
+    b = np.asarray(second, dtype=float)
+    if a.shape != b.shape or a.ndim != 2:
+        raise ValueError("crossed inputs must be two-dimensional [initializations, streams]")
+    if a.size == 0:
+        raise ValueError("crossed inputs must be non-empty")
+    if not (np.all(np.isfinite(a)) and np.all(np.isfinite(b))):
+        raise ValueError("crossed inputs must be finite")
+    if not 0 < confidence < 1:
+        raise ValueError("confidence must lie strictly between 0 and 1")
+
+    differences = b - a
+    initializations, streams = differences.shape
+    mean = float(np.mean(differences))
+    per_initialization = [float(value) for value in np.mean(differences, axis=1)]
+    per_stream = [float(value) for value in np.mean(differences, axis=0)]
+
+    if initializations < 2 or streams < 2:
+        low = high = float("nan")
+        status = "INSUFFICIENT_EVIDENCE"
+    else:
+        rng = np.random.default_rng(derive_seed("bootstrap", bootstrap_index))
+        rows = rng.integers(0, initializations, size=(draws, initializations))
+        columns = rng.integers(0, streams, size=(draws, streams))
+        resampled = np.empty(draws, dtype=float)
+        for index in range(draws):
+            resampled[index] = differences[np.ix_(rows[index], columns[index])].mean()
+        alpha = (1.0 - confidence) / 2.0
+        low = float(np.quantile(resampled, alpha))
+        high = float(np.quantile(resampled, 1.0 - alpha))
+        status = "MEASURED"
+
+    baseline = float(np.mean(b))
+    signs = {1 if value > 0 else (-1 if value < 0 else 0) for value in per_initialization}
+    return {
+        "design": "crossed initializations x streams",
+        "initializations": int(initializations),
+        "streams": int(streams),
+        "first_mean": float(np.mean(a)),
+        "second_mean": baseline,
+        "mean_difference": mean,
+        "median_difference": float(np.median(differences)),
+        "relative_difference": mean / baseline if baseline != 0 else float("nan"),
+        "per_initialization_difference": per_initialization,
+        "per_stream_difference": per_stream,
+        "confidence": confidence,
+        "draws": int(draws),
+        "interval_status": status,
+        "ci_low": low,
+        "ci_high": high,
+        "favours_first": int(np.sum(np.asarray(per_stream) > 0)),
+        "favours_second": int(np.sum(np.asarray(per_stream) < 0)),
+        "ties": int(np.sum(np.asarray(per_stream) == 0)),
+        "initializations_agreeing_on_sign": len(signs) == 1,
+    }
+
+
+def achieved_precision(record: Mapping[str, Any]) -> dict[str, Any]:
+    """Interval half-width against the effect actually measured.
+
+    A precision target sized from a pilot is a guess about an effect nobody had
+    seen yet. What a reader needs is how sharply the effect that *was* measured
+    is resolved, so that is reported for every headline comparison.
+    """
+
+    if record.get("interval_status") != "MEASURED":
+        return {"status": record.get("interval_status", "NOT_VERIFIED")}
+    half_width = (float(record["ci_high"]) - float(record["ci_low"])) / 2.0
+    effect = abs(float(record["mean_difference"]))
+    ratio = half_width / effect if effect > 0 else float("inf")
+    return {
+        "status": "MEASURED",
+        "effect": float(record["mean_difference"]),
+        "half_width": half_width,
+        "half_width_over_effect": ratio,
+        "resolved_to_fraction_of_effect": ratio,
+        "meets_quarter_effect_target": bool(ratio <= 0.25),
+    }
+
+
 def summarize_values(values: Sequence[float]) -> dict[str, Any]:
     array = np.asarray(values, dtype=float)
     finite = array[np.isfinite(array)]

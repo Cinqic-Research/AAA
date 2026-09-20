@@ -5,6 +5,9 @@
     python -m research.aaa_1k select      --output docs/evidence/aaa_1k_development_selection.json
     python -m research.aaa_1k evaluate    --output docs/evidence/aaa_1k_evaluation.json
     python -m research.aaa_1k report      --evidence ... --selection ... --output docs/aaa_1k_report.md
+    python -m research.aaa_1k characterize --selection ... --output docs/evidence/aaa_1k_characterization.json
+    python -m research.aaa_1k round2     --selection ... --output docs/evidence/aaa_1k_evaluation_round2.json
+    python -m research.aaa_1k report2    --evidence ... --selection ... --output docs/aaa_1k_report.md
     python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation.json
     python -m research.aaa_1k adversarial-probes --selection ... --output docs/evidence/aaa_1k_adversarial_probes.json
     python -m research.aaa_1k visualize   --family occlusion_v1 --output runs/aaa_1k/dashboard.png
@@ -130,10 +133,7 @@ def command_select(args: argparse.Namespace) -> int:
 
 def command_evaluate(args: argparse.Namespace) -> int:
     selection = json.loads(Path(args.selection).read_text(encoding="utf-8"))
-    chosen = selection["selected"]
-    configuration = Configuration(
-        float(chosen["learning_rate"]), int(chosen["tbptt_steps"]), float(chosen["error_loss_weight"])
-    )
+    configuration = _configuration(args.selection)
     plan = plan_replication(configuration)
     replicas = int(args.replicas) if args.replicas else plan["selected_replicas"]
     evidence = run_experiments(configuration, replicas=replicas)
@@ -167,6 +167,110 @@ def command_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def _recompute_round2(evidence: dict[str, Any]) -> int:
+    """Rebuild round 2's headline statistics from its retained cells."""
+
+    from .round2 import MEMORY_FAMILIES, _crossed, _in_families, _matrix, _select
+    from .stats import crossed_paired_difference
+
+    cells = evidence["cells"]
+    dims = evidence["capability_vector"]["dimensions"]
+    failures: list[str] = []
+    checks = 0
+
+    def compare(label: str, stored: float, recomputed: float) -> None:
+        nonlocal checks
+        checks += 1
+        if not (math.isfinite(stored) and math.isfinite(recomputed)):
+            if math.isfinite(stored) != math.isfinite(recomputed):
+                failures.append(f"{label}: stored={stored} recomputed={recomputed}")
+            return
+        if abs(stored - recomputed) > RECOMPUTE_TOLERANCE * max(1.0, abs(stored)):
+            failures.append(f"{label}: stored={stored!r} recomputed={recomputed!r}")
+
+    q1 = crossed_paired_difference(
+        _matrix(cells, PRIMARY, "last_quarter_mae"), _matrix(cells, PRIMARY, "first_quarter_mae")
+    )
+    for field in ("mean_difference", "ci_low", "ci_high"):
+        compare(f"q1.{field}", dims["q1_online_learning"]["overall"][field], q1[field])
+
+    memory = _in_families(cells, MEMORY_FAMILIES)
+    for label, control, stored in (
+        ("q3.state_reset", "aaa1k_state_reset", dims["q3_hidden_state"]["versus_state_reset"]),
+        ("q3.stateless", "mlp_control", dims["q3_hidden_state"]["versus_stateless_mlp"]),
+        ("q4.all", "rnn_control", dims["q4_gating"]["all_families"]),
+    ):
+        source = cells if label == "q4.all" else memory
+        recomputed = _crossed(source, PRIMARY, control)
+        for field in ("mean_difference", "ci_low", "ci_high"):
+            compare(f"{label}.{field}", stored[field], recomputed[field])
+
+    # The two new measurements are recomputed from their own retained trials.
+    adaptation = dims["q2_adaptation"]
+    trials = adaptation["trials"]
+    compare(
+        "q2.adaptation_mean",
+        adaptation["adaptation_effect"]["mean_difference"],
+        float(np.mean([trial["adaptation_effect"] for trial in trials])),
+    )
+    for trial in trials:
+        compare(
+            f"q2.trial[{trial['seed']}].adaptation",
+            trial["adaptation_effect"],
+            trial["changed"]["absolute_advantage"] - trial["control"]["absolute_advantage"],
+        )
+    retention = dims["q5_retention"]
+    compare(
+        "q5.forgetting_mean",
+        retention["forgetting"]["mean_difference"],
+        float(np.mean([trial["forgetting"] for trial in retention["trials"]])),
+    )
+    for trial in retention["trials"]:
+        compare(
+            f"q5.trial[{trial['seed']}].forgetting",
+            trial["forgetting"],
+            trial["probe_error"]["after_B"] - trial["probe_error"]["after_A1"],
+        )
+
+    for family, row in dims["prediction_accuracy"].items():
+        entries = _select(cells, family=family)
+        for name, summary in row.items():
+            compare(
+                f"prediction_accuracy.{family}.{name}.mean",
+                summary["mean"],
+                float(np.mean([cell["mae"][name] for cell in entries])),
+            )
+
+    compare(
+        "numerical_stability.total_clip_events",
+        dims["numerical_stability"]["total_clip_events"],
+        float(sum(cell["clip_events"] for cell in cells)),
+    )
+
+    print(f"recomputed {checks} stored values from retained primitives (round 2)")
+    if failures:
+        print(f"MISMATCH on {len(failures)} value(s):")
+        for failure in failures[:20]:
+            print(f"  {failure}")
+        return 1
+    print("all recomputed values agree")
+    return 0
+
+
+def command_report2(args: argparse.Namespace) -> int:
+    from .report import render_round2_report
+
+    evidence = json.loads(Path(args.evidence).read_text(encoding="utf-8"))
+    selection = json.loads(Path(args.selection).read_text(encoding="utf-8"))
+    characterization = (
+        json.loads(Path(args.characterization).read_text(encoding="utf-8")) if args.characterization else None
+    )
+    text = render_round2_report(evidence, selection, phase_fingerprint(project_root()), characterization)
+    _write(Path(args.output), text)
+    print(f"wrote {args.output} ({len(text)} bytes)")
+    return 0
+
+
 def command_recompute(args: argparse.Namespace) -> int:
     """Rebuild every headline statistic from the retained per-stream primitives.
 
@@ -176,6 +280,8 @@ def command_recompute(args: argparse.Namespace) -> int:
     """
 
     evidence = json.loads(Path(args.evidence).read_text(encoding="utf-8"))
+    if evidence.get("schema") == "aaa.1k.experiments.v2":
+        return _recompute_round2(evidence)
     per_stream = evidence["per_stream"]
     dims = evidence["capability_vector"]["dimensions"]
     failures: list[str] = []
@@ -247,20 +353,80 @@ def command_recompute(args: argparse.Namespace) -> int:
     return 0
 
 
+def _configuration(path: str) -> Configuration:
+    selection = json.loads(Path(path).read_text(encoding="utf-8"))
+    chosen = selection["selected"]
+    return Configuration(
+        float(chosen["learning_rate"]),
+        int(chosen["tbptt_steps"]),
+        float(chosen["error_loss_weight"]),
+        chosen.get("gradient_clip", 1.0),
+    )
+
+
+def command_characterize(args: argparse.Namespace) -> int:
+    """Development-only probes that settle the open interpretation questions."""
+
+    from .characterization import run_characterization
+
+    report = run_characterization(_configuration(args.selection))
+    for probe in report["probes"]:
+        print(f"{probe['probe']}: {probe['finding']}")
+    if args.output:
+        _write(Path(args.output), report)
+    return 0
+
+
+def command_round2(args: argparse.Namespace) -> int:
+    """Run the corrected evaluation round on fresh stream identities."""
+
+    from .round2 import run_round2
+
+    configuration = _configuration(args.selection)
+    fairness = None
+    if args.characterization:
+        report = json.loads(Path(args.characterization).read_text(encoding="utf-8"))
+        fairness = next((p for p in report["probes"] if p["probe"] == "per_architecture_selection"), None)
+    selection = json.loads(Path(args.selection).read_text(encoding="utf-8"))
+    evidence = run_round2(
+        configuration,
+        architecture_configurations=selection.get("architecture_configurations"),
+        replicas=args.replicas,
+        initializations=args.initializations,
+        adaptation_trials=args.adaptation_trials,
+        retention_trials=args.retention_trials,
+        fairness=fairness,
+    )
+    evidence["git"] = git_provenance(project_root())
+    evidence["scientific_fingerprint"] = phase_fingerprint(project_root())["sha256"]
+    if args.output:
+        _write(Path(args.output), evidence)
+    dims = evidence["capability_vector"]["dimensions"]
+    print(
+        f"cells: {len(evidence['cells'])} "
+        f"({args.initializations} initializations x {len(evidence['streams'])} streams)"
+    )
+    for key, field in (
+        ("q1_online_learning", "overall"),
+        ("q2_adaptation", "adaptation_effect"),
+        ("q3_hidden_state", "versus_stateless_mlp"),
+        ("q4_gating", "all_families"),
+        ("q5_retention", "forgetting"),
+    ):
+        record = dims[key][field]
+        print(
+            f"{key:26s} mean={record['mean_difference']:+.3e} "
+            f"ci=[{record['ci_low']:+.3e},{record['ci_high']:+.3e}]"
+        )
+    return 0
+
+
 def command_probes(args: argparse.Namespace) -> int:
     """Run the adversarial probes that try to break this phase's conclusions."""
 
     from .adversarial import run_probes
 
-    selection = json.loads(Path(args.selection).read_text(encoding="utf-8"))
-    chosen = selection["selected"]
-    report = run_probes(
-        Configuration(
-            float(chosen["learning_rate"]),
-            int(chosen["tbptt_steps"]),
-            float(chosen["error_loss_weight"]),
-        )
-    )
+    report = run_probes(_configuration(args.selection))
     for probe in report["probes"]:
         print(f"{probe['probe']}: {probe['finding']}")
     if args.output:
@@ -346,6 +512,13 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--output", required=True)
     report.set_defaults(handler=command_report)
 
+    report2 = sub.add_parser("report2", help="render the round-2 research report")
+    report2.add_argument("--evidence", required=True)
+    report2.add_argument("--selection", required=True)
+    report2.add_argument("--characterization")
+    report2.add_argument("--output", required=True)
+    report2.set_defaults(handler=command_report2)
+
     recompute = sub.add_parser("recompute", help="rebuild headline statistics from primitives")
     recompute.add_argument("--evidence", required=True)
     recompute.set_defaults(handler=command_recompute)
@@ -354,6 +527,23 @@ def build_parser() -> argparse.ArgumentParser:
     probes.add_argument("--selection", required=True)
     probes.add_argument("--output")
     probes.set_defaults(handler=command_probes)
+
+    characterize = sub.add_parser(
+        "characterize", help="development probes for the open interpretation questions"
+    )
+    characterize.add_argument("--selection", required=True)
+    characterize.add_argument("--output")
+    characterize.set_defaults(handler=command_characterize)
+
+    round2 = sub.add_parser("round2", help="run the corrected evaluation round")
+    round2.add_argument("--selection", required=True)
+    round2.add_argument("--characterization")
+    round2.add_argument("--replicas", type=int, default=24)
+    round2.add_argument("--initializations", type=int, default=5)
+    round2.add_argument("--adaptation-trials", type=int, default=24)
+    round2.add_argument("--retention-trials", type=int, default=12)
+    round2.add_argument("--output")
+    round2.set_defaults(handler=command_round2)
 
     visualize = sub.add_parser("visualize", help="render the diagnostic dashboard")
     visualize.add_argument("--family", default="occlusion_v1")

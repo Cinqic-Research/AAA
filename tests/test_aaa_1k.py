@@ -27,15 +27,23 @@ from research.aaa_1k.agents import (
     WindowedLinearFitAgent,
     baseline_suite,
 )
+from research.aaa_1k.characterization import coarse_speed_decomposition
 from research.aaa_1k.controls import (
     StatelessMLPControl,
     VanillaRNNControl,
     expected_mlp_parameter_count,
     expected_rnn_parameter_count,
 )
+from research.aaa_1k.experiments import build_agents
 from research.aaa_1k.features import PublicScales, build_inputs
 from research.aaa_1k.gradcheck import check_model, full_gradient_check
 from research.aaa_1k.identity import lineage_record, phase_fingerprint
+from research.aaa_1k.measurements import (
+    _probe,
+    adaptation_difference_of_differences,
+    probe_bank,
+    retention_trial,
+)
 from research.aaa_1k.model import (
     AAA1KGRU,
     ARCHITECTURE_ID,
@@ -49,8 +57,18 @@ from research.aaa_1k.model import (
 )
 from research.aaa_1k.runner import run_online_frozen_branch, run_stream
 from research.aaa_1k.seeds import NAMESPACES, derive_seed
-from research.aaa_1k.selection import Configuration, eligible_learning_rates
-from research.aaa_1k.stats import calibration, paired_difference
+from research.aaa_1k.selection import (
+    Configuration,
+    development_streams,
+    eligible_learning_rates,
+    select_for_architecture,
+)
+from research.aaa_1k.stats import (
+    achieved_precision,
+    calibration,
+    crossed_paired_difference,
+    paired_difference,
+)
 from research.aaa_1k.streams import (
     FAMILIES,
     Stream,
@@ -61,6 +79,7 @@ from research.aaa_1k.streams import (
     motion_compat_stream,
     observable_view,
     occlusion_stream,
+    paired_change_streams,
     quantize,
 )
 
@@ -877,8 +896,6 @@ class VisualizationTests(unittest.TestCase):
 # ----------------------------------------------------------------------
 class EndToEndTests(unittest.TestCase):
     def test_the_full_arm_set_runs_paired_on_one_stream(self):
-        from research.aaa_1k.experiments import build_agents
-
         agents = build_agents(Configuration(0.03, 4, 0.25))
         result = run_stream(coarse_speed_stream(53, steps=120), agents)
         self.assertEqual(len(result.agent_names), 12)
@@ -891,8 +908,6 @@ class EndToEndTests(unittest.TestCase):
         self.assertEqual(main(["parameter-audit"]), 0)
 
     def test_running_the_same_configuration_twice_gives_identical_results(self):
-        from research.aaa_1k.experiments import build_agents
-
         stream = occlusion_stream(59, steps=120)
         first = run_stream(stream, build_agents(Configuration(0.03, 4, 0.25)))
         second = run_stream(stream, build_agents(Configuration(0.03, 4, 0.25)))
@@ -1031,3 +1046,235 @@ class FailureInjectionTests(unittest.TestCase):
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
+
+
+# ----------------------------------------------------------------------
+# round 2: the corrected designs
+# ----------------------------------------------------------------------
+ROUND2_CONFIG = Configuration(0.03, 4, 0.25, 10.0)
+
+
+class PairedChangeStreamTests(unittest.TestCase):
+    def test_the_pair_is_bit_identical_until_the_change(self):
+        changed, control = paired_change_streams(101, steps=200, change_step=100)
+        for index in range(101):
+            self.assertEqual(changed.steps[index].true_position, control.steps[index].true_position)
+
+    def test_the_pair_diverges_after_the_change(self):
+        changed, control = paired_change_streams(101, steps=200, change_step=100)
+        tail_changed = [step.true_position for step in changed.steps[101:]]
+        tail_control = [step.true_position for step in control.steps[101:]]
+        self.assertNotEqual(tail_changed, tail_control)
+
+    def test_only_the_changed_member_carries_a_change_event(self):
+        changed, control = paired_change_streams(101, steps=200, change_step=100)
+        self.assertEqual([s.index for s in changed.steps if s.event == "change"], [101])
+        self.assertEqual([s.index for s in control.steps if s.event == "change"], [])
+
+    def test_the_control_has_no_change_factor(self):
+        changed, control = paired_change_streams(101, steps=200, change_step=100)
+        self.assertNotEqual(changed.metadata["change_factor"], 1.0)
+        self.assertEqual(control.metadata["change_factor"], 1.0)
+
+    def test_a_change_step_outside_the_stream_is_refused(self):
+        with self.assertRaises(ValueError):
+            paired_change_streams(1, steps=50, change_step=49)
+
+
+class AdaptationMeasurementTests(unittest.TestCase):
+    def test_both_trunks_reach_an_identical_state_at_the_branch(self):
+        trial = adaptation_difference_of_differences(ROUND2_CONFIG, seed=202, steps=160, change_step=80)
+        self.assertTrue(trial["trunks_matched"])
+        self.assertEqual(len(trial["trunk_state_hash"]), 64)
+
+    def test_the_effect_is_the_declared_difference_of_differences(self):
+        trial = adaptation_difference_of_differences(ROUND2_CONFIG, seed=203, steps=160, change_step=80)
+        self.assertAlmostEqual(
+            trial["adaptation_effect"],
+            trial["changed"]["absolute_advantage"] - trial["control"]["absolute_advantage"],
+            places=15,
+        )
+
+    def test_the_control_arm_still_shows_an_ordinary_learning_advantage(self):
+        """The whole point: the control is not zero, which is why round 1 was wrong."""
+
+        trial = adaptation_difference_of_differences(ROUND2_CONFIG, seed=204, steps=160, change_step=80)
+        self.assertNotEqual(trial["continued_learning_effect"], 0.0)
+
+
+class RetentionMeasurementTests(unittest.TestCase):
+    def test_the_probe_bank_is_fixed_and_deterministic(self):
+        first, second = probe_bank(size=4), probe_bank(size=4)
+        self.assertEqual([s.stream_id for s in first], [s.stream_id for s in second])
+        self.assertEqual(len(first), 4)
+
+    def test_probing_never_updates_the_weights(self):
+        trial = retention_trial(ROUND2_CONFIG, seed=205, segment_steps=60, bank=probe_bank(size=2, steps=40))
+        self.assertGreater(trial["updates"], 0)
+        self.assertEqual(set(trial["probe_error"]), {"after_A1", "after_B", "after_A2"})
+
+    def test_forgetting_is_the_declared_probe_difference(self):
+        trial = retention_trial(ROUND2_CONFIG, seed=206, segment_steps=60, bank=probe_bank(size=2, steps=40))
+        self.assertAlmostEqual(
+            trial["forgetting"],
+            trial["probe_error"]["after_B"] - trial["probe_error"]["after_A1"],
+            places=15,
+        )
+
+    def test_every_checkpoint_is_measured_on_the_same_questions(self):
+        bank = probe_bank(size=3, steps=40)
+        trial = retention_trial(ROUND2_CONFIG, seed=207, segment_steps=60, bank=bank)
+        self.assertEqual(trial["probe_bank_size"], 3)
+        # three distinct measurements of the same bank
+        self.assertEqual(len(set(trial["probe_error"].values())), 3)
+
+
+class CrossedBootstrapTests(unittest.TestCase):
+    def test_a_crossed_interval_resamples_both_factors(self):
+        rng = np.random.default_rng(0)
+        first = rng.normal(1.0, 0.05, size=(4, 12))
+        second = first + 0.2
+        record = crossed_paired_difference(first, second)
+        self.assertEqual(record["initializations"], 4)
+        self.assertEqual(record["streams"], 12)
+        self.assertAlmostEqual(record["mean_difference"], 0.2, places=9)
+        self.assertLess(record["ci_low"], record["ci_high"])
+        self.assertTrue(record["initializations_agreeing_on_sign"])
+
+    def test_a_single_initialization_cannot_produce_a_crossed_interval(self):
+        record = crossed_paired_difference(np.zeros((1, 8)), np.ones((1, 8)))
+        self.assertEqual(record["interval_status"], "INSUFFICIENT_EVIDENCE")
+
+    def test_the_crossed_interval_is_wider_than_the_stream_only_interval(self):
+        """Resampling one factor understates the uncertainty. That was the defect."""
+
+        rng = np.random.default_rng(3)
+        # a design where initializations genuinely disagree
+        offsets = np.array([0.0, 0.4, -0.3, 0.2, -0.1]).reshape(-1, 1)
+        first = rng.normal(1.0, 0.02, size=(5, 20))
+        second = first + 0.2 + offsets
+        crossed = crossed_paired_difference(first, second)
+        flat = paired_difference(first.reshape(-1), second.reshape(-1))
+        crossed_width = crossed["ci_high"] - crossed["ci_low"]
+        flat_width = flat["ci_high"] - flat["ci_low"]
+        self.assertGreater(crossed_width, flat_width)
+
+    def test_a_ragged_design_is_refused(self):
+        with self.assertRaises(ValueError):
+            crossed_paired_difference(np.zeros((2, 3)), np.zeros((3, 2)))
+
+    def test_achieved_precision_reports_resolution_against_the_measured_effect(self):
+        record = crossed_paired_difference(np.zeros((4, 20)), np.full((4, 20), 1.0))
+        precision = achieved_precision(record)
+        self.assertEqual(precision["status"], "MEASURED")
+        self.assertAlmostEqual(precision["effect"], 1.0, places=9)
+        self.assertTrue(precision["meets_quarter_effect_target"])
+
+
+class PerArchitectureSelectionTests(unittest.TestCase):
+    def test_each_architecture_gets_its_own_rule_selected_hyperparameters(self):
+        streams = development_streams()[:2]
+        record = select_for_architecture("VanillaRNNControl", streams, tbptt_steps=4, error_loss_weight=0.25)
+        self.assertEqual(record["architecture"], "VanillaRNNControl")
+        self.assertIn(record["selected"]["learning_rate"], record["eligible_learning_rates"])
+        self.assertIn(record["selected"]["gradient_clip"], (0.3, 1.0, 3.0, 10.0, None))
+
+    def test_controls_receive_their_own_configuration(self):
+        agents = build_agents(
+            ROUND2_CONFIG,
+            architecture_configurations={
+                "StatelessMLPControl": {
+                    "learning_rate": 0.001,
+                    "tbptt_steps": 4,
+                    "error_loss_weight": 0.25,
+                    "gradient_clip": None,
+                }
+            },
+        )
+        by_name = {agent.name: agent for agent in agents}
+        self.assertEqual(by_name["mlp_control"].model.learning_rate, 0.001)
+        self.assertIsNone(by_name["mlp_control"].model.gradient_clip)
+        # the primary and its ablations are untouched
+        self.assertEqual(by_name["aaa1k_gru"].model.learning_rate, 0.03)
+        self.assertEqual(by_name["aaa1k_state_reset"].model.learning_rate, 0.03)
+        self.assertEqual(by_name["aaa1k_gru"].model.gradient_clip, 10.0)
+
+    def test_an_ablation_differs_from_the_primary_in_exactly_one_mechanism(self):
+        by_name = {agent.name: agent for agent in build_agents(ROUND2_CONFIG)}
+        primary = by_name["aaa1k_gru"].model
+        for name, field in (
+            ("aaa1k_state_reset", "reset_state_every_step"),
+            ("aaa1k_no_error_input", "zero_error_input"),
+            ("aaa1k_frozen_recurrent", "freeze_recurrent"),
+        ):
+            with self.subTest(ablation=name):
+                ablation = by_name[name].model
+                self.assertTrue(getattr(ablation, field))
+                self.assertFalse(getattr(primary, field))
+                self.assertEqual(ablation.learning_rate, primary.learning_rate)
+                self.assertEqual(ablation.gradient_clip, primary.gradient_clip)
+                for parameter in primary.parameters:
+                    np.testing.assert_array_equal(
+                        ablation.parameters[parameter], primary.parameters[parameter]
+                    )
+
+
+class CharacterizationTests(unittest.TestCase):
+    def test_the_coarse_family_is_decomposed_into_its_two_mechanisms(self):
+        record = coarse_speed_decomposition(ROUND2_CONFIG, streams=2, initializations=1)
+        self.assertEqual(set(record["conditions"]), {"no_regime_switch", "with_regime_switch"})
+        self.assertIn("finding", record)
+        self.assertTrue(math.isfinite(record["advantage_share_without_regime"]))
+
+
+class Round2FailureInjectionTests(unittest.TestCase):
+    """The new designs get the same treatment as the old ones."""
+
+    def test_a_broken_pairing_is_caught(self):
+        """If the two trunks diverged before the branch, the DiD is meaningless."""
+
+        import research.aaa_1k.measurements as measurements
+
+        original = measurements.paired_change_streams
+
+        def broken(seed, **options):
+            changed, _ = original(seed, **options)
+            other, _ = original(seed + 1, **options)  # inject: unpaired control
+            return changed, other
+
+        measurements.paired_change_streams = broken
+        try:
+            with self.assertRaises(RuntimeError):
+                measurements.adaptation_difference_of_differences(
+                    ROUND2_CONFIG, seed=301, steps=120, change_step=60
+                )
+        finally:
+            measurements.paired_change_streams = original
+
+    def test_a_probe_that_trains_is_caught(self):
+        """The retention probe must never update the weights it is measuring."""
+
+        agent = NeuralAgent(fresh_model(), name="a")
+        run_stream(small_stream(), [agent])
+        bank = probe_bank(size=2, steps=40)
+
+        class LeakyAgent(NeuralAgent):
+            def branch(self, *, name, update_enabled):
+                # inject the defect: hand back a clone that still learns
+                return super().branch(name=name, update_enabled=True)
+
+        leaky = LeakyAgent(agent.model.clone(), name="leaky")
+        leaky.load_state(agent.state_dict())
+        with self.assertRaises(RuntimeError):
+            _probe(leaky, bank, label="broken")
+
+    def test_the_stream_only_interval_would_have_understated_the_uncertainty(self):
+        """Documents the defect the crossed bootstrap fixes, as a live check."""
+
+        rng = np.random.default_rng(11)
+        offsets = np.array([0.0, 0.5, -0.4, 0.3, -0.2]).reshape(-1, 1)
+        first = rng.normal(1.0, 0.01, size=(5, 25))
+        second = first + 0.1 + offsets
+        crossed = crossed_paired_difference(first, second)
+        naive = paired_difference(first.reshape(-1), second.reshape(-1))
+        self.assertGreater(crossed["ci_high"] - crossed["ci_low"], 3 * (naive["ci_high"] - naive["ci_low"]))

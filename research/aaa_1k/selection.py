@@ -20,6 +20,26 @@ including the ones that blow up.
 **Stage 2 -- auxiliary weight.** ``lambda_error`` in ``{0.0, 0.1, 0.25, 0.5}``
 at the horizon and learning rate stage 1 selected.
 
+**Stage 3a -- per-architecture hyperparameters.** The learning rate and the
+clip threshold are selected *separately for each architecture*, by the same
+rules, on the same development streams. Imposing one architecture's
+hyperparameters on another is how a comparison quietly becomes a handicap: a
+threshold that suits the gated model destabilized the stateless control badly
+enough to inflate its error by two orders of magnitude on one family, which
+would have been reported as "hidden state helps". Ablations of the gated model
+share its hyperparameters exactly, because they are the same architecture with
+one mechanism removed; the two *controls* are different architectures and get
+their own.
+
+**Stage 3 -- gradient-clip threshold.** ``{0.3, 1.0, 3.0, 10.0, None}``,
+averaged over three development initializations. This stage was added after a
+characterization probe found the originally *declared* threshold of 1.0 costing
+29% of development error while activating on roughly a quarter of all updates.
+A threshold that active is a hyperparameter deciding what gets learned, not a
+guard, and a hyperparameter has to be selected by the rule like any other
+rather than asserted. Round 1 of the evaluation was run with the declared 1.0
+and is retained; round 2 uses whatever this stage selects.
+
 Selection rule, also frozen in advance
 --------------------------------------
 1. **Stable execution.** A configuration that produced a non-finite value on
@@ -40,6 +60,11 @@ Selection rule, also frozen in advance
 For ``lambda_error`` the same rule applies with one addition: the predeclared
 default of 0.25 is retained unless another value beats it by more than 2%. A
 2% development difference is not a reason to move a declared default.
+
+For the gradient clip the rule prefers **the most conservative threshold whose
+development error is within the practical margin of the best**. Given two
+thresholds that perform the same, the tighter one is chosen, because its cost
+is bounded and its benefit is insurance.
 """
 
 from __future__ import annotations
@@ -60,6 +85,9 @@ SELECTION_SCHEMA = "aaa.1k.development_selection.v1"
 LEARNING_RATES: tuple[float, ...] = (0.001, 0.003, 0.01, 0.03, 0.1, 0.3)
 TBPTT_HORIZONS: tuple[int, ...] = (4, 8, 16, 32)
 ERROR_WEIGHTS: tuple[float, ...] = (0.0, 0.1, 0.25, 0.5)
+GRADIENT_CLIPS: tuple[float | None, ...] = (0.3, 1.0, 3.0, 10.0, None)
+DECLARED_GRADIENT_CLIP = 1.0
+CLIP_INITIALIZATIONS = 3
 DEFAULT_ERROR_WEIGHT = 0.25
 PRACTICAL_MARGIN = 0.02
 MARGIN_STEPS = 2
@@ -92,6 +120,7 @@ class Configuration:
     learning_rate: float
     tbptt_steps: int
     error_loss_weight: float
+    gradient_clip: float | None = DECLARED_GRADIENT_CLIP
 
     def key(self) -> str:
         return f"lr={self.learning_rate:g};T={self.tbptt_steps};lambda={self.error_loss_weight:g}"
@@ -101,6 +130,17 @@ class Configuration:
             "learning_rate": self.learning_rate,
             "tbptt_steps": self.tbptt_steps,
             "error_loss_weight": self.error_loss_weight,
+            "gradient_clip": self.gradient_clip,
+        }
+
+    def model_kwargs(self) -> dict[str, Any]:
+        """Exactly the arguments every arm's core is constructed with."""
+
+        return {
+            "learning_rate": self.learning_rate,
+            "tbptt_steps": self.tbptt_steps,
+            "error_loss_weight": self.error_loss_weight,
+            "gradient_clip": self.gradient_clip,
         }
 
 
@@ -276,6 +316,235 @@ def _rank(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(close, key=tiebreak) + rest
 
 
+def select_gradient_clip(
+    configuration: Configuration, streams: list[Stream], *, initializations: int = CLIP_INITIALIZATIONS
+) -> dict[str, Any]:
+    """Stage 3: choose the clip threshold instead of asserting one.
+
+    Averaged over several initializations because the differences between
+    neighbouring thresholds are small enough that a single seed would decide
+    the outcome on noise.
+    """
+
+    records: list[dict[str, Any]] = []
+    for threshold in GRADIENT_CLIPS:
+        errors: list[float] = []
+        rates: list[float] = []
+        diverged: list[str] = []
+        for initialization in range(initializations):
+            for stream in streams:
+                agent = NeuralAgent(
+                    AAA1KGRU(
+                        seed=derive_seed("model_init", initialization),
+                        learning_rate=configuration.learning_rate,
+                        tbptt_steps=configuration.tbptt_steps,
+                        error_loss_weight=configuration.error_loss_weight,
+                        gradient_clip=threshold,
+                    ),
+                    name="aaa1k",
+                )
+                try:
+                    with np.errstate(over="ignore", invalid="ignore"):
+                        result = run_stream(stream, [agent])
+                except (FloatingPointError, ValueError, OverflowError) as error:
+                    diverged.append(f"{stream.stream_id}: {type(error).__name__}")
+                    continue
+                errors.append(result.mean_absolute_error("aaa1k"))
+                if agent.model.update_count:
+                    rates.append(agent.model.clip_events / agent.model.update_count)
+        records.append(
+            {
+                "gradient_clip": threshold,
+                "stable": not diverged,
+                "diverged_streams": diverged,
+                "initializations": initializations,
+                "mean_mae": float(np.mean(errors)) if errors else float("inf"),
+                "mean_clip_rate": float(np.mean(rates)) if rates else 0.0,
+            }
+        )
+
+    stable = [record for record in records if record["stable"]]
+    if not stable:
+        raise RuntimeError("no gradient-clip threshold was stable on development data")
+    best = min(stable, key=lambda record: record["mean_mae"])
+    within = [
+        record for record in stable if record["mean_mae"] <= best["mean_mae"] * (1.0 + PRACTICAL_MARGIN)
+    ]
+    # Most conservative means the tightest finite threshold; no clip at all is
+    # the least conservative option and is chosen only if nothing else is close.
+    finite = [record for record in within if record["gradient_clip"] is not None]
+    selected = min(finite, key=lambda record: float(record["gradient_clip"])) if finite else best
+    declared = next(record for record in records if record["gradient_clip"] == DECLARED_GRADIENT_CLIP)
+    return {
+        "records": records,
+        "selected_gradient_clip": selected["gradient_clip"],
+        "declared_gradient_clip": DECLARED_GRADIENT_CLIP,
+        "declared_cost_versus_best": (
+            declared["mean_mae"] / best["mean_mae"] - 1.0 if best["mean_mae"] > 0 else float("nan")
+        ),
+        "declared_clip_rate": declared["mean_clip_rate"],
+        "selected_clip_rate": selected["mean_clip_rate"],
+        "rule": (
+            "the most conservative threshold within the practical margin of the best stable "
+            "one; a bare threshold is chosen only when no finite threshold is close"
+        ),
+    }
+
+
+ARCHITECTURES: dict[str, Any] = {}
+
+
+def _architecture_factories() -> dict[str, Any]:
+    """Imported lazily so this module does not depend on the control classes."""
+
+    from .controls import StatelessMLPControl, VanillaRNNControl
+
+    return {
+        "AAA1KGRU": AAA1KGRU,
+        "StatelessMLPControl": StatelessMLPControl,
+        "VanillaRNNControl": VanillaRNNControl,
+    }
+
+
+def _sweep_learning_rates(
+    factory: Any,
+    streams: list[Stream],
+    *,
+    tbptt_steps: int,
+    error_loss_weight: float,
+    gradient_clip: float | None,
+    model_seed_index: int,
+) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for learning_rate in LEARNING_RATES:
+        errors: list[float] = []
+        diverged: list[str] = []
+        for stream in streams:
+            agent = NeuralAgent(
+                factory(
+                    seed=derive_seed("model_init", model_seed_index),
+                    learning_rate=learning_rate,
+                    tbptt_steps=tbptt_steps,
+                    error_loss_weight=error_loss_weight,
+                    gradient_clip=gradient_clip,
+                ),
+                name="arm",
+            )
+            try:
+                with np.errstate(over="ignore", invalid="ignore"):
+                    result = run_stream(stream, [agent])
+            except (FloatingPointError, ValueError, OverflowError) as error:
+                diverged.append(f"{stream.stream_id}: {type(error).__name__}")
+                continue
+            errors.append(result.mean_absolute_error("arm"))
+        records.append(
+            {
+                "learning_rate": learning_rate,
+                "gradient_clip": gradient_clip,
+                "stable": not diverged,
+                "diverged_streams": diverged,
+                "mean_mae": float(np.mean(errors)) if errors and not diverged else float("inf"),
+            }
+        )
+    return records
+
+
+def select_for_architecture(
+    name: str,
+    streams: list[Stream],
+    *,
+    tbptt_steps: int,
+    error_loss_weight: float,
+    model_seed_index: int = 0,
+) -> dict[str, Any]:
+    """Apply the frozen rules to one architecture and return what they choose."""
+
+    factory = _architecture_factories()[name]
+    unclipped = _sweep_learning_rates(
+        factory,
+        streams,
+        tbptt_steps=tbptt_steps,
+        error_loss_weight=error_loss_weight,
+        gradient_clip=None,
+        model_seed_index=model_seed_index,
+    )
+    boundary = next((record["learning_rate"] for record in unclipped if not record["stable"]), None)
+    allowed = eligible_learning_rates(boundary)
+    clipped = _sweep_learning_rates(
+        factory,
+        streams,
+        tbptt_steps=tbptt_steps,
+        error_loss_weight=error_loss_weight,
+        gradient_clip=DECLARED_GRADIENT_CLIP,
+        model_seed_index=model_seed_index,
+    )
+    eligible = [record for record in clipped if record["stable"] and record["learning_rate"] in allowed]
+    if not eligible:
+        raise RuntimeError(f"no eligible learning rate for {name} under the declared rules")
+    learning_rate = float(min(eligible, key=lambda record: record["mean_mae"])["learning_rate"])
+
+    clip_records: list[dict[str, Any]] = []
+    for threshold in GRADIENT_CLIPS:
+        errors: list[float] = []
+        rates: list[float] = []
+        diverged: list[str] = []
+        for initialization in range(CLIP_INITIALIZATIONS):
+            for stream in streams:
+                agent = NeuralAgent(
+                    factory(
+                        seed=derive_seed("model_init", initialization),
+                        learning_rate=learning_rate,
+                        tbptt_steps=tbptt_steps,
+                        error_loss_weight=error_loss_weight,
+                        gradient_clip=threshold,
+                    ),
+                    name="arm",
+                )
+                try:
+                    with np.errstate(over="ignore", invalid="ignore"):
+                        result = run_stream(stream, [agent])
+                except (FloatingPointError, ValueError, OverflowError) as error:
+                    diverged.append(f"{stream.stream_id}: {type(error).__name__}")
+                    continue
+                errors.append(result.mean_absolute_error("arm"))
+                if agent.model.update_count:
+                    rates.append(agent.model.clip_events / agent.model.update_count)
+        clip_records.append(
+            {
+                "gradient_clip": threshold,
+                "stable": not diverged,
+                "diverged_streams": diverged,
+                "mean_mae": float(np.mean(errors)) if errors else float("inf"),
+                "mean_clip_rate": float(np.mean(rates)) if rates else 0.0,
+            }
+        )
+    stable = [record for record in clip_records if record["stable"]]
+    if not stable:
+        raise RuntimeError(f"no stable gradient clip for {name}")
+    best = min(stable, key=lambda record: record["mean_mae"])
+    within = [r for r in stable if r["mean_mae"] <= best["mean_mae"] * (1.0 + PRACTICAL_MARGIN)]
+    finite = [r for r in within if r["gradient_clip"] is not None]
+    clip = (
+        float(min(finite, key=lambda record: float(record["gradient_clip"]))["gradient_clip"])
+        if finite
+        else best["gradient_clip"]
+    )
+    return {
+        "architecture": name,
+        "unclipped_divergence_boundary": boundary,
+        "eligible_learning_rates": list(allowed),
+        "learning_rate_records": clipped,
+        "unclipped_records": unclipped,
+        "clip_records": clip_records,
+        "selected": {
+            "learning_rate": learning_rate,
+            "tbptt_steps": tbptt_steps,
+            "error_loss_weight": error_loss_weight,
+            "gradient_clip": clip,
+        },
+    }
+
+
 def run_development_selection(*, model_seed_index: int = 0) -> dict[str, Any]:
     """Execute the frozen two-stage plan and return the complete record."""
 
@@ -328,13 +597,32 @@ def run_development_selection(*, model_seed_index: int = 0) -> dict[str, Any]:
         )
 
     selected = Configuration(float(chosen["learning_rate"]), int(chosen["tbptt_steps"]), selected_weight)
+    architecture_selections = {
+        name: select_for_architecture(
+            name,
+            streams,
+            tbptt_steps=selected.tbptt_steps,
+            error_loss_weight=selected.error_loss_weight,
+            model_seed_index=model_seed_index,
+        )
+        for name in ("AAA1KGRU", "StatelessMLPControl", "VanillaRNNControl")
+    }
+    stage_three = select_gradient_clip(selected, streams)
+    selected = Configuration(
+        selected.learning_rate,
+        selected.tbptt_steps,
+        selected.error_loss_weight,
+        stage_three["selected_gradient_clip"],
+    )
     return {
         "schema": SELECTION_SCHEMA,
         "plan": {
             "learning_rates": list(LEARNING_RATES),
             "tbptt_horizons": list(TBPTT_HORIZONS),
             "error_weights": list(ERROR_WEIGHTS),
+            "gradient_clips": list(GRADIENT_CLIPS),
             "default_error_weight": DEFAULT_ERROR_WEIGHT,
+            "declared_gradient_clip": DECLARED_GRADIENT_CLIP,
             "practical_margin": PRACTICAL_MARGIN,
             "stability_margin_steps": MARGIN_STEPS,
             "streams_per_family": STREAMS_PER_FAMILY,
@@ -362,7 +650,13 @@ def run_development_selection(*, model_seed_index: int = 0) -> dict[str, Any]:
         ],
         "stage_two": list(stage_two.values()),
         "stage_two_ranking": [record["key"] for record in ranked_two],
+        "stage_three_gradient_clip": stage_three,
+        "stage_three_a_architecture_selections": architecture_selections,
+        "architecture_configurations": {
+            name: record["selected"] for name, record in architecture_selections.items()
+        },
         "error_weight_decision": weight_reason,
-        "selected": selected.to_dict(),
+        "selected": {**selected.to_dict(), "gradient_clip": stage_three["selected_gradient_clip"]},
         "selected_key": selected.key(),
+        "selected_gradient_clip": stage_three["selected_gradient_clip"],
     }

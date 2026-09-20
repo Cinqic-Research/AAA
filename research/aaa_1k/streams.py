@@ -35,6 +35,15 @@ Four families
     to B (damped oscillation) and back to A. Transitions are unannounced. This
     is the continual-adaptation probe.
 
+``paired_change_v1``
+    Two streams that are *bit-identical* up to a declared step, after which one
+    changes its speed and the other does not. This family exists because the
+    single-stream online-versus-frozen comparison could not distinguish
+    "continued learning helps after a change" from "continued learning helps",
+    and a probe showed the difference was 5%. Running both members of a pair
+    from the same model and differencing removes everything the two have in
+    common, including the ordinary benefit of continuing to learn.
+
 Every family is fully deterministic given its seed.
 """
 
@@ -52,7 +61,7 @@ from aaa.environment import DampedOscillatorEnvironment, MovingDotEnvironment, r
 
 BENCHMARK_VERSION = "aaa.1k.benchmarks.v1"
 
-FAMILIES = ("motion_compat", "occlusion_v1", "coarse_speed_v1", "aba_v1")
+FAMILIES = ("motion_compat", "occlusion_v1", "coarse_speed_v1", "aba_v1", "paired_change_v1")
 COMPAT_SCENARIOS = ("straight", "bouncing", "changed", "dynamics_change")
 
 
@@ -400,6 +409,81 @@ def aba_stream(
     )
 
 
+def paired_change_streams(
+    seed: int,
+    *,
+    steps: int = 240,
+    change_step: int = 120,
+    config: WorldConfig | None = None,
+) -> tuple[Stream, Stream]:
+    """Return ``(changed, control)``: identical until ``change_step``, then not.
+
+    Both members share one initial state and one velocity, so every scored
+    transition before ``change_step`` is bit-identical and a model driven
+    through either prefix arrives at exactly the same state. After that step
+    the changed member's speed is multiplied by a factor drawn from the public
+    configuration and the control member carries on unchanged.
+
+    This is what makes a difference-of-differences possible: the online-minus-
+    frozen advantage measured on the control is everything that is *not* about
+    the change, and subtracting it leaves the part that is.
+    """
+
+    world = config or WorldConfig(steps_per_episode=steps)
+    if not 0 < change_step < steps - 1:
+        raise ValueError("change_step must fall strictly inside the stream")
+    rng = np.random.default_rng(seed)
+    speed = float(rng.uniform(world.speed_min, world.speed_max))
+    velocity0 = speed if rng.integers(0, 2) else -speed
+    position0 = float(rng.uniform(world.lower_bound + 0.2, world.upper_bound - 0.2))
+    factor = world.change_factor_low if rng.integers(0, 2) == 0 else world.change_factor_high
+
+    def integrate(apply_change: bool) -> tuple[StreamStep, ...]:
+        position, velocity = position0, velocity0
+        records = [StreamStep(index=0, true_position=position, observed=True, regime="pre")]
+        for index in range(steps):
+            step_index = index + 1
+            event = None
+            if index == change_step and apply_change:
+                velocity *= factor
+                event = "change"
+            position, velocity, bounced = _reflect_advance(
+                position, velocity, world.dt, world.lower_bound, world.upper_bound
+            )
+            records.append(
+                StreamStep(
+                    index=step_index,
+                    true_position=position,
+                    observed=True,
+                    regime="pre" if index < change_step else "post",
+                    event=event or ("bounce" if bounced else None),
+                )
+            )
+        return tuple(records)
+
+    metadata = {
+        "change_step": change_step,
+        "change_factor": factor,
+        "steps": steps,
+        "pairing": "changed and control share one initial state; prefixes are bit-identical",
+    }
+    changed = Stream(
+        family="paired_change_v1",
+        stream_id=f"paired_change_v1:{seed}:changed",
+        seed=int(seed),
+        steps=integrate(True),
+        metadata={**metadata, "variant": "changed"},
+    )
+    control = Stream(
+        family="paired_change_v1",
+        stream_id=f"paired_change_v1:{seed}:control",
+        seed=int(seed),
+        steps=integrate(False),
+        metadata={**metadata, "variant": "control", "change_factor": 1.0},
+    )
+    return changed, control
+
+
 def build_stream(family: str, seed: int, **options: Any) -> Stream:
     """Dispatch to a family generator by name."""
 
@@ -412,6 +496,10 @@ def build_stream(family: str, seed: int, **options: Any) -> Stream:
         return coarse_speed_stream(seed, **options)
     if family == "aba_v1":
         return aba_stream(seed, **options)
+    if family == "paired_change_v1":
+        variant = options.pop("variant", "changed")
+        changed, control = paired_change_streams(seed, **options)
+        return changed if variant == "changed" else control
     raise ValueError(f"unknown family {family!r}")
 
 

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import math
 import time
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -66,28 +67,45 @@ MIN_REPLICAS = 8
 MAX_REPLICAS = 32
 
 
-def build_agents(configuration: Configuration, *, model_seed_index: int = 0) -> list[Any]:
-    """Every arm, all sharing one initialization seed where that is meaningful.
+def build_agents(
+    configuration: Configuration,
+    *,
+    model_seed_index: int = 0,
+    architecture_configurations: Mapping[str, Mapping[str, Any]] | None = None,
+) -> list[Any]:
+    """Every arm, with each architecture on its own selected hyperparameters.
 
-    The primary model, its three ablations and the two neural controls all take
-    their weights from the ``model_init`` namespace at the same index, so an
-    ablation differs from the primary in exactly the declared mechanism.
+    The primary model and its three ablations share one initialization seed and
+    one hyperparameter set, because an ablation is the same architecture with
+    one mechanism removed and must differ in exactly that.
+
+    The two neural **controls** are different architectures, and imposing the
+    gated model's hyperparameters on them is how a comparison becomes a
+    handicap. A clip threshold selected for the gated core destabilized the
+    stateless control by two orders of magnitude on one family, which would
+    have been reported as evidence that hidden state helps. Each control
+    therefore runs on whatever the same declared rules select for it, from the
+    same development streams; ``architecture_configurations`` carries that
+    result, and omitting it falls back to the shared configuration.
     """
 
     seed = derive_seed("model_init", model_seed_index)
-    shared: dict[str, Any] = {
-        "seed": seed,
-        "learning_rate": configuration.learning_rate,
-        "tbptt_steps": configuration.tbptt_steps,
-        "error_loss_weight": configuration.error_loss_weight,
-    }
+    primary = {"seed": seed, **configuration.model_kwargs()}
+
+    def control_kwargs(name: str) -> dict[str, Any]:
+        if not architecture_configurations or name not in architecture_configurations:
+            return dict(primary)
+        chosen = dict(architecture_configurations[name])
+        chosen.pop("architecture", None)
+        return {"seed": seed, **chosen}
+
     return [
-        NeuralAgent(AAA1KGRU(**shared), name=PRIMARY),
-        NeuralAgent(AAA1KGRU(**shared, reset_state_every_step=True), name="aaa1k_state_reset"),
-        NeuralAgent(AAA1KGRU(**shared, zero_error_input=True), name="aaa1k_no_error_input"),
-        NeuralAgent(AAA1KGRU(**shared, freeze_recurrent=True), name="aaa1k_frozen_recurrent"),
-        NeuralAgent(StatelessMLPControl(**shared), name="mlp_control"),
-        NeuralAgent(VanillaRNNControl(**shared), name="rnn_control"),
+        NeuralAgent(AAA1KGRU(**primary), name=PRIMARY),
+        NeuralAgent(AAA1KGRU(**primary, reset_state_every_step=True), name="aaa1k_state_reset"),
+        NeuralAgent(AAA1KGRU(**primary, zero_error_input=True), name="aaa1k_no_error_input"),
+        NeuralAgent(AAA1KGRU(**primary, freeze_recurrent=True), name="aaa1k_frozen_recurrent"),
+        NeuralAgent(StatelessMLPControl(**control_kwargs("StatelessMLPControl")), name="mlp_control"),
+        NeuralAgent(VanillaRNNControl(**control_kwargs("VanillaRNNControl")), name="rnn_control"),
         RLSAgent(name="rls_online"),
         *baseline_suite(),
     ]
