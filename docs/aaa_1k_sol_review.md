@@ -12,6 +12,8 @@
 
 **Corrected implementation reviewed:** `21264f8`
 
+**Final reviewed PR head:** `f47580a30c6bff1a0cd4c11a3e1b03b910700cae`
+
 **Final scientific fingerprint:** `89c687404b772d1dd11688297e2fb67446096103518fe10a59d1203da828b875`
 
 ## Scope and independence
@@ -134,3 +136,21 @@ does not replace a preregistered external replication.
 **APPROVE FOR NORMAL MERGE**, conditional on exact-head required CI remaining
 green and the remote head matching the reviewed commit chain. Do not tag or
 publish a release from this verdict.
+
+## GitHub integration result
+
+Both exact-head CPU CI runs passed on the final reviewed PR head:
+`35494445673` and `35494447197`. Each passed the locked environment, fresh
+installation, and Python 3.10 through 3.13 jobs.
+
+GitHub refused to store the verdict as an `APPROVED` review because the
+authenticated repository owner was also the PR author. The same substantive
+verdict was therefore submitted as a `COMMENTED` review on the exact head. The
+repository required zero approving reviews; this platform-enforced distinction
+is not presented as a formal GitHub approval.
+
+PR #16 was merged normally with expected-head protection at merge commit
+`acbb52ee4d199c497a4c62517adcabdc3aa08421`. The reviewed head is an ancestor
+of that merge, the remote feature branch was deleted, and post-merge main run
+`35494986925` passed all six jobs on the exact merge SHA. No tag or release was
+created.

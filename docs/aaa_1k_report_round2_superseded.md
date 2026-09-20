@@ -2,7 +2,10 @@
 
 AAA-1K is a research seed, not Juniper and not an agent. It is one primitive: a persistent gated recurrent predictor that learns online, keeps a hidden state, and estimates how wrong it expects to be. Everything below describes what was measured on a moving dot.
 
-**This round supersedes round 1.** Round 1 is retained unchanged at `docs/evidence/aaa_1k_evaluation.json`. Four defects in it were found by probing its own conclusions, and all four are repaired here rather than annotated.
+**This round supersedes round 1.** Round 1 is retained unchanged at
+`docs/evidence/aaa_1k_evaluation_round1_superseded.json`. Four defects in it
+were found by probing its own conclusions, and all four are repaired here
+rather than annotated.
 
 | What | Round 1 | Round 2 | Tracked as |
 |---|---|---|---|
