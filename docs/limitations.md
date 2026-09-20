@@ -157,9 +157,8 @@ provide external replication. A decomposition probe established that
 fixed the recurrent model is *worse* than the stateless control — but
 `occlusion_v1` has no equivalent check.
 
-**The most useful next experiments**, in order: a width-matched gating
-comparison, to separate "gating" from "fewer hidden units at the same parameter
-count"; a distributional analysis of the minority of streams where the ungated
-control wins large; an independently designed memory benchmark; and a benchmark
-with genuine long-range dependence, without which the truncation horizon does
-not matter and an unbiased online recurrent learner has nothing to fix.
+**The most useful next experiments**, in order: a distributional analysis of the
+minority of streams where the ungated control wins large; an independently
+designed memory benchmark; and a benchmark with genuine long-range dependence,
+without which the truncation horizon does not matter and an unbiased online
+recurrent learner has nothing to fix.
