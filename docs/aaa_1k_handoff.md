@@ -246,12 +246,14 @@ Round 1's top four entries were defects and are now repaired; see
    on 113 of 144 streams and much worse on the rest. That structure wants a
    distributional analysis this phase does not have.
 3. **The two memory benchmarks were designed by the implementer whose model
-   they evaluate**, and reviewed by nobody. The decomposition probe addresses
-   `coarse_speed_v1` — with the speed fixed the recurrent model is *worse*, so
-   the family genuinely tests regime inference — but `occlusion_v1` has no
-   equivalent check.
-4. **Q6 is weak.** Mean rank correlation 0.44; 114 of 720 cells have a monotone
-   quintile table; the head over-predicts.
+   they evaluate and were not independently designed or preregistered before
+   evaluation.** Independent Sol review later examined the implementation and
+   added characterization, but that does not remove the benchmark-origin
+   limitation. The decomposition probe addresses `coarse_speed_v1` — with the
+   speed fixed the recurrent model is *worse*, so the family genuinely tests
+   regime inference — but `occlusion_v1` has no equivalent check.
+4. **Q6 is weak.** Mean Spearman rank correlation 0.454; 114 of 720 cells have
+   a monotone quintile table; the head over-predicts.
 5. **The missingness code is weak.** During a gap inputs 2 and 3 are both
    exactly zero, which a genuine zero displacement and zero error would also
    produce. A clean flag needs a fourth input and a new architecture (`D-5`).
