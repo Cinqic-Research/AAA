@@ -272,9 +272,9 @@
   "error_weight_decision": "the predeclared default was retained: no alternative beat it by more than 2% on development data",
   "git": {
     "branch": "opus/aaa-1k-recurrent-core",
-    "commit": "87b77295a268463c3d4fa2e6da8d74f7e01186b1",
+    "commit": "3b39754ae99ed73b3204053c2f1412f28853d19a",
     "dirty": false,
-    "tree_hash": "fea5beb7c180a771b144346c30ec4ba17990a04d"
+    "tree_hash": "90ffb8340ce6122620d4cbc6807707f6eae20891"
   },
   "plan": {
     "default_error_weight": 0.25,
@@ -311,7 +311,7 @@
     ]
   },
   "schema": "aaa.1k.development_selection.v1",
-  "scientific_fingerprint": "388851cac1aa85101d4407e9e69b42cc376c32e5028661a019bbde18e6a11eec",
+  "scientific_fingerprint": "88738d9762f9721c4c32dd36dc2f93b13f11769aa5895c29879699c26952e2bd",
   "selected": {
     "error_loss_weight": 0.25,
     "learning_rate": 0.03,
