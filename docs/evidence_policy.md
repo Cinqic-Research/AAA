@@ -163,16 +163,22 @@ round that produced a misleading result is evidence on exactly the same terms as
 one that did not — particularly this one, since the largest defect inflated a
 headline effect thirty-fold and was caught by reading a per-arm table.
 
+Together those are about 4.6 MB of JSON, of which 3.2 MB is round 2's 720
+per-cell records and 1.2 MB is the retained round 1. That is the price of
+independent recomputation without rerunning a model, and it is paid
+deliberately: the per-cell table is what exposed the stateless control's
+instability that a summary had already averaged away.
+
 It does **not** commit dashboard images or per-step traces. A 994-parameter
 model has no excuse to generate another multi-gigabyte archive, and it does
-not: the entire evaluation is 55,040 scored transitions and about 73 seconds of
-CPU, so regeneration is cheaper than storage by a wide margin.
+not: the whole round-2 evaluation is 206,400 scored transitions and about five
+minutes of CPU, so regenerating a trace is far cheaper than storing one.
 
 The committed evidence is sufficient for independent recomputation without
 rerunning a model:
 
 ```bash
-python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation.json
+python -m research.aaa_1k recompute --evidence docs/evidence/aaa_1k_evaluation_round2.json
 ```
 
 Failed and eliminated configurations are retained on the same terms as
