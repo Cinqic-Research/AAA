@@ -1,0 +1,375 @@
+{
+  "configuration": {
+    "error_loss_weight": 0.25,
+    "gradient_clip": 10.0,
+    "learning_rate": 0.03,
+    "tbptt_steps": 4
+  },
+  "note": "development streams only; nothing here influences a selected hyperparameter",
+  "probes": [
+    {
+      "best_threshold": null,
+      "configuration": {
+        "error_loss_weight": 0.25,
+        "gradient_clip": 10.0,
+        "learning_rate": 0.03,
+        "tbptt_steps": 4
+      },
+      "declared_threshold_rank": 4,
+      "finding": "the declared threshold of 1.0 activates on 24% of updates and costs 29% of development error against the best stable threshold. At that rate it is a hyperparameter deciding what gets learned, not a guard, and asserting it rather than selecting it was a defect. The threshold is now chosen by stage 3 of the development selection.",
+      "probe": "clipping_probe",
+      "question": "is the declared gradient clip shaping the optimization or guarding it?",
+      "records": [
+        {
+          "diverged": false,
+          "diverged_streams": [],
+          "gradient_clip": 0.3,
+          "mean_clip_rate": 0.5996270161290324,
+          "mean_mae": 0.002080594016273152,
+          "streams_completed": 12
+        },
+        {
+          "diverged": false,
+          "diverged_streams": [],
+          "gradient_clip": 1.0,
+          "mean_clip_rate": 0.23858273596176818,
+          "mean_mae": 0.0014344007202870622,
+          "streams_completed": 12
+        },
+        {
+          "diverged": false,
+          "diverged_streams": [],
+          "gradient_clip": 3.0,
+          "mean_clip_rate": 0.07710200119474313,
+          "mean_mae": 0.0012190701695173594,
+          "streams_completed": 12
+        },
+        {
+          "diverged": false,
+          "diverged_streams": [],
+          "gradient_clip": 10.0,
+          "mean_clip_rate": 0.008680555555555556,
+          "mean_mae": 0.0011367331544111872,
+          "streams_completed": 12
+        },
+        {
+          "diverged": false,
+          "diverged_streams": [],
+          "gradient_clip": null,
+          "mean_clip_rate": 0.0,
+          "mean_mae": 0.0011119655224517105,
+          "streams_completed": 12
+        }
+      ]
+    },
+    {
+      "advantage_share_without_regime": -0.05872149628241929,
+      "comparisons": {
+        "no_regime_switch": {
+          "versus_state_reset": {
+            "ci_high": -0.00026088421513723243,
+            "ci_low": -0.000375500672828248,
+            "confidence": 0.95,
+            "draws": 10000,
+            "favours_first": 1,
+            "favours_second": 23,
+            "first_mean": 0.0016470604131098932,
+            "interval_status": "MEASURED",
+            "mean_difference": -0.0003213477856559079,
+            "median_difference": -0.0003352899980149859,
+            "per_stream_difference": [
+              -0.0003782947315493141,
+              -0.0003345778789735324,
+              -0.0003945416402859653,
+              -4.90075781288575e-06,
+              -0.0003854889298062882,
+              -0.0003870712387108921,
+              -0.0003927384466582168,
+              -0.00039211759926301875,
+              -0.00024410321984532496,
+              -0.0004096263535381516,
+              -0.0005319685573164608,
+              -2.3559611702847483e-06,
+              -0.0005025848066470119,
+              -0.0002703042392339617,
+              -0.0005323926452795943,
+              -0.0002807159345357146,
+              -0.00030655848997465044,
+              -0.0002934611201967706,
+              -0.0003352176449286067,
+              9.466085772026709e-06,
+              -0.0003321709341768367,
+              -0.00033536235110136507,
+              -0.000328320669669876,
+              -0.00034693879083909254
+            ],
+            "relative_difference": -0.2423962622073325,
+            "second_mean": 0.001325712627453985,
+            "streams": 24,
+            "ties": 0
+          },
+          "versus_stateless_mlp": {
+            "ci_high": -0.0005168571333917652,
+            "ci_low": -0.0007401874298761731,
+            "confidence": 0.95,
+            "draws": 10000,
+            "favours_first": 2,
+            "favours_second": 22,
+            "first_mean": 0.0016470604131098932,
+            "interval_status": "MEASURED",
+            "mean_difference": -0.0006315921554067879,
+            "median_difference": -0.0006589055514010927,
+            "per_stream_difference": [
+              -0.0006926050037227008,
+              -0.0006738126624108974,
+              -0.0006004064201915041,
+              5.3592293266248835e-06,
+              -0.0006196579450689944,
+              -0.0006647227305173442,
+              -0.0005976401215307746,
+              -0.0006512971317586443,
+              -0.0006479053800315962,
+              -0.0009946260172877185,
+              -0.0010750671062939314,
+              -2.490982587129674e-06,
+              -0.001048608449944095,
+              -0.0006658643242999462,
+              -0.0010782353936650895,
+              -0.0006747278238858824,
+              -0.0005972638500091217,
+              -0.0006589606963139196,
+              -0.0006617275752259353,
+              2.4698791749985533e-05,
+              -0.0006623579733527259,
+              -0.0006235166107187107,
+              -0.0006588504064882658,
+              -0.0006379251455345926
+            ],
+            "relative_difference": -0.6219713423986197,
+            "second_mean": 0.0010154682577031052,
+            "streams": 24,
+            "ties": 0
+          }
+        },
+        "with_regime_switch": {
+          "versus_state_reset": {
+            "ci_high": 5.03011801457282e-05,
+            "ci_low": -1.3132235171864496e-05,
+            "confidence": 0.95,
+            "draws": 10000,
+            "favours_first": 17,
+            "favours_second": 7,
+            "first_mean": 0.0022365983583614133,
+            "interval_status": "MEASURED",
+            "mean_difference": 2.020125433611917e-05,
+            "median_difference": 3.812244439414976e-05,
+            "per_stream_difference": [
+              -0.0001626207020823888,
+              -0.00011846030408373424,
+              8.28977054949517e-06,
+              1.4307898000623376e-05,
+              -7.937957999894652e-06,
+              5.747546950631878e-05,
+              7.516070535908831e-05,
+              0.00012294634331052158,
+              -7.45330643544392e-05,
+              -0.00010467293063230179,
+              5.851436531988108e-05,
+              7.249866581206504e-05,
+              1.0262307925051808e-05,
+              5.209575225853698e-05,
+              9.609168034067743e-05,
+              9.831401635742015e-05,
+              -6.9851239945482e-05,
+              -5.895768245774754e-05,
+              5.8099308353543044e-05,
+              0.00012953473479259238,
+              1.6874391861995165e-05,
+              2.414913652976254e-05,
+              0.00012596384883885705,
+              6.12855905064184e-05
+            ],
+            "relative_difference": 0.008951284031803244,
+            "second_mean": 0.0022567996126975328,
+            "streams": 24,
+            "ties": 0
+          },
+          "versus_stateless_mlp": {
+            "ci_high": 0.01824324996989091,
+            "ci_low": 0.003334328301479561,
+            "confidence": 0.95,
+            "draws": 10000,
+            "favours_first": 6,
+            "favours_second": 18,
+            "first_mean": 0.0022365983583614133,
+            "interval_status": "MEASURED",
+            "mean_difference": 0.01075572312342254,
+            "median_difference": -0.0003345791376971704,
+            "per_stream_difference": [
+              0.04346645531070506,
+              0.04453282454125981,
+              -0.0003402276547220795,
+              -0.000421120626634729,
+              -0.00031208370325477115,
+              -0.00032893062067226126,
+              -0.00036514437222537376,
+              -0.00027600891619407515,
+              0.043864306575143196,
+              0.04457689674491239,
+              -0.000520218917005348,
+              -0.00046121263632609025,
+              -0.000454973186091095,
+              -0.00035775213000590884,
+              -0.0005690833976923432,
+              -0.0003037098824123026,
+              0.044045980246333355,
+              0.0446078066890397,
+              -0.000421583901189324,
+              -0.00039199014379818565,
+              -0.00036857653954441676,
+              -0.0003206560356509194,
+              -0.00044960774762739953,
+              -0.00029403473420592597
+            ],
+            "relative_difference": 0.8278522924869688,
+            "second_mean": 0.012992321481783956,
+            "streams": 24,
+            "ties": 0
+          }
+        }
+      },
+      "conditions": {
+        "no_regime_switch": {
+          "regime_length": 10000
+        },
+        "with_regime_switch": {
+          "regime_length": 60
+        }
+      },
+      "finding": "with the speed held fixed the recurrent model is 6.32e-04 *worse* than the stateless control, and it is better only once the speed starts switching. `coarse_speed_v1` is therefore measuring inference of a hidden regime, not tolerance to a coarse grid -- the quantizer alone hands the advantage to the stateless arm",
+      "probe": "coarse_speed_decomposition",
+      "question": "does coarse_speed_v1 measure hidden-regime inference or coarse-observation integration?"
+    },
+    {
+      "finding": "the comparison is inconclusive once each architecture is tuned separately, so Q4's negative result is weaker than the shared-rate comparison suggested",
+      "gated": {
+        "eligible_learning_rates": [
+          0.001,
+          0.003,
+          0.01,
+          0.03
+        ],
+        "records": [
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.001,
+            "mean_mae": 0.0026917724467113717
+          },
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.003,
+            "mean_mae": 0.001887566355754815
+          },
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.01,
+            "mean_mae": 0.0013636614001354935
+          },
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.03,
+            "mean_mae": 0.0011119655224517105
+          },
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.1,
+            "mean_mae": 0.03320485152823804
+          },
+          {
+            "diverged_unclipped": true,
+            "learning_rate": 0.3,
+            "mean_mae": Infinity
+          }
+        ],
+        "selected_learning_rate": 0.03,
+        "selected_mean_mae": 0.0011119655224517105,
+        "unclipped_divergence_boundary": 0.3
+      },
+      "head_to_head_at_own_best": {
+        "ci_high": 0.00022284477331133823,
+        "ci_low": -0.00013137685350527058,
+        "confidence": 0.95,
+        "draws": 10000,
+        "favours_first": 10,
+        "favours_second": 2,
+        "first_mean": 0.0011367331544111872,
+        "interval_status": "MEASURED",
+        "mean_difference": 6.645677139084873e-05,
+        "median_difference": 0.0001539449380398657,
+        "per_stream_difference": [
+          0.0001496908416337796,
+          0.00014630126244406653,
+          0.00021413351219344744,
+          0.0001742526057883914,
+          0.0001257607754459204,
+          0.00015819903444595177,
+          0.0003325311279548603,
+          0.0004311584415295309,
+          -0.0005146369609331629,
+          -0.0006979999179598211,
+          7.193143159599875e-05,
+          0.00020615910255122167
+        ],
+        "relative_difference": 0.05523381634578531,
+        "second_mean": 0.0012031899258020363,
+        "streams": 12,
+        "ties": 0
+      },
+      "probe": "per_architecture_selection",
+      "question": "does Q4's negative result survive giving each architecture its own learning rate?",
+      "ungated": {
+        "eligible_learning_rates": [
+          0.001,
+          0.003,
+          0.01
+        ],
+        "records": [
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.001,
+            "mean_mae": 0.002421039568927696
+          },
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.003,
+            "mean_mae": 0.001629948806323296
+          },
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.01,
+            "mean_mae": 0.0011532122689884678
+          },
+          {
+            "diverged_unclipped": false,
+            "learning_rate": 0.03,
+            "mean_mae": 0.0011519574207710928
+          },
+          {
+            "diverged_unclipped": true,
+            "learning_rate": 0.1,
+            "mean_mae": Infinity
+          },
+          {
+            "diverged_unclipped": true,
+            "learning_rate": 0.3,
+            "mean_mae": Infinity
+          }
+        ],
+        "selected_learning_rate": 0.01,
+        "selected_mean_mae": 0.0011532122689884678,
+        "unclipped_divergence_boundary": 0.1
+      }
+    }
+  ],
+  "schema": "aaa.1k.characterization.v1"
+}
