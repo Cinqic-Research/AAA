@@ -598,6 +598,78 @@ def command_validate(_args: argparse.Namespace) -> int:
     return 1 if failures or problems else 0
 
 
+VOLATILE = frozenset({"git", "compute_seconds", "seconds_per_transition", "ratio", "wall_seconds"})
+"""Provenance and wall-clock fields; every other committed value must reproduce exactly."""
+
+REPRODUCIBLE: dict[str, tuple[str, dict[str, Any]]] = {
+    "observe": (str(EVIDENCE_DIR / "observation.json"), {}),
+    "diagnose": (str(EVIDENCE_DIR / "diagnosis.json"), {"workers": None}),
+    "diagnose2": (str(EVIDENCE_DIR / "diagnosis_2.json"), {"workers": None}),
+    "diagnose3": (str(EVIDENCE_DIR / "diagnosis_3.json"), {"workers": None}),
+    "develop": (str(EVIDENCE_DIR / "development.json"), {"workers": None, "round": 1}),
+    "develop-round-2": (str(EVIDENCE_DIR / "development_2.json"), {"workers": None, "round": 2}),
+    "attack": (str(EVIDENCE_DIR / "attack.json"), {"workers": None}),
+    "develop2": ("docs/evidence/aaa1k_loop_0002/development.json", {"workers": None}),
+    "attack3": (str(EVIDENCE_DIR_3 / "attack.json"), {"workers": None}),
+    "attack3b": (str(EVIDENCE_DIR_3 / "attack_2.json"), {"workers": None}),
+}
+
+
+def compare_evidence(committed: Any, fresh: Any, path: str = "$") -> tuple[list[str], list[str]]:
+    """``(mismatches, added)``: every committed value must reappear exactly."""
+
+    mismatches: list[str] = []
+    added: list[str] = []
+    if isinstance(committed, dict):
+        if not isinstance(fresh, dict):
+            return [f"{path}: type changed"], added
+        for key, value in committed.items():
+            if key in VOLATILE:
+                continue
+            if key not in fresh:
+                mismatches.append(f"{path}.{key}: missing from the rerun")
+                continue
+            m, a = compare_evidence(value, fresh[key], f"{path}.{key}")
+            mismatches += m
+            added += a
+        added += [f"{path}.{key}" for key in fresh if key not in committed and key not in VOLATILE]
+    elif isinstance(committed, list):
+        if not isinstance(fresh, list) or len(fresh) != len(committed):
+            return [f"{path}: list length changed"], added
+        for index, (c, f) in enumerate(zip(committed, fresh, strict=True)):
+            m, a = compare_evidence(c, f, f"{path}[{index}]")
+            mismatches += m
+            added += a
+    elif committed != fresh:
+        mismatches.append(f"{path}: committed {committed!r} rerun {fresh!r}")
+    return mismatches, added
+
+
+def command_reproduce(args: argparse.Namespace) -> int:
+    import tempfile
+
+    root = project_root()
+    committed_path, options = REPRODUCIBLE[args.stage]
+    handlers = build_handlers()
+    with tempfile.TemporaryDirectory() as scratch:
+        fresh_path = Path(scratch) / "rerun.json"
+        stage = "develop" if args.stage == "develop-round-2" else args.stage
+        status = handlers[stage](argparse.Namespace(output=str(fresh_path), **options))
+        if status != 0:
+            print(f"{args.stage}: the rerun itself failed", file=sys.stderr)
+            return 1
+        mismatches, added = compare_evidence(
+            read_strict_json(root / committed_path), read_strict_json(fresh_path)
+        )
+    for mismatch in mismatches[:20]:
+        print(f"MISMATCH {mismatch}", file=sys.stderr)
+    print(
+        f"{args.stage}: {'REPRODUCED' if not mismatches else 'NOT REPRODUCED'} "
+        f"({len(mismatches)} mismatches; {len(added)} fields added by later code)"
+    )
+    return 0 if not mismatches else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -650,12 +722,13 @@ def build_parser() -> argparse.ArgumentParser:
     recompute3.add_argument("--output")
     sub.add_parser("records", help="write the iteration records from the committed evidence")
     sub.add_parser("validate", help="validate iteration records, Champion 0 and the identity ledger")
+    reproduce = sub.add_parser("reproduce", help="rerun a stage and require its committed primitives exactly")
+    reproduce.add_argument("stage", choices=sorted(REPRODUCIBLE))
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
-    handlers = {
+def build_handlers() -> dict[str, Any]:
+    return {
         "ledger-sync": command_ledger_sync,
         "prove-fresh": command_prove_fresh,
         "champion": command_champion,
@@ -673,5 +746,10 @@ def main(argv: list[str] | None = None) -> int:
         "recompute3": command_recompute3,
         "records": command_records,
         "validate": command_validate,
+        "reproduce": command_reproduce,
     }
-    return handlers[args.command](args)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    return int(build_handlers()[args.command](args))
