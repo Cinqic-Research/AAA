@@ -283,15 +283,23 @@ The loop is itself the challenger here. Each answer points at evidence.
 13. **What should change before the protocol becomes permanent?** The seven
     gaps in [`loop_protocol.md`](loop_protocol.md#known-gaps-to-close-before-v1),
     plus one real cycle through fresh confirmation.
-14. **Did the infrastructure cost more than it produced?** About 3,000 lines
-    of loop code and tests. That machinery produced a family-level
-    reclassification of Q4, a supported mechanism for it, a previously
-    unmeasured long-horizon failure mode, falsification of a documented claim,
-    and eight honest rejections. Some of it (the iteration-3-specific
-    freeze/confirm/recompute commands) has only ever run against synthetic
-    confirmations and may be the wrong shape; that is the part most likely to
-    be over-engineered, and it should be generalized, or deleted, on its
-    first real use.
+14. **Did the infrastructure cost more than it produced?** Possibly, and
+    this is the most honest "partly". The package is about 6,200 lines plus
+    900 lines of tests: roughly 2,900 of reusable machinery (identities,
+    evidence I/O, the state model and validator, freeze, decision,
+    recomputation, harness, champion, command line) and 3,200 of
+    experiment definitions for these three iterations (diagnoses, candidates,
+    attacks). The experiments produced a family-level reclassification of
+    Q4, a supported mechanism for it, a previously unmeasured long-horizon
+    failure mode, falsification of a documented claim, and eight honest
+    rejections; the machinery's checks caught one defect in the pilot's own
+    code (`AAA-164`). But about 900 lines of the machinery (freeze,
+    confirmation, decision, recomputation) have only ever run against
+    synthetic confirmations and may be the wrong shape. That is the part
+    most likely to be over-engineered, and it should be generalized or
+    deleted on its first real use. The per-iteration experiment code is also
+    heavier than it needs to be: each stage re-declares similar cell
+    constructions, which a second iteration of the protocol should factor.
 
 ## What the pilot says about scaling
 
@@ -347,7 +355,9 @@ Task timing (human/AI work, not scientific compute):
 | iteration 0001 development and attack | 14:38–14:48 |
 | iteration 0002 | 14:48–14:53 |
 | iteration 0003 | 14:53–15:00 |
-| records, tests, reproduction, documentation, validation, PR | 15:00–end (see the PR) |
+| records, tests, reproduction checks, documentation, validation | 15:00–15:16 |
+| task end (final commit before opening the PR) | 15:16:19 |
+| **total elapsed wall clock** | **56 min 43 s** |
 
 Scientific compute is recorded per artifact (`compute_seconds`) and in each
 iteration record: about 290 wall seconds in total on 16 worker processes
