@@ -291,10 +291,10 @@
   ],
   "error_weight_decision": "the predeclared default was retained: no alternative beat it by more than 2% on development data",
   "git": {
-    "branch": "opus/aaa-1k-recurrent-core",
-    "commit": "b82e40aa4ef644381ad57885db0265bb88153d39",
-    "dirty": false,
-    "tree_hash": "ef515407aa0029975feb6dd472a13b373583ee27"
+    "branch": "chore/cleaning-aaa-house",
+    "commit": "0ca20e612e8caace4c0f06e786bdfeb9971c65ac",
+    "dirty": true,
+    "tree_hash": "47b7a0643c3520865e42041e9657d7ee1bf57ae9"
   },
   "plan": {
     "declared_gradient_clip": 1.0,
@@ -339,7 +339,7 @@
     ]
   },
   "schema": "aaa.1k.development_selection.v1",
-  "scientific_fingerprint": "60ab9aa04f2e7f99359e1ec2b41a0e86af58f0c78727307017ab3b17ad90978a",
+  "scientific_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
   "selected": {
     "error_loss_weight": 0.25,
     "gradient_clip": 10.0,
@@ -4172,7 +4172,7 @@
           ],
           "gradient_clip": null,
           "learning_rate": 0.3,
-          "mean_mae": Infinity,
+          "mean_mae": null,
           "stable": false
         }
       ]
@@ -4308,7 +4308,7 @@
           ],
           "gradient_clip": null,
           "learning_rate": 0.1,
-          "mean_mae": Infinity,
+          "mean_mae": null,
           "stable": false
         },
         {
@@ -4325,7 +4325,7 @@
           ],
           "gradient_clip": null,
           "learning_rate": 0.3,
-          "mean_mae": Infinity,
+          "mean_mae": null,
           "stable": false
         }
       ]
@@ -4467,7 +4467,7 @@
           ],
           "gradient_clip": null,
           "learning_rate": 0.1,
-          "mean_mae": Infinity,
+          "mean_mae": null,
           "stable": false
         },
         {
@@ -4487,7 +4487,7 @@
           ],
           "gradient_clip": null,
           "learning_rate": 0.3,
-          "mean_mae": Infinity,
+          "mean_mae": null,
           "stable": false
         }
       ]

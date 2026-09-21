@@ -63,7 +63,7 @@ Implementation, `research/aaa_1k/`:
 | `characterization.py` | development probes for the clip, the coarse family and tuning fairness |
 | `report.py`, `visualize.py`, `identity.py`, `seeds.py`, `cli.py` | reporting, dashboard, identity, seeds, entry point |
 
-Tests: `tests/test_aaa_1k.py`, 125 tests. Evidence:
+Tests: the comprehensive phase suite in `tests/test_aaa_1k.py`. Evidence:
 `docs/evidence/aaa_1k_development_selection.json`,
 `docs/evidence/aaa_1k_evaluation_round3.json` (current),
 `docs/evidence/aaa_1k_characterization.json`,

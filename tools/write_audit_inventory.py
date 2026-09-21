@@ -16,6 +16,8 @@ def git(*args: str) -> str:
 
 
 def purpose(path: str) -> str:
+    if path.startswith("research/aaa_1k/"):
+        return "active isolated AAA-1K research implementation"
     if path.startswith("aaa/"):
         return "active implementation or packaged protocol data"
     if path.startswith("tests/"):
@@ -26,6 +28,12 @@ def purpose(path: str) -> str:
         return "active frozen protocol identity or seed registry"
     if path.startswith("results/"):
         return "historical or current immutable experiment evidence"
+    if path == "docs/evidence/aaa_1k_evaluation_round3.json":
+        return "current retained AAA-1K evaluation evidence"
+    if path.startswith("docs/evidence/aaa_1k_evaluation_round"):
+        return "superseded retained AAA-1K evaluation evidence"
+    if path.startswith("docs/evidence/aaa_1k_"):
+        return "retained AAA-1K development or characterization evidence"
     if path.startswith("docs/evidence/"):
         return "retained diagnostic or selection evidence"
     if path.startswith("docs/"):
@@ -36,10 +44,6 @@ def purpose(path: str) -> str:
 
 
 def category(path: str) -> str:
-    if path.startswith("results/final/") or path.startswith("results/benchmark_v2/"):
-        return "historical"
-    if path.startswith("results/benchmark_v2_1/") or path.startswith("docs/evidence/"):
-        return "retained evidence"
     if path in {
         "docs/evidence/phase_closure_validation.json",
         "docs/final_audit.md",
@@ -47,6 +51,17 @@ def category(path: str) -> str:
         "docs/sol_review.md",
     }:
         return "generated"
+    if path.startswith("results/final/") or path.startswith("results/benchmark_v2/"):
+        return "historical"
+    if path in {
+        "docs/evidence/aaa_1k_evaluation_round1_superseded.json",
+        "docs/evidence/aaa_1k_evaluation_round2_superseded.json",
+    }:
+        return "superseded evidence"
+    if path == "docs/evidence/aaa_1k_evaluation_round3.json":
+        return "current evidence"
+    if path.startswith("results/benchmark_v2_1/") or path.startswith("docs/evidence/"):
+        return "retained evidence"
     return "active"
 
 
@@ -66,6 +81,14 @@ def verification(path: str) -> str:
 
 
 def findings(path: str) -> str:
+    aaa_1k_path = (
+        path.startswith("research/aaa_1k/")
+        or path.startswith("docs/aaa_1k_")
+        or path.startswith("docs/evidence/aaa_1k_")
+        or path == "tests/test_aaa_1k.py"
+    )
+    if aaa_1k_path:
+        return "AAA-152 through AAA-161; rounds 1 and 2 retained as superseded"
     noise_path = (
         path.startswith("aaa/noise/")
         or path.startswith("docs/evidence/observation_noise")

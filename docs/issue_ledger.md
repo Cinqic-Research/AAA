@@ -1572,3 +1572,25 @@ corruption, missing scientific gates, and strict-type substitutions.
   `-2.025e-04` `[-6.418e-04, +1.257e-04]`. The truthful claim is that no
   forgetting was measured on this probe bank, not that retention immunity was
   established.
+
+### AAA-161 — divergent AAA-1K development records were not strict JSON
+- **Source** final repository audit, 2026-09-20 · **Severity** medium · **Status** repaired and verified
+- **Reproduction** Strict parsing with rejection of non-standard numeric
+  constants failed on four tracked AAA-1K artifacts. Divergent development
+  configurations stored `mean_mae: Infinity`, which Python's permissive JSON
+  encoder and decoder accept even though RFC 8259 JSON does not.
+- **Scientific impact** The explicit divergence flags and selected
+  configurations were correct, so headline results and model behavior were
+  unaffected. The artifacts were nevertheless not portable JSON and could be
+  rejected by standards-compliant independent tooling.
+- **Repair** A divergent configuration now records `mean_mae: null` alongside
+  its existing explicit divergence flag and diagnostic. The evidence writer
+  uses `allow_nan=False`, so any future unhandled `NaN` or infinity fails
+  before replacing an artifact. Current selection, characterization, and
+  round-3 evidence were regenerated from the repaired source. The three
+  affected tokens in the explicitly superseded round-2 artifact were
+  syntax-normalized to `null`; no primitive measurement, summary, claim, or
+  historical status changed.
+- **Regression** `SerializationTests` injects positive infinity into an
+  evidence payload and requires a fail-closed `ValueError` with no output file.
+  The repository integrity audit strictly parses every tracked JSON file.

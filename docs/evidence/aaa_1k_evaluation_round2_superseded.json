@@ -2661,7 +2661,7 @@
               {
                 "diverged_unclipped": true,
                 "learning_rate": 0.3,
-                "mean_mae": Infinity
+                "mean_mae": null
               }
             ],
             "selected_learning_rate": 0.03,
@@ -2730,12 +2730,12 @@
               {
                 "diverged_unclipped": true,
                 "learning_rate": 0.1,
-                "mean_mae": Infinity
+                "mean_mae": null
               },
               {
                 "diverged_unclipped": true,
                 "learning_rate": 0.3,
-                "mean_mae": Infinity
+                "mean_mae": null
               }
             ],
             "selected_learning_rate": 0.01,

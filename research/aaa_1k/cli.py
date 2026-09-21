@@ -57,7 +57,10 @@ def _write(path: Path, payload: Any) -> None:
     if isinstance(payload, str):
         temporary.write_text(payload, encoding="utf-8")
     else:
-        temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        temporary.write_text(
+            json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
+            encoding="utf-8",
+        )
     temporary.replace(path)
 
 

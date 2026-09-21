@@ -36,10 +36,12 @@ has to beat something that also remembered it.
 
 **The results, including the ones that are not flattering.** The model learns
 online on every family. Persistent hidden state helps, most clearly on steps
-whose target it never saw. **Gating does not pay for itself**: the smaller
-ungated control wins. The model loses to reflected constant motion, dead
-reckoning and the existing three-parameter RLS learner on smooth fully observed
-motion. Its self-error head is weakly informative and over-predicts.
+whose target it never saw. **Gating's predictive benefit is inconclusive**
+under the corrected fair comparison: the earlier apparent ungated win did not
+survive per-architecture hyperparameter selection, while gating separately
+shows a stability advantage. The model loses to reflected constant motion,
+dead reckoning and the existing three-parameter RLS learner on smooth fully
+observed motion. Its self-error head is weakly informative and over-predicts.
 
 **A gate that fired.** The stability-margin rule was rewritten mid-phase after
 it was found to be vacuous — with the declared gradient clip in place, nothing
@@ -107,7 +109,7 @@ score; phase-scoped non-self-referential source identity with lineage metadata
 (`parent_model_id: null` — this is the lineage root); a read-only Matplotlib
 dashboard showing all sixteen real hidden activations and both gate vectors,
 with no interactive key bindings, because PR #12 already found what Matplotlib
-does with those; 93 new tests including deliberate failure injection; and mypy,
+does with those; extensive deliberate failure-injection tests; and mypy,
 coverage and packaging extended to cover `research/`.
 
 Adding this phase necessarily changes both repository-wide source fingerprints.

@@ -258,10 +258,10 @@ def evaluate_configuration(
         "stable": bool(stable and len(completed) == len(streams)),
         "failure": failure,
         "streams": per_stream,
-        "mean_mae": float(np.mean(values)) if values else float("inf"),
-        "median_mae": float(np.median(values)) if values else float("inf"),
-        "post_change_adaptation": float(np.mean(adaptation)) if adaptation else float("nan"),
-        "retention_ratio": float(np.mean(retention)) if retention else float("nan"),
+        "mean_mae": float(np.mean(values)) if values else None,
+        "median_mae": float(np.median(values)) if values else None,
+        "post_change_adaptation": float(np.mean(adaptation)) if adaptation else None,
+        "retention_ratio": float(np.mean(retention)) if retention else None,
         "total_clip_events": int(sum(entry["clip_events"] for entry in completed)),
     }
 
@@ -358,7 +358,7 @@ def select_gradient_clip(
                 "stable": not diverged,
                 "diverged_streams": diverged,
                 "initializations": initializations,
-                "mean_mae": float(np.mean(errors)) if errors else float("inf"),
+                "mean_mae": float(np.mean(errors)) if errors else None,
                 "mean_clip_rate": float(np.mean(rates)) if rates else 0.0,
             }
         )
@@ -443,7 +443,7 @@ def _sweep_learning_rates(
                 "gradient_clip": gradient_clip,
                 "stable": not diverged,
                 "diverged_streams": diverged,
-                "mean_mae": float(np.mean(errors)) if errors and not diverged else float("inf"),
+                "mean_mae": float(np.mean(errors)) if errors and not diverged else None,
             }
         )
     return records
@@ -514,7 +514,7 @@ def select_for_architecture(
                 "gradient_clip": threshold,
                 "stable": not diverged,
                 "diverged_streams": diverged,
-                "mean_mae": float(np.mean(errors)) if errors else float("inf"),
+                "mean_mae": float(np.mean(errors)) if errors else None,
                 "mean_clip_rate": float(np.mean(rates)) if rates else 0.0,
             }
         )
