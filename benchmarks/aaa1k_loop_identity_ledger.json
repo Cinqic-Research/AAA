@@ -49,6 +49,16 @@
       "role": "diagnostic",
       "start": 0,
       "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/diagnostic/long-3",
+      "count": 16,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "diagnostic_long_3",
+      "purpose": "long-horizon streams for the round-3 stability hypotheses (H16-H19), declared after round 2",
+      "role": "diagnostic",
+      "start": 0,
+      "status": "reserved"
     }
   ],
   "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",

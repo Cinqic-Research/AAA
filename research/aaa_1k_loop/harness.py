@@ -42,6 +42,7 @@ class InstrumentedAgent(NeuralAgent):
         values["last_gradient_norm"] = float(self.last_update.get("gradient_norm", float("nan")))
         values["last_clip_scale"] = float(self.last_update.get("clip_scale", float("nan")))
         values["hidden_norm"] = float(np.linalg.norm(getattr(self.model, "hidden", np.zeros(1))))
+        values["previous_signed_error_input"] = float(self.previous_signed_error)
         values.update(jacobian_statistics(self.model))
         return values
 

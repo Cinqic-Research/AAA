@@ -40,6 +40,13 @@ INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
         "purpose": "fresh coarse_speed_v1 streams for the round-2 hypotheses (H13-H15), declared after round 1",
     },
     {
+        "block_id": "aaa1k-loop-0001/diagnostic/long-3",
+        "role": "diagnostic",
+        "namespace": "diagnostic_long_3",
+        "count": 16,
+        "purpose": "long-horizon streams for the round-3 stability hypotheses (H16-H19), declared after round 2",
+    },
+    {
         "block_id": "aaa1k-loop-0001/development/all",
         "role": "development",
         "namespace": "development_all",
@@ -196,6 +203,27 @@ def command_diagnose2(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_diagnose3(args: argparse.Namespace) -> int:
+    from .diagnosis3 import DIAGNOSIS3_SCHEMA, DIAGNOSTIC_BLOCK_3, HYPOTHESES, adjudicate3, run_diagnosis3
+
+    root = project_root()
+    started = time.perf_counter()
+    records = run_diagnosis3(load_ledger(_ledger_path(root)), workers=args.workers)
+    analysis = adjudicate3(records)
+    payload = {
+        "schema": DIAGNOSIS3_SCHEMA,
+        "evidence_role": "diagnostic",
+        "identity_block": DIAGNOSTIC_BLOCK_3,
+        "hypotheses": list(HYPOTHESES),
+        "analysis": analysis,
+        "records": records,
+    }
+    write_strict_json(Path(args.output), _stamp(payload, root, started))
+    for key, value in analysis["verdicts"].items():
+        print(f"{key:4s} {value['verdict']}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -218,6 +246,9 @@ def build_parser() -> argparse.ArgumentParser:
     diagnose2 = sub.add_parser("diagnose2", help="run the round-2 hypotheses on a fresh diagnostic block")
     diagnose2.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis_2.json"))
     diagnose2.add_argument("--workers", type=int)
+    diagnose3 = sub.add_parser("diagnose3", help="run the round-3 long-horizon stability hypotheses")
+    diagnose3.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis_3.json"))
+    diagnose3.add_argument("--workers", type=int)
     return parser
 
 
@@ -230,5 +261,6 @@ def main(argv: list[str] | None = None) -> int:
         "observe": command_observe,
         "diagnose": command_diagnose,
         "diagnose2": command_diagnose2,
+        "diagnose3": command_diagnose3,
     }
     return handlers[args.command](args)
