@@ -251,6 +251,29 @@ def command_develop(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_attack(args: argparse.Namespace) -> int:
+    from .attack import ATTACK_SCHEMA, CHALLENGER, ENV_BLOCK, INIT_BLOCK, adjudicate_attack, run_attack
+
+    root = project_root()
+    started = time.perf_counter()
+    result = run_attack(load_ledger(_ledger_path(root)), workers=args.workers)
+    adjudication = adjudicate_attack(result)
+    payload = {
+        "schema": ATTACK_SCHEMA,
+        "evidence_role": "attack",
+        "identity_blocks": [ENV_BLOCK, INIT_BLOCK],
+        "challenger_arm": CHALLENGER,
+        "challenger_id": "aaa1k-loop-0001-c2",
+        "adjudication": adjudication,
+        **result,
+    }
+    write_strict_json(Path(args.output), _stamp(payload, root, started))
+    for key, value in adjudication["outcome"].items():
+        print(f"{key:34s} {'PASS' if value['passed'] else 'FAIL'}")
+    print(f"advance to freeze: {adjudication['advance_to_freeze']}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -280,6 +303,9 @@ def build_parser() -> argparse.ArgumentParser:
     develop.add_argument("--round", type=int, choices=(1, 2), default=1)
     develop.add_argument("--output", default=str(EVIDENCE_DIR / "development.json"))
     develop.add_argument("--workers", type=int)
+    attack = sub.add_parser("attack", help="attack challenger c2 on attack identities")
+    attack.add_argument("--output", default=str(EVIDENCE_DIR / "attack.json"))
+    attack.add_argument("--workers", type=int)
     return parser
 
 
@@ -294,5 +320,6 @@ def main(argv: list[str] | None = None) -> int:
         "diagnose2": command_diagnose2,
         "diagnose3": command_diagnose3,
         "develop": command_develop,
+        "attack": command_attack,
     }
     return handlers[args.command](args)

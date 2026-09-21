@@ -293,6 +293,16 @@ def _registry() -> dict[str, ArmSpec]:
                 f"{base}:{suffix}", _candidate(f"{base}:{suffix}", None, **options), "candidate_ablation", 994
             )
         )
+    for bias in (-1.5, -2.5):
+        specs.append(
+            ArmSpec(
+                f"probe:gru_keep_bias_{bias:g}",
+                _candidate(f"probe:gru_keep_bias_{bias:g}", bias),
+                "probe",
+                994,
+                f"attack: challenger c2's keep bias moved to {bias:g}, to test whether the benefit sits on a cliff",
+            )
+        )
     specs.append(
         ArmSpec(
             "probe:gru_keep_bias_2:occlusion",

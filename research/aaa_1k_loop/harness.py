@@ -190,6 +190,18 @@ def run_cells(
     )
 
 
+def parallel_map(
+    function: Callable[[Any], Any], payloads: Sequence[Any], *, workers: int | None = None
+) -> list[Any]:
+    """``[function(p) for p in payloads]`` in input order, across processes."""
+
+    count = workers or default_workers()
+    if count == 1 or len(payloads) <= 1:
+        return [function(payload) for payload in payloads]
+    with ProcessPoolExecutor(max_workers=count) as pool:
+        return list(pool.map(function, payloads, chunksize=1))
+
+
 # ----------------------------------------------------------------------
 # standard reductions
 # ----------------------------------------------------------------------
