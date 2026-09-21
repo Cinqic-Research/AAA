@@ -1,0 +1,46 @@
+{
+  "blocks": [
+    {
+      "block_id": "aaa1k-loop-0001/diagnostic/coarse",
+      "count": 16,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "diagnostic_coarse",
+      "purpose": "coarse_speed_v1 streams for the Q4 hypothesis tests",
+      "role": "diagnostic",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/development/all",
+      "count": 48,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "development_all",
+      "purpose": "challenger development on every round-3 family (8 streams per plan entry)",
+      "role": "development",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/attack/env",
+      "count": 96,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "attack_env",
+      "purpose": "adversarial attack streams: nearby conditions, other families, tails",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/attack/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "attack_init",
+      "purpose": "fresh model initialization seeds for the attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    }
+  ],
+  "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",
+  "schema": "aaa.loop.identity_ledger.v1"
+}
