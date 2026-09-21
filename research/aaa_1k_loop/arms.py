@@ -53,18 +53,24 @@ def gru(seed: int, **overrides: Any) -> AAA1KGRU:
     return AAA1KGRU(seed=seed, **{**CHAMPION_CONFIGURATION, **overrides})
 
 
-def gru_with_keep_bias(seed: int, keep_bias: float, **overrides: Any) -> AAA1KGRU:
-    """The champion GRU with its keep-gate bias initialized to ``keep_bias``.
+def gru_with_gate_biases(
+    seed: int, *, keep_bias: float = 0.0, reset_bias: float = 0.0, **overrides: Any
+) -> AAA1KGRU:
+    """The champion GRU with its keep- and/or reset-gate biases initialized off zero.
 
-    Only the *initial value* of ``b_z`` changes: same equations, same 994
-    parameters, same optimizer, same state. Everything else -- every other
-    parameter's initial value included -- is drawn exactly as the champion
-    draws it from the same seed, so the two differ in one number per unit.
+    Only *initial values* of ``b_z`` and ``b_r`` change: same equations, same
+    994 parameters, same optimizer, same state. Every other parameter's
+    initial value is drawn exactly as the champion draws it from the same seed.
     """
 
     model = gru(seed, **overrides)
     model.parameters["b_z"][:] = float(keep_bias)
+    model.parameters["b_r"][:] = float(reset_bias)
     return model
+
+
+def gru_with_keep_bias(seed: int, keep_bias: float, **overrides: Any) -> AAA1KGRU:
+    return gru_with_gate_biases(seed, keep_bias=keep_bias, **overrides)
 
 
 @dataclass(frozen=True)
@@ -127,6 +133,29 @@ def _registry() -> dict[str, ArmSpec]:
             "probe",
             994,
             "Champion 0 with the keep-gate bias initialized at +2 (initial keep ~0.88)",
+        ),
+        ArmSpec(
+            "probe:gru_keep_bias_-2",
+            lambda s: _neural(gru_with_gate_biases(s, keep_bias=-2.0), "probe:gru_keep_bias_-2"),
+            "probe",
+            994,
+            "keep-gate bias initialized at -2 (initial keep ~0.12): less leak, more recurrent drive",
+        ),
+        ArmSpec(
+            "probe:gru_reset_bias_2",
+            lambda s: _neural(gru_with_gate_biases(s, reset_bias=2.0), "probe:gru_reset_bias_2"),
+            "probe",
+            994,
+            "reset-gate bias initialized at +2 (initial reset ~0.88): more recurrent drive into the candidate",
+        ),
+        ArmSpec(
+            "probe:gru_keep_-2_reset_2",
+            lambda s: _neural(
+                gru_with_gate_biases(s, keep_bias=-2.0, reset_bias=2.0), "probe:gru_keep_-2_reset_2"
+            ),
+            "probe",
+            994,
+            "both: the gated core starts close to an ungated tanh recurrence",
         ),
         ArmSpec(
             "rnn28",

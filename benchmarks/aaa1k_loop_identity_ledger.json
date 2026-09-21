@@ -39,6 +39,16 @@
       "role": "attack",
       "start": 0,
       "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/diagnostic/coarse-2",
+      "count": 16,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "diagnostic_coarse_2",
+      "purpose": "fresh coarse_speed_v1 streams for the round-2 hypotheses (H13-H15), declared after round 1",
+      "role": "diagnostic",
+      "start": 0,
+      "status": "reserved"
     }
   ],
   "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",

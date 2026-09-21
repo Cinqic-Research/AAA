@@ -30,6 +30,7 @@ from research.aaa_1k.agents import NeuralAgent
 from research.aaa_1k.runner import RunResult, run_stream
 from research.aaa_1k.streams import Stream
 
+from .dynamics import jacobian_statistics
 from .evidence import finite_or_none
 
 
@@ -41,6 +42,7 @@ class InstrumentedAgent(NeuralAgent):
         values["last_gradient_norm"] = float(self.last_update.get("gradient_norm", float("nan")))
         values["last_clip_scale"] = float(self.last_update.get("clip_scale", float("nan")))
         values["hidden_norm"] = float(np.linalg.norm(getattr(self.model, "hidden", np.zeros(1))))
+        values.update(jacobian_statistics(self.model))
         return values
 
 

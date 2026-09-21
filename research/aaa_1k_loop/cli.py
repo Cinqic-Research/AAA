@@ -33,6 +33,13 @@ INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
         "purpose": "coarse_speed_v1 streams for the Q4 hypothesis tests",
     },
     {
+        "block_id": "aaa1k-loop-0001/diagnostic/coarse-2",
+        "role": "diagnostic",
+        "namespace": "diagnostic_coarse_2",
+        "count": 16,
+        "purpose": "fresh coarse_speed_v1 streams for the round-2 hypotheses (H13-H15), declared after round 1",
+    },
+    {
         "block_id": "aaa1k-loop-0001/development/all",
         "role": "development",
         "namespace": "development_all",
@@ -74,18 +81,30 @@ def _stamp(payload: dict[str, Any], root: Path, started: float) -> dict[str, Any
     }
 
 
-def command_ledger_init(_args: argparse.Namespace) -> int:
+def command_ledger_sync(_args: argparse.Namespace) -> int:
+    """Append declared blocks the ledger lacks; never edit or remove an existing one."""
+
     root = project_root()
     path = _ledger_path(root)
-    if path.exists():
-        print(f"refusing: {LEDGER_PATH} already exists; blocks are never re-reserved", file=sys.stderr)
-        return 2
-    ledger = empty_ledger()
-    for block in INNER_LOOP_BLOCKS:
-        ledger = reserve(ledger, **block)
+    ledger = load_ledger(path) if path.exists() else empty_ledger()
+    existing = {block["block_id"]: block for block in ledger["blocks"]}
+    added = 0
+    for declared in INNER_LOOP_BLOCKS:
+        current = existing.get(declared["block_id"])
+        if current is None:
+            ledger = reserve(ledger, **declared)
+            added += 1
+            continue
+        drift = [key for key, value in declared.items() if current.get(key) != value]
+        if drift:
+            print(
+                f"refusing: declared block {declared['block_id']} differs from the ledger in {drift}",
+                file=sys.stderr,
+            )
+            return 2
     prove_fresh(ledger, root)
     write_ledger(path, ledger)
-    print(f"reserved {len(INNER_LOOP_BLOCKS)} inner-loop blocks in {LEDGER_PATH}")
+    print(f"ledger holds {len(ledger['blocks'])} blocks ({added} added)")
     return 0
 
 
@@ -156,11 +175,32 @@ def command_diagnose(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_diagnose2(args: argparse.Namespace) -> int:
+    from .diagnosis2 import DIAGNOSIS2_SCHEMA, DIAGNOSTIC_BLOCK_2, HYPOTHESES, adjudicate2, run_diagnosis2
+
+    root = project_root()
+    started = time.perf_counter()
+    records = run_diagnosis2(load_ledger(_ledger_path(root)), workers=args.workers)
+    analysis = adjudicate2(records)
+    payload = {
+        "schema": DIAGNOSIS2_SCHEMA,
+        "evidence_role": "diagnostic",
+        "identity_block": DIAGNOSTIC_BLOCK_2,
+        "hypotheses": list(HYPOTHESES),
+        "analysis": analysis,
+        "records": records,
+    }
+    write_strict_json(Path(args.output), _stamp(payload, root, started))
+    for key, value in analysis["verdicts"].items():
+        print(f"{key:4s} {value['verdict']}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("ledger-init", help="reserve the pilot's inner-loop identity blocks once")
+    sub.add_parser("ledger-sync", help="append declared inner-loop blocks; never edit existing ones")
     fresh = sub.add_parser("prove-fresh", help="prove every ledger block disjoint from AAA-1K identities")
     fresh.add_argument("--output")
 
@@ -175,16 +215,20 @@ def build_parser() -> argparse.ArgumentParser:
     diagnose = sub.add_parser("diagnose", help="run the diagnostic hypothesis tests")
     diagnose.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis.json"))
     diagnose.add_argument("--workers", type=int)
+    diagnose2 = sub.add_parser("diagnose2", help="run the round-2 hypotheses on a fresh diagnostic block")
+    diagnose2.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis_2.json"))
+    diagnose2.add_argument("--workers", type=int)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     handlers = {
-        "ledger-init": command_ledger_init,
+        "ledger-sync": command_ledger_sync,
         "prove-fresh": command_prove_fresh,
         "champion": command_champion,
         "observe": command_observe,
         "diagnose": command_diagnose,
+        "diagnose2": command_diagnose2,
     }
     return handlers[args.command](args)
