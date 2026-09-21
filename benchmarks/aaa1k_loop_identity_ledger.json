@@ -109,6 +109,26 @@
       "role": "attack",
       "start": 0,
       "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0003/attack-2/env",
+      "count": 24,
+      "iteration": "aaa1k-loop-0003",
+      "namespace": "attack2_env",
+      "purpose": "iteration 0003 second attack, on the scoped claim v3",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0003/attack-2/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0003",
+      "namespace": "attack2_init",
+      "purpose": "iteration 0003 fresh initialization seeds for the second attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
     }
   ],
   "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",

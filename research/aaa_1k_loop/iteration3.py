@@ -43,14 +43,15 @@ from .harness import Cell, arm_errors, diagnostic_series, matrix, run_cells, sum
 from .identities import block_seeds, find_block, require_usable
 
 ITERATION_ID = "aaa1k-loop-0003"
-CLAIM_ID = "aaa1k-claim-q4-coarse-v2"
+CLAIM_ID_V2 = "aaa1k-claim-q4-coarse-v2"
+CLAIM_ID = "aaa1k-claim-q4-coarse-v3"
 
 CHAMPION_CLAIM = (
     "Q4's unfavourable mean comes from a minority of streams with large gated losses; coarse_speed_v1 "
     "genuinely tests hidden-regime inference, because with the speed held fixed the recurrent model is "
     "worse than the stateless control (the quantizer alone hands the advantage to the stateless arm)."
 )
-CHALLENGER_CLAIM = (
+CHALLENGER_CLAIM_V2 = (
     "Q4's unfavourable mean is carried by one family, coarse_speed_v1, where the gated champion is "
     "systematically worse than the ungated control in every initialization; without that family the Q4 "
     "aggregate is not negative. coarse_speed_v1 rewards memory even with the speed held fixed: a recurrent "
@@ -59,9 +60,26 @@ CHALLENGER_CLAIM = (
     "stateless control -- is a limitation of the champion's zero-bias gate dynamics, concentrated in the "
     "slow regime, where its one-step Jacobian has no sign-alternating mode."
 )
+"""Rejected by the first attack (T1): true at the declared construction, not across nearby ones."""
+
+CHALLENGER_CLAIM = (
+    "At the declared coarse_speed_v1 construction (quantum 0.005, speeds 0.12 and 0.30, regime length 60): "
+    "Q4's unfavourable mean is carried by that family, where the gated champion is systematically worse "
+    "than the ungated control in every initialization, and without it the Q4 aggregate is not negative. "
+    "With the speed held fixed, the ungated control keeps most (>= 70%) of its memory advantage over the "
+    "stateless control while the champion gains nothing, so the fixed-speed probe's observation is a "
+    "limitation of the champion's zero-bias gate dynamics -- concentrated in the slow regime, where its "
+    "one-step Jacobian has no sign-alternating mode -- not a property of the benchmark. How much of the "
+    "family's memory advantage is regime inference rather than sub-quantum phase integration depends on "
+    "the speed-to-quantum ratio: at quantum 0.006 or speeds 0.10/0.25 most of it needs the switches. "
+    "Neither description is construction-independent."
+)
+"""Claim v3: v2 scoped to the declared construction, carrying the boundary the first attack found."""
 
 ATTACK_ENV_BLOCK = f"{ITERATION_ID}/attack/env"
 ATTACK_INIT_BLOCK = f"{ITERATION_ID}/attack/init"
+ATTACK2_ENV_BLOCK = f"{ITERATION_ID}/attack-2/env"
+ATTACK2_INIT_BLOCK = f"{ITERATION_ID}/attack-2/init"
 CONFIRMATION_ENV_BLOCK = f"{ITERATION_ID}/confirmation/env"
 CONFIRMATION_INIT_BLOCK = f"{ITERATION_ID}/confirmation/init"
 
@@ -191,6 +209,122 @@ def adjudicate_attack(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     }
     return {
         "criteria": ATTACK_CRITERIA,
+        "outcome": outcome,
+        "advance_to_freeze": all(entry["passed"] for entry in outcome.values()),
+    }
+
+
+# ----------------------------------------------------------------------
+# attack 2: the scoped claim v3, on fresh attack identities
+# ----------------------------------------------------------------------
+ATTACK2_CRITERIA = {
+    "R1_fresh_initializations": (
+        "declared construction: the champion's deficit to the ungated control is positive in every fresh "
+        "initialization and its interval lies above zero"
+    ),
+    "R2_core_claim": (
+        "declared construction at fixed speed: the ungated memory advantage over the stateless control has "
+        "an interval above zero and is >= 70% of its switching advantage; the champion's fixed-speed memory "
+        "advantage point estimate is <= 0"
+    ),
+    "R3_other_memory_capable_model": "the 16-unit ungated RNN keeps >= 70% of its memory advantage at fixed speed",
+    "R4_gated_model_with_fast_dynamics": (
+        "the keep-bias -2 gated probe's fixed-speed memory advantage over the stateless control has an "
+        "interval above zero"
+    ),
+    "R5_declared_boundary_replicates": (
+        "at quantum 0.006 and at speeds 0.10/0.25 the ungated fixed-speed share is below 70%, as the claim "
+        "states; if either reaches 70% the claim's boundary statement is wrong"
+    ),
+}
+BOUNDARY = ("quantum_0.006", "speeds_0.10_0.25")
+
+
+def attack2_cells(ledger: Mapping[str, Any]) -> list[Cell]:
+    require_usable(ledger, ATTACK2_ENV_BLOCK, purpose="selection")
+    require_usable(ledger, ATTACK2_INIT_BLOCK, purpose="selection")
+    env = block_seeds(find_block(ledger, ATTACK2_ENV_BLOCK))
+    inits = block_seeds(find_block(ledger, ATTACK2_INIT_BLOCK))
+    cells: list[Cell] = []
+    for variant, base in (("switching", COARSE), ("no_switch", NO_SWITCH)):
+        streams = [coarse_speed_stream(seed, **base) for seed in env[0:16]]
+        cells.extend(
+            Cell(f"standard/{variant}", i, init, stream) for stream in streams for i, init in enumerate(inits)
+        )
+    for label in BOUNDARY:
+        for variant, base in (("switching", COARSE), ("no_switch", NO_SWITCH)):
+            streams = [coarse_speed_stream(seed, **{**base, **NEARBY[label]}) for seed in env[16:24]]
+            cells.extend(
+                Cell(f"{label}/{variant}", i, init, stream)
+                for stream in streams
+                for i, init in enumerate(inits)
+            )
+    return cells
+
+
+def run_attack2(ledger: Mapping[str, Any], *, workers: int | None = None) -> list[dict[str, Any]]:
+    return run_cells(attack2_cells(ledger), ATTACK_ARMS, reduce_mae, workers=workers, isolate_failures=True)
+
+
+def _share(steady: Mapping[str, Any], switching: Mapping[str, Any]) -> float | None:
+    return (
+        steady["mean_difference"] / switching["mean_difference"] if switching["mean_difference"] > 0 else None
+    )
+
+
+def adjudicate_attack2(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    def rows(condition: str) -> list[Mapping[str, Any]]:
+        return [record for record in records if record["condition"] == condition]
+
+    deficit = crossed_paired_difference(
+        matrix(rows("standard/switching"), "rnn28"),
+        matrix(rows("standard/switching"), "gru"),
+        bootstrap_index=650,
+    )
+    switching = _advantage(rows("standard/switching"), "rnn28", 651)
+    steady = _advantage(rows("standard/no_switch"), "rnn28", 652)
+    champion = _advantage(rows("standard/no_switch"), "gru", 653)
+    share = _share(steady, switching)
+    switching16 = _advantage(rows("standard/switching"), "probe:rnn16", 654)
+    steady16 = _advantage(rows("standard/no_switch"), "probe:rnn16", 655)
+    share16 = _share(steady16, switching16)
+    gated_fast = _advantage(rows("standard/no_switch"), "probe:gru_keep_bias_-2", 656)
+    boundary: dict[str, dict[str, Any]] = {}
+    for offset, label in enumerate(BOUNDARY):
+        b_switch = _advantage(rows(f"{label}/switching"), "rnn28", 660 + 2 * offset)
+        b_steady = _advantage(rows(f"{label}/no_switch"), "rnn28", 661 + 2 * offset)
+        boundary[label] = {"switching": b_switch, "no_switch": b_steady, "share": _share(b_steady, b_switch)}
+    outcome = {
+        "R1_fresh_initializations": {
+            "deficit": deficit,
+            "passed": deficit["ci_low"] > 0 and all(v > 0 for v in deficit["per_initialization_difference"]),
+        },
+        "R2_core_claim": {
+            "switching": switching,
+            "no_switch": steady,
+            "share": share,
+            "champion_no_switch": champion,
+            "passed": share is not None
+            and steady["ci_low"] > 0
+            and share >= SHARE_SUPPORTED
+            and champion["mean_difference"] <= 0,
+        },
+        "R3_other_memory_capable_model": {
+            "switching": switching16,
+            "no_switch": steady16,
+            "share": share16,
+            "passed": share16 is not None and share16 >= SHARE_SUPPORTED,
+        },
+        "R4_gated_model_with_fast_dynamics": {"advantage": gated_fast, "passed": gated_fast["ci_low"] > 0},
+        "R5_declared_boundary_replicates": {
+            "conditions": boundary,
+            "passed": all(
+                row["share"] is not None and row["share"] < SHARE_SUPPORTED for row in boundary.values()
+            ),
+        },
+    }
+    return {
+        "criteria": ATTACK2_CRITERIA,
         "outcome": outcome,
         "advance_to_freeze": all(entry["passed"] for entry in outcome.values()),
     }

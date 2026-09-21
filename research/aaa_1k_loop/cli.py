@@ -26,6 +26,22 @@ EVIDENCE_DIR = Path("docs/evidence/loop_pilot_1")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
     {
+        "block_id": "aaa1k-loop-0003/attack-2/env",
+        "iteration_id": "aaa1k-loop-0003",
+        "role": "attack",
+        "namespace": "attack2_env",
+        "count": 24,
+        "purpose": "iteration 0003 second attack, on the scoped claim v3",
+    },
+    {
+        "block_id": "aaa1k-loop-0003/attack-2/init",
+        "iteration_id": "aaa1k-loop-0003",
+        "role": "attack",
+        "namespace": "attack2_init",
+        "count": 5,
+        "purpose": "iteration 0003 fresh initialization seeds for the second attack",
+    },
+    {
         "block_id": "aaa1k-loop-0003/attack/env",
         "iteration_id": "aaa1k-loop-0003",
         "role": "attack",
@@ -389,6 +405,29 @@ def command_attack3(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_attack3b(args: argparse.Namespace) -> int:
+    from .iteration3 import ATTACK2_ENV_BLOCK, ATTACK2_INIT_BLOCK, CLAIM_ID, adjudicate_attack2, run_attack2
+
+    root = project_root()
+    started = time.perf_counter()
+    records = run_attack2(load_ledger(_ledger_path(root)), workers=args.workers)
+    adjudication = adjudicate_attack2(records)
+    payload = {
+        "schema": "aaa.loop.attack.v3",
+        "iteration": "aaa1k-loop-0003",
+        "evidence_role": "attack",
+        "identity_blocks": [ATTACK2_ENV_BLOCK, ATTACK2_INIT_BLOCK],
+        "claim_id": CLAIM_ID,
+        "adjudication": adjudication,
+        "records": records,
+    }
+    write_strict_json(Path(args.output), _stamp(payload, root, started))
+    for key, value in adjudication["outcome"].items():
+        print(f"{key:36s} {'PASS' if value['passed'] else 'FAIL'}")
+    print(f"advance to freeze: {adjudication['advance_to_freeze']}")
+    return 0
+
+
 def command_freeze3(_args: argparse.Namespace) -> int:
     from .freeze import build_freeze
     from .iteration3 import (
@@ -396,7 +435,7 @@ def command_freeze3(_args: argparse.Namespace) -> int:
         CONFIRMATION_ENV_COUNT,
         CONFIRMATION_INIT_BLOCK,
         CONFIRMATION_INIT_COUNT,
-        adjudicate_attack,
+        adjudicate_attack2,
     )
 
     root = project_root()
@@ -404,9 +443,9 @@ def command_freeze3(_args: argparse.Namespace) -> int:
     if output.exists():
         print(f"refusing: {FREEZE_3} exists; a freeze is never rewritten", file=sys.stderr)
         return 2
-    attack_path = EVIDENCE_DIR_3 / "attack.json"
+    attack_path = EVIDENCE_DIR_3 / "attack_2.json"
     attack = read_strict_json(root / attack_path)
-    if not adjudicate_attack(attack["records"])["advance_to_freeze"]:
+    if not adjudicate_attack2(attack["records"])["advance_to_freeze"]:
         print("refusing: the recomputed attack does not advance this challenger", file=sys.stderr)
         return 1
     ledger = load_ledger(_ledger_path(root))
@@ -497,7 +536,7 @@ def command_confirm3(args: argparse.Namespace) -> int:
     }
     try:
         payload["decision"] = decide(payload)
-    except Exception as error:  # noqa: BLE001 - the primitives are kept whatever happens
+    except Exception as error:
         payload["decision"] = {"outcome": None, "error": f"{type(error).__name__}: {error}"}
         write_strict_json(output, _stamp(payload, root, started), overwrite=False)
         print(f"decision failed after observation; primitives retained: {error}", file=sys.stderr)
@@ -560,6 +599,11 @@ def build_parser() -> argparse.ArgumentParser:
     attack3 = sub.add_parser("attack3", help="iteration 0003: attack the corrected Q4 interpretation")
     attack3.add_argument("--output", default=str(EVIDENCE_DIR_3 / "attack.json"))
     attack3.add_argument("--workers", type=int)
+    attack3b = sub.add_parser(
+        "attack3b", help="iteration 0003: attack the scoped claim v3 on fresh identities"
+    )
+    attack3b.add_argument("--output", default=str(EVIDENCE_DIR_3 / "attack_2.json"))
+    attack3b.add_argument("--workers", type=int)
     sub.add_parser("freeze3", help="iteration 0003: reserve confirmation identities and write the freeze")
     confirm3 = sub.add_parser("confirm3", help="iteration 0003: run the frozen confirmation once")
     confirm3.add_argument("--output", default=str(EVIDENCE_DIR_3 / "confirmation.json"))
@@ -584,6 +628,7 @@ def main(argv: list[str] | None = None) -> int:
         "attack": command_attack,
         "develop2": command_develop2,
         "attack3": command_attack3,
+        "attack3b": command_attack3b,
         "freeze3": command_freeze3,
         "confirm3": command_confirm3,
         "recompute3": command_recompute3,
