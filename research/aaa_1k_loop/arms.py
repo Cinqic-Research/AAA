@@ -32,6 +32,7 @@ from research.aaa_1k.agents import (
 from research.aaa_1k.controls import StatelessMLPControl, VanillaRNNControl
 from research.aaa_1k.model import AAA1KGRU
 
+from .bounded import PUBLIC_BOUND, TIGHT_BOUND, BoundedErrorAgent
 from .harness import InstrumentedAgent
 
 CHAMPION_CONFIGURATION: dict[str, Any] = {
@@ -116,6 +117,17 @@ def _candidate(
             else gru_with_gate_biases(seed, keep_bias=bias, **overrides)
         )
         return _neural(model, name, update_enabled=update_enabled)
+
+    return build
+
+
+def _bounded(
+    name: str, bound: float, *, update_enabled: bool = True, **overrides: Any
+) -> Callable[[int], Any]:
+    def build(seed: int) -> BoundedErrorAgent:
+        return BoundedErrorAgent(
+            gru(seed, **overrides), name=name, error_input_bound=bound, update_enabled=update_enabled
+        )
 
     return build
 
@@ -303,6 +315,23 @@ def _registry() -> dict[str, ArmSpec]:
                 f"attack: challenger c2's keep bias moved to {bias:g}, to test whether the benefit sits on a cliff",
             )
         )
+    for bound in (PUBLIC_BOUND, TIGHT_BOUND, 16.0, 2.0):  # 16 and 2: attack neighbourhood
+        base = f"cand:error_bound_{bound:g}"
+        for suffix, options in (
+            ("", {}),
+            (":frozen", {"update_enabled": False}),
+            (":state_reset", {"reset_state_every_step": True}),
+        ):
+            specs.append(
+                ArmSpec(
+                    base + suffix,
+                    _bounded(base + suffix, bound, **options),
+                    "candidate" if not suffix else "candidate_ablation",
+                    994,
+                    f"champion with the previous-error input clipped to [-{bound:g}, {bound:g}]",
+                    {**CHAMPION_CONFIGURATION, "error_input_bound": bound},
+                )
+            )
     specs.append(
         ArmSpec(
             "probe:gru_keep_bias_2:occlusion",

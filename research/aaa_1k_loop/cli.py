@@ -26,6 +26,30 @@ EVIDENCE_DIR = Path("docs/evidence/loop_pilot_1")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
     {
+        "block_id": "aaa1k-loop-0002/development/all",
+        "iteration_id": "aaa1k-loop-0002",
+        "role": "development",
+        "namespace": "development_all",
+        "count": 56,
+        "purpose": "iteration 0002 candidate development: 48 standard plan streams and 8 long-horizon seeds",
+    },
+    {
+        "block_id": "aaa1k-loop-0002/attack/env",
+        "iteration_id": "aaa1k-loop-0002",
+        "role": "attack",
+        "namespace": "attack_env",
+        "count": 96,
+        "purpose": "iteration 0002 adversarial attack streams",
+    },
+    {
+        "block_id": "aaa1k-loop-0002/attack/init",
+        "iteration_id": "aaa1k-loop-0002",
+        "role": "attack",
+        "namespace": "attack_init",
+        "count": 5,
+        "purpose": "iteration 0002 fresh initialization seeds for the attack",
+    },
+    {
         "block_id": "aaa1k-loop-0001/diagnostic/coarse",
         "role": "diagnostic",
         "namespace": "diagnostic_coarse",
@@ -98,11 +122,15 @@ def command_ledger_sync(_args: argparse.Namespace) -> int:
     added = 0
     for declared in INNER_LOOP_BLOCKS:
         current = existing.get(declared["block_id"])
+        declared = dict(declared)
+        iteration = declared.pop("iteration_id", PILOT_ITERATION_ID)
         if current is None:
-            ledger = reserve(ledger, **declared)
+            ledger = reserve(ledger, **declared, iteration_id=iteration)
             added += 1
             continue
-        drift = [key for key, value in declared.items() if current.get(key) != value]
+        drift = [
+            key for key, value in {**declared, "iteration": iteration}.items() if current.get(key) != value
+        ]
         if drift:
             print(
                 f"refusing: declared block {declared['block_id']} differs from the ledger in {drift}",
@@ -274,6 +302,29 @@ def command_attack(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_develop2(args: argparse.Namespace) -> int:
+    from .iteration2 import CANDIDATES, DEVELOPMENT_BLOCK, evaluate_candidates, run_development
+
+    root = project_root()
+    started = time.perf_counter()
+    records = run_development(load_ledger(_ledger_path(root)), workers=args.workers)
+    selection = evaluate_candidates(records)
+    payload = {
+        "schema": "aaa.loop.development.v2",
+        "iteration": "aaa1k-loop-0002",
+        "evidence_role": "development",
+        "identity_block": DEVELOPMENT_BLOCK,
+        "candidates_declared": list(CANDIDATES),
+        "selection": selection,
+        "records": records,
+    }
+    write_strict_json(Path(args.output), _stamp(payload, root, started))
+    for cid, row in selection["candidates"].items():
+        print(f"{cid}: eligible={row['eligible']}")
+    print(f"selected: {selection['selected']}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -306,6 +357,9 @@ def build_parser() -> argparse.ArgumentParser:
     attack = sub.add_parser("attack", help="attack challenger c2 on attack identities")
     attack.add_argument("--output", default=str(EVIDENCE_DIR / "attack.json"))
     attack.add_argument("--workers", type=int)
+    develop2 = sub.add_parser("develop2", help="iteration 0002: evaluate the bounded-error candidates")
+    develop2.add_argument("--output", default="docs/evidence/loop_pilot_2/development.json")
+    develop2.add_argument("--workers", type=int)
     return parser
 
 
@@ -321,5 +375,6 @@ def main(argv: list[str] | None = None) -> int:
         "diagnose3": command_diagnose3,
         "develop": command_develop,
         "attack": command_attack,
+        "develop2": command_develop2,
     }
     return handlers[args.command](args)

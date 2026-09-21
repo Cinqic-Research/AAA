@@ -59,6 +59,36 @@
       "role": "diagnostic",
       "start": 0,
       "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0002/development/all",
+      "count": 56,
+      "iteration": "aaa1k-loop-0002",
+      "namespace": "development_all",
+      "purpose": "iteration 0002 candidate development: 48 standard plan streams and 8 long-horizon seeds",
+      "role": "development",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0002/attack/env",
+      "count": 96,
+      "iteration": "aaa1k-loop-0002",
+      "namespace": "attack_env",
+      "purpose": "iteration 0002 adversarial attack streams",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0002/attack/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0002",
+      "namespace": "attack_init",
+      "purpose": "iteration 0002 fresh initialization seeds for the attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
     }
   ],
   "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",
