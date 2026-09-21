@@ -180,3 +180,16 @@ wording and archived attempt provenance remain unchanged. The separately
 versioned observation-noise phase follows the same fixed 300-transition law
 change for its matched branch and does not reinterpret a sensor shift as a
 physical-law detection.
+
+## AAA-1K interpretation flags from the loop pilot (2026-09-21)
+
+The historical AAA-1K reports are unchanged; this notice travels with them.
+
+| Where | Statement | Status |
+|---|---|---|
+| `aaa_1k_report.md` (Q4), `aaa_1k_sol_review.md`, `aaa_1k_self_review.md` | Q4's unfavourable mean comes from "a minority of streams" with large gated losses | true as a count (31 of 144), misleading as a description: 24 of the 31 are the whole `coarse_speed_v1` family, in every initialization; without it the Q4 aggregate is `+8.3e-05` |
+| `aaa_1k_report.md` (`coarse_speed_decomposition`), `aaa_1k_self_review.md`, `aaa_1k_handoff.md`, `limitations.md` | `coarse_speed_v1` genuinely measures hidden-regime inference; the quantizer alone hands the advantage to the stateless arm | **unsupported** (`AAA-162`): the probe tested only the gated model; the ungated control keeps most of its memory advantage at fixed speed at the declared construction. A corrected claim was attacked twice and is *not* confirmed |
+| `aaa_1k_architecture.md` §5 | the selected clip "fires on under 1% of updates" | true on the evaluated horizons; on 1120-step fixed-speed coarse streams diverging cells clip on about 75% of updates (see `limitations.md`) |
+
+The recomputation is `python -m research.aaa_1k_loop observe`; the diagnostic
+and attack evidence is under `docs/evidence/aaa1k_loop_000*/`.

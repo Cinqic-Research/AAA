@@ -188,3 +188,17 @@ successful ones. The four development configurations that scored best and were
 then eliminated by the stability margin are in `stage_one_eliminated` with
 their scores intact, which is the only way a reader can check what the rule
 cost.
+
+## AAA-1K improvement-loop pilot
+
+Each loop stage writes one strict-JSON artifact under
+`docs/evidence/aaa1k_loop_000N/`, holding the per-cell primitives its verdicts
+are computed from, and each iteration has a record (`iteration.json`) that
+references its artifacts by SHA-256. Together they are about 6 MB, most of it
+diagnosis round 1 (2 MB) and the first attack (0.7 MB). Failed and rejected
+candidates are kept on the same terms as anything else: they are most of the
+evidence. Per-step traces are not committed; every stage is deterministic and
+`python -m research.aaa_1k_loop reproduce <stage>` regenerates it and requires
+every committed value to reappear exactly. The identity ledger,
+`benchmarks/aaa1k_loop_identity_ledger.json`, is append-only in the sense that
+matters: blocks never overlap and a spent block never becomes usable again.

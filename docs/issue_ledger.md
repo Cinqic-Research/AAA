@@ -1594,3 +1594,81 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Regression** `SerializationTests` injects positive infinity into an
   evidence payload and requires a fail-closed `ValueError` with no output file.
   The repository integrity audit strictly parses every tracked JSON file.
+
+## AAA-1K improvement-loop pilot (`aaa.loop.v0-pilot`, 2026-09-21)
+
+Found while running the first iterations of the loop in
+[`loop_pilot_report.md`](loop_pilot_report.md). Model limitations the pilot
+measured (the coarse-family operating point, the long-horizon runaway) are
+*known limitations*, recorded in [`limitations.md`](limitations.md), not
+defects; failed candidates are *failed hypotheses*, recorded in the iteration
+records. Only actual defects are entered here.
+
+### AAA-162 — the coarse_speed_v1 characterization attributes a gated-model limitation to the benchmark
+- **Source** loop pilot diagnosis, 2026-09-21 · **Severity** medium · **Status** open; claim flagged, no replacement confirmed
+- **Claim** `docs/limitations.md`, the round-3 report and the AAA-1K handoff
+  and self-review state that `coarse_speed_v1` "genuinely tests hidden-regime
+  inference" because, with the speed held fixed, "the quantizer alone hands the
+  advantage to the stateless arm". The report and handoff describe Q4's
+  unfavourable mean as a minority of streams with large gated losses.
+- **Reproduction** `python -m research.aaa_1k_loop observe` recomputes, from
+  round-3 primitives, that all 31 ungated-favouring stream means are 24
+  `coarse_speed_v1` streams (every one of that family, in every
+  initialization) and 7 `aba_v1` streams; without `coarse_speed_v1` the Q4
+  aggregate is `+8.3e-05`. `python -m research.aaa_1k_loop diagnose2` measures,
+  on fresh diagnostic streams, the ungated control's memory advantage over the
+  stateless control at fixed speed at 99% of its switching size (H15), while
+  the champion is worse than the stateless control at fixed speed.
+- **Root cause** The decomposition probe (`coarse_speed_decomposition` in
+  `research/aaa_1k/characterization.py`) compared only the gated champion with
+  the stateless control, then drew a conclusion about the benchmark. A model
+  that cannot use memory on a family cannot show whether the family rewards
+  memory.
+- **Scientific impact** The explanation of Q4's memory-family result and of
+  what `coarse_speed_v1` measures is unsupported. No round-3 number is wrong;
+  its interpretation is.
+- **Repair attempted** Iteration `aaa1k-loop-0003` took a corrected
+  interpretation through the loop. Claim v2 failed attack T1: the fixed-speed
+  memory advantage is construction-dependent (about 30% survives at quantum
+  0.006 or speeds 0.10/0.25). Scoped claim v3 failed attack R4 on an unresolved
+  interval. Neither is promoted. The original statements are flagged in
+  `docs/limitations.md` and `docs/errata.md`; the historical reports are
+  unchanged.
+- **Regression** `tests/test_aaa_1k_loop.py` re-verifies the observation's
+  source hash; the evidence is `docs/evidence/aaa1k_loop_0001/observation.json`,
+  `diagnosis_2.json` and `docs/evidence/aaa1k_loop_0003/attack*.json`.
+- **Outcome** open: the existing claim is contradicted on diagnostic and attack
+  identities; a replacement needs a better-designed attack (see the protocol's
+  known gap 4) and fresh confirmation.
+
+### AAA-163 — AAA-1K seed namespaces can collide, contrary to the module's claim
+- **Source** loop pilot identity work, 2026-09-21 · **Severity** low · **Status** open; accepted, no evidence affected
+- **Claim** `research/aaa_1k/seeds.py`: "two different labels cannot collide
+  except by a SHA-256 collision".
+- **Reproduction** Enumerating every AAA-1K namespace at indices below 100,000
+  yields 499,927 distinct seeds from 500,000 derivations: 73 cross-index
+  collisions (for example `model_init` 1556 and `development_env` 35877). Seeds
+  are SHA-256 digests reduced modulo `2^31 - 1`, so birthday collisions are
+  expected at this scale.
+- **Scientific impact** None measured: no collision exists among the indices
+  AAA-1K actually used (checked across every declared range). The docstring
+  overstates a guarantee.
+- **Repair** Not applied to `research/aaa_1k/`, because editing it would change
+  Champion 0's scientific fingerprint for a comment. The loop does not rely on
+  the claim: `research/aaa_1k_loop/identities.py` proves disjointness by set
+  intersection against every AAA-1K seed below index 100,000 and every seed
+  recorded in AAA-1K evidence.
+- **Regression** `IdentityLedgerTests` inject a collision and require the
+  freshness proof to fail.
+
+### AAA-164 — the first claim attack's command stamped the current claim id
+- **Source** loop pilot reproduction check, 2026-09-21 · **Severity** low · **Status** repaired
+- **Reproduction** After claim v3 was declared, `python -m research.aaa_1k_loop
+  reproduce attack3` reported one mismatch: the committed artifact records
+  `claim_id: aaa1k-claim-q4-coarse-v2` (the claim that attack judged), but the
+  command now wrote `...-v3`. Every measured value reproduced.
+- **Root cause** `command_attack3` labelled its output with the module's
+  current `CLAIM_ID` rather than the claim that attack was declared to judge.
+- **Repair** The command uses `CLAIM_ID_V2`.
+- **Regression** `ReproductionTests` replay the committed attack records through
+  the command and require zero mismatches; it fails on the defective code.

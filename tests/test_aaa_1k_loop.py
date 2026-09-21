@@ -890,3 +890,36 @@ class IterationRecordTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ======================================================================
+# reproduction check
+# ======================================================================
+class ReproductionTests(unittest.TestCase):
+    def test_compare_evidence_requires_every_committed_value(self):
+        committed = {"a": 1.0, "git": {"commit": "x"}, "compute_seconds": 3.0, "rows": [{"b": 2}]}
+        self.assertEqual(
+            cli.compare_evidence(committed, {**committed, "git": {}, "compute_seconds": 9.0}), ([], [])
+        )
+        mismatches, added = cli.compare_evidence(committed, {**committed, "a": 1.0000001, "new": 5})
+        self.assertEqual(len(mismatches), 1)
+        self.assertEqual(added, ["$.new"])
+        self.assertTrue(cli.compare_evidence(committed, {"a": 1.0, "rows": []})[0])
+
+    def test_the_first_claim_attack_is_labelled_with_the_claim_it_judged(self):
+        """Regression for AAA-164: the command must not stamp the current claim id."""
+
+        from research.aaa_1k_loop import iteration3
+
+        committed = read_strict_json(ROOT / "docs/evidence/aaa1k_loop_0003/attack.json")
+        original = iteration3.run_attack
+        try:
+            iteration3.run_attack = lambda _ledger, workers=None: committed["records"]  # type: ignore[assignment]
+            with tempfile.TemporaryDirectory() as directory:
+                output = Path(directory) / "rerun.json"
+                self.assertEqual(cli.main(["attack3", "--output", str(output)]), 0)
+                mismatches, _ = cli.compare_evidence(committed, read_strict_json(output))
+        finally:
+            iteration3.run_attack = original  # type: ignore[assignment]
+        self.assertEqual(mismatches, [])
+        self.assertEqual(committed["claim_id"], "aaa1k-claim-q4-coarse-v2")

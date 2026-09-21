@@ -301,3 +301,18 @@ adding this phase changes both of those, which is correct and is recorded as
 `AAA-152`. Historical v2.1 and observation-noise evidence reproduces from its
 historical checkout at the tags `aaa-pre-next-phase-2026-09-19` and
 `aaa-pre-next-phase-closure-2026-09-19`.
+
+## AAA-1K improvement-loop pilot
+
+```bash
+python -m research.aaa_1k fingerprint                 # Champion 0: must print 5ce6e019...
+python -m research.aaa_1k_loop champion --verify      # Champion 0 record against the repository
+python -m research.aaa_1k_loop prove-fresh            # every loop identity disjoint from AAA-1K's
+python -m research.aaa_1k_loop validate               # iteration records, champion, ledger
+python -m research.aaa_1k_loop reproduce observe      # and diagnose, diagnose2, diagnose3, develop,
+                                                      # develop-round-2, attack, develop2, attack3, attack3b
+python -m unittest tests.test_aaa_1k_loop
+```
+
+See [`loop_pilot_handoff.md`](loop_pilot_handoff.md) for timings and what each
+stage checks.

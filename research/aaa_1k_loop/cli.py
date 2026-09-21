@@ -383,7 +383,7 @@ def _frozen_content_3() -> dict[str, Any]:
 
 
 def command_attack3(args: argparse.Namespace) -> int:
-    from .iteration3 import ATTACK_ENV_BLOCK, ATTACK_INIT_BLOCK, CLAIM_ID, adjudicate_attack, run_attack
+    from .iteration3 import ATTACK_ENV_BLOCK, ATTACK_INIT_BLOCK, CLAIM_ID_V2, adjudicate_attack, run_attack
 
     root = project_root()
     started = time.perf_counter()
@@ -394,7 +394,7 @@ def command_attack3(args: argparse.Namespace) -> int:
         "iteration": "aaa1k-loop-0003",
         "evidence_role": "attack",
         "identity_blocks": [ATTACK_ENV_BLOCK, ATTACK_INIT_BLOCK],
-        "claim_id": CLAIM_ID,
+        "claim_id": CLAIM_ID_V2,  # the first attack judged claim v2
         "adjudication": adjudication,
         "records": records,
     }
