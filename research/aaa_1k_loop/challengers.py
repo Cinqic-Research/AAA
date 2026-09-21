@@ -48,6 +48,25 @@ CANDIDATES: tuple[dict[str, Any], ...] = (
     {"candidate_id": "aaa1k-loop-0001-c1", "arm": "cand:keep_bias_-1", "keep_bias": -1.0},
     {"candidate_id": "aaa1k-loop-0001-c2", "arm": "cand:keep_bias_-2", "keep_bias": -2.0},
 )
+CANDIDATES_ROUND_2: tuple[dict[str, Any], ...] = (
+    {
+        "candidate_id": "aaa1k-loop-0001-c3",
+        "arm": "cand:keep_bias_split",
+        "keep_bias": "units 0-7: -2; units 8-15: +2",
+        "departure": 2.0,
+    },
+)
+"""Declared after development round 1 rejected c1 and c2, before round 2 ran.
+
+Development round 1 found c2 (every unit at -2) improving the target and four
+other plan entries but regressing occlusion by 5.0%. The mechanism predicts
+that tradeoff: a keep gate near 0.12 on every unit is exactly the fast,
+sign-alternating dynamics the coarse phase needs and exactly the wrong
+dynamics for holding a velocity through an observation gap. c3 keeps half the
+units fast and makes the other half holding (+2, keep ~0.88): still one
+change to one initial vector, still zero added parameters.
+"""
+
 TARGET_FAMILY = "coarse_speed_v1"
 PRACTICAL_MARGIN = 0.02
 """Relative regression tolerated on any other family's development mean, and the tie window."""
@@ -73,7 +92,13 @@ def plan_key(record: Mapping[str, Any]) -> str:
     return str(record["plan_entry"])
 
 
-def evaluate_candidates(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+def _departure(candidate: Mapping[str, Any]) -> float:
+    return float(candidate.get("departure", abs(float(candidate["keep_bias"]))))
+
+
+def evaluate_candidates(
+    records: Sequence[Mapping[str, Any]], candidates: Sequence[Mapping[str, Any]] = CANDIDATES
+) -> dict[str, Any]:
     """Apply :data:`SELECTION_RULE` to development records. Pure function of the records."""
 
     entries = sorted({plan_key(record) for record in records})
@@ -86,7 +111,7 @@ def evaluate_candidates(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
 
     champion_divergences = diverged("gru")
     results: dict[str, Any] = {}
-    for offset, candidate in enumerate(CANDIDATES):
+    for offset, candidate in enumerate(candidates):
         arm = candidate["arm"]
         nonfinite = int(sum(arm in record.get("failures", {}) for record in records))
         if nonfinite:
@@ -146,7 +171,7 @@ def evaluate_candidates(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             for cid in eligible
             if results[cid]["coarse_improvement"]["mean_difference"] >= best * (1.0 - PRACTICAL_MARGIN)
         ]
-        selected = min(tied, key=lambda cid: abs(results[cid]["keep_bias"]))
+        selected = min(tied, key=lambda cid: _departure(results[cid]))
     return {
         "rule": SELECTION_RULE,
         "candidates": results,

@@ -73,6 +73,23 @@ def gru_with_keep_bias(seed: int, keep_bias: float, **overrides: Any) -> AAA1KGR
     return gru_with_gate_biases(seed, keep_bias=keep_bias, **overrides)
 
 
+SPLIT_KEEP_BIAS = tuple([-2.0] * 8 + [2.0] * 8)
+"""Candidate c3's keep-gate bias: units 0-7 fast (-2, keep ~0.12), units 8-15 holding (+2, keep ~0.88)."""
+
+
+def gru_with_split_keep_bias(seed: int, **overrides: Any) -> AAA1KGRU:
+    """The champion GRU with the keep-gate bias initialized to :data:`SPLIT_KEEP_BIAS`.
+
+    Glorot draws are exchangeable across units, so which half is fast is
+    arbitrary; the first half is. Only the initial ``b_z`` differs from the
+    champion's.
+    """
+
+    model = gru(seed, **overrides)
+    model.parameters["b_z"][:] = np.asarray(SPLIT_KEEP_BIAS, dtype=float)
+    return model
+
+
 @dataclass(frozen=True)
 class ArmSpec:
     name: str
@@ -88,12 +105,17 @@ def _neural(model: Any, name: str, *, update_enabled: bool = True) -> Instrument
 
 
 def _candidate(
-    name: str, bias: float, *, update_enabled: bool = True, **overrides: Any
+    name: str, bias: float | None, *, update_enabled: bool = True, **overrides: Any
 ) -> Callable[[int], Any]:
+    """``bias=None`` builds the split keep-bias candidate (c3)."""
+
     def build(seed: int) -> InstrumentedAgent:
-        return _neural(
-            gru_with_gate_biases(seed, keep_bias=bias, **overrides), name, update_enabled=update_enabled
+        model = (
+            gru_with_split_keep_bias(seed, **overrides)
+            if bias is None
+            else gru_with_gate_biases(seed, keep_bias=bias, **overrides)
         )
+        return _neural(model, name, update_enabled=update_enabled)
 
     return build
 
@@ -250,6 +272,36 @@ def _registry() -> dict[str, ArmSpec]:
                 994,
             )
         )
+    base = "cand:keep_bias_split"
+    specs.append(
+        ArmSpec(
+            base,
+            _candidate(base, None),
+            "candidate",
+            994,
+            "challenger candidate: keep-gate bias initialized -2 on units 0-7 and +2 on units 8-15",
+            {**CHAMPION_CONFIGURATION, "keep_bias_init": list(SPLIT_KEEP_BIAS)},
+        )
+    )
+    for suffix, options in (
+        ("frozen", {"update_enabled": False}),
+        ("state_reset", {"reset_state_every_step": True}),
+        ("no_error_input", {"zero_error_input": True}),
+    ):
+        specs.append(
+            ArmSpec(
+                f"{base}:{suffix}", _candidate(f"{base}:{suffix}", None, **options), "candidate_ablation", 994
+            )
+        )
+    specs.append(
+        ArmSpec(
+            "probe:gru_keep_bias_2:occlusion",
+            lambda s: _neural(gru_with_keep_bias(s, 2.0), "probe:gru_keep_bias_2:occlusion"),
+            "probe",
+            994,
+            "keep-bias +2 on every unit, to test whether holding units carry occlusion",
+        )
+    )
     return {spec.name: spec for spec in specs}
 
 

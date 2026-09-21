@@ -225,18 +225,22 @@ def command_diagnose3(args: argparse.Namespace) -> int:
 
 
 def command_develop(args: argparse.Namespace) -> int:
-    from .challengers import CANDIDATES, evaluate_candidates
-    from .develop import DEVELOPMENT_BLOCK, DEVELOPMENT_SCHEMA, run_development
+    from .challengers import CANDIDATES, CANDIDATES_ROUND_2, evaluate_candidates
+    from .develop import ARMS, ARMS_ROUND_2, DEVELOPMENT_BLOCK, DEVELOPMENT_SCHEMA, run_development
 
     root = project_root()
     started = time.perf_counter()
-    records = run_development(load_ledger(_ledger_path(root)), workers=args.workers)
-    selection = evaluate_candidates(records)
+    declared = CANDIDATES if args.round == 1 else CANDIDATES_ROUND_2
+    records = run_development(
+        load_ledger(_ledger_path(root)), workers=args.workers, arms=ARMS if args.round == 1 else ARMS_ROUND_2
+    )
+    selection = evaluate_candidates(records, declared)
     payload = {
         "schema": DEVELOPMENT_SCHEMA,
+        "development_round": args.round,
         "evidence_role": "development",
         "identity_block": DEVELOPMENT_BLOCK,
-        "candidates_declared": list(CANDIDATES),
+        "candidates_declared": list(declared),
         "selection": selection,
         "records": records,
     }
@@ -273,6 +277,7 @@ def build_parser() -> argparse.ArgumentParser:
     diagnose3.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis_3.json"))
     diagnose3.add_argument("--workers", type=int)
     develop = sub.add_parser("develop", help="evaluate the declared candidates on the development block")
+    develop.add_argument("--round", type=int, choices=(1, 2), default=1)
     develop.add_argument("--output", default=str(EVIDENCE_DIR / "development.json"))
     develop.add_argument("--workers", type=int)
     return parser

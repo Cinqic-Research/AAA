@@ -19,7 +19,7 @@ from research.aaa_1k.seeds import derive_seed
 from research.aaa_1k.streams import build_stream
 
 from .arms import ArmSet
-from .challengers import CANDIDATES
+from .challengers import CANDIDATES, CANDIDATES_ROUND_2
 from .harness import Cell, arm_errors, run_cells
 from .identities import block_seeds, find_block, require_usable
 
@@ -29,6 +29,17 @@ STREAMS_PER_ENTRY = 8
 INITIALIZATIONS = 5
 
 ARMS = ArmSet(("gru", *(candidate["arm"] for candidate in CANDIDATES), "rnn28", "persistence"))
+ARMS_ROUND_2 = ArmSet(
+    (
+        "gru",
+        "cand:keep_bias_-2",
+        *(candidate["arm"] for candidate in CANDIDATES_ROUND_2),
+        "probe:gru_keep_bias_2:occlusion",
+        "rnn28",
+        "persistence",
+    )
+)
+"""Round 2 re-runs c2 and a keep +2 probe beside c3 to explain the occlusion tradeoff."""
 
 
 def plan_entry_name(family: str, options: Mapping[str, Any]) -> str:
@@ -65,12 +76,20 @@ def development_cells(ledger: Mapping[str, Any]) -> list[Cell]:
 
 def reduce_cell(cell: Cell, result: RunResult, _agents: Sequence[Any]) -> dict[str, Any]:
     errors = arm_errors(result)
-    return {
+    record: dict[str, Any] = {
         "plan_entry": cell.condition,
         "mae": {name: float(np.mean(values)) for name, values in errors.items()},
         "max_step_error": {name: float(np.max(values)) for name, values in errors.items()},
     }
+    if cell.stream.family == "occlusion_v1":
+        hidden = result.where(target_observed=False)
+        visible = result.where(target_observed=True)
+        record["occluded_mae"] = {name: hidden.mean_absolute_error(name) for name in result.agent_names}
+        record["visible_mae"] = {name: visible.mean_absolute_error(name) for name in result.agent_names}
+    return record
 
 
-def run_development(ledger: Mapping[str, Any], *, workers: int | None = None) -> list[dict[str, Any]]:
-    return run_cells(development_cells(ledger), ARMS, reduce_cell, workers=workers, isolate_failures=True)
+def run_development(
+    ledger: Mapping[str, Any], *, workers: int | None = None, arms: ArmSet = ARMS
+) -> list[dict[str, Any]]:
+    return run_cells(development_cells(ledger), arms, reduce_cell, workers=workers, isolate_failures=True)
