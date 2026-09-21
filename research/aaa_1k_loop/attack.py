@@ -10,7 +10,7 @@ The criteria and thresholds below were committed before the attack ran. The
 challenger advances to a freeze only if every attack criterion passes. c2's
 known development regression on ``occlusion_v1`` is not an attack criterion:
 it is carried unchanged into the frozen promotion criteria (see
-``docs/loop_pilot_1_report.md``, deviation L-4).
+``docs/loop_pilot_report.md``, deviation L-4).
 """
 
 from __future__ import annotations

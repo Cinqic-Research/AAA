@@ -1,0 +1,185 @@
+{
+  "accounting": {
+    "adaptive_state_after": 1414,
+    "adaptive_state_before": 1414,
+    "compute_change": "none: no challenger was frozen; every candidate had 994 parameters and 1414 state scalars",
+    "parameters_after": 994,
+    "parameters_before": 994,
+    "parameters_counted_from_arrays": 994
+  },
+  "artifacts": [
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/observation.json",
+      "role": "observation",
+      "sha256": "b444f8efe92ce38ec2ff23bcf8ca3968fee63d8275ed13fa14e36dcb7c55b87f"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/diagnosis.json",
+      "role": "diagnosis",
+      "sha256": "99c5b8fb56f9becd5b59893b609a6a7dd195685766cab682cba3fd8fb7c13b87"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/diagnosis_2.json",
+      "role": "diagnosis",
+      "sha256": "ef121a61778466f772d6e37ae7a41a4e91fb8aa2d8a47356dd2a202e0e1d215b"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/diagnosis_3.json",
+      "role": "diagnosis",
+      "sha256": "0f5c384e0dd97cafd1cac6e9510d11557b1a19ce0648d330180afbb865348bd9"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/development.json",
+      "role": "development",
+      "sha256": "fe99335d2044d7a4cea2f3208d0c90e09d9222d52a96eada336b28a515466a51"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/development_2.json",
+      "role": "development",
+      "sha256": "1b599e6133c9f0f17eb54734d31bcbc29916549f15635038b1ebeafc35fa0a75"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/attack.json",
+      "role": "attack",
+      "sha256": "53f78c988ef5180e65df51e33a98b5d607684b9e1f4328d8e8c02a3d881b48b5"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "aaa1k-loop-0001-c1",
+      "evidence": "docs/evidence/aaa1k_loop_0001/development.json",
+      "intervention": "keep-gate bias initialized at -1 (initialization only; parameter-neutral)",
+      "intervention_class": "optimization/initialization",
+      "reason": "E1/E2/E3 fail: coarse 140% worse, 2 divergent cells against the champion's 0, occlusion +3.3%",
+      "status": "REJECTED_IN_DEVELOPMENT"
+    },
+    {
+      "candidate_id": "aaa1k-loop-0001-c2",
+      "evidence": "docs/evidence/aaa1k_loop_0001/attack.json",
+      "intervention": "keep-gate bias initialized at -2 (initialization only; parameter-neutral)",
+      "intervention_class": "optimization/initialization",
+      "reason": "failed development E3 on a real occlusion regression (+5.0% [+3.4%, +6.8%]) and was advanced to attack as a labelled tradeoff challenger (deviation L-4); the attack then failed A1, A2 and A7: on one of five fresh initializations it degrades to twice persistence on the target family, and bias -1.5 fails on the same initialization",
+      "status": "REJECTED_IN_ATTACK"
+    },
+    {
+      "candidate_id": "aaa1k-loop-0001-c3",
+      "evidence": "docs/evidence/aaa1k_loop_0001/development_2.json",
+      "intervention": "keep-gate bias initialized -2 on units 0-7 and +2 on units 8-15",
+      "intervention_class": "optimization/initialization",
+      "reason": "E3 fails: motion_compat +3.6% to +11.0%, occlusion +2.1%; coarse only -13.4%",
+      "status": "REJECTED_IN_DEVELOPMENT"
+    }
+  ],
+  "challenger": null,
+  "classification": {
+    "after_observation": "not a tail: one entire family (coarse_speed_v1, 24/24 streams, every initialization) carries the Q4 sign; plus two initialization-3 burst cells",
+    "final": "M1 representation/optimization interaction: zero gate biases give the gated core contractive, non-alternating one-step dynamics that cannot carry the slow regime's sub-quantum phase (H13); M2 instability: a runaway through the previous-error input on long quantized streams (H16-H19); the keep-gate initial operating point is an expected architectural tradeoff (coarse/smooth motion versus holding through gaps), not a free fix",
+    "initial": "baseline competitiveness failure with a suspicious tail (prompt framing: minority-tail failure)"
+  },
+  "compute_seconds": {
+    "docs/evidence/aaa1k_loop_0001/attack.json": 36.75334541500001,
+    "docs/evidence/aaa1k_loop_0001/champion_0.json": 0.08021275499993408,
+    "docs/evidence/aaa1k_loop_0001/development.json": 8.44517018900001,
+    "docs/evidence/aaa1k_loop_0001/development_2.json": 10.485754756000006,
+    "docs/evidence/aaa1k_loop_0001/diagnosis.json": 17.38499738200005,
+    "docs/evidence/aaa1k_loop_0001/diagnosis_2.json": 48.16248512099992,
+    "docs/evidence/aaa1k_loop_0001/diagnosis_3.json": 104.11312114799989,
+    "docs/evidence/aaa1k_loop_0001/observation.json": 0.06971343200007141
+  },
+  "confirmation_evidence": null,
+  "confirmation_freeze": null,
+  "deviations": [
+    "L-4: c2 failed development screening on a single non-regression criterion and was advanced to attack anyway, as a labelled tradeoff challenger, with the failed criterion carried into the would-be promotion rules; the attack rejected it, so no confirmation followed",
+    "the candidate budget (three) and the handling of screen-failed tradeoff candidates were not predeclared; both were decided during the iteration and are recorded as protocol gaps"
+  ],
+  "diagnostic_identity_blocks": [
+    "aaa1k-loop-0001/diagnostic/coarse",
+    "aaa1k-loop-0001/diagnostic/coarse-2",
+    "aaa1k-loop-0001/diagnostic/long-3"
+  ],
+  "evidence_that_exposed_the_problem": [
+    "docs/evidence/aaa_1k_evaluation_round3.json (observed, never tuned on)"
+  ],
+  "history": [
+    {
+      "at": "2026-09-21T14:28:42Z",
+      "state": "OBSERVED"
+    },
+    {
+      "at": "2026-09-21T14:28:42Z",
+      "state": "CLASSIFIED"
+    },
+    {
+      "at": "2026-09-21T14:37:59Z",
+      "state": "DIAGNOSED"
+    },
+    {
+      "at": "2026-09-21T14:37:59Z",
+      "state": "TEST_DEFINED"
+    },
+    {
+      "at": "2026-09-21T14:43:23Z",
+      "state": "CHALLENGER_CREATED"
+    },
+    {
+      "at": "2026-09-21T14:48:03Z",
+      "state": "CHALLENGER_ATTACKED"
+    },
+    {
+      "at": "2026-09-21T14:48:03Z",
+      "state": "REJECTED"
+    },
+    {
+      "at": "2026-09-21T14:48:03Z",
+      "state": "PRESERVED"
+    }
+  ],
+  "hypotheses": {
+    "diagnosis_1": "H1-H12, verdicts in diagnosis.json (H12 contradicted, H11 contradicted, width H6 contradicted)",
+    "diagnosis_2": "H13 supported, H14 contradicted (exposed M2), H15 supported, in diagnosis_2.json",
+    "diagnosis_3": "H16-H19 supported, in diagnosis_3.json",
+    "no_change_warranted_hypotheses_tested": [
+      "H10 legitimate width tradeoff",
+      "H11 statistical tail"
+    ]
+  },
+  "independent_recomputation": null,
+  "iteration_id": "aaa1k-loop-0001",
+  "limitations": [
+    "five initializations in development hid an initialization-dependent instability that five fresh attack initializations exposed",
+    "coarse_speed_v1 and occlusion_v1 were designed by the implementer whose model they evaluate"
+  ],
+  "loop_protocol_version": "aaa.loop.v0-pilot",
+  "outcome": "REJECT",
+  "parent_champion": {
+    "champion_id": "aaa1k-champion-0",
+    "phase_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+    "record": {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    "source_commit": "1ce716c42500003881e379f6d23dc0d807301001"
+  },
+  "problem": "Round 3 Q4 (ungated minus gated error) is INCONCLUSIVE with its mean and median disagreeing in sign: the gated model is slightly better on 113 of 144 stream means and much worse on the rest.",
+  "reason": "no candidate survived development screening and attack; Champion 0 is retained unchanged. The diagnosed mechanism is real (H13) but its parameter-neutral remedies trade occlusion for coarse and smooth-motion accuracy, and the best of them fails on an unseen initialization with the signature of the M2 runaway (error above twice persistence; its mechanism was not diagnosed further). M2 became iteration 0002's target",
+  "schema": "aaa.loop.iteration.v1",
+  "targeted_tests": [
+    "switching vs fixed-speed coarse streams (H2, H9, H15)",
+    "read-only one-step Jacobian spectra, finite-difference checked (H13)",
+    "gain-raising and gain-lowering bias probes as a discriminating pair (H13 c/d)",
+    "1120-step streams across four families (H14, H16-H19)"
+  ],
+  "timing": {
+    "note": "human/AI task timing lives in docs/loop_pilot_report.md; scientific compute time is per artifact",
+    "task_start_utc": "2026-09-21T14:19:36Z"
+  },
+  "unregistered_observations": [
+    "one exploratory inspection of a single diagnosis-round-2 cell (a diagnostic identity) that pointed at the previous-error input before diagnosis round 3 was declared"
+  ]
+}

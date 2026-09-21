@@ -3,10 +3,13 @@
 Iteration 0001 targeted the Q4 coarse-family deficit (M1). Its diagnosis also
 classified a second mechanism, M2: on long quantized streams the champion's
 unbounded previous-error input closes a runaway loop (60 of 160 long coarse
-cells worse than twice persistence; H16, H17 supported). M2 produced Round
-3's two largest Q4 gated losses (the initialization-3 bursts), and iteration
-0001's attack found challenger c2 failing the same way on a fresh
-initialization. Iteration 0001 ended REJECTED; this iteration starts from that
+cells worse than twice persistence; H16, H17 supported). By signature -- the
+clip active on ~10% of updates, the online model worse than its frozen copy --
+M2 is the likely source of Round 3's two largest Q4 gated losses (the
+initialization-3 bursts); those evaluation cells were not re-run to confirm it.
+Iteration 0001's attack found challenger c2 failing with the same signature
+(error above twice persistence) on a fresh initialization; that failure's
+mechanism was not diagnosed separately. Iteration 0001 ended REJECTED; this iteration starts from that
 state, on its own identity salt, so none of its streams can coincide with
 0001's.
 

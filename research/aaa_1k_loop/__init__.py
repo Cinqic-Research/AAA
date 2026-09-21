@@ -17,7 +17,7 @@ byte-for-byte unchanged, so the champion this loop starts from can be
 reproduced at exactly its recorded fingerprint on the same checkout.
 
 See ``docs/loop_protocol.md`` for the protocol and
-``docs/loop_pilot_1_report.md`` for the first iteration.
+``docs/loop_pilot_report.md`` for the first iteration.
 """
 
 from __future__ import annotations

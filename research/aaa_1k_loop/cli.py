@@ -1,6 +1,6 @@
 """Command line for the AAA-1K loop pilot: ``python -m research.aaa_1k_loop``.
 
-Each stage writes one strict-JSON artifact under ``docs/evidence/loop_pilot_1``
+Each stage writes one strict-JSON artifact under ``docs/evidence/aaa1k_loop_0001``
 and exits non-zero when an invariant fails. The inner-loop commands
 (``diagnose``, ``develop``, ``attack``) may only read diagnostic, development
 and attack identity blocks. ``confirm`` is the only command that may touch a
@@ -22,7 +22,7 @@ from . import LOOP_PROTOCOL_VERSION, PILOT_ITERATION_ID
 from .evidence import read_strict_json, write_strict_json
 from .identities import LEDGER_PATH, empty_ledger, load_ledger, prove_fresh, reserve, write_ledger
 
-EVIDENCE_DIR = Path("docs/evidence/loop_pilot_1")
+EVIDENCE_DIR = Path("docs/evidence/aaa1k_loop_0001")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
     {
@@ -357,7 +357,7 @@ def command_develop2(args: argparse.Namespace) -> int:
     return 0
 
 
-EVIDENCE_DIR_3 = Path("docs/evidence/loop_pilot_3")
+EVIDENCE_DIR_3 = Path("docs/evidence/aaa1k_loop_0003")
 FREEZE_3 = EVIDENCE_DIR_3 / "freeze.json"
 
 
@@ -561,6 +561,43 @@ def command_recompute3(args: argparse.Namespace) -> int:
     return 0 if result["agrees"] else 1
 
 
+def command_records(_args: argparse.Namespace) -> int:
+    from .records import RECORDS
+
+    root = project_root()
+    for iteration_id, (builder, path) in RECORDS.items():
+        write_strict_json(root / path, builder(root))
+        print(f"{iteration_id}: {path}")
+    return 0
+
+
+def command_validate(_args: argparse.Namespace) -> int:
+    """Validate every iteration record, the ledger and Champion 0; fail closed."""
+
+    from .champion import verify_champion
+    from .decision import decide
+    from .iteration import IterationError, validate_iteration
+    from .records import RECORDS
+
+    root = project_root()
+    failures = 0
+    for iteration_id, (_builder, path) in RECORDS.items():
+        try:
+            result = validate_iteration(read_strict_json(root / path), root, decide=decide)
+            print(
+                f"{iteration_id}: {result['status']} {' -> '.join(result['states'])} outcome={result['outcome']}"
+            )
+        except (IterationError, OSError, ValueError, KeyError) as error:
+            failures += 1
+            print(f"{iteration_id}: INVALID: {error}", file=sys.stderr)
+    problems = verify_champion(read_strict_json(root / EVIDENCE_DIR / "champion_0.json"), root)
+    for problem in problems:
+        print(f"champion: STALE: {problem}", file=sys.stderr)
+    proof = prove_fresh(load_ledger(_ledger_path(root)), root)
+    print(f"ledger: {proof['status']} ({proof['loop_blocks']} blocks)")
+    return 1 if failures or problems else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -594,7 +631,7 @@ def build_parser() -> argparse.ArgumentParser:
     attack.add_argument("--output", default=str(EVIDENCE_DIR / "attack.json"))
     attack.add_argument("--workers", type=int)
     develop2 = sub.add_parser("develop2", help="iteration 0002: evaluate the bounded-error candidates")
-    develop2.add_argument("--output", default="docs/evidence/loop_pilot_2/development.json")
+    develop2.add_argument("--output", default="docs/evidence/aaa1k_loop_0002/development.json")
     develop2.add_argument("--workers", type=int)
     attack3 = sub.add_parser("attack3", help="iteration 0003: attack the corrected Q4 interpretation")
     attack3.add_argument("--output", default=str(EVIDENCE_DIR_3 / "attack.json"))
@@ -611,6 +648,8 @@ def build_parser() -> argparse.ArgumentParser:
     recompute3 = sub.add_parser("recompute3", help="iteration 0003: independently recompute the decision")
     recompute3.add_argument("--confirmation", default=str(EVIDENCE_DIR_3 / "confirmation.json"))
     recompute3.add_argument("--output")
+    sub.add_parser("records", help="write the iteration records from the committed evidence")
+    sub.add_parser("validate", help="validate iteration records, Champion 0 and the identity ledger")
     return parser
 
 
@@ -632,5 +671,7 @@ def main(argv: list[str] | None = None) -> int:
         "freeze3": command_freeze3,
         "confirm3": command_confirm3,
         "recompute3": command_recompute3,
+        "records": command_records,
+        "validate": command_validate,
     }
     return handlers[args.command](args)

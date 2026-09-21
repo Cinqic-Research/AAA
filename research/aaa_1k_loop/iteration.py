@@ -178,6 +178,20 @@ def validate_iteration(
         if candidate["status"].startswith("REJECTED") and not candidate.get("reason"):
             raise IterationError(f"rejected candidate {candidate.get('candidate_id')} lacks a reason")
 
+    # a rejected attempt cannot be dropped from the record: every candidate an
+    # artifact declares or attacks must still be listed
+    listed = {candidate.get("candidate_id") for candidate in candidates}
+    for role in ("development", "attack"):
+        for artifact in roles.get(role, []):
+            content = read_strict_json(root / str(artifact["path"]))
+            named = [entry["candidate_id"] for entry in content.get("candidates_declared", [])]
+            named += [content[key] for key in ("challenger_id", "claim_id") if key in content]
+            dropped = sorted(set(named) - listed)
+            if dropped:
+                raise IterationError(
+                    f"{artifact['path']} names candidates missing from the record: {dropped}"
+                )
+
     terminal = states[-2] if states[-1] == "PRESERVED" and len(states) > 1 else states[-1]
     outcome = record.get("outcome")
     if terminal in TERMINAL_OUTCOME:
