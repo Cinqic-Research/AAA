@@ -87,6 +87,17 @@ def _neural(model: Any, name: str, *, update_enabled: bool = True) -> Instrument
     return InstrumentedAgent(model, name=name, update_enabled=update_enabled)
 
 
+def _candidate(
+    name: str, bias: float, *, update_enabled: bool = True, **overrides: Any
+) -> Callable[[int], Any]:
+    def build(seed: int) -> InstrumentedAgent:
+        return _neural(
+            gru_with_gate_biases(seed, keep_bias=bias, **overrides), name, update_enabled=update_enabled
+        )
+
+    return build
+
+
 def _registry() -> dict[str, ArmSpec]:
     specs: list[ArmSpec] = [
         ArmSpec(
@@ -203,6 +214,42 @@ def _registry() -> dict[str, ArmSpec]:
         ArmSpec("dead_reckoning", lambda _s: DeadReckoningAgent(), "baseline", 0),
         ArmSpec("linear_fit", lambda _s: WindowedLinearFitAgent(), "baseline", 0),
     ]
+    for bias in (-1.0, -2.0):
+        base = f"cand:keep_bias_{bias:g}"
+        specs.append(
+            ArmSpec(
+                base,
+                _candidate(base, bias),
+                "candidate",
+                994,
+                f"challenger candidate: champion with keep-gate bias initialized at {bias:g}",
+                {**CHAMPION_CONFIGURATION, "keep_bias_init": bias},
+            )
+        )
+        specs.append(
+            ArmSpec(
+                f"{base}:frozen",
+                _candidate(f"{base}:frozen", bias, update_enabled=False),
+                "candidate_ablation",
+                994,
+            )
+        )
+        specs.append(
+            ArmSpec(
+                f"{base}:state_reset",
+                _candidate(f"{base}:state_reset", bias, reset_state_every_step=True),
+                "candidate_ablation",
+                994,
+            )
+        )
+        specs.append(
+            ArmSpec(
+                f"{base}:no_error_input",
+                _candidate(f"{base}:no_error_input", bias, zero_error_input=True),
+                "candidate_ablation",
+                994,
+            )
+        )
     return {spec.name: spec for spec in specs}
 
 

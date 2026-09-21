@@ -224,6 +224,29 @@ def command_diagnose3(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_develop(args: argparse.Namespace) -> int:
+    from .challengers import CANDIDATES, evaluate_candidates
+    from .develop import DEVELOPMENT_BLOCK, DEVELOPMENT_SCHEMA, run_development
+
+    root = project_root()
+    started = time.perf_counter()
+    records = run_development(load_ledger(_ledger_path(root)), workers=args.workers)
+    selection = evaluate_candidates(records)
+    payload = {
+        "schema": DEVELOPMENT_SCHEMA,
+        "evidence_role": "development",
+        "identity_block": DEVELOPMENT_BLOCK,
+        "candidates_declared": list(CANDIDATES),
+        "selection": selection,
+        "records": records,
+    }
+    write_strict_json(Path(args.output), _stamp(payload, root, started))
+    for cid, row in selection["candidates"].items():
+        print(f"{cid}: eligible={row['eligible']}")
+    print(f"selected: {selection['selected']}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -249,6 +272,9 @@ def build_parser() -> argparse.ArgumentParser:
     diagnose3 = sub.add_parser("diagnose3", help="run the round-3 long-horizon stability hypotheses")
     diagnose3.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis_3.json"))
     diagnose3.add_argument("--workers", type=int)
+    develop = sub.add_parser("develop", help="evaluate the declared candidates on the development block")
+    develop.add_argument("--output", default=str(EVIDENCE_DIR / "development.json"))
+    develop.add_argument("--workers", type=int)
     return parser
 
 
@@ -262,5 +288,6 @@ def main(argv: list[str] | None = None) -> int:
         "diagnose": command_diagnose,
         "diagnose2": command_diagnose2,
         "diagnose3": command_diagnose3,
+        "develop": command_develop,
     }
     return handlers[args.command](args)

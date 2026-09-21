@@ -27,7 +27,7 @@ from typing import Any
 import numpy as np
 
 from research.aaa_1k.agents import NeuralAgent
-from research.aaa_1k.runner import RunResult, run_stream
+from research.aaa_1k.runner import RunResult, ScoredStep, run_stream
 from research.aaa_1k.streams import Stream
 
 from .dynamics import jacobian_statistics
@@ -67,11 +67,82 @@ ArmFactory = Callable[[int], Sequence[Any]]
 Reducer = Callable[[Cell, RunResult, Sequence[Any]], dict[str, Any]]
 
 
-def _run_one(payload: tuple[Cell, ArmFactory, Reducer, bool]) -> dict[str, Any]:
-    cell, factory, reducer, collect = payload
+FAILURE_TYPES = (FloatingPointError, OverflowError, ValueError)
+
+
+def _merge(results: Sequence[RunResult]) -> RunResult:
+    """Combine single-agent runs over the same stream into one paired result.
+
+    Agents never interact inside :func:`run_stream`, so running them one at a
+    time over the same stream produces exactly the steps a joint run would.
+    The merge checks that claim step by step instead of assuming it.
+    """
+
+    first = results[0]
+    steps: list[ScoredStep] = []
+    for index, step in enumerate(first.steps):
+        merged = {
+            field: {k: v for result in results for k, v in getattr(result.steps[index], field).items()}
+            for field in (
+                "predictions",
+                "absolute_errors",
+                "normalized_absolute_errors",
+                "signed_errors",
+                "error_estimates",
+                "diagnostics",
+            )
+        }
+        for result in results[1:]:
+            other = result.steps[index]
+            if (other.index, other.target_index, other.true_next_position) != (
+                step.index,
+                step.target_index,
+                step.true_next_position,
+            ):
+                raise RuntimeError("isolated runs did not see the same stream")
+        steps.append(
+            ScoredStep(
+                index=step.index,
+                target_index=step.target_index,
+                true_next_position=step.true_next_position,
+                target_observed=step.target_observed,
+                input_observed=step.input_observed,
+                regime=step.regime,
+                event=step.event,
+                **merged,
+            )
+        )
+    return RunResult(
+        schema=first.schema,
+        stream_summary=first.stream_summary,
+        agent_names=[name for result in results for name in result.agent_names],
+        steps=steps,
+    )
+
+
+def _run_one(payload: tuple[Cell, ArmFactory, Reducer, bool, bool]) -> dict[str, Any]:
+    cell, factory, reducer, collect, isolate = payload
     agents = list(factory(cell.init_seed))
-    result = run_stream(cell.stream, agents, collect_diagnostics=collect)
+    failures: dict[str, str] = {}
+    if isolate:
+        results: list[RunResult] = []
+        survivors: list[Any] = []
+        for agent in agents:
+            try:
+                results.append(run_stream(cell.stream, [agent], collect_diagnostics=collect))
+                survivors.append(agent)
+            except FAILURE_TYPES as error:
+                # A failure is evidence: it is recorded against the arm that
+                # raised it and the arm is excluded from this cell's primitives.
+                failures[agent.name] = f"{type(error).__name__}: {error}"
+        if not results:
+            raise RuntimeError(f"every arm failed on cell {cell.key}: {failures}")
+        result = _merge(results)
+        agents = survivors
+    else:
+        result = run_stream(cell.stream, agents, collect_diagnostics=collect)
     record = reducer(cell, result, agents)
+    record["failures"] = failures
     record.setdefault("condition", cell.condition)
     record.setdefault("init_index", cell.init_index)
     record.setdefault("init_seed", cell.init_seed)
@@ -95,13 +166,19 @@ def run_cells(
     *,
     collect_diagnostics: bool = False,
     workers: int | None = None,
+    isolate_failures: bool = False,
 ) -> list[dict[str, Any]]:
-    """Run every cell and return reduced records in canonical key order."""
+    """Run every cell and return reduced records in canonical key order.
+
+    With ``isolate_failures`` each arm runs alone on the cell's stream, so a
+    non-finite failure in one arm is recorded in ``record["failures"]`` instead
+    of aborting the other arms. Without it, any failure aborts the run.
+    """
 
     keys = [cell.key for cell in cells]
     if len(set(keys)) != len(keys):
         raise ValueError("cells must have unique (condition, initialization, stream) keys")
-    payloads = [(cell, factory, reducer, collect_diagnostics) for cell in cells]
+    payloads = [(cell, factory, reducer, collect_diagnostics, isolate_failures) for cell in cells]
     count = workers or default_workers()
     if count == 1 or len(payloads) == 1:
         records = [_run_one(payload) for payload in payloads]
