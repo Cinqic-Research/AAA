@@ -89,6 +89,26 @@
       "role": "attack",
       "start": 0,
       "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0003/attack/env",
+      "count": 24,
+      "iteration": "aaa1k-loop-0003",
+      "namespace": "attack_env",
+      "purpose": "iteration 0003 attack on the corrected Q4 interpretation",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0003/attack/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0003",
+      "namespace": "attack_init",
+      "purpose": "iteration 0003 fresh initialization seeds for the attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
     }
   ],
   "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",

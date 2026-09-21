@@ -26,6 +26,22 @@ EVIDENCE_DIR = Path("docs/evidence/loop_pilot_1")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
     {
+        "block_id": "aaa1k-loop-0003/attack/env",
+        "iteration_id": "aaa1k-loop-0003",
+        "role": "attack",
+        "namespace": "attack_env",
+        "count": 24,
+        "purpose": "iteration 0003 attack on the corrected Q4 interpretation",
+    },
+    {
+        "block_id": "aaa1k-loop-0003/attack/init",
+        "iteration_id": "aaa1k-loop-0003",
+        "role": "attack",
+        "namespace": "attack_init",
+        "count": 5,
+        "purpose": "iteration 0003 fresh initialization seeds for the attack",
+    },
+    {
         "block_id": "aaa1k-loop-0002/development/all",
         "iteration_id": "aaa1k-loop-0002",
         "role": "development",
@@ -325,6 +341,187 @@ def command_develop2(args: argparse.Namespace) -> int:
     return 0
 
 
+EVIDENCE_DIR_3 = Path("docs/evidence/loop_pilot_3")
+FREEZE_3 = EVIDENCE_DIR_3 / "freeze.json"
+
+
+def _frozen_content_3() -> dict[str, Any]:
+    from .decision import CRITERIA, THRESHOLDS
+    from .iteration3 import CHALLENGER_CLAIM, CHAMPION_CLAIM, CLAIM_ID, CONFIRMATION_DESIGN, ITERATION_ID
+
+    return {
+        "iteration_id": ITERATION_ID,
+        "claim_id": CLAIM_ID,
+        "champion_claim": CHAMPION_CLAIM,
+        "challenger_claim": CHALLENGER_CLAIM,
+        "design": CONFIRMATION_DESIGN,
+        "thresholds": THRESHOLDS,
+        "criteria": CRITERIA,
+        "outcome_rule": "any FAIL -> REJECT; every criterion PASS -> PROMOTE; otherwise INCONCLUSIVE",
+        "promotion_effect": (
+            "PROMOTE adopts the challenger claim in the documentation and repairs AAA-162; REJECT keeps the "
+            "champion claim and records that the correction did not confirm; INCONCLUSIVE marks the claim "
+            "contested. Champion 0, the model, is unchanged in every outcome."
+        ),
+    }
+
+
+def command_attack3(args: argparse.Namespace) -> int:
+    from .iteration3 import ATTACK_ENV_BLOCK, ATTACK_INIT_BLOCK, CLAIM_ID, adjudicate_attack, run_attack
+
+    root = project_root()
+    started = time.perf_counter()
+    records = run_attack(load_ledger(_ledger_path(root)), workers=args.workers)
+    adjudication = adjudicate_attack(records)
+    payload = {
+        "schema": "aaa.loop.attack.v2",
+        "iteration": "aaa1k-loop-0003",
+        "evidence_role": "attack",
+        "identity_blocks": [ATTACK_ENV_BLOCK, ATTACK_INIT_BLOCK],
+        "claim_id": CLAIM_ID,
+        "adjudication": adjudication,
+        "records": records,
+    }
+    write_strict_json(Path(args.output), _stamp(payload, root, started))
+    for key, value in adjudication["outcome"].items():
+        print(f"{key:36s} {'PASS' if value['passed'] else 'FAIL'}")
+    print(f"advance to freeze: {adjudication['advance_to_freeze']}")
+    return 0
+
+
+def command_freeze3(_args: argparse.Namespace) -> int:
+    from .freeze import build_freeze
+    from .iteration3 import (
+        CONFIRMATION_ENV_BLOCK,
+        CONFIRMATION_ENV_COUNT,
+        CONFIRMATION_INIT_BLOCK,
+        CONFIRMATION_INIT_COUNT,
+        adjudicate_attack,
+    )
+
+    root = project_root()
+    output = root / FREEZE_3
+    if output.exists():
+        print(f"refusing: {FREEZE_3} exists; a freeze is never rewritten", file=sys.stderr)
+        return 2
+    attack_path = EVIDENCE_DIR_3 / "attack.json"
+    attack = read_strict_json(root / attack_path)
+    if not adjudicate_attack(attack["records"])["advance_to_freeze"]:
+        print("refusing: the recomputed attack does not advance this challenger", file=sys.stderr)
+        return 1
+    ledger = load_ledger(_ledger_path(root))
+    ledger = reserve(
+        ledger,
+        block_id=CONFIRMATION_ENV_BLOCK,
+        role="confirmation",
+        namespace="confirmation_env",
+        count=CONFIRMATION_ENV_COUNT,
+        purpose="iteration 0003 fresh confirmation streams",
+        iteration_id="aaa1k-loop-0003",
+    )
+    ledger = reserve(
+        ledger,
+        block_id=CONFIRMATION_INIT_BLOCK,
+        role="confirmation",
+        namespace="confirmation_init",
+        count=CONFIRMATION_INIT_COUNT,
+        purpose="iteration 0003 fresh confirmation initializations",
+        iteration_id="aaa1k-loop-0003",
+    )
+    freshness = prove_fresh(ledger, root)
+    manifest = build_freeze(
+        root,
+        ledger=ledger,
+        freshness=freshness,
+        champion_path=str(EVIDENCE_DIR / "champion_0.json"),
+        attack_path=str(attack_path),
+        blocks=(CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK),
+        frozen_content=_frozen_content_3(),
+    )
+    write_ledger(_ledger_path(root), ledger)
+    write_strict_json(
+        output, {**manifest, "frozen_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, overwrite=False
+    )
+    print(f"freeze written: {FREEZE_3}; commit it before running confirm3")
+    return 0
+
+
+def command_confirm3(args: argparse.Namespace) -> int:
+    from .decision import THRESHOLDS, decide
+    from .freeze import load_freeze, require_committed, verify_freeze
+    from .identities import mark, require_usable
+    from .iteration3 import CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK, run_confirmation
+
+    root = project_root()
+    output = root / args.output
+    if output.exists():
+        print(f"refusing: {args.output} exists; a confirmation is observed once", file=sys.stderr)
+        return 2
+    manifest = load_freeze(root / FREEZE_3)
+    head = require_committed(root, str(FREEZE_3))
+    ledger = load_ledger(_ledger_path(root))
+    problems = verify_freeze(manifest, root, ledger=ledger, frozen_content=_frozen_content_3())
+    for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
+        try:
+            require_usable(ledger, block_id, purpose="confirmation")
+        except Exception as error:
+            problems.append(str(error))
+    if problems:
+        for problem in problems:
+            print(f"REFUSED: {problem}", file=sys.stderr)
+        return 1
+    prove_fresh(ledger, root)
+    observer = f"aaa1k-loop-0003 confirmation at {head}"
+    for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
+        ledger = mark(ledger, block_id, status="spent", observed_by=observer)
+    # Spent before the first cell runs: a crash after this point still consumes the identities.
+    write_ledger(_ledger_path(root), ledger)
+    started = time.perf_counter()
+    primitives = run_confirmation(ledger, workers=args.workers)
+    import hashlib
+
+    payload: dict[str, Any] = {
+        "schema": "aaa.loop.confirmation.v1",
+        "iteration": "aaa1k-loop-0003",
+        "evidence_role": "confirmation",
+        "freeze": {
+            "path": str(FREEZE_3),
+            "sha256": hashlib.sha256((root / FREEZE_3).read_bytes()).hexdigest(),
+            "commit": head,
+        },
+        "confirmation_source_fingerprint": manifest["confirmation_source_fingerprint"]["sha256"],
+        "champion_phase_fingerprint": manifest["champion_phase_fingerprint"],
+        "thresholds": THRESHOLDS,
+        "identity_blocks": [CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK],
+        "primitives": primitives,
+    }
+    try:
+        payload["decision"] = decide(payload)
+    except Exception as error:  # noqa: BLE001 - the primitives are kept whatever happens
+        payload["decision"] = {"outcome": None, "error": f"{type(error).__name__}: {error}"}
+        write_strict_json(output, _stamp(payload, root, started), overwrite=False)
+        print(f"decision failed after observation; primitives retained: {error}", file=sys.stderr)
+        return 1
+    write_strict_json(output, _stamp(payload, root, started), overwrite=False)
+    for name, status in payload["decision"]["statuses"].items():
+        print(f"{name:46s} {status}")
+    print(f"OUTCOME: {payload['decision']['outcome']}")
+    return 0
+
+
+def command_recompute3(args: argparse.Namespace) -> int:
+    from .recompute import verify_confirmation
+
+    root = project_root()
+    result = verify_confirmation(root / args.confirmation, root / FREEZE_3, load_ledger(_ledger_path(root)))
+    if args.output:
+        write_strict_json(Path(args.output), result)
+    for problem in result["problems"]:
+        print(f"DISAGREES: {problem}", file=sys.stderr)
+    print(f"independent outcome: {result['independent']['outcome']}; agrees with stored: {result['agrees']}")
+    return 0 if result["agrees"] else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -360,6 +557,16 @@ def build_parser() -> argparse.ArgumentParser:
     develop2 = sub.add_parser("develop2", help="iteration 0002: evaluate the bounded-error candidates")
     develop2.add_argument("--output", default="docs/evidence/loop_pilot_2/development.json")
     develop2.add_argument("--workers", type=int)
+    attack3 = sub.add_parser("attack3", help="iteration 0003: attack the corrected Q4 interpretation")
+    attack3.add_argument("--output", default=str(EVIDENCE_DIR_3 / "attack.json"))
+    attack3.add_argument("--workers", type=int)
+    sub.add_parser("freeze3", help="iteration 0003: reserve confirmation identities and write the freeze")
+    confirm3 = sub.add_parser("confirm3", help="iteration 0003: run the frozen confirmation once")
+    confirm3.add_argument("--output", default=str(EVIDENCE_DIR_3 / "confirmation.json"))
+    confirm3.add_argument("--workers", type=int)
+    recompute3 = sub.add_parser("recompute3", help="iteration 0003: independently recompute the decision")
+    recompute3.add_argument("--confirmation", default=str(EVIDENCE_DIR_3 / "confirmation.json"))
+    recompute3.add_argument("--output")
     return parser
 
 
@@ -376,5 +583,9 @@ def main(argv: list[str] | None = None) -> int:
         "develop": command_develop,
         "attack": command_attack,
         "develop2": command_develop2,
+        "attack3": command_attack3,
+        "freeze3": command_freeze3,
+        "confirm3": command_confirm3,
+        "recompute3": command_recompute3,
     }
     return handlers[args.command](args)
