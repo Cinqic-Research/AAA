@@ -149,15 +149,16 @@ them is mistaken for a capability.
 
 **Benchmark provenance, still the weakest point.** `occlusion_v1` and
 `coarse_speed_v1` are new, designed by the same implementer whose model they
-evaluate, and reviewed by nobody. A decomposition probe established that
+evaluate, and were not independently designed or preregistered before
+evaluation. Independent Sol review later examined the implementation and added
+characterization, but that does not remove the benchmark-origin limitation or
+provide external replication. A decomposition probe established that
 `coarse_speed_v1` genuinely tests hidden-regime inference — with the speed held
 fixed the recurrent model is *worse* than the stateless control — but
-`occlusion_v1` has no equivalent check, and neither has been seen by anyone
-else.
+`occlusion_v1` has no equivalent check.
 
-**The most useful next experiments**, in order: a width-matched gating
-comparison, to separate "gating" from "fewer hidden units at the same parameter
-count"; a distributional analysis of the minority of streams where the ungated
-control wins large; an independently designed memory benchmark; and a benchmark
-with genuine long-range dependence, without which the truncation horizon does
-not matter and an unbiased online recurrent learner has nothing to fix.
+**The most useful next experiments**, in order: a distributional analysis of the
+minority of streams where the ungated control wins large; an independently
+designed memory benchmark; and a benchmark with genuine long-range dependence,
+without which the truncation horizon does not matter and an unbiased online
+recurrent learner has nothing to fix.

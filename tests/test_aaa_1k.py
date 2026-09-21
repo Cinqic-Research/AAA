@@ -439,6 +439,15 @@ class CloneTests(unittest.TestCase):
 # serialization and resume
 # ----------------------------------------------------------------------
 class SerializationTests(unittest.TestCase):
+    def test_evidence_writer_rejects_non_standard_json_numbers(self):
+        from research.aaa_1k.cli import _write
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "evidence.json"
+            with self.assertRaises(ValueError):
+                _write(path, {"mean_mae": float("inf")})
+            self.assertFalse(path.exists())
+
     def test_a_round_trip_is_exact(self):
         model = fresh_model()
         for _ in range(6):

@@ -90,7 +90,7 @@ def clipping_probe(configuration: Configuration, *, model_seed_index: int = 0) -
                 "gradient_clip": threshold,
                 "diverged": bool(diverged),
                 "diverged_streams": diverged,
-                "mean_mae": float(np.mean(errors)) if errors else float("inf"),
+                "mean_mae": float(np.mean(errors)) if errors else None,
                 "mean_clip_rate": float(np.mean(clip_rates)) if clip_rates else 0.0,
                 "streams_completed": len(errors),
             }
@@ -250,7 +250,7 @@ def _architecture_sweep(
             {
                 "learning_rate": learning_rate,
                 "diverged_unclipped": diverged,
-                "mean_mae": float(np.mean(errors)) if errors and not diverged else float("inf"),
+                "mean_mae": float(np.mean(errors)) if errors and not diverged else None,
             }
         )
     boundary = next((record["learning_rate"] for record in records if record["diverged_unclipped"]), None)

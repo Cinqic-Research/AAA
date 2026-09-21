@@ -255,8 +255,8 @@ result, and this repository is built to report that rather than to avoid it.
 | [Reproduction](docs/reproduction.md) | exact commands from a clean checkout |
 | [Evidence policy](docs/evidence_policy.md) | what is committed, what is regenerable, and the known limitation |
 | [Experiment registry](docs/experiment_registry.md) | trial state, resume semantics, verification |
-| [Limitations](docs/limitations.md) | what this cannot show and the current confirmation blocker |
-| [Research history](CHANGELOG.md) | v1, v2, v2.1 and observation-noise v1/v1.1 |
+| [Limitations](docs/limitations.md) | current evidence boundaries, unexecuted work, and known limitations |
+| [Research history](CHANGELOG.md) | v1, v2, v2.1, observation-noise v1/v1.1, and AAA-1K |
 | [Self-review](docs/self_review.md) | what was checked after the repair, and what stayed weak |
 | [Review handoff](docs/handoff_sol.md) | identity, confirmation outcomes, reproduction commands |
 

@@ -41,8 +41,8 @@
         "arms": 13,
         "initializations": 5,
         "scored_transitions": 206400,
-        "transitions_per_second": 721.2124256584298,
-        "wall_seconds": 286.18475314199895
+        "transitions_per_second": 720.6992070767982,
+        "wall_seconds": 286.38854875000004
       },
       "numerical_stability": {
         "max_clip_rate": 0.10714285714285714,
@@ -5694,7 +5694,7 @@
               {
                 "diverged_unclipped": true,
                 "learning_rate": 0.3,
-                "mean_mae": Infinity
+                "mean_mae": null
               }
             ],
             "selected_learning_rate": 0.03,
@@ -5763,12 +5763,12 @@
               {
                 "diverged_unclipped": true,
                 "learning_rate": 0.1,
-                "mean_mae": Infinity
+                "mean_mae": null
               },
               {
                 "diverged_unclipped": true,
                 "learning_rate": 0.3,
-                "mean_mae": Infinity
+                "mean_mae": null
               }
             ],
             "selected_learning_rate": 0.01,
@@ -121657,10 +121657,10 @@
     "retention_trials": 60
   },
   "git": {
-    "branch": "codex/aaa-1k-sol-review",
-    "commit": "a04e2f28b1272fdbae381fcc6f7c4fad12a135ac",
+    "branch": "chore/cleaning-aaa-house",
+    "commit": "0ca20e612e8caace4c0f06e786bdfeb9971c65ac",
     "dirty": true,
-    "tree_hash": "3b4a3ef1c98170d865256a77cdc8d2cd1597336a"
+    "tree_hash": "47b7a0643c3520865e42041e9657d7ee1bf57ae9"
   },
   "model_accounting": {
     "parameter_count": 994,
@@ -121752,12 +121752,12 @@
     "arms": 13,
     "initializations": 5,
     "scored_transitions": 206400,
-    "transitions_per_second": 721.2124256584298,
-    "wall_seconds": 286.18475314199895
+    "transitions_per_second": 720.6992070767982,
+    "wall_seconds": 286.38854875000004
   },
   "round": 3,
   "schema": "aaa.1k.experiments.v3",
-  "scientific_fingerprint": "89c687404b772d1dd11688297e2fb67446096103518fe10a59d1203da828b875",
+  "scientific_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
   "streams": [
     {
       "benchmark_version": "aaa.1k.benchmarks.v1",

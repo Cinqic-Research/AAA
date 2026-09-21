@@ -71,6 +71,10 @@ python tools/check_exit_codes.py
 one. No blanket `# type: ignore`: if the checker objects, the annotation is
 usually the thing that is wrong.
 
+For substantial AI-assisted repository work, report the task start, end, and
+elapsed wall-clock time, with phase timings when useful. Keep this lightweight
+process record separate from scientific experiment evidence.
+
 ## Adding a gate
 
 1. Declare it in `aaa/benchmark/data/benchmark_v2_1.json` with its evaluator,

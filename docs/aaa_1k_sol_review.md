@@ -14,7 +14,17 @@
 
 **Final reviewed PR head:** `f47580a30c6bff1a0cd4c11a3e1b03b910700cae`
 
-**Final scientific fingerprint:** `89c687404b772d1dd11688297e2fb67446096103518fe10a59d1203da828b875`
+**Historical PR #16 scientific fingerprint:** `89c687404b772d1dd11688297e2fb67446096103518fe10a59d1203da828b875`
+
+**Current post-closure scientific fingerprint:** `5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e`
+
+The current fingerprint differs because the later repository-closure review
+repaired `AAA-161`: divergent development configurations had been serialized
+with the non-standard JSON token `Infinity`. They now use `null` beside their
+explicit divergence flags, and the writer rejects any unhandled non-finite
+number. The full current evidence was regenerated and independently
+recomputed; no headline statistic or scientific interpretation changed. The
+historical fingerprint above remains the exact identity reviewed on PR #16.
 
 ## Scope and independence
 
@@ -97,10 +107,11 @@ ungated control but is inconclusive: ungated-minus-gated
 
 ## Verification performed
 
-- All 570 repository unit tests passed, both normally and under coverage.
+- All 570 repository unit tests at the reviewed PR #16 head passed, both
+  normally and under coverage.
   Aggregate line coverage was 68%; the repository does not define an enforced
   coverage threshold.
-- The focused AAA-1K phase suite passed all 125 tests.
+- The focused AAA-1K phase suite at that head passed all 125 tests.
 - Ruff lint and format checks passed; mypy passed for all 65 checked source
   files.
 - The finite-difference gradient audit passed every parameter for the 994-

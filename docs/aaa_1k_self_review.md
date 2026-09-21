@@ -11,7 +11,8 @@ An attempt to prove the phase's own conclusions wrong. It succeeded four times,
 and all four findings are now repaired rather than annotated. Round 1's evidence
 is retained unchanged at
 [`evidence/aaa_1k_evaluation_round1_superseded.json`](evidence/aaa_1k_evaluation_round1_superseded.json);
-round 2 is the corrected result.
+round 2 was the corrected historical result at that point, and round 3
+subsequently superseded it as the current result.
 
 Everything below is reproducible:
 
