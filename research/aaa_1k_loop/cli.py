@@ -486,8 +486,15 @@ def command_freeze3(_args: argparse.Namespace) -> int:
 
 
 def command_confirm3(args: argparse.Namespace) -> int:
+    from aaa.noise.reservation import ReservationError, reserve_confirmation_batch
+
     from .decision import THRESHOLDS, decide
-    from .freeze import load_freeze, require_committed, verify_freeze
+    from .freeze import (
+        load_freeze,
+        require_committed,
+        require_committed_confirmation_source,
+        verify_freeze,
+    )
     from .identities import mark, require_usable
     from .iteration3 import CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK, run_confirmation
 
@@ -498,6 +505,7 @@ def command_confirm3(args: argparse.Namespace) -> int:
         return 2
     manifest = load_freeze(root / FREEZE_3)
     head = require_committed(root, str(FREEZE_3))
+    require_committed_confirmation_source(root, manifest)
     ledger = load_ledger(_ledger_path(root))
     problems = verify_freeze(manifest, root, ledger=ledger, frozen_content=_frozen_content_3())
     for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
@@ -511,6 +519,25 @@ def command_confirm3(args: argparse.Namespace) -> int:
         return 1
     prove_fresh(ledger, root)
     observer = f"aaa1k-loop-0003 confirmation at {head}"
+    # Local ledger mutation is recoverable by reset/reclone and therefore is
+    # not a durable claim.  Atomically own each confirmation block on the
+    # shared remote before execution can observe it.  Immutable Git refs make
+    # crashes, worktrees, clones and concurrent actors converge on one owner.
+    fingerprint = manifest["confirmation_source_fingerprint"]["sha256"]
+    for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
+        batch_id = block_id.replace("/", "-")
+        try:
+            reserve_confirmation_batch(
+                root,
+                batch_id=batch_id,
+                role="loop-confirmation",
+                attempt_id=observer,
+                scientific_fingerprint_sha256=fingerprint,
+                resume=False,
+            )
+        except ReservationError as error:
+            print(f"REFUSED: durable confirmation reservation failed: {error}", file=sys.stderr)
+            return 1
     for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
         ledger = mark(ledger, block_id, status="spent", observed_by=observer)
     # Spent before the first cell runs: a crash after this point still consumes the identities.

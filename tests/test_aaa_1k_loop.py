@@ -51,6 +51,7 @@ from research.aaa_1k_loop.freeze import (
     FreezeError,
     build_freeze,
     require_committed,
+    require_committed_confirmation_source,
     verify_freeze,
 )
 from research.aaa_1k_loop.harness import Cell, _merge, _run_one, matrix
@@ -667,7 +668,9 @@ class FreezeTests(unittest.TestCase):
 
     def test_a_challenger_modified_after_the_freeze_is_caught(self):
         manifest, ledger, frozen = self._manifest()
-        manifest["confirmation_source_fingerprint"]["files"]["research/aaa_1k_loop/arms.py"] = "0" * 64
+        manifest["confirmation_source_fingerprint"]["files"]["research/aaa_1k_loop/arms.py"]["sha256"] = (
+            "0" * 64
+        )
         manifest["confirmation_source_fingerprint"]["sha256"] = "0" * 64
         problems = verify_freeze(manifest, ROOT, ledger=ledger, frozen_content=frozen)
         self.assertTrue(any("arms.py" in p for p in problems))
@@ -704,6 +707,40 @@ class FreezeTests(unittest.TestCase):
             (root / "freeze.json").write_text('{"changed": 1}\n', encoding="utf-8")
             with self.assertRaisesRegex(FreezeError, "differs from HEAD"):
                 require_committed(root, "freeze.json")
+
+    def test_dirty_frozen_source_that_is_absent_from_head_is_refused(self):
+        """Regression: committing only a freeze must not bless dirty source."""
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.email", "t@t"], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "t"], check=True)
+            source = root / "science.py"
+            source.write_text("VALUE = 1\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "science.py"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "source"], check=True)
+            source.write_text("VALUE = 2\n", encoding="utf-8")
+            manifest = {
+                "confirmation_source_fingerprint": {
+                    "files": {
+                        "science.py": {
+                            "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+                            "executable": False,
+                        }
+                    }
+                }
+            }
+            (root / "freeze.json").write_text("{}\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "freeze.json"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "freeze only"], check=True)
+            require_committed(root, "freeze.json")
+            with self.assertRaisesRegex(FreezeError, "bytes are not the bytes in HEAD"):
+                require_committed_confirmation_source(root, manifest)
+
+    def test_confirmation_entrypoint_and_admission_are_frozen(self):
+        self.assertIn("research/aaa_1k_loop/cli.py", CONFIRMATION_SOURCES)
+        self.assertIn("research/aaa_1k_loop/freeze.py", CONFIRMATION_SOURCES)
 
     def test_the_confirmation_path_imports_only_frozen_sources(self):
         allowed = {
@@ -770,6 +807,21 @@ class IterationRecordTests(unittest.TestCase):
         record["artifacts"][1]["path"] = "docs/evidence/aaa1k_loop_0001/missing.json"
         self.assertInvalid(record, "missing")
 
+    def test_unsafe_duplicate_and_malformed_record_fields_are_refused(self):
+        record = copy.deepcopy(self.record)
+        record["artifacts"][0]["path"] = "../outside.json"
+        self.assertInvalid(record, "unsafe")
+        record = copy.deepcopy(self.record)
+        record["artifacts"].append(copy.deepcopy(record["artifacts"][0]))
+        record["artifacts"][-1]["role"] = "diagnosis"
+        self.assertInvalid(record, "duplicated")
+        record = copy.deepcopy(self.record)
+        record["artifacts"][0]["sha256"] = "not-a-hash"
+        self.assertInvalid(record, "malformed SHA-256")
+        record = copy.deepcopy(self.record)
+        record["candidates"].append(copy.deepcopy(record["candidates"][0]))
+        self.assertInvalid(record, "duplicate candidate id")
+
     def test_a_rejected_attempt_cannot_be_discarded_or_left_unexplained(self):
         record = copy.deepcopy(self.record)
         record["candidates"] = [c for c in record["candidates"] if c["candidate_id"] != "aaa1k-loop-0001-c1"]
@@ -800,7 +852,7 @@ class IterationRecordTests(unittest.TestCase):
             record["artifacts"].append(
                 {
                     "path": "bad.json",
-                    "role": "note",
+                    "role": "observation",
                     "sha256": hashlib.sha256((root / "bad.json").read_bytes()).hexdigest(),
                 }
             )

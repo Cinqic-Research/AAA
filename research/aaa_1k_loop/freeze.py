@@ -48,6 +48,24 @@ CONFIRMATION_SOURCES = (
     "research/aaa_1k_loop/identities.py",
     "research/aaa_1k_loop/iteration3.py",
     "research/aaa_1k_loop/challengers.py",
+    # Admission and orchestration are scientific until they are reduced to a
+    # genuinely inert wrapper.  In particular cli.py chooses the freeze,
+    # blocks, thresholds and runner, so excluding it would let those choices
+    # change without changing the frozen identity.
+    "research/aaa_1k_loop/cli.py",
+    "research/aaa_1k_loop/freeze.py",
+    "research/aaa_1k_loop/__main__.py",
+    "research/aaa_1k_loop/attack.py",
+    "research/aaa_1k_loop/capabilities.py",
+    "research/aaa_1k_loop/champion.py",
+    "research/aaa_1k_loop/diagnosis.py",
+    "research/aaa_1k_loop/diagnosis2.py",
+    "research/aaa_1k_loop/diagnosis3.py",
+    "research/aaa_1k_loop/iteration.py",
+    "research/aaa_1k_loop/iteration2.py",
+    "research/aaa_1k_loop/observation.py",
+    "research/aaa_1k_loop/recompute.py",
+    "research/aaa_1k_loop/records.py",
 )
 """Loop modules on the confirmation path, in addition to every AAA-1K phase file."""
 
@@ -58,12 +76,15 @@ class FreezeError(RuntimeError):
 
 def confirmation_source_fingerprint(root: Path) -> dict[str, Any]:
     names = sorted(set(phase_files(root)) | set(CONFIRMATION_SOURCES))
-    files: dict[str, str] = {}
+    files: dict[str, dict[str, Any]] = {}
     for name in names:
         path = root / name
         if path.is_symlink() or not path.is_file():
             raise FreezeError(f"confirmation source {name} is missing, not a file, or a symlink")
-        files[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+        files[name] = {
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "executable": bool(path.stat().st_mode & 0o111),
+        }
     encoded = json.dumps(files, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return {"sha256": hashlib.sha256(encoded).hexdigest(), "file_count": len(files), "files": files}
 
@@ -124,6 +145,45 @@ def require_committed(root: Path, relative: str) -> str:
     head = _git(root, "rev-parse", "HEAD")
     if head.returncode != 0:
         raise FreezeError("cannot resolve HEAD")
+    return head.stdout.strip()
+
+
+def require_committed_confirmation_source(root: Path, manifest: Mapping[str, Any]) -> str:
+    """Prove every frozen scientific byte and mode exists in ``HEAD``.
+
+    Comparing the live tree with the manifest is insufficient: a freeze can
+    otherwise be built from a dirty source file and committed without that
+    source.  This check deliberately addresses only the non-self-referential
+    confirmation source set; the generated freeze and evidence remain outside
+    the set.
+    """
+
+    head = _git(root, "rev-parse", "HEAD")
+    if head.returncode != 0:
+        raise FreezeError("cannot resolve HEAD")
+    frozen_files = manifest.get("confirmation_source_fingerprint", {}).get("files")
+    if not isinstance(frozen_files, Mapping) or not frozen_files:
+        raise FreezeError("freeze has no inspectable confirmation source file map")
+    for name, expected in frozen_files.items():
+        if not isinstance(name, str) or name.startswith("/") or ".." in Path(name).parts:
+            raise FreezeError(f"unsafe frozen confirmation source path: {name!r}")
+        if _git(root, "ls-files", "--error-unmatch", "--", name).returncode != 0:
+            raise FreezeError(f"frozen confirmation source is not tracked in HEAD: {name}")
+        blob = _git(root, "show", f"HEAD:{name}")
+        if blob.returncode != 0:
+            raise FreezeError(f"frozen confirmation source is absent from HEAD: {name}")
+        expected_sha = expected.get("sha256") if isinstance(expected, Mapping) else expected
+        if hashlib.sha256(blob.stdout.encode("utf-8", errors="surrogateescape")).hexdigest() != expected_sha:
+            raise FreezeError(f"frozen confirmation source bytes are not the bytes in HEAD: {name}")
+        mode = _git(root, "ls-tree", "HEAD", "--", name).stdout.split()
+        if not mode:
+            raise FreezeError(f"cannot resolve frozen confirmation source mode in HEAD: {name}")
+        executable = mode[0] == "100755"
+        expected_executable = (
+            bool(expected.get("executable", False)) if isinstance(expected, Mapping) else False
+        )
+        if executable != expected_executable:
+            raise FreezeError(f"frozen confirmation source executable bit differs from HEAD: {name}")
     return head.stdout.strip()
 
 

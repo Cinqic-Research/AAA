@@ -288,7 +288,7 @@ def record_0003(root: Path) -> dict[str, Any]:
         (f"{E1}/observation.json", "observation"),
         (f"{E1}/diagnosis.json", "diagnosis"),
         (f"{E1}/diagnosis_2.json", "diagnosis"),
-        (f"{E1}/diagnosis_2.json", "development"),
+        ("research/aaa_1k_loop/iteration3.py", "development"),
         (f"{E3}/attack.json", "attack"),
         (f"{E3}/attack_2.json", "attack"),
     ]

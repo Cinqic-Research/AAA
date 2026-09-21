@@ -1672,3 +1672,57 @@ records. Only actual defects are entered here.
 - **Repair** The command uses `CLAIM_ID_V2`.
 - **Regression** `ReproductionTests` replay the committed attack records through
   the command and require zero mismatches; it fails on the defective code.
+
+### AAA-165 — loop freeze could attest scientific bytes absent from its commit
+- **Source** independent PR #19 final review · **Severity** high · **Status** repaired
+- **Reproduction** Modify a confirmation-affecting file, build a freeze from
+  the dirty bytes, commit only the freeze and ledger, and run confirmation.
+  The old admission checked only that the manifest matched `HEAD`; live dirty
+  source still matched the manifest even though no durable commit contained it.
+- **Root cause** `require_committed()` proved the freeze was committed but did
+  not prove the freeze's file map existed in that commit.
+- **Repair** Confirmation now compares every frozen source byte and executable
+  bit with `HEAD`. The frozen set includes the complete loop package, including
+  CLI admission and freeze logic, plus the AAA-1K phase files.
+- **Regression** `test_dirty_frozen_source_that_is_absent_from_head_is_refused`
+  implements the adversarial commit sequence and requires refusal.
+
+### AAA-166 — locally spent loop identities could become fresh after reset or reclone
+- **Source** independent PR #19 final review · **Severity** high · **Status** repaired
+- **Reproduction** The old `confirm3` wrote `spent` only to the working-tree
+  ledger immediately before execution. A crash followed by reset or a fresh
+  clone recovered the committed `reserved` ledger.
+- **Root cause** a mutable local file was treated as durable ownership.
+- **Repair** Before a confirmation cell can run, `confirm3` atomically creates
+  immutable remote Git ownership refs for both confirmation blocks using the
+  repository's existing reservation mechanism. A crash, clone, worktree or
+  competing actor sees the same durable owner; partial reservation fails safe
+  by consuming rather than reusing identities.
+- **Regression** Existing reservation failure-injection tests cover atomic
+  races, mismatched resume and immutable ownership; loop tests continue to
+  require a spent local ledger for recomputation.
+
+### AAA-167 — iteration records accepted malformed and unsafe artifact structures
+- **Source** independent PR #19 final review · **Severity** medium · **Status** repaired
+- **Reproduction** Artifact mappings were indexed before shape validation and
+  accepted traversal, symlinks, malformed hashes, duplicate paths with
+  contradictory roles, and unknown roles; candidate IDs could repeat.
+- **Repair** The validator now checks exact artifact fields, safe relative
+  paths confined to the repository, regular non-symlink files, known roles,
+  unique paths, lowercase SHA-256 shape and unique non-empty candidate IDs.
+  Iteration 0003 now cites its predeclared source as the development artifact
+  instead of assigning one diagnosis JSON two contradictory roles.
+- **Regression** The loop validator suite exercises the hardened shape checks
+  while all three committed records continue to validate.
+
+### AAA-168 — H13 operational tests were reported as a proved mechanism
+- **Source** independent PR #19 final review · **Severity** medium · **Status** repaired in active interpretation
+- **Reproduction** Four declared subtests passed, but the Jacobian result is a
+  per-cell median of per-step spectral summaries and the bias perturbations
+  correlate the operating point with performance. They do not identify the
+  claimed sign-alternating mode or exclude all alternative mechanisms; the
+  same intervention later showed tradeoffs and initialization instability.
+- **Repair** Active report and handoff classify M1/H13 as partial mechanistic
+  support while preserving the observed evidence and its computed operational
+  verdict. M2's closed-loop-gain explanation remains explicitly a hypothesis.
+- **Outcome** No model or historical evidence changed.

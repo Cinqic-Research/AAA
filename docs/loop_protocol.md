@@ -46,7 +46,8 @@ that judges it is committed first.
    differs from `HEAD`;
 4. recompute the champion fingerprint, the confirmation-source fingerprint and
    the frozen content, and refuse on any difference;
-5. mark the confirmation blocks `spent` *before* the first cell runs;
+5. atomically reserve every confirmation block on immutable remote Git claim
+   refs, then mark the local ledger `spent`, *before* the first cell runs;
 6. run, write the primitives (never overwriting), and decide;
 7. recompute independently (`recompute.py`: a different bootstrap algorithm,
    thresholds read from the freeze, identities checked against the ledger);
@@ -62,9 +63,10 @@ What enforces the separation:
 |---|---|
 | confirmation never informs selection | `identities.require_usable(..., purpose="selection")` refuses `confirmation` blocks; every inner-loop stage calls it |
 | identities are fresh | per-iteration salt; `prove_fresh` intersects every loop seed with every AAA-1K seed below index 100,000 in every namespace and every seed recorded in AAA-1K evidence |
-| no reuse | blocks never overlap; `spent` never reverts; a spent block must record what observed it |
+| no reuse | blocks never overlap; immutable remote claim refs survive crashes, resets, worktrees and fresh clones; `spent` never reverts locally |
 | the observed freeze is the committed freeze | `freeze.require_committed` |
-| the challenger did not change | `freeze.verify_freeze` over a fingerprint of exactly the files that can change a confirmation number; a test asserts the confirmation path imports nothing outside that set |
+| frozen bytes exist in the recorded commit | `freeze.require_committed_confirmation_source` compares every frozen byte and executable bit with `HEAD` |
+| the challenger did not change | `freeze.verify_freeze` covers the complete loop package and AAA-1K phase source, including the CLI admission path |
 | stored conclusions are not evidence | `iteration.validate_iteration` recomputes a `DECIDED` outcome from the confirmation primitives |
 | failures stay visible | the validator refuses a record that drops any candidate an artifact declares or attacks, or leaves a rejection unexplained |
 
@@ -115,35 +117,41 @@ A parameter increase is considered only when all of the following hold:
 Any increase reports old and new counts, the absolute and relative change, the
 adaptive-state and compute change, and what mechanism the parameters buy.
 
-## Known gaps (to close before `v1`)
+## Pilot gaps and the rules for the next iteration
 
-These came out of the pilot and are not yet enforced:
+These rules were chosen only in final review. They are prospective: they do
+not retroactively make the pilot's deviations predeclared, and the protocol
+remains `v0-pilot` until a real challenger completes fresh confirmation.
 
-1. **Candidate budget.** How many candidates an inner loop may try on one
-   development block before selection bias dominates was decided during the
-   pilot (three), not declared in advance.
+1. **Candidate budget.** Every iteration must commit a finite candidate budget
+   before the first development identity is observed. The pilot's budget of
+   three remains a disclosed during-execution choice, not precedent.
 2. **Screen-failed tradeoff candidates.** The pilot advanced one candidate
    that failed a single non-regression screen to attack, as a labelled
-   deviation. The protocol needs a declared rule: either screens are vetoes, or
-   the failed criterion must be carried into the frozen promotion rules at
-   equal or stricter strength.
+   deviation. A failed screen is now an unconditional veto. A future tradeoff
+   policy is a new protocol version and must be fixed before development; it
+   may not be invented after a failure. L-4 remains a historical deviation.
 3. **Screens without uncertainty.** Development screens used point estimates
    against a 2% margin. They happened to be right; the permanent protocol
-   should state the screen's uncertainty treatment.
+   must use a predeclared interval or other uncertainty rule. A point estimate
+   alone cannot pass a margin; an interval crossing the margin is unresolved.
 4. **Attack instruments.** An attack criterion may not depend on an
    instrument already known to be fragile (iteration 0003's R4 used an
-   initialization-unstable probe).
+   initialization-unstable probe). Any instrument used as a gate needs a
+   predeclared validation block and must pass that validation before attack.
 5. **Generic freeze.** `freeze3` / `confirm3` / `recompute3` are specific to
    iteration 0003's claim. A second real use should decide what generalizes;
    the pilot deliberately did not build a framework.
-6. **Claims as challengers.** The pilot let a corrected interpretation be the
-   challenger. That fits the loop's classes (*unsupported claim*) and
-   interventions (*measurement repair*), but the protocol should say so
-   explicitly and define what promotion changes.
+6. **Claims as challengers.** They are permitted only as measurement repairs.
+   Promotion freezes the exact old and proposed wording, changes active
+   documentation and errata only, and never implies a model promotion. It
+   requires the same attack, freeze, fresh evidence and independent decision
+   recomputation as a model challenger.
 7. **Unregistered observations.** Two informal looks happened (one diagnostic
    cell; one arbitrary sanity stream). Both are disclosed; the protocol should
    require a scratch identity namespace so that even sanity checks are
-   ledgered.
+   ledgered. Scratch identities may never satisfy development, attack or
+   confirmation criteria and every look must be recorded.
 
 ## Running an iteration
 

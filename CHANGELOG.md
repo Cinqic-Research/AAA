@@ -1,5 +1,19 @@
 # Research history
 
+## PR #19 independent final review remediation (2026-09-21)
+
+- Repaired confirmation freeze provenance so every frozen scientific byte and
+  executable bit must exist in the recorded commit; the complete loop package,
+  including CLI admission, is now frozen (`AAA-165`).
+- Replaced recoverable local-only confirmation consumption with atomic,
+  immutable remote Git ownership before observation (`AAA-166`).
+- Hardened iteration records against unsafe paths, symlinks, malformed hashes,
+  duplicate/contradictory artifacts and duplicate candidate IDs (`AAA-167`).
+- Weakened H13/M1 to partial mechanistic support without altering observed
+  evidence, and fixed prospective pilot-gap rules without rewriting L-4
+  (`AAA-168`). Champion 0 and all eight rejected candidates remain unchanged;
+  no confirmation identity was reserved or spent.
+
 ## aaa.loop.v0-pilot — Birth of The Loop (2026-09-21)
 
 A pilot of AAA's iterative-improvement loop — observe, classify, diagnose,

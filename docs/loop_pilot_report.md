@@ -25,7 +25,7 @@ be read as approval.
 | Champion 0 | `aaa1k-champion-0`, phase `aaa.1k.v1`, fingerprint `5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e` (recomputed; unchanged on this branch) |
 | iterations | `aaa1k-loop-0001`, `-0002`, `-0003`, each on its own identity salt |
 | evidence | `docs/evidence/aaa1k_loop_000{1,2,3}/`, ledger `benchmarks/aaa1k_loop_identity_ledger.json` |
-| tests | `tests/test_aaa_1k_loop.py` (60 tests, mostly failure injection) |
+| tests | `tests/test_aaa_1k_loop.py` (63 tests, mostly failure injection); 634 repository tests total |
 
 ## Champion 0
 
@@ -98,7 +98,7 @@ than its persistence-like frozen copy.
 
 | Hypothesis | Verdict | Deciding measurement |
 |---|---|---|
-| H13 contractive gated dynamics cannot carry the sub-quantum phase | **SUPPORTED** (all four predeclared parts) | champion's one-step Jacobian has no sign-alternating mode (median 0.0, min real eigenvalue +0.16) while the ungated control's is 0.77; slow-regime deficit 1.07e-3 vs fast 2.4e-4; keep bias −2 closes 73% (+4.6e-4 [+4.2e-4, +5.1e-4], all initializations); keep bias +2 does not |
+| H13 contractive gated dynamics cannot carry the sub-quantum phase | **PARTIAL mechanistic support** (four operational subtests passed) | the one-step Jacobian summary and bias perturbations associate the operating point with the deficit, but a per-cell median of per-step eigenvalue summaries does not identify the claimed sign-alternating mode or prove the causal mechanism; keep bias −2 also has later instability/tradeoffs |
 | H14 learning speed | CONTRADICTED — and exposed M2 | on 1120-step fixed-speed streams the deficit *grows* 25-fold |
 | H15 coarse_speed_v1 rewards memory without switches | **SUPPORTED** | ungated-over-stateless advantage without switches is 99% of its switching size; the champion is *worse* than stateless at fixed speed |
 
@@ -115,9 +115,10 @@ the clip active on 75% of updates, output-head norm ~113. H16–H19 SUPPORTED.
 
 Two mechanisms, therefore:
 
-* **M1** — zero gate biases put the gated core in a contractive,
-  non-alternating operating point that cannot track the slow regime's
-  roughly period-2 sub-quantum phase within an episode (H13). This carries the
+* **M1 (hypothesis with partial support)** — zero gate biases may put the gated
+  core in a contractive operating point associated with failure to track the
+  slow regime's roughly period-2 sub-quantum phase within an episode (H13).
+  The retained statistic does not by itself establish that mode. This carries the
   Q4 sign.
 * **M2** — a runaway through the previous-error feedback channel on long
   quantized streams at lr 0.03 (H16–H19). By signature it is the likely source

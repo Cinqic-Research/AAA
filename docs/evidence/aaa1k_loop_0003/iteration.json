@@ -29,9 +29,9 @@
       "sha256": "ef121a61778466f772d6e37ae7a41a4e91fb8aa2d8a47356dd2a202e0e1d215b"
     },
     {
-      "path": "docs/evidence/aaa1k_loop_0001/diagnosis_2.json",
+      "path": "research/aaa_1k_loop/iteration3.py",
       "role": "development",
-      "sha256": "ef121a61778466f772d6e37ae7a41a4e91fb8aa2d8a47356dd2a202e0e1d215b"
+      "sha256": "ab4e34c377a499a19b026d6983d58f29c619828ada96fcbd7a8304e38e40ceca"
     },
     {
       "path": "docs/evidence/aaa1k_loop_0003/attack.json",

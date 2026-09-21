@@ -24,6 +24,7 @@ workflow engine.
 from __future__ import annotations
 
 import hashlib
+import re
 from collections.abc import Callable, Mapping
 from itertools import pairwise
 from pathlib import Path
@@ -144,12 +145,40 @@ def validate_iteration(
     if not isinstance(artifacts, list):
         raise IterationError("artifacts must be a list")
     roles: dict[str, list[Mapping[str, Any]]] = {}
+    seen_paths: dict[str, str] = {}
     for artifact in artifacts:
-        path = root / str(artifact["path"])
-        if not path.is_file():
-            raise IterationError(f"artifact {artifact['path']} is missing")
+        if not isinstance(artifact, Mapping):
+            raise IterationError("each artifact must be an object")
+        if set(artifact) != {"path", "role", "sha256"}:
+            raise IterationError(f"artifact has malformed fields: {artifact!r}")
+        relative = artifact["path"]
+        role = artifact["role"]
+        digest = artifact["sha256"]
+        if (
+            not isinstance(relative, str)
+            or not relative
+            or Path(relative).is_absolute()
+            or ".." in Path(relative).parts
+        ):
+            raise IterationError(f"artifact path is unsafe: {relative!r}")
+        if not isinstance(role, str) or role not in set(sum(REQUIRED_ARTIFACTS.values(), ())):
+            raise IterationError(f"artifact {relative} has unknown role {role!r}")
+        if relative in seen_paths:
+            raise IterationError(
+                f"artifact {relative} is duplicated with roles {seen_paths[relative]!r} and {role!r}"
+            )
+        seen_paths[relative] = role
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            raise IterationError(f"artifact {relative} has malformed SHA-256")
+        path = root / relative
+        if path.is_symlink() or not path.is_file():
+            raise IterationError(f"artifact {relative} is missing, not a regular file, or a symlink")
+        try:
+            path.resolve().relative_to(root.resolve())
+        except ValueError as error:
+            raise IterationError(f"artifact path escapes the repository: {relative}") from error
         actual = sha256_file(path)
-        if actual != artifact["sha256"]:
+        if actual != digest:
             raise IterationError(
                 f"artifact {artifact['path']} changed: recorded {artifact['sha256']}, now {actual}"
             )
@@ -158,7 +187,7 @@ def validate_iteration(
                 read_strict_json(path)
             except EvidenceError as error:
                 raise IterationError(str(error)) from error
-        roles.setdefault(str(artifact["role"]), []).append(artifact)
+        roles.setdefault(role, []).append(artifact)
     for state in states:
         missing = [role for role in REQUIRED_ARTIFACTS[state] if role not in roles]
         if missing:
@@ -167,7 +196,16 @@ def validate_iteration(
     candidates = record["candidates"]
     if not isinstance(candidates, list) or (not candidates and "CHALLENGER_CREATED" in states):
         raise IterationError("a created challenger must be listed among the candidates")
+    candidate_ids: set[str] = set()
     for candidate in candidates:
+        if not isinstance(candidate, Mapping):
+            raise IterationError("each candidate must be an object")
+        candidate_id = candidate.get("candidate_id")
+        if not isinstance(candidate_id, str) or not candidate_id:
+            raise IterationError("each candidate needs a non-empty string candidate_id")
+        if candidate_id in candidate_ids:
+            raise IterationError(f"duplicate candidate id {candidate_id}")
+        candidate_ids.add(candidate_id)
         if candidate.get("status") not in (
             "REJECTED_IN_DEVELOPMENT",
             "REJECTED_IN_ATTACK",
@@ -183,6 +221,8 @@ def validate_iteration(
     listed = {candidate.get("candidate_id") for candidate in candidates}
     for role in ("development", "attack"):
         for artifact in roles.get(role, []):
+            if not str(artifact["path"]).endswith(".json"):
+                continue
             content = read_strict_json(root / str(artifact["path"]))
             named = [entry["candidate_id"] for entry in content.get("candidates_declared", [])]
             named += [content[key] for key in ("challenger_id", "claim_id") if key in content]

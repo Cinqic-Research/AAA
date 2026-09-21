@@ -38,7 +38,7 @@ trusting the implementer. The result is in
 | `iteration.py`, `records.py` | the state model and fail-closed validator; the three records |
 | `capabilities.py` | Q2/Q5 for any registered arm (used by the attack) |
 | `cli.py` | every command below |
-| `tests/test_aaa_1k_loop.py` | 60 tests, mostly failure injection |
+| `tests/test_aaa_1k_loop.py` | 63 tests, mostly failure injection; 634 repository tests total |
 | `benchmarks/aaa1k_loop_identity_ledger.json` | 13 blocks, none `confirmation` |
 
 Nothing under `research/aaa_1k/`, `aaa/`, `results/`, or any AAA-1K evidence
@@ -90,10 +90,11 @@ The implementer's own list of weak points:
    observed. The outer loop's code (`freeze3`, `confirm3`, `recompute3`,
    `decide`) has run only against synthetic confirmations in tests. It is the
    least-exercised part of the pilot.
-5. **Diagnostic depth.** H13 is supported by four predeclared predictions on a
-   fresh block, but the Jacobian statistic is a per-cell median of a per-step
-   quantity. M2's refined mechanism (a closed-loop gain above one) is a
-   hypothesis, not a finding.
+5. **Diagnostic depth.** H13's four predeclared operational predictions passed
+   on a fresh block, but final review classifies the mechanism as **PARTIAL**:
+   the Jacobian statistic is a per-cell median of a per-step quantity and does
+   not identify the claimed mode. M2's refined mechanism (a closed-loop gain
+   above one) is a hypothesis, not a finding.
 6. **Development initializations.** Diagnosis and development used the
    champion's five `model_init` seeds; only attacks used fresh
    initializations, and that is where c2 broke.
