@@ -1594,3 +1594,135 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Regression** `SerializationTests` injects positive infinity into an
   evidence payload and requires a fail-closed `ValueError` with no output file.
   The repository integrity audit strictly parses every tracked JSON file.
+
+## AAA-1K improvement-loop pilot (`aaa.loop.v0-pilot`, 2026-09-21)
+
+Found while running the first iterations of the loop in
+[`loop_pilot_report.md`](loop_pilot_report.md). Model limitations the pilot
+measured (the coarse-family operating point, the long-horizon runaway) are
+*known limitations*, recorded in [`limitations.md`](limitations.md), not
+defects; failed candidates are *failed hypotheses*, recorded in the iteration
+records. Only actual defects are entered here.
+
+### AAA-162 — the coarse_speed_v1 characterization attributes a gated-model limitation to the benchmark
+- **Source** loop pilot diagnosis, 2026-09-21 · **Severity** medium · **Status** open; claim flagged, no replacement confirmed
+- **Claim** `docs/limitations.md`, the round-3 report and the AAA-1K handoff
+  and self-review state that `coarse_speed_v1` "genuinely tests hidden-regime
+  inference" because, with the speed held fixed, "the quantizer alone hands the
+  advantage to the stateless arm". The report and handoff describe Q4's
+  unfavourable mean as a minority of streams with large gated losses.
+- **Reproduction** `python -m research.aaa_1k_loop observe` recomputes, from
+  round-3 primitives, that all 31 ungated-favouring stream means are 24
+  `coarse_speed_v1` streams (every one of that family, in every
+  initialization) and 7 `aba_v1` streams; without `coarse_speed_v1` the Q4
+  aggregate is `+8.3e-05`. `python -m research.aaa_1k_loop diagnose2` measures,
+  on fresh diagnostic streams, the ungated control's memory advantage over the
+  stateless control at fixed speed at 99% of its switching size (H15), while
+  the champion is worse than the stateless control at fixed speed.
+- **Root cause** The decomposition probe (`coarse_speed_decomposition` in
+  `research/aaa_1k/characterization.py`) compared only the gated champion with
+  the stateless control, then drew a conclusion about the benchmark. A model
+  that cannot use memory on a family cannot show whether the family rewards
+  memory.
+- **Scientific impact** The explanation of Q4's memory-family result and of
+  what `coarse_speed_v1` measures is unsupported. No round-3 number is wrong;
+  its interpretation is.
+- **Repair attempted** Iteration `aaa1k-loop-0003` took a corrected
+  interpretation through the loop. Claim v2 failed attack T1: the fixed-speed
+  memory advantage is construction-dependent (about 30% survives at quantum
+  0.006 or speeds 0.10/0.25). Scoped claim v3 failed attack R4 on an unresolved
+  interval. Neither is promoted. The original statements are flagged in
+  `docs/limitations.md` and `docs/errata.md`; the historical reports are
+  unchanged.
+- **Regression** `tests/test_aaa_1k_loop.py` re-verifies the observation's
+  source hash; the evidence is `docs/evidence/aaa1k_loop_0001/observation.json`,
+  `diagnosis_2.json` and `docs/evidence/aaa1k_loop_0003/attack*.json`.
+- **Outcome** open: the existing claim is contradicted on diagnostic and attack
+  identities; a replacement needs a better-designed attack (see the protocol's
+  known gap 4) and fresh confirmation.
+
+### AAA-163 — AAA-1K seed namespaces can collide, contrary to the module's claim
+- **Source** loop pilot identity work, 2026-09-21 · **Severity** low · **Status** open; accepted, no evidence affected
+- **Claim** `research/aaa_1k/seeds.py`: "two different labels cannot collide
+  except by a SHA-256 collision".
+- **Reproduction** Enumerating every AAA-1K namespace at indices below 100,000
+  yields 499,927 distinct seeds from 500,000 derivations: 73 cross-index
+  collisions (for example `model_init` 1556 and `development_env` 35877). Seeds
+  are SHA-256 digests reduced modulo `2^31 - 1`, so birthday collisions are
+  expected at this scale.
+- **Scientific impact** None measured: no collision exists among the indices
+  AAA-1K actually used (checked across every declared range). The docstring
+  overstates a guarantee.
+- **Repair** Not applied to `research/aaa_1k/`, because editing it would change
+  Champion 0's scientific fingerprint for a comment. The loop does not rely on
+  the claim: `research/aaa_1k_loop/identities.py` proves disjointness by set
+  intersection against every AAA-1K seed below index 100,000 and every seed
+  recorded in AAA-1K evidence.
+- **Regression** `IdentityLedgerTests` inject a collision and require the
+  freshness proof to fail.
+
+### AAA-164 — the first claim attack's command stamped the current claim id
+- **Source** loop pilot reproduction check, 2026-09-21 · **Severity** low · **Status** repaired
+- **Reproduction** After claim v3 was declared, `python -m research.aaa_1k_loop
+  reproduce attack3` reported one mismatch: the committed artifact records
+  `claim_id: aaa1k-claim-q4-coarse-v2` (the claim that attack judged), but the
+  command now wrote `...-v3`. Every measured value reproduced.
+- **Root cause** `command_attack3` labelled its output with the module's
+  current `CLAIM_ID` rather than the claim that attack was declared to judge.
+- **Repair** The command uses `CLAIM_ID_V2`.
+- **Regression** `ReproductionTests` replay the committed attack records through
+  the command and require zero mismatches; it fails on the defective code.
+
+### AAA-165 — loop freeze could attest scientific bytes absent from its commit
+- **Source** independent PR #19 final review · **Severity** high · **Status** repaired
+- **Reproduction** Modify a confirmation-affecting file, build a freeze from
+  the dirty bytes, commit only the freeze and ledger, and run confirmation.
+  The old admission checked only that the manifest matched `HEAD`; live dirty
+  source still matched the manifest even though no durable commit contained it.
+- **Root cause** `require_committed()` proved the freeze was committed but did
+  not prove the freeze's file map existed in that commit.
+- **Repair** Confirmation now compares every frozen source byte and executable
+  bit with `HEAD`. The frozen set includes the complete loop package, including
+  CLI admission and freeze logic, plus the AAA-1K phase files.
+- **Regression** `test_dirty_frozen_source_that_is_absent_from_head_is_refused`
+  implements the adversarial commit sequence and requires refusal.
+
+### AAA-166 — locally spent loop identities could become fresh after reset or reclone
+- **Source** independent PR #19 final review · **Severity** high · **Status** repaired
+- **Reproduction** The old `confirm3` wrote `spent` only to the working-tree
+  ledger immediately before execution. A crash followed by reset or a fresh
+  clone recovered the committed `reserved` ledger.
+- **Root cause** a mutable local file was treated as durable ownership.
+- **Repair** Before a confirmation cell can run, `confirm3` atomically creates
+  immutable remote Git ownership refs for both confirmation blocks using the
+  repository's existing reservation mechanism. A crash, clone, worktree or
+  competing actor sees the same durable owner; partial reservation fails safe
+  by consuming rather than reusing identities.
+- **Regression** Existing reservation failure-injection tests cover atomic
+  races, mismatched resume and immutable ownership; loop tests continue to
+  require a spent local ledger for recomputation.
+
+### AAA-167 — iteration records accepted malformed and unsafe artifact structures
+- **Source** independent PR #19 final review · **Severity** medium · **Status** repaired
+- **Reproduction** Artifact mappings were indexed before shape validation and
+  accepted traversal, symlinks, malformed hashes, duplicate paths with
+  contradictory roles, and unknown roles; candidate IDs could repeat.
+- **Repair** The validator now checks exact artifact fields, safe relative
+  paths confined to the repository, regular non-symlink files, known roles,
+  unique paths, lowercase SHA-256 shape and unique non-empty candidate IDs.
+  Iteration 0003 now cites its predeclared source as the development artifact
+  instead of assigning one diagnosis JSON two contradictory roles.
+- **Regression** The loop validator suite exercises the hardened shape checks
+  while all three committed records continue to validate.
+
+### AAA-168 — H13 operational tests were reported as a proved mechanism
+- **Source** independent PR #19 final review · **Severity** medium · **Status** repaired in active interpretation
+- **Reproduction** Four declared subtests passed, but the Jacobian result is a
+  per-cell median of per-step spectral summaries and the bias perturbations
+  correlate the operating point with performance. They do not identify the
+  claimed sign-alternating mode or exclude all alternative mechanisms; the
+  same intervention later showed tradeoffs and initialization instability.
+- **Repair** Active report and handoff classify M1/H13 as partial mechanistic
+  support while preserving the observed evidence and its computed operational
+  verdict. M2's closed-loop-gain explanation remains explicitly a hypothesis.
+- **Outcome** No model or historical evidence changed.

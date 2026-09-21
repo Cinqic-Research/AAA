@@ -1,0 +1,5630 @@
+{
+  "adjudication": {
+    "advance_to_freeze": false,
+    "criteria": {
+      "R1_fresh_initializations": "declared construction: the champion's deficit to the ungated control is positive in every fresh initialization and its interval lies above zero",
+      "R2_core_claim": "declared construction at fixed speed: the ungated memory advantage over the stateless control has an interval above zero and is >= 70% of its switching advantage; the champion's fixed-speed memory advantage point estimate is <= 0",
+      "R3_other_memory_capable_model": "the 16-unit ungated RNN keeps >= 70% of its memory advantage at fixed speed",
+      "R4_gated_model_with_fast_dynamics": "the keep-bias -2 gated probe's fixed-speed memory advantage over the stateless control has an interval above zero",
+      "R5_declared_boundary_replicates": "at quantum 0.006 and at speeds 0.10/0.25 the ungated fixed-speed share is below 70%, as the claim states; if either reaches 70% the claim's boundary statement is wrong"
+    },
+    "outcome": {
+      "R1_fresh_initializations": {
+        "deficit": {
+          "ci_high": 0.001130019175621569,
+          "ci_low": 0.000607647982965796,
+          "confidence": 0.95,
+          "design": "crossed initializations x streams",
+          "draws": 10000,
+          "favours_first": 16,
+          "favours_second": 0,
+          "first_mean": 0.0016509150746703994,
+          "initializations": 5,
+          "initializations_agreeing_on_sign": true,
+          "interval_status": "MEASURED",
+          "mean_difference": 0.000779614401625321,
+          "median_difference": 0.000660685428665542,
+          "per_initialization_difference": [
+            0.000783566348995746,
+            0.000697854354432464,
+            0.0008395651874883885,
+            0.000821479827100274,
+            0.0007556062901097323
+          ],
+          "per_stream_difference": [
+            0.0007815577091385237,
+            0.0006237615655465327,
+            0.0005774618115481456,
+            0.000609827234352413,
+            0.000703818377324861,
+            0.0007407321168218233,
+            0.0006285863109846772,
+            0.0007021641010568152,
+            0.0007098196987990078,
+            0.0006173796661673563,
+            0.0005514984256152385,
+            0.0026658132773864232,
+            0.0006512230316558998,
+            0.0007008450517859525,
+            0.0005026383982500218,
+            0.0007067036495714445
+          ],
+          "relative_difference": 0.3207590811914375,
+          "second_mean": 0.00243052947629572,
+          "streams": 16,
+          "ties": 0
+        },
+        "passed": true
+      },
+      "R2_core_claim": {
+        "champion_no_switch": {
+          "ci_high": -0.0002387137677944355,
+          "ci_low": -0.0012212637277619369,
+          "confidence": 0.95,
+          "design": "crossed initializations x streams",
+          "draws": 10000,
+          "favours_first": 0,
+          "favours_second": 16,
+          "first_mean": 0.0029572137636581,
+          "initializations": 5,
+          "initializations_agreeing_on_sign": true,
+          "interval_status": "MEASURED",
+          "mean_difference": -0.0006787759838449874,
+          "median_difference": -0.00015483352897026651,
+          "per_initialization_difference": [
+            -0.0006988308283118502,
+            -0.0007249211241900991,
+            -0.0006851634198077037,
+            -0.00017432194286645908,
+            -0.001110642604048825
+          ],
+          "per_stream_difference": [
+            -0.00032059115903993433,
+            -0.00010723325321004398,
+            -0.00011037941462424292,
+            -7.24639470952896e-05,
+            -0.0006750584721559722,
+            -0.0011661116414729542,
+            -0.00011096584099481145,
+            -0.0010963908072144615,
+            -0.002320197704072921,
+            -0.0008067042817924145,
+            -0.0001036520984601322,
+            -0.00026130028528842267,
+            -7.794438364931898e-05,
+            -0.0017420873157783499,
+            -0.0001323422148580832,
+            -0.001756992921812447
+          ],
+          "relative_difference": -0.2979128900771051,
+          "second_mean": 0.0022784377798131133,
+          "streams": 16,
+          "ties": 0
+        },
+        "no_switch": {
+          "ci_high": 0.0017264500193571715,
+          "ci_low": 0.0005307556289235167,
+          "confidence": 0.95,
+          "design": "crossed initializations x streams",
+          "draws": 10000,
+          "favours_first": 16,
+          "favours_second": 0,
+          "first_mean": 0.0012534502811864462,
+          "initializations": 5,
+          "initializations_agreeing_on_sign": true,
+          "interval_status": "MEASURED",
+          "mean_difference": 0.0010249874986266669,
+          "median_difference": 0.0005763771169768327,
+          "per_initialization_difference": [
+            0.000881420774982688,
+            0.0010087042438045005,
+            0.0008748206009679016,
+            0.0018525531414002776,
+            0.0005074387319779668
+          ],
+          "per_stream_difference": [
+            0.0003922142511105737,
+            0.0002829149129054811,
+            0.00029676375642690117,
+            0.00035773928433389046,
+            0.0023645631215925794,
+            0.003227181768321979,
+            0.0003125436289347202,
+            0.0017597131500872109,
+            0.001652664313426157,
+            0.0017089492401309852,
+            0.00024753169101349057,
+            0.0008378569442610976,
+            0.00037617395794328453,
+            0.00163826866923565,
+            0.00023441436886144801,
+            0.0007103069194412217
+          ],
+          "relative_difference": 0.4498641603066907,
+          "second_mean": 0.0022784377798131133,
+          "streams": 16,
+          "ties": 0
+        },
+        "passed": true,
+        "share": 1.4760415587958136,
+        "switching": {
+          "ci_high": 0.0007452139624269324,
+          "ci_low": 0.0006404530465033097,
+          "confidence": 0.95,
+          "design": "crossed initializations x streams",
+          "draws": 10000,
+          "favours_first": 16,
+          "favours_second": 0,
+          "first_mean": 0.0016509150746703994,
+          "initializations": 5,
+          "initializations_agreeing_on_sign": true,
+          "interval_status": "MEASURED",
+          "mean_difference": 0.0006944164224365564,
+          "median_difference": 0.0006854785968937019,
+          "per_initialization_difference": [
+            0.0006038361362174803,
+            0.000737969094936705,
+            0.0007032412365356046,
+            0.000733476764303078,
+            0.0006935588801899142
+          ],
+          "per_stream_difference": [
+            0.0007135667295306481,
+            0.0006921136190388578,
+            0.0006312990552804255,
+            0.0006510706009897029,
+            0.0006679898507308794,
+            0.0007429325063176763,
+            0.0006592724088140893,
+            0.0006288567152383994,
+            0.0007390348861709645,
+            0.000727281689834923,
+            0.0005936535881792167,
+            0.0008641256896785068,
+            0.0006769317386356056,
+            0.0007202944219244732,
+            0.0006666257945928133,
+            0.0007356134640277217
+          ],
+          "relative_difference": 0.2960845506458862,
+          "second_mean": 0.0023453314971069554,
+          "streams": 16,
+          "ties": 0
+        }
+      },
+      "R3_other_memory_capable_model": {
+        "no_switch": {
+          "ci_high": 0.0016111690265344588,
+          "ci_low": 0.000483594314402376,
+          "confidence": 0.95,
+          "design": "crossed initializations x streams",
+          "draws": 10000,
+          "favours_first": 16,
+          "favours_second": 0,
+          "first_mean": 0.0013411690654578112,
+          "initializations": 5,
+          "initializations_agreeing_on_sign": true,
+          "interval_status": "MEASURED",
+          "mean_difference": 0.0009372687143553019,
+          "median_difference": 0.0004969250311818456,
+          "per_initialization_difference": [
+            0.0009363017646807411,
+            0.0008973214332859504,
+            0.0007611043696981463,
+            0.0016037709884443876,
+            0.0004878450156672842
+          ],
+          "per_stream_difference": [
+            0.0003486732722792356,
+            0.00019513501670584245,
+            0.0001888248453399811,
+            0.00023460291258141103,
+            0.0022794430452208127,
+            0.0031414975202890896,
+            0.00020014629138245723,
+            0.0016808240207674425,
+            0.0015732025877822273,
+            0.0016237657623629502,
+            0.00017518428210561333,
+            0.0007657942032037034,
+            0.0002257247511865308,
+            0.0015603368928439514,
+            0.00016788183271775753,
+            0.0006352621929158259
+          ],
+          "relative_difference": 0.41136463003706886,
+          "second_mean": 0.0022784377798131133,
+          "streams": 16,
+          "ties": 0
+        },
+        "passed": true,
+        "share": 1.5237370947900397,
+        "switching": {
+          "ci_high": 0.0006626441226913729,
+          "ci_low": 0.0005707011250088297,
+          "confidence": 0.95,
+          "design": "crossed initializations x streams",
+          "draws": 10000,
+          "favours_first": 16,
+          "favours_second": 0,
+          "first_mean": 0.0017302196660962058,
+          "initializations": 5,
+          "initializations_agreeing_on_sign": true,
+          "interval_status": "MEASURED",
+          "mean_difference": 0.0006151118310107499,
+          "median_difference": 0.0006142187931351657,
+          "per_initialization_difference": [
+            0.0006800136310540662,
+            0.0005829909878709273,
+            0.0006255330706680939,
+            0.0005857053569293274,
+            0.0006013161085313348
+          ],
+          "per_stream_difference": [
+            0.0006356410971798768,
+            0.0006064518338015515,
+            0.0005463619859167312,
+            0.0005628653910100566,
+            0.0005933656350413073,
+            0.0006686400857479735,
+            0.0005667781087657789,
+            0.0005581370384074037,
+            0.0006712373012363092,
+            0.0006585373685385019,
+            0.0005132413397326759,
+            0.0007940871003462545,
+            0.0005857665048712847,
+            0.0006494846425412086,
+            0.0005707419264176964,
+            0.0006604519366173886
+          ],
+          "relative_difference": 0.262270741585789,
+          "second_mean": 0.0023453314971069554,
+          "streams": 16,
+          "ties": 0
+        }
+      },
+      "R4_gated_model_with_fast_dynamics": {
+        "advantage": {
+          "ci_high": 0.0010382574283826303,
+          "ci_low": -4.3357259752404344e-05,
+          "confidence": 0.95,
+          "design": "crossed initializations x streams",
+          "draws": 10000,
+          "favours_first": 13,
+          "favours_second": 3,
+          "first_mean": 0.0017688851948812812,
+          "initializations": 5,
+          "initializations_agreeing_on_sign": true,
+          "interval_status": "MEASURED",
+          "mean_difference": 0.0005095525849318318,
+          "median_difference": 0.00025400209185435065,
+          "per_initialization_difference": [
+            0.00041397182165056314,
+            0.00044203987927208974,
+            0.0008122336265613024,
+            0.000552516224943738,
+            0.00032700137223146657
+          ],
+          "per_stream_difference": [
+            0.00042382942993985224,
+            1.642281479575492e-05,
+            -1.4862521926088321e-06,
+            2.4834940146550118e-05,
+            0.0017378776516544017,
+            0.0017247576068799265,
+            2.2688747742499043e-05,
+            0.0009296328514326964,
+            0.0016491230428755533,
+            0.0012854664209085522,
+            1.7620503099421285e-05,
+            0.0007790322370815481,
+            2.1510210990911695e-05,
+            0.0016251985902588843,
+            -3.2293554790884535e-05,
+            -0.0020713738819137474
+          ],
+          "relative_difference": 0.22364121129242662,
+          "second_mean": 0.0022784377798131133,
+          "streams": 16,
+          "ties": 0
+        },
+        "passed": false
+      },
+      "R5_declared_boundary_replicates": {
+        "conditions": {
+          "quantum_0.006": {
+            "no_switch": {
+              "ci_high": 0.0009036099827135329,
+              "ci_low": 0.00011132345842129382,
+              "confidence": 0.95,
+              "design": "crossed initializations x streams",
+              "draws": 10000,
+              "favours_first": 8,
+              "favours_second": 0,
+              "first_mean": 0.0006084698699730083,
+              "initializations": 5,
+              "initializations_agreeing_on_sign": true,
+              "interval_status": "MEASURED",
+              "mean_difference": 0.0004705913825843259,
+              "median_difference": 0.0001085840725995797,
+              "per_initialization_difference": [
+                0.0004003219266526032,
+                0.0004567019799823523,
+                0.0004836011275835931,
+                0.0005519870297795958,
+                0.00046034484892348545
+              ],
+              "per_stream_difference": [
+                7.396232092639812e-05,
+                0.0006960207962649894,
+                0.0009969917261068322,
+                6.605857445334078e-05,
+                6.611764931429064e-05,
+                8.278295399880612e-05,
+                5.958174186357744e-05,
+                0.0017232152977463733
+              ],
+              "relative_difference": 0.43611183467948844,
+              "second_mean": 0.0010790612525573343,
+              "streams": 8,
+              "ties": 0
+            },
+            "share": 0.6913667703356525,
+            "switching": {
+              "ci_high": 0.0007695827413421014,
+              "ci_low": 0.0006021686380395045,
+              "confidence": 0.95,
+              "design": "crossed initializations x streams",
+              "draws": 10000,
+              "favours_first": 8,
+              "favours_second": 0,
+              "first_mean": 0.0012939412691461718,
+              "initializations": 5,
+              "initializations_agreeing_on_sign": true,
+              "interval_status": "MEASURED",
+              "mean_difference": 0.000680668210819357,
+              "median_difference": 0.0006860306889584937,
+              "per_initialization_difference": [
+                0.0005879142182191582,
+                0.0006376994972480558,
+                0.0006309293141245481,
+                0.0007830066258546273,
+                0.0007637913986503961
+              ],
+              "per_stream_difference": [
+                0.0006927305994863101,
+                0.0008302269545760205,
+                0.0006313751112285032,
+                0.0006493289710041599,
+                0.000646453353029208,
+                0.0006171630833923048,
+                0.0006229453284148218,
+                0.000755122285423528
+              ],
+              "relative_difference": 0.3447102921997719,
+              "second_mean": 0.0019746094799655287,
+              "streams": 8,
+              "ties": 0
+            }
+          },
+          "speeds_0.10_0.25": {
+            "no_switch": {
+              "ci_high": 0.0004896302546730638,
+              "ci_low": 0.00011411863111140269,
+              "confidence": 0.95,
+              "design": "crossed initializations x streams",
+              "draws": 10000,
+              "favours_first": 8,
+              "favours_second": 0,
+              "first_mean": 0.0005535594988524782,
+              "initializations": 5,
+              "initializations_agreeing_on_sign": true,
+              "interval_status": "MEASURED",
+              "mean_difference": 0.000287101481507227,
+              "median_difference": 0.00013563139082577999,
+              "per_initialization_difference": [
+                0.0001891449743824613,
+                0.000253567900865095,
+                0.0002954462998959967,
+                0.0003493033723231244,
+                0.00034804486006945786
+              ],
+              "per_stream_difference": [
+                8.3825554717206e-05,
+                0.0005322847940059838,
+                0.0007430384124666457,
+                8.518043426761915e-05,
+                8.525798887199458e-05,
+                8.320046412374779e-05,
+                8.403136105434402e-05,
+                0.0005999928425502751
+              ],
+              "relative_difference": 0.34151874324460846,
+              "second_mean": 0.0008406609803597052,
+              "streams": 8,
+              "ties": 0
+            },
+            "share": 0.47897250052906104,
+            "switching": {
+              "ci_high": 0.0006863560759643591,
+              "ci_low": 0.000517101219096914,
+              "confidence": 0.95,
+              "design": "crossed initializations x streams",
+              "draws": 10000,
+              "favours_first": 8,
+              "favours_second": 0,
+              "first_mean": 0.0011498106836447413,
+              "initializations": 5,
+              "initializations_agreeing_on_sign": true,
+              "interval_status": "MEASURED",
+              "mean_difference": 0.0005994112004135976,
+              "median_difference": 0.0005866080377866621,
+              "per_initialization_difference": [
+                0.0005283940494177887,
+                0.0005733024818614884,
+                0.0005416668301427307,
+                0.0006926190166818613,
+                0.0006610736239641186
+              ],
+              "per_stream_difference": [
+                0.0005748155573031221,
+                0.0007178969571656704,
+                0.0005774970490433727,
+                0.0005002309636436039,
+                0.0004996792746153478,
+                0.0005869134987027102,
+                0.0005700174589937045,
+                0.0007682388438412489
+              ],
+              "relative_difference": 0.3426730513014816,
+              "second_mean": 0.0017492218840583391,
+              "streams": 8,
+              "ties": 0
+            }
+          }
+        },
+        "passed": true
+      }
+    }
+  },
+  "claim_id": "aaa1k-claim-q4-coarse-v3",
+  "compute_seconds": 10.733230188999642,
+  "evidence_role": "attack",
+  "git": {
+    "branch": "opus/birth-of-the-loop",
+    "commit": "8da75afcbdbaa5deb6405e719302193bfe03edd2",
+    "dirty": false,
+    "tree_hash": "7949710ee02f757c9b813f8acfc9a0b45be2d7f2"
+  },
+  "identity_blocks": [
+    "aaa1k-loop-0003/attack-2/env",
+    "aaa1k-loop-0003/attack-2/init"
+  ],
+  "iteration": "aaa1k-loop-0003",
+  "iteration_id": "aaa1k-loop-0001",
+  "loop_protocol_version": "aaa.loop.v0-pilot",
+  "records": [
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.00024969303200746287,
+        "mlp": 0.0003500611045692949,
+        "probe:gru_keep_bias_-2": 0.00017986105308331912,
+        "probe:rnn16": 0.00036024302529413885,
+        "rnn28": 0.00030304807058996084
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0018266126124645231,
+        "mlp": 0.0016356271247241645,
+        "probe:gru_keep_bias_-2": 0.0015758936248656166,
+        "probe:rnn16": 0.001234526022055582,
+        "rnn28": 0.0011324582080226657
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.005859696515921926,
+        "mlp": 0.0021654111961370427,
+        "probe:gru_keep_bias_-2": 0.005598962466160137,
+        "probe:rnn16": 0.0012421791567216805,
+        "rnn28": 0.0013537914448527295
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.00019267044917733867,
+        "mlp": 0.0003008873890653419,
+        "probe:gru_keep_bias_-2": 0.0001480146547344982,
+        "probe:rnn16": 0.00030376666234139735,
+        "rnn28": 0.00027478006859246897
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.00019261607474412064,
+        "mlp": 0.0003008790232040095,
+        "probe:gru_keep_bias_-2": 0.0001480398906657272,
+        "probe:rnn16": 0.00030381857094009405,
+        "rnn28": 0.00027493407101485096
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.00025410795258226377,
+        "mlp": 0.00036425474825868337,
+        "probe:gru_keep_bias_-2": 0.0001972843635590968,
+        "probe:rnn16": 0.0003601687564174197,
+        "rnn28": 0.00032383155077188314
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0002742365317504554,
+        "mlp": 0.00036997294761796493,
+        "probe:gru_keep_bias_-2": 0.0002097802372720547,
+        "probe:rnn16": 0.0003823029444481796,
+        "rnn28": 0.00035659560559641034
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.003402200482098034,
+        "mlp": 0.0031105542475995383,
+        "probe:gru_keep_bias_-2": 0.002818141686701121,
+        "probe:rnn16": 0.001385322884819489,
+        "rnn28": 0.0013756333485142448
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0002710095426471701,
+        "mlp": 0.0003422684851949973,
+        "probe:gru_keep_bias_-2": 0.00020450152386809447,
+        "probe:rnn16": 0.0003576005654703897,
+        "rnn28": 0.00031560613445518723
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0018319955676485017,
+        "mlp": 0.0016250501708761622,
+        "probe:gru_keep_bias_-2": 0.001549552237342601,
+        "probe:rnn16": 0.001231830087614542,
+        "rnn28": 0.0010505527196562764
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0021236669165545824,
+        "mlp": 0.0022385131811329512,
+        "probe:gru_keep_bias_-2": 0.006975506939307953,
+        "probe:rnn16": 0.001499992586750464,
+        "rnn28": 0.0011994197360023944
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.00021159304535368448,
+        "mlp": 0.0002927297865697491,
+        "probe:gru_keep_bias_-2": 0.00016623467100344616,
+        "probe:rnn16": 0.0003189759500889803,
+        "rnn28": 0.00026468852706453303
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.00021162043975511552,
+        "mlp": 0.0002926528438579768,
+        "probe:gru_keep_bias_-2": 0.00016625493886010935,
+        "probe:rnn16": 0.00031893227591825706,
+        "rnn28": 0.00026452763298068097
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0002669107831879047,
+        "mlp": 0.00035795427184002977,
+        "probe:gru_keep_bias_-2": 0.00020930885968251022,
+        "probe:rnn16": 0.0003687730068775319,
+        "rnn28": 0.00032087825216887993
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0003059967622221066,
+        "mlp": 0.000360420412878809,
+        "probe:gru_keep_bias_-2": 0.00022278433753348758,
+        "probe:rnn16": 0.0003983273643063587,
+        "rnn28": 0.0003323246862352644
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.003458067794269088,
+        "mlp": 0.0031146143376052414,
+        "probe:gru_keep_bias_-2": 0.00288339910468389,
+        "probe:rnn16": 0.0014831705221465645,
+        "rnn28": 0.0012225899615338823
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.00032491553945140466,
+        "mlp": 0.0004507696808483805,
+        "probe:gru_keep_bias_-2": 0.0002468213707116377,
+        "probe:rnn16": 0.00048774239264915055,
+        "rnn28": 0.00035814860550717535
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0019361531058949071,
+        "mlp": 0.0017971619549166694,
+        "probe:gru_keep_bias_-2": 0.0015383179897713382,
+        "probe:rnn16": 0.0011371421104817941,
+        "rnn28": 0.0010615575777832523
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0021701346275248873,
+        "mlp": 0.002252315127355064,
+        "probe:gru_keep_bias_-2": 0.007027800035620924,
+        "probe:rnn16": 0.0014794859032606204,
+        "rnn28": 0.0014008349774289875
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0002520143365980846,
+        "mlp": 0.0003980633898852793,
+        "probe:gru_keep_bias_-2": 0.00019801749716433147,
+        "probe:rnn16": 0.0004592481049176471,
+        "rnn28": 0.00031776792232613327
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.00025200950663925624,
+        "mlp": 0.0003979490905725589,
+        "probe:gru_keep_bias_-2": 0.0001980840013152489,
+        "probe:rnn16": 0.0004593623481258284,
+        "rnn28": 0.00031695810295845724
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.00029762831303032755,
+        "mlp": 0.0004674952952398084,
+        "probe:gru_keep_bias_-2": 0.00024902498073565743,
+        "probe:rnn16": 0.0005102166874205953,
+        "rnn28": 0.00038230655099463307
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.00033356441965613255,
+        "mlp": 0.0004652930934021684,
+        "probe:gru_keep_bias_-2": 0.0002643020531318572,
+        "probe:rnn16": 0.0005309317772610166,
+        "rnn28": 0.00038849781521152683
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0030956875354789964,
+        "mlp": 0.0031344531873533314,
+        "probe:gru_keep_bias_-2": 0.0031267523783664753,
+        "probe:rnn16": 0.0014700939840700182,
+        "rnn28": 0.0012686202466943499
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0002667687992353059,
+        "mlp": 0.00040973851569915264,
+        "probe:gru_keep_bias_-2": 0.00021083711314315306,
+        "probe:rnn16": 0.0003517943987103457,
+        "rnn28": 0.00028085309609515176
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0018810599845134278,
+        "mlp": 0.0015910389696382,
+        "probe:gru_keep_bias_-2": 0.0016465023836963152,
+        "probe:rnn16": 0.0015501210883080957,
+        "rnn28": 0.0008521858167991492
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.006327916342372037,
+        "mlp": 0.002143206568460477,
+        "probe:gru_keep_bias_-2": 0.0059801497043831565,
+        "probe:rnn16": 0.0017984656352010107,
+        "rnn28": 0.0010864947007526238
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.00021616097004158034,
+        "mlp": 0.00037087870471841627,
+        "probe:gru_keep_bias_-2": 0.00017179480410958444,
+        "probe:rnn16": 0.0002992094285292348,
+        "rnn28": 0.00023340669139458348
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.00021619739398434672,
+        "mlp": 0.000370786698632664,
+        "probe:gru_keep_bias_-2": 0.00017179254585611897,
+        "probe:rnn16": 0.0002993628467553487,
+        "rnn28": 0.00023342327682615363
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.00027036347125168186,
+        "mlp": 0.0004430781444441385,
+        "probe:gru_keep_bias_-2": 0.0002174681122579866,
+        "probe:rnn16": 0.0003439621185517711,
+        "rnn28": 0.0002782707646008711
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0003145105503773334,
+        "mlp": 0.0004414481029636937,
+        "probe:gru_keep_bias_-2": 0.00023644786172203702,
+        "probe:rnn16": 0.0003802443868491553,
+        "rnn28": 0.00031690103310573947
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0038797223989294354,
+        "mlp": 0.003019927870045406,
+        "probe:gru_keep_bias_-2": 0.0030254322542993847,
+        "probe:rnn16": 0.0017405774999301655,
+        "rnn28": 0.0010926719567911098
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.00026779054425595157,
+        "mlp": 0.0003716816201596868,
+        "probe:gru_keep_bias_-2": 0.00018855931221328773,
+        "probe:rnn16": 0.00038381908759115794,
+        "rnn28": 0.0002970518951920463
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0018747606699350229,
+        "mlp": 0.0016825400413431597,
+        "probe:gru_keep_bias_-2": 0.0015808066462159119,
+        "probe:rnn16": 0.0009992139791508276,
+        "rnn28": 0.0007545599579120658
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0022319011051580937,
+        "mlp": 0.002213910078498034,
+        "probe:gru_keep_bias_-2": 0.006842921131209309,
+        "probe:rnn16": 0.0012631101328419432,
+        "rnn28": 0.0009878566620126735
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.00020613298929975977,
+        "mlp": 0.0003081024028599886,
+        "probe:gru_keep_bias_-2": 0.00014871018938757285,
+        "probe:rnn16": 0.00034503706020162485,
+        "rnn28": 0.0002497255914543526
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.00020607149621786194,
+        "mlp": 0.00030773522234878544,
+        "probe:gru_keep_bias_-2": 0.00014865366792761895,
+        "probe:rnn16": 0.00034505004087235125,
+        "rnn28": 0.00024957154826439864
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0002645326076761452,
+        "mlp": 0.00038723725332903344,
+        "probe:gru_keep_bias_-2": 0.00020275744393556178,
+        "probe:rnn16": 0.0003987086634156219,
+        "rnn28": 0.00030081782458139567
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.000263122810337908,
+        "mlp": 0.00038654492781129866,
+        "probe:gru_keep_bias_-2": 0.00019311926402056334,
+        "probe:rnn16": 0.0004276300699088365,
+        "rnn28": 0.0003314516352071065
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0031827252754155115,
+        "mlp": 0.0021292428906360167,
+        "probe:gru_keep_bias_-2": 0.0032425319357403297,
+        "probe:rnn16": 0.0012840420063502955,
+        "rnn28": 0.0009332005309740809
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0017383073506273118,
+        "mlp": 0.001975933123166296,
+        "probe:gru_keep_bias_-2": 0.0014760532275044686,
+        "probe:rnn16": 0.0013307379922052388,
+        "rnn28": 0.0013274239651771495
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0019386689390348108,
+        "mlp": 0.002006945358885818,
+        "probe:gru_keep_bias_-2": 0.0015651384230982658,
+        "probe:rnn16": 0.001413888939158391,
+        "rnn28": 0.0013364894277978824
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0019401229023078468,
+        "mlp": 0.0019372503024588563,
+        "probe:gru_keep_bias_-2": 0.0015882503129662129,
+        "probe:rnn16": 0.0013201209079749187,
+        "rnn28": 0.0013871898437164013
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0016931296674290808,
+        "mlp": 0.001882617291162922,
+        "probe:gru_keep_bias_-2": 0.0014146481752472196,
+        "probe:rnn16": 0.0013656804715596802,
+        "rnn28": 0.0013182740985000596
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0016921094002080802,
+        "mlp": 0.0018803218763833657,
+        "probe:gru_keep_bias_-2": 0.0014140073496991248,
+        "probe:rnn16": 0.0013656210260471222,
+        "rnn28": 0.0013178745926870322
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0017079357453242798,
+        "mlp": 0.0018918947900959913,
+        "probe:gru_keep_bias_-2": 0.0014362258923656449,
+        "probe:rnn16": 0.001339435857165003,
+        "rnn28": 0.0013522756733285472
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0017630596576269537,
+        "mlp": 0.0019105146657982582,
+        "probe:gru_keep_bias_-2": 0.0014530472955319714,
+        "probe:rnn16": 0.0013644474853155269,
+        "rnn28": 0.001364901642564538
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0016754648687466284,
+        "mlp": 0.001905188331734908,
+        "probe:gru_keep_bias_-2": 0.0015072549160523912,
+        "probe:rnn16": 0.001301925037921187,
+        "rnn28": 0.0012829227501615409
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0017874724833795627,
+        "mlp": 0.001939046550932946,
+        "probe:gru_keep_bias_-2": 0.0015046955497376297,
+        "probe:rnn16": 0.001637234240765527,
+        "rnn28": 0.001355414189405122
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0019510918827611804,
+        "mlp": 0.0020771956968161356,
+        "probe:gru_keep_bias_-2": 0.0015624743429825934,
+        "probe:rnn16": 0.0015921112766821574,
+        "rnn28": 0.0012859097210648127
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0019134698409935345,
+        "mlp": 0.0019536395711821854,
+        "probe:gru_keep_bias_-2": 0.0015904133933076583,
+        "probe:rnn16": 0.001643607646709372,
+        "rnn28": 0.0013470343726327597
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0017285706169082415,
+        "mlp": 0.0018895227815455297,
+        "probe:gru_keep_bias_-2": 0.0014196139768029414,
+        "probe:rnn16": 0.0016054614744371468,
+        "rnn28": 0.0012665167159555068
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.001728341256586756,
+        "mlp": 0.0018877665291378973,
+        "probe:gru_keep_bias_-2": 0.0014193220065623982,
+        "probe:rnn16": 0.0016048304009624976,
+        "rnn28": 0.0012749043691129055
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0017271877749407277,
+        "mlp": 0.0018872587981348713,
+        "probe:gru_keep_bias_-2": 0.0014373222473258102,
+        "probe:rnn16": 0.0016340810574420501,
+        "rnn28": 0.0013049922753618625
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.001780726367196601,
+        "mlp": 0.0019060496451066805,
+        "probe:gru_keep_bias_-2": 0.001481954026091831,
+        "probe:rnn16": 0.001674947555251076,
+        "rnn28": 0.0013152606410341233
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0017320239351005212,
+        "mlp": 0.0019657295605776583,
+        "probe:gru_keep_bias_-2": 0.0014648291084542134,
+        "probe:rnn16": 0.0014903773376698276,
+        "rnn28": 0.0012545808708823655
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0018494240286350387,
+        "mlp": 0.00210478227413148,
+        "probe:gru_keep_bias_-2": 0.0015780566960911847,
+        "probe:rnn16": 0.0014938874289534302,
+        "rnn28": 0.0014665797541760167
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0020818490947377482,
+        "mlp": 0.0021509102173014115,
+        "probe:gru_keep_bias_-2": 0.0016831481880449186,
+        "probe:rnn16": 0.0014653069638982834,
+        "rnn28": 0.0013542855592290827
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0020035718025106855,
+        "mlp": 0.0020811385027919562,
+        "probe:gru_keep_bias_-2": 0.001664936710799371,
+        "probe:rnn16": 0.0015435316695445868,
+        "rnn28": 0.0015033210236308292
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.001832069932974828,
+        "mlp": 0.0020221180970265828,
+        "probe:gru_keep_bias_-2": 0.0015251967022375302,
+        "probe:rnn16": 0.0014757864174626445,
+        "rnn28": 0.0014294030493889887
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.001831929463452261,
+        "mlp": 0.002018646837090779,
+        "probe:gru_keep_bias_-2": 0.0015248593942201946,
+        "probe:rnn16": 0.001474297729667871,
+        "rnn28": 0.001427290204417366
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0018239200350481989,
+        "mlp": 0.0020201953406402645,
+        "probe:gru_keep_bias_-2": 0.00154276717581724,
+        "probe:rnn16": 0.001566515985767442,
+        "rnn28": 0.0014818182622778366
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0018211855719324143,
+        "mlp": 0.002038611028758637,
+        "probe:gru_keep_bias_-2": 0.0015479701289485572,
+        "probe:rnn16": 0.0015566155534370823,
+        "rnn28": 0.0015060289109699268
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0017795845720385874,
+        "mlp": 0.0020045830044526664,
+        "probe:gru_keep_bias_-2": 0.0015183325219372964,
+        "probe:rnn16": 0.001409698012388604,
+        "rnn28": 0.0012248240251073457
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0017504095193511527,
+        "mlp": 0.00204074461774947,
+        "probe:gru_keep_bias_-2": 0.0014979159580536772,
+        "probe:rnn16": 0.0016040369389280053,
+        "rnn28": 0.0012354873073604801
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.002020294289997314,
+        "mlp": 0.0022823902154166416,
+        "probe:gru_keep_bias_-2": 0.0015695047981789032,
+        "probe:rnn16": 0.0017287157365345751,
+        "rnn28": 0.0012884734222461806
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0019777708967995975,
+        "mlp": 0.001976003318730815,
+        "probe:gru_keep_bias_-2": 0.001570347713432812,
+        "probe:rnn16": 0.001708475294661739,
+        "rnn28": 0.001255216345870358
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0017191120021609841,
+        "mlp": 0.001975867221437417,
+        "probe:gru_keep_bias_-2": 0.0014194563145545481,
+        "probe:rnn16": 0.0015826426440121778,
+        "rnn28": 0.001241028827566449
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0017191016042563054,
+        "mlp": 0.0019753844628805283,
+        "probe:gru_keep_bias_-2": 0.0014189787928350307,
+        "probe:rnn16": 0.0015824602275450322,
+        "rnn28": 0.0012407308245412814
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0017167390700438025,
+        "mlp": 0.0019654862047055474,
+        "probe:gru_keep_bias_-2": 0.0014343931444831543,
+        "probe:rnn16": 0.001610276292710418,
+        "rnn28": 0.0012531008319684926
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0017713132057176537,
+        "mlp": 0.001996191715365199,
+        "probe:gru_keep_bias_-2": 0.001491346189911472,
+        "probe:rnn16": 0.0016312408677200954,
+        "rnn28": 0.0012688958196810803
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0017137398886343167,
+        "mlp": 0.002073967826277863,
+        "probe:gru_keep_bias_-2": 0.001442762988107204,
+        "probe:rnn16": 0.0016025249304637054,
+        "rnn28": 0.001239049196492141
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0018090415695224365,
+        "mlp": 0.0019304672355177363,
+        "probe:gru_keep_bias_-2": 0.0015726944352345232,
+        "probe:rnn16": 0.0012581353809626066,
+        "rnn28": 0.0011424155879476094
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0019795457916947944,
+        "mlp": 0.002051569518096112,
+        "probe:gru_keep_bias_-2": 0.0016258929222791871,
+        "probe:rnn16": 0.001217911572384922,
+        "rnn28": 0.001152718103298058
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0019791497885255746,
+        "mlp": 0.0019207470770885272,
+        "probe:gru_keep_bias_-2": 0.001679807094796529,
+        "probe:rnn16": 0.0013261328068220161,
+        "rnn28": 0.0012191416302594757
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0017578599613850142,
+        "mlp": 0.0018772432279242901,
+        "probe:gru_keep_bias_-2": 0.0015102252959029907,
+        "probe:rnn16": 0.0012358738295377358,
+        "rnn28": 0.0011455010726649382
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0017574576655777993,
+        "mlp": 0.00187529175588367,
+        "probe:gru_keep_bias_-2": 0.0015094879451890443,
+        "probe:rnn16": 0.0012351843788204852,
+        "rnn28": 0.001144344705471615
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0017519815667069545,
+        "mlp": 0.0018789202127353082,
+        "probe:gru_keep_bias_-2": 0.0015293350607077348,
+        "probe:rnn16": 0.0013000066079681366,
+        "rnn28": 0.0011657528864137195
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.00176618231924748,
+        "mlp": 0.00189516841236228,
+        "probe:gru_keep_bias_-2": 0.001535462069919015,
+        "probe:rnn16": 0.001326924533210023,
+        "rnn28": 0.0011767218110672773
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "quantum_0.006/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.001782286818816295,
+        "mlp": 0.0019310760011356494,
+        "probe:gru_keep_bias_-2": 0.0015144937184948617,
+        "probe:rnn16": 0.0011984077349099346,
+        "rnn28": 0.0011035564544177115
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0001871523089556399,
+        "mlp": 0.00031538494390189365,
+        "probe:gru_keep_bias_-2": 0.0001438956510636096,
+        "probe:rnn16": 0.0003038981842161245,
+        "rnn28": 0.00028097136850197316
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0016014814284994944,
+        "mlp": 0.0014546590819563578,
+        "probe:gru_keep_bias_-2": 0.0013340881397192793,
+        "probe:rnn16": 0.0010777477823485763,
+        "rnn28": 0.0010874599857676106
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0035906112102597736,
+        "mlp": 0.001868393654307612,
+        "probe:gru_keep_bias_-2": 0.0034255362995750265,
+        "probe:rnn16": 0.0011575033190091692,
+        "rnn28": 0.0013261096244960309
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0001839248492041209,
+        "mlp": 0.0003148280912423111,
+        "probe:gru_keep_bias_-2": 0.00014761293248424597,
+        "probe:rnn16": 0.00030482900097824245,
+        "rnn28": 0.00028347006663349215
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.00018386850906297608,
+        "mlp": 0.00031475860513452555,
+        "probe:gru_keep_bias_-2": 0.00014762211442092025,
+        "probe:rnn16": 0.0003049002625488465,
+        "rnn28": 0.0002836533694585011
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.00018471333085821832,
+        "mlp": 0.000315389176071812,
+        "probe:gru_keep_bias_-2": 0.00014699701612468888,
+        "probe:rnn16": 0.0003035252861251156,
+        "rnn28": 0.0002799303624224475
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.00018696835376363381,
+        "mlp": 0.0003153525550410313,
+        "probe:gru_keep_bias_-2": 0.00014367794302165104,
+        "probe:rnn16": 0.000304024464891027,
+        "rnn28": 0.00028132176381358883
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0017120997526230174,
+        "mlp": 0.0016287159448078062,
+        "probe:gru_keep_bias_-2": 0.0014270726837776102,
+        "probe:rnn16": 0.001105246708080352,
+        "rnn28": 0.001191405716310015
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.00022033788587026685,
+        "mlp": 0.00030387459138531353,
+        "probe:gru_keep_bias_-2": 0.00017608321648263756,
+        "probe:rnn16": 0.000303506903762804,
+        "rnn28": 0.00025548424634599845
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0015105761550319448,
+        "mlp": 0.001451277318401721,
+        "probe:gru_keep_bias_-2": 0.001214781422077633,
+        "probe:rnn16": 0.001162931467218415,
+        "rnn28": 0.0010108935064391518
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0018802816468872826,
+        "mlp": 0.0019155214392434252,
+        "probe:gru_keep_bias_-2": 0.003837872665896315,
+        "probe:rnn16": 0.0014296260251299856,
+        "rnn28": 0.0011290583170722153
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.00021156618152051937,
+        "mlp": 0.00030270649910243774,
+        "probe:gru_keep_bias_-2": 0.00017301530539434997,
+        "probe:rnn16": 0.00030524352392144975,
+        "rnn28": 0.0002516986238121609
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0002116089519668265,
+        "mlp": 0.0003026117046798197,
+        "probe:gru_keep_bias_-2": 0.00017305079380076688,
+        "probe:rnn16": 0.0003053246022766454,
+        "rnn28": 0.0002515366013247226
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.00021050641701895315,
+        "mlp": 0.0003042852996756156,
+        "probe:gru_keep_bias_-2": 0.00017203534717465682,
+        "probe:rnn16": 0.0003026974356219591,
+        "rnn28": 0.0002573605414885137
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.00022054789072075152,
+        "mlp": 0.0003037257540427727,
+        "probe:gru_keep_bias_-2": 0.0001762741158938568,
+        "probe:rnn16": 0.0003038207012584523,
+        "rnn28": 0.00025484860278504
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0016330681776540433,
+        "mlp": 0.001609472572111221,
+        "probe:gru_keep_bias_-2": 0.001356329052888943,
+        "probe:rnn16": 0.001270202136922142,
+        "rnn28": 0.0010540515324537637
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0002529153483669886,
+        "mlp": 0.00042321112018676283,
+        "probe:gru_keep_bias_-2": 0.0002089382681440939,
+        "probe:rnn16": 0.0004582892732776864,
+        "rnn28": 0.00031979589528098704
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.001648006896103023,
+        "mlp": 0.001503157644841614,
+        "probe:gru_keep_bias_-2": 0.00129391826251307,
+        "probe:rnn16": 0.0010080924826209295,
+        "rnn28": 0.0009600328981493354
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0019270313837242037,
+        "mlp": 0.0019671398758831964,
+        "probe:gru_keep_bias_-2": 0.0037906499071025074,
+        "probe:rnn16": 0.0013579016362852017,
+        "rnn28": 0.0013387124357263395
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.00025270792267375193,
+        "mlp": 0.00042046437147171944,
+        "probe:gru_keep_bias_-2": 0.0002075814019987437,
+        "probe:rnn16": 0.0004616068466183658,
+        "rnn28": 0.0003082321152773978
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.00025267858024094085,
+        "mlp": 0.00042016635464063015,
+        "probe:gru_keep_bias_-2": 0.00020760919093899832,
+        "probe:rnn16": 0.0004618534671819645,
+        "rnn28": 0.0003072498348180865
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0002526086183532474,
+        "mlp": 0.00042354900403499186,
+        "probe:gru_keep_bias_-2": 0.00020617163468012863,
+        "probe:rnn16": 0.00045688525594564475,
+        "rnn28": 0.0003232597321759879
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.00025295511483240456,
+        "mlp": 0.00042298507733099004,
+        "probe:gru_keep_bias_-2": 0.0002090737005750316,
+        "probe:rnn16": 0.00045875036971324516,
+        "rnn28": 0.00031844265794253216
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.00175447302895315,
+        "mlp": 0.0016939061274026384,
+        "probe:gru_keep_bias_-2": 0.0014214615037380282,
+        "probe:rnn16": 0.00115816959030898,
+        "rnn28": 0.0010352836072539038
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0002152363196444727,
+        "mlp": 0.0003953350022996678,
+        "probe:gru_keep_bias_-2": 0.00016919163516080014,
+        "probe:rnn16": 0.00029802369001182173,
+        "rnn28": 0.00023661667492522762
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0016747071606256583,
+        "mlp": 0.001415088797162301,
+        "probe:gru_keep_bias_-2": 0.001400241591745671,
+        "probe:rnn16": 0.001418550918376408,
+        "rnn28": 0.0008392236608634433
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.003737870771441093,
+        "mlp": 0.0018433651819505065,
+        "probe:gru_keep_bias_-2": 0.0035704157781589296,
+        "probe:rnn16": 0.0016910323406140618,
+        "rnn28": 0.0010397005635382232
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.00021557139305900138,
+        "mlp": 0.0003957747579487446,
+        "probe:gru_keep_bias_-2": 0.00017650308130215622,
+        "probe:rnn16": 0.00030038633943395407,
+        "rnn28": 0.00023594739304496587
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0002156822483206452,
+        "mlp": 0.00039581518641155003,
+        "probe:gru_keep_bias_-2": 0.00017655771873285522,
+        "probe:rnn16": 0.0003005718153282961,
+        "rnn28": 0.00023589408987325966
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.00021309493571590018,
+        "mlp": 0.0003951263204653261,
+        "probe:gru_keep_bias_-2": 0.00017567528969278647,
+        "probe:rnn16": 0.0002971136088260358,
+        "rnn28": 0.00023678005863630972
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.00021531789424238213,
+        "mlp": 0.00039539611643317566,
+        "probe:gru_keep_bias_-2": 0.00016920961446299708,
+        "probe:rnn16": 0.0002983385106909743,
+        "rnn28": 0.00023654206361016852
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.00175986120415977,
+        "mlp": 0.0015598489823337245,
+        "probe:gru_keep_bias_-2": 0.0014976769691067912,
+        "probe:rnn16": 0.001491354663095827,
+        "rnn28": 0.000940618861928403
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.00018830768693379424,
+        "mlp": 0.00031318704618068567,
+        "probe:gru_keep_bias_-2": 0.000145177737067044,
+        "probe:rnn16": 0.00033030212561120713,
+        "rnn28": 0.0002389967453141072
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0016938694957492804,
+        "mlp": 0.0014927138723816573,
+        "probe:gru_keep_bias_-2": 0.0013277619120897952,
+        "probe:rnn16": 0.0009142375077406562,
+        "rnn28": 0.0007578626934941908
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0020009384748602213,
+        "mlp": 0.0018964808117464542,
+        "probe:gru_keep_bias_-2": 0.0037035711079004036,
+        "probe:rnn16": 0.0011325498813671228,
+        "rnn28": 0.0009421279599651569
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0001997525705993862,
+        "mlp": 0.0003078725988607395,
+        "probe:gru_keep_bias_-2": 0.00015154464500432836,
+        "probe:rnn16": 0.0003334267301880682,
+        "rnn28": 0.00023639594851983982
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0001997025502335154,
+        "mlp": 0.00030748126268612054,
+        "probe:gru_keep_bias_-2": 0.0001515126649157126,
+        "probe:rnn16": 0.0003336670461191802,
+        "rnn28": 0.00023620927371810317
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0002004890068293501,
+        "mlp": 0.0003153650124750663,
+        "probe:gru_keep_bias_-2": 0.00015216320498221355,
+        "probe:rnn16": 0.0003291903950530552,
+        "rnn28": 0.00024038179738081403
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.00018820285967821474,
+        "mlp": 0.0003124473067193295,
+        "probe:gru_keep_bias_-2": 0.00014510401308566337,
+        "probe:rnn16": 0.000330709073997725,
+        "rnn28": 0.00023859491614424956
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.001802881099190884,
+        "mlp": 0.0015896041514349435,
+        "probe:gru_keep_bias_-2": 0.0014609750315503882,
+        "probe:rnn16": 0.0010218259178337082,
+        "rnn28": 0.0008602238473928719
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0014592691386285973,
+        "mlp": 0.0017071023956373992,
+        "probe:gru_keep_bias_-2": 0.001248886520469116,
+        "probe:rnn16": 0.0011642464078091977,
+        "rnn28": 0.0011990651599941625
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0015871523517051375,
+        "mlp": 0.0017877297819325435,
+        "probe:gru_keep_bias_-2": 0.001370776193594063,
+        "probe:rnn16": 0.0011679887170041759,
+        "rnn28": 0.0011549974556381414
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0016739363261003134,
+        "mlp": 0.0017544650269752434,
+        "probe:gru_keep_bias_-2": 0.0013944018976769343,
+        "probe:rnn16": 0.0011680434343315955,
+        "rnn28": 0.001259547711638877
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0013700204345941946,
+        "mlp": 0.0015665517603888088,
+        "probe:gru_keep_bias_-2": 0.0011991249962170574,
+        "probe:rnn16": 0.0010880866405697902,
+        "rnn28": 0.0011130105140207578
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0013272190495105193,
+        "mlp": 0.0015491824925297601,
+        "probe:gru_keep_bias_-2": 0.0011615423064027114,
+        "probe:rnn16": 0.0010855931065092963,
+        "rnn28": 0.0010983887799995231
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0014588139427686945,
+        "mlp": 0.0017347726705122548,
+        "probe:gru_keep_bias_-2": 0.0012564369208131621,
+        "probe:rnn16": 0.001160736514606476,
+        "rnn28": 0.0011967454041735635
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0014564552338208509,
+        "mlp": 0.0016988479411754731,
+        "probe:gru_keep_bias_-2": 0.0012467995665401323,
+        "probe:rnn16": 0.001160075919136705,
+        "rnn28": 0.0011939510200529493
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0015728976335708101,
+        "mlp": 0.0018672828986080689,
+        "probe:gru_keep_bias_-2": 0.005897304668979583,
+        "probe:rnn16": 0.0011689769592316283,
+        "rnn28": 0.0012230765268992673
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0015106842173507335,
+        "mlp": 0.0016898831726423946,
+        "probe:gru_keep_bias_-2": 0.0012982084680388563,
+        "probe:rnn16": 0.0014493005673662522,
+        "rnn28": 0.0011368733192217725
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0016718535741622258,
+        "mlp": 0.0018253960870155763,
+        "probe:gru_keep_bias_-2": 0.0014067058273326423,
+        "probe:rnn16": 0.0014053112901391258,
+        "rnn28": 0.0011309016326356894
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0016692790978453588,
+        "mlp": 0.0017449128707642785,
+        "probe:gru_keep_bias_-2": 0.0014008629236815214,
+        "probe:rnn16": 0.001463464912553517,
+        "rnn28": 0.001176906282023657
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0013901421584358526,
+        "mlp": 0.0015516438200902708,
+        "probe:gru_keep_bias_-2": 0.0012118914877957629,
+        "probe:rnn16": 0.0013497084127243205,
+        "rnn28": 0.0011044125265824102
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0013547522595773397,
+        "mlp": 0.001537457009476663,
+        "probe:gru_keep_bias_-2": 0.0011829705759599724,
+        "probe:rnn16": 0.0013252352637415064,
+        "rnn28": 0.0010870084891596197
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0014910817562175669,
+        "mlp": 0.0017144608559377824,
+        "probe:gru_keep_bias_-2": 0.0012985408970253515,
+        "probe:rnn16": 0.00146088559219507,
+        "rnn28": 0.0011557384741495524
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0015072459865339422,
+        "mlp": 0.001682019837601337,
+        "probe:gru_keep_bias_-2": 0.0012964757029203264,
+        "probe:rnn16": 0.0014460390635631865,
+        "rnn28": 0.0011357908025189797
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0016641943329279516,
+        "mlp": 0.0018663331998904893,
+        "probe:gru_keep_bias_-2": 0.001622629473082665,
+        "probe:rnn16": 0.001448528360653906,
+        "rnn28": 0.0010980554722352042
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.001550847329751227,
+        "mlp": 0.0018307967084112674,
+        "probe:gru_keep_bias_-2": 0.0013613958415614159,
+        "probe:rnn16": 0.0013806083640111725,
+        "rnn28": 0.0013268776416972285
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0017189240418601403,
+        "mlp": 0.001868387229024501,
+        "probe:gru_keep_bias_-2": 0.0014910730604898806,
+        "probe:rnn16": 0.0013270343849893288,
+        "rnn28": 0.0012228190264617236
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0017539132240828616,
+        "mlp": 0.0018705044464365395,
+        "probe:gru_keep_bias_-2": 0.0014644242534253905,
+        "probe:rnn16": 0.0013735716301682493,
+        "rnn28": 0.0013722407840655803
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0014470930344077247,
+        "mlp": 0.0016602297706443659,
+        "probe:gru_keep_bias_-2": 0.0012732295625885895,
+        "probe:rnn16": 0.001272813966341871,
+        "rnn28": 0.001233063567875582
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0014140253904267972,
+        "mlp": 0.0016482189681604254,
+        "probe:gru_keep_bias_-2": 0.0012361924759604654,
+        "probe:rnn16": 0.0012831071794292936,
+        "rnn28": 0.0012081520966585474
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0015788201669553641,
+        "mlp": 0.001858269452668141,
+        "probe:gru_keep_bias_-2": 0.0013719446114920663,
+        "probe:rnn16": 0.0014093695140561249,
+        "rnn28": 0.0013501085042272364
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0015469315524795472,
+        "mlp": 0.0018197042724653794,
+        "probe:gru_keep_bias_-2": 0.0013595911590943406,
+        "probe:rnn16": 0.0013707684216002082,
+        "rnn28": 0.0013197309313073152
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.001725017547059143,
+        "mlp": 0.001985349653733245,
+        "probe:gru_keep_bias_-2": 0.005427827550577759,
+        "probe:rnn16": 0.0013413944910296899,
+        "rnn28": 0.0011751333081088055
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0014975491942854264,
+        "mlp": 0.0017975354481008128,
+        "probe:gru_keep_bias_-2": 0.0012866291259624628,
+        "probe:rnn16": 0.0014459769791285307,
+        "rnn28": 0.00113304370687565
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0016492431919917087,
+        "mlp": 0.0020210553466889604,
+        "probe:gru_keep_bias_-2": 0.001395127091271363,
+        "probe:rnn16": 0.0015401040124023212,
+        "rnn28": 0.0011897076230027136
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0016344843998628348,
+        "mlp": 0.0017877775652351934,
+        "probe:gru_keep_bias_-2": 0.0013797894913519621,
+        "probe:rnn16": 0.0015298213842102298,
+        "rnn28": 0.0011306999068412468
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.001395391368291029,
+        "mlp": 0.0016896423623804252,
+        "probe:gru_keep_bias_-2": 0.0012086334989358405,
+        "probe:rnn16": 0.00137408099636559,
+        "rnn28": 0.001087109643585418
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0013577859573240697,
+        "mlp": 0.0016878423464013151,
+        "probe:gru_keep_bias_-2": 0.001169795082636172,
+        "probe:rnn16": 0.0013351893440013936,
+        "rnn28": 0.0010851195218953406
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0014860298464858543,
+        "mlp": 0.0018270565259584102,
+        "probe:gru_keep_bias_-2": 0.0012781871160800044,
+        "probe:rnn16": 0.0014234953928215003,
+        "rnn28": 0.0011435246323982288
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0014950532362898563,
+        "mlp": 0.0017886446112639984,
+        "probe:gru_keep_bias_-2": 0.0012845011446996858,
+        "probe:rnn16": 0.001442508799474572,
+        "rnn28": 0.0011304808711013524
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.001605976695818068,
+        "mlp": 0.0019880425012603264,
+        "probe:gru_keep_bias_-2": 0.0024638161830334514,
+        "probe:rnn16": 0.0015757654983262859,
+        "rnn28": 0.0011469586681346013
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0014991945730775697,
+        "mlp": 0.0016835712745972245,
+        "probe:gru_keep_bias_-2": 0.0013511004022065893,
+        "probe:rnn16": 0.00113169926983927,
+        "rnn28": 0.0010389513850846746
+      },
+      "stream_id": "coarse_speed_v1:1342842686",
+      "stream_seed": 1342842686
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0016774118642994141,
+        "mlp": 0.0018073373274011357,
+        "probe:gru_keep_bias_-2": 0.001439089759178028,
+        "probe:rnn16": 0.0011063856210617672,
+        "rnn28": 0.001021995248496097
+      },
+      "stream_id": "coarse_speed_v1:1535639600",
+      "stream_seed": 1535639600
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0017096454485653135,
+        "mlp": 0.0017401245995709897,
+        "probe:gru_keep_bias_-2": 0.001492275834214306,
+        "probe:rnn16": 0.0011528412288631452,
+        "rnn28": 0.00107090457919602
+      },
+      "stream_id": "coarse_speed_v1:1652202215",
+      "stream_seed": 1652202215
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0013972354819041855,
+        "mlp": 0.0015545143563810808,
+        "probe:gru_keep_bias_-2": 0.001285069329036306,
+        "probe:rnn16": 0.0010705516603492728,
+        "rnn28": 0.0009838309996027638
+      },
+      "stream_id": "coarse_speed_v1:201102306",
+      "stream_seed": 201102306
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0013676976184560723,
+        "mlp": 0.0015387776318987946,
+        "probe:gru_keep_bias_-2": 0.0012508481448495312,
+        "probe:rnn16": 0.001065195314957788,
+        "rnn28": 0.0009844131876771886
+      },
+      "stream_id": "coarse_speed_v1:316494252",
+      "stream_seed": 316494252
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.001496843500530486,
+        "mlp": 0.001713219229207739,
+        "probe:gru_keep_bias_-2": 0.0013535092972293183,
+        "probe:rnn16": 0.001143359283645906,
+        "rnn28": 0.0010670942258221951
+      },
+      "stream_id": "coarse_speed_v1:326423393",
+      "stream_seed": 326423393
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.001498439834759306,
+        "mlp": 0.0016764029042849805,
+        "probe:gru_keep_bias_-2": 0.0013503252533942787,
+        "probe:rnn16": 0.00112804177403828,
+        "rnn28": 0.0010355786468420494
+      },
+      "stream_id": "coarse_speed_v1:748419173",
+      "stream_seed": 748419173
+    },
+    {
+      "condition": "speeds_0.10_0.25/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0016706970420547421,
+        "mlp": 0.0018478290089799605,
+        "probe:gru_keep_bias_-2": 0.0015636637955993968,
+        "probe:rnn16": 0.0010936664418438647,
+        "rnn28": 0.0010704190678879674
+      },
+      "stream_id": "coarse_speed_v1:888694649",
+      "stream_seed": 888694649
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0014646348336099391,
+        "mlp": 0.0012033241412058198,
+        "probe:gru_keep_bias_-2": 0.0007863350387966578,
+        "probe:rnn16": 0.0008229279243369289,
+        "rnn28": 0.0008533405324996917
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.001974548079826609,
+        "mlp": 0.0018827567058302662,
+        "probe:gru_keep_bias_-2": 0.0017824063027169457,
+        "probe:rnn16": 0.0016239334691669173,
+        "rnn28": 0.0017911444269640689
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0019744231226357743,
+        "mlp": 0.0018861902762772945,
+        "probe:gru_keep_bias_-2": 0.001801655661998215,
+        "probe:rnn16": 0.001620823804591842,
+        "rnn28": 0.0017569273100066182
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0018938640966831757,
+        "mlp": 0.0018591134329427519,
+        "probe:gru_keep_bias_-2": 0.0017158663368554412,
+        "probe:rnn16": 0.0015508220435950567,
+        "rnn28": 0.0016451615712400039
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.003401756434588873,
+        "mlp": 0.0037455899259283896,
+        "probe:gru_keep_bias_-2": 0.0009853442766140095,
+        "probe:rnn16": 0.0010187492755683119,
+        "rnn28": 0.0009926044579642687
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.004567682285286563,
+        "mlp": 0.005203556464378407,
+        "probe:gru_keep_bias_-2": 0.0044991273357686155,
+        "probe:rnn16": 0.001009137627567594,
+        "rnn28": 0.0009875677673975946
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0019636414493342,
+        "mlp": 0.0018784453263807233,
+        "probe:gru_keep_bias_-2": 0.0017457370140204274,
+        "probe:rnn16": 0.0016183895072592173,
+        "rnn28": 0.0017286862127367832
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.004739270893714022,
+        "mlp": 0.0018165958908478064,
+        "probe:gru_keep_bias_-2": 0.0010182724728340627,
+        "probe:rnn16": 0.0010483590943178296,
+        "rnn28": 0.0010358097833911724
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0042532030998388435,
+        "mlp": 0.0018488985833789086,
+        "probe:gru_keep_bias_-2": 0.0009730755057504999,
+        "probe:rnn16": 0.0010212330775588522,
+        "rnn28": 0.0010653858338073078
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0029763832514406383,
+        "mlp": 0.00295481787991292,
+        "probe:gru_keep_bias_-2": 0.0009644122755496829,
+        "probe:rnn16": 0.0010040151131038408,
+        "rnn28": 0.0010050577104738511
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0019776583065595744,
+        "mlp": 0.001884710409823432,
+        "probe:gru_keep_bias_-2": 0.0017858299171966225,
+        "probe:rnn16": 0.0016633732700980575,
+        "rnn28": 0.0017616964076785225
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0020022143563932075,
+        "mlp": 0.0018543355912882956,
+        "probe:gru_keep_bias_-2": 0.0009014470987206791,
+        "probe:rnn16": 0.0009657698058217033,
+        "rnn28": 0.0009734877091915377
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0019004777097484176,
+        "mlp": 0.001856547022902899,
+        "probe:gru_keep_bias_-2": 0.0017115457089610013,
+        "probe:rnn16": 0.0015749071299262683,
+        "rnn28": 0.0016580444317748552
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.003715621988453905,
+        "mlp": 0.0018427629481866845,
+        "probe:gru_keep_bias_-2": 0.0009653185772243797,
+        "probe:rnn16": 0.0010060703036996457,
+        "rnn28": 0.0010571165192818236
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002014199146238164,
+        "mlp": 0.0019047227856286602,
+        "probe:gru_keep_bias_-2": 0.0018512546416692111,
+        "probe:rnn16": 0.001686031738319867,
+        "rnn28": 0.0018399770574257497
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0056284890135485256,
+        "mlp": 0.001644407429997569,
+        "probe:gru_keep_bias_-2": 0.0051555975038253665,
+        "probe:rnn16": 0.0010514033950870367,
+        "rnn28": 0.0010120346833539715
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0015156781959032057,
+        "mlp": 0.0012185651480191764,
+        "probe:gru_keep_bias_-2": 0.0008430282462360009,
+        "probe:rnn16": 0.000858045560196529,
+        "rnn28": 0.0008154611330442368
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0019792473748810355,
+        "mlp": 0.001870065929983954,
+        "probe:gru_keep_bias_-2": 0.0019257877202544476,
+        "probe:rnn16": 0.001680360444677036,
+        "rnn28": 0.0015452225718122822
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0019949883538439017,
+        "mlp": 0.0018713960066943421,
+        "probe:gru_keep_bias_-2": 0.0019652596784926236,
+        "probe:rnn16": 0.0017505357177079507,
+        "rnn28": 0.001527530894871147
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.001936445520881917,
+        "mlp": 0.0018405192438535032,
+        "probe:gru_keep_bias_-2": 0.0019189678005917398,
+        "probe:rnn16": 0.0016700800063980626,
+        "rnn28": 0.0014587109569052317
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.004834057436577243,
+        "mlp": 0.003743537712838095,
+        "probe:gru_keep_bias_-2": 0.001065803275138598,
+        "probe:rnn16": 0.001000384711039929,
+        "rnn28": 0.0009414674442851069
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.005741329042330979,
+        "mlp": 0.005187060944324552,
+        "probe:gru_keep_bias_-2": 0.0010234559246249286,
+        "probe:rnn16": 0.0009861614858207776,
+        "rnn28": 0.0009147523334931986
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.001984559306622937,
+        "mlp": 0.001862010746782188,
+        "probe:gru_keep_bias_-2": 0.0019516548183745644,
+        "probe:rnn16": 0.0017111311333095893,
+        "rnn28": 0.0015093633605679818
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.001915088755670411,
+        "mlp": 0.0018234947225444062,
+        "probe:gru_keep_bias_-2": 0.0010450992863678633,
+        "probe:rnn16": 0.0010102855383483731,
+        "rnn28": 0.0009579895598014909
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.005979461764467812,
+        "mlp": 0.0018447602496682893,
+        "probe:gru_keep_bias_-2": 0.0010828692885651132,
+        "probe:rnn16": 0.0010159527834239363,
+        "rnn28": 0.0009582647796283848
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.003937256849679728,
+        "mlp": 0.002943376503711591,
+        "probe:gru_keep_bias_-2": 0.0010548769190563852,
+        "probe:rnn16": 0.0010123639656870224,
+        "rnn28": 0.000930615293350307
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.00197859588447203,
+        "mlp": 0.0018690235598291377,
+        "probe:gru_keep_bias_-2": 0.001936886251779941,
+        "probe:rnn16": 0.0017164654059433685,
+        "rnn28": 0.0015772284009073912
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.002058003899810214,
+        "mlp": 0.001867461210433711,
+        "probe:gru_keep_bias_-2": 0.0009375100747145259,
+        "probe:rnn16": 0.000973918212347581,
+        "rnn28": 0.0009074403887301544
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0019413754938467705,
+        "mlp": 0.0018393411434963073,
+        "probe:gru_keep_bias_-2": 0.001925942787991566,
+        "probe:rnn16": 0.001664685922930181,
+        "rnn28": 0.0014536492118362308
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.005117183731031897,
+        "mlp": 0.0018292771016151193,
+        "probe:gru_keep_bias_-2": 0.0010735851410529566,
+        "probe:rnn16": 0.0010186423034998946,
+        "rnn28": 0.0009478667056106767
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.002021406430677611,
+        "mlp": 0.001892311635422343,
+        "probe:gru_keep_bias_-2": 0.0019579795282443106,
+        "probe:rnn16": 0.0017484786178136983,
+        "rnn28": 0.0016155967292158383
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.001838128505653078,
+        "mlp": 0.0016718667000924698,
+        "probe:gru_keep_bias_-2": 0.006392723749470183,
+        "probe:rnn16": 0.0009994338175900487,
+        "rnn28": 0.0009736408943775196
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0016392270885226261,
+        "mlp": 0.001370446122260496,
+        "probe:gru_keep_bias_-2": 0.0007863811525453074,
+        "probe:rnn16": 0.0008744816128920755,
+        "rnn28": 0.0008689067008565326
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.001998930598098679,
+        "mlp": 0.0019382850836246134,
+        "probe:gru_keep_bias_-2": 0.0018955596185518326,
+        "probe:rnn16": 0.00187547514780003,
+        "rnn28": 0.0016915138627639846
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.002015299100286128,
+        "mlp": 0.0019410679506352264,
+        "probe:gru_keep_bias_-2": 0.001881565182554478,
+        "probe:rnn16": 0.0018983876548323698,
+        "rnn28": 0.0017247513251231197
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0019356975173303165,
+        "mlp": 0.0018946117401626554,
+        "probe:gru_keep_bias_-2": 0.0018749729956021573,
+        "probe:rnn16": 0.001824847702864803,
+        "rnn28": 0.0016123562336769301
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0037937116543821934,
+        "mlp": 0.0038505943227483018,
+        "probe:gru_keep_bias_-2": 0.0010269593787088553,
+        "probe:rnn16": 0.0011033722328069994,
+        "rnn28": 0.0010364941595378963
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.005392900859082223,
+        "mlp": 0.0019390444198280248,
+        "probe:gru_keep_bias_-2": 0.0009771202430251286,
+        "probe:rnn16": 0.0010968694791936367,
+        "rnn28": 0.0010403394797178377
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0020035644353863674,
+        "mlp": 0.001925629502434466,
+        "probe:gru_keep_bias_-2": 0.001855219746891068,
+        "probe:rnn16": 0.0018832889468481375,
+        "rnn28": 0.0017055535842628183
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.005612622199446838,
+        "mlp": 0.001884749844814528,
+        "probe:gru_keep_bias_-2": 0.000996334159660024,
+        "probe:rnn16": 0.0011369351199440512,
+        "rnn28": 0.0010893561554078171
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.004533492631991213,
+        "mlp": 0.0019187835410367313,
+        "probe:gru_keep_bias_-2": 0.0010436195359725398,
+        "probe:rnn16": 0.0011204205463788946,
+        "rnn28": 0.001063039079828281
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0032528768344592357,
+        "mlp": 0.003014897709795949,
+        "probe:gru_keep_bias_-2": 0.0010100718087830045,
+        "probe:rnn16": 0.0011161033901364967,
+        "rnn28": 0.0010159470099820992
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0019911889254456776,
+        "mlp": 0.0019400421434670387,
+        "probe:gru_keep_bias_-2": 0.001880322209362288,
+        "probe:rnn16": 0.0019087579528998938,
+        "rnn28": 0.0017309627360803156
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.002001012153389528,
+        "mlp": 0.0019585864213495863,
+        "probe:gru_keep_bias_-2": 0.0009236223116667632,
+        "probe:rnn16": 0.0010526032524237929,
+        "rnn28": 0.000972348618778694
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.001935554232550259,
+        "mlp": 0.0018932203758013585,
+        "probe:gru_keep_bias_-2": 0.0018775959054882203,
+        "probe:rnn16": 0.0018284658574956052,
+        "rnn28": 0.0016054873735337238
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.004008456493813732,
+        "mlp": 0.0038011439881131697,
+        "probe:gru_keep_bias_-2": 0.0010306594541515423,
+        "probe:rnn16": 0.0011188724886263828,
+        "rnn28": 0.0010487616025101466
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0020455677977928898,
+        "mlp": 0.0019661102276203267,
+        "probe:gru_keep_bias_-2": 0.00197826765151002,
+        "probe:rnn16": 0.0019353354579635083,
+        "rnn28": 0.001789738514262785
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.001879061690682034,
+        "mlp": 0.0018393361020442077,
+        "probe:gru_keep_bias_-2": 0.0010425401162826124,
+        "probe:rnn16": 0.0011246627374596613,
+        "rnn28": 0.0010838634439272708
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0015432708756685726,
+        "mlp": 0.0012286814003679254,
+        "probe:gru_keep_bias_-2": 0.0008491280943429937,
+        "probe:rnn16": 0.0010082890597950239,
+        "rnn28": 0.0008780144063260811
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0020398763080848614,
+        "mlp": 0.0019547689327977457,
+        "probe:gru_keep_bias_-2": 0.0018857012691348976,
+        "probe:rnn16": 0.0018862859071171899,
+        "rnn28": 0.0015118005464340226
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.002041502341392184,
+        "mlp": 0.0019562584230291636,
+        "probe:gru_keep_bias_-2": 0.0019715634276299414,
+        "probe:rnn16": 0.00187865146007976,
+        "rnn28": 0.001465820192390842
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.001957107595316486,
+        "mlp": 0.0019461299814654822,
+        "probe:gru_keep_bias_-2": 0.0018196772724206813,
+        "probe:rnn16": 0.001819495635654686,
+        "rnn28": 0.0013760963008916235
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.004135559234214135,
+        "mlp": 0.0037743432244282784,
+        "probe:gru_keep_bias_-2": 0.004033529576464691,
+        "probe:rnn16": 0.0011842108866994788,
+        "rnn28": 0.0010488823889755197
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.004873123552384743,
+        "mlp": 0.0069825033389119655,
+        "probe:gru_keep_bias_-2": 0.00496501509190532,
+        "probe:rnn16": 0.0011727555053249838,
+        "rnn28": 0.0010508491382194174
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0020426489913014196,
+        "mlp": 0.001954651362186693,
+        "probe:gru_keep_bias_-2": 0.001942619234680387,
+        "probe:rnn16": 0.0018712177142327967,
+        "rnn28": 0.0014160374253929305
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.005119058081305939,
+        "mlp": 0.006691988168584975,
+        "probe:gru_keep_bias_-2": 0.0052203153219157585,
+        "probe:rnn16": 0.0011889266118367858,
+        "rnn28": 0.0010701987158496977
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.005235955749175577,
+        "mlp": 0.006041499693626129,
+        "probe:gru_keep_bias_-2": 0.0010207489954192689,
+        "probe:rnn16": 0.0012172224766293738,
+        "rnn28": 0.0010530394471564984
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.003857773043863479,
+        "mlp": 0.002973788497645111,
+        "probe:gru_keep_bias_-2": 0.003053731747580903,
+        "probe:rnn16": 0.0011687974272821752,
+        "rnn28": 0.0010478876157526895
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0020372421041282567,
+        "mlp": 0.001955238440084178,
+        "probe:gru_keep_bias_-2": 0.001889266772472193,
+        "probe:rnn16": 0.0018929936031643374,
+        "rnn28": 0.0015657112138922002
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0020395567677465314,
+        "mlp": 0.0019018835113483817,
+        "probe:gru_keep_bias_-2": 0.001403953700665823,
+        "probe:rnn16": 0.0011136794873701711,
+        "rnn28": 0.0010020945907497742
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0019622159666568694,
+        "mlp": 0.0019432358240592917,
+        "probe:gru_keep_bias_-2": 0.001817639550109028,
+        "probe:rnn16": 0.001823069572943569,
+        "rnn28": 0.001360515270679485
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.004732841090929576,
+        "mlp": 0.0040835457925556765,
+        "probe:gru_keep_bias_-2": 0.001062240890974943,
+        "probe:rnn16": 0.0011942464169855237,
+        "rnn28": 0.0010466337357845836
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.002093147002034705,
+        "mlp": 0.001966318365726215,
+        "probe:gru_keep_bias_-2": 0.001970094707937037,
+        "probe:rnn16": 0.0018980787824942533,
+        "rnn28": 0.0015401619797623615
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.006225309243987976,
+        "mlp": 0.0017922019055107534,
+        "probe:gru_keep_bias_-2": 0.0054015516095742904,
+        "probe:rnn16": 0.0011687804996076527,
+        "rnn28": 0.001072443631665797
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.001696942244832764,
+        "mlp": 0.0012357806314840184,
+        "probe:gru_keep_bias_-2": 0.0008727777617172148,
+        "probe:rnn16": 0.0009496869247207008,
+        "rnn28": 0.0008800034150580256
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0020125770881790866,
+        "mlp": 0.0018231365307834722,
+        "probe:gru_keep_bias_-2": 0.0018974441983831533,
+        "probe:rnn16": 0.0014272831307296661,
+        "rnn28": 0.001514757210518288
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0020060219066864544,
+        "mlp": 0.0018254250950872012,
+        "probe:gru_keep_bias_-2": 0.001867725062011014,
+        "probe:rnn16": 0.0013878148878114,
+        "rnn28": 0.001521489247196995
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.001964625139040921,
+        "mlp": 0.0017850457353519751,
+        "probe:gru_keep_bias_-2": 0.0018717610275735977,
+        "probe:rnn16": 0.0012871601823567045,
+        "rnn28": 0.0014443986493931265
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.004068690576629073,
+        "mlp": 0.0017444177896685914,
+        "probe:gru_keep_bias_-2": 0.0010574582104134929,
+        "probe:rnn16": 0.001154550643392874,
+        "rnn28": 0.001016218916885966
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0063626140780403085,
+        "mlp": 0.0017949264423170951,
+        "probe:gru_keep_bias_-2": 0.0010185849800364189,
+        "probe:rnn16": 0.0011346799104076032,
+        "rnn28": 0.0009776740493221037
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.001993298548295155,
+        "mlp": 0.0018121465881819514,
+        "probe:gru_keep_bias_-2": 0.0018242089732870797,
+        "probe:rnn16": 0.0013481247674039948,
+        "rnn28": 0.001510524798331907
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0020666111882256394,
+        "mlp": 0.0017538684554988253,
+        "probe:gru_keep_bias_-2": 0.001042511584349351,
+        "probe:rnn16": 0.00118207061400629,
+        "rnn28": 0.001018777117404308
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.005020921273792759,
+        "mlp": 0.0017681039311915417,
+        "probe:gru_keep_bias_-2": 0.001056117458816411,
+        "probe:rnn16": 0.0011812041759994075,
+        "rnn28": 0.0010189952913503433
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.003568452311602043,
+        "mlp": 0.0016723402910174803,
+        "probe:gru_keep_bias_-2": 0.001048796026570314,
+        "probe:rnn16": 0.001139112174058765,
+        "rnn28": 0.0010149670518691787
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002005386512136846,
+        "mlp": 0.0018227966872379371,
+        "probe:gru_keep_bias_-2": 0.0018914035741335728,
+        "probe:rnn16": 0.0014142995978079999,
+        "rnn28": 0.0015985540268158413
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0022264658972487887,
+        "mlp": 0.0014384849137261814,
+        "probe:gru_keep_bias_-2": 0.0009590572769706243,
+        "probe:rnn16": 0.0010858098741643907,
+        "rnn28": 0.0009760956193905069
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.001966037533772484,
+        "mlp": 0.001783594652068349,
+        "probe:gru_keep_bias_-2": 0.0018756640108238314,
+        "probe:rnn16": 0.0012961867790999282,
+        "rnn28": 0.001357372940787488
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.004445088067139131,
+        "mlp": 0.0017520249620058424,
+        "probe:gru_keep_bias_-2": 0.0010509577777782482,
+        "probe:rnn16": 0.0011692388154452885,
+        "rnn28": 0.0010170328831110127
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002058391079457142,
+        "mlp": 0.0018415373675125509,
+        "probe:gru_keep_bias_-2": 0.0019748716265039394,
+        "probe:rnn16": 0.001463666621729981,
+        "rnn28": 0.001613454256936121
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/no_switch",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0019187508724669998,
+        "mlp": 0.0017569625796313786,
+        "probe:gru_keep_bias_-2": 0.001069231147692664,
+        "probe:rnn16": 0.0011841833029528502,
+        "rnn28": 0.001011257466745711
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002312143645141231,
+        "mlp": 0.0022327625162209303,
+        "probe:gru_keep_bias_-2": 0.001776185542030576,
+        "probe:rnn16": 0.001530178314709422,
+        "rnn28": 0.0016255925949911463
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002343878451692429,
+        "mlp": 0.002434234607900699,
+        "probe:gru_keep_bias_-2": 0.0019297475393644902,
+        "probe:rnn16": 0.001767380067573674,
+        "rnn28": 0.0017852472395260164
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0023298431882812394,
+        "mlp": 0.0023640473532027316,
+        "probe:gru_keep_bias_-2": 0.0018597943560766685,
+        "probe:rnn16": 0.001748882173177547,
+        "rnn28": 0.0017917389795164146
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.00229847821834606,
+        "mlp": 0.002306902765029033,
+        "probe:gru_keep_bias_-2": 0.001898922804924924,
+        "probe:rnn16": 0.0017223653402415353,
+        "rnn28": 0.0017951778777548825
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002303398213127164,
+        "mlp": 0.0022304112144923218,
+        "probe:gru_keep_bias_-2": 0.0018078025855431548,
+        "probe:rnn16": 0.0015568676408143096,
+        "rnn28": 0.0016514378879141662
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0022935792615970847,
+        "mlp": 0.0023140481515107098,
+        "probe:gru_keep_bias_-2": 0.0018358283168054335,
+        "probe:rnn16": 0.0015655294964856809,
+        "rnn28": 0.0016330487844292395
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0023507453347907143,
+        "mlp": 0.0023696372313711045,
+        "probe:gru_keep_bias_-2": 0.0018764753379309084,
+        "probe:rnn16": 0.0017320885097468542,
+        "rnn28": 0.0017792254749124214
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002307659001230441,
+        "mlp": 0.0022033741872296603,
+        "probe:gru_keep_bias_-2": 0.0018629400655340272,
+        "probe:rnn16": 0.0015898736918285013,
+        "rnn28": 0.0016814688157651104
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0023265105179619437,
+        "mlp": 0.002311396994906093,
+        "probe:gru_keep_bias_-2": 0.001813716368936297,
+        "probe:rnn16": 0.0015771398469356765,
+        "rnn28": 0.0016479618185185941
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002133987067525662,
+        "mlp": 0.002213714343364539,
+        "probe:gru_keep_bias_-2": 0.0016991202674238256,
+        "probe:rnn16": 0.0014600211616568048,
+        "rnn28": 0.001595591449479743
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002299871846568955,
+        "mlp": 0.0023562538256227173,
+        "probe:gru_keep_bias_-2": 0.001899406263073285,
+        "probe:rnn16": 0.001776390787338904,
+        "rnn28": 0.001784379390294296
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.005475159939206609,
+        "mlp": 0.00232375886836419,
+        "probe:gru_keep_bias_-2": 0.007500490009888386,
+        "probe:rnn16": 0.001510073933566712,
+        "rnn28": 0.001654120593128979
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002319091498627805,
+        "mlp": 0.0023679966177390195,
+        "probe:gru_keep_bias_-2": 0.0018967502664092152,
+        "probe:rnn16": 0.0017122797737252025,
+        "rnn28": 0.0017815656657788504
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.002295932493797895,
+        "mlp": 0.002281784322994908,
+        "probe:gru_keep_bias_-2": 0.0018090203069468227,
+        "probe:rnn16": 0.001562592912684776,
+        "rnn28": 0.00164035341807896
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0021131387560482683,
+        "mlp": 0.002301023911714043,
+        "probe:gru_keep_bias_-2": 0.0017268480440028658,
+        "probe:rnn16": 0.0016510843047549545,
+        "rnn28": 0.0017670806957600386
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 0,
+      "init_seed": 433787758,
+      "mae": {
+        "gru": 0.0023099245523136294,
+        "mlp": 0.0023263116701421776,
+        "probe:gru_keep_bias_-2": 0.001783648709838762,
+        "probe:rnn16": 0.0015946925296992636,
+        "rnn28": 0.0016622897164763348
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0023428988776665795,
+        "mlp": 0.00228629095266541,
+        "probe:gru_keep_bias_-2": 0.0018604658513537327,
+        "probe:rnn16": 0.0017331976626456494,
+        "rnn28": 0.001537629988926054
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.00237229210686542,
+        "mlp": 0.0024247330796832497,
+        "probe:gru_keep_bias_-2": 0.0020156034615690433,
+        "probe:rnn16": 0.001827371910527006,
+        "rnn28": 0.001719318073613281
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0023103146784324824,
+        "mlp": 0.0023728375046328733,
+        "probe:gru_keep_bias_-2": 0.001967313861007097,
+        "probe:rnn16": 0.0018307111904396843,
+        "rnn28": 0.001701650330601322
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0023392773184624086,
+        "mlp": 0.002366786883337967,
+        "probe:gru_keep_bias_-2": 0.001991702582841977,
+        "probe:rnn16": 0.0018260351323264486,
+        "rnn28": 0.001658401901056466
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0022713531927702397,
+        "mlp": 0.0022668474999388536,
+        "probe:gru_keep_bias_-2": 0.0018906804174561433,
+        "probe:rnn16": 0.0017263377652981739,
+        "rnn28": 0.0015445980226913788
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0023428943189213952,
+        "mlp": 0.002288392163152635,
+        "probe:gru_keep_bias_-2": 0.0018713201058207368,
+        "probe:rnn16": 0.0016898537068056234,
+        "rnn28": 0.0015411005172788028
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0023228403685691965,
+        "mlp": 0.002349364752522296,
+        "probe:gru_keep_bias_-2": 0.001980723844024796,
+        "probe:rnn16": 0.0018263803109063342,
+        "rnn28": 0.0016486726087883705
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0023145163487519175,
+        "mlp": 0.0022534240952328125,
+        "probe:gru_keep_bias_-2": 0.0019027975855368101,
+        "probe:rnn16": 0.0016985318393547358,
+        "rnn28": 0.0016004918824305725
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0022709591099252823,
+        "mlp": 0.002330054618083811,
+        "probe:gru_keep_bias_-2": 0.001905681151046088,
+        "probe:rnn16": 0.001702910511545533,
+        "rnn28": 0.001553073464130353
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.002154795703924518,
+        "mlp": 0.00226859974111882,
+        "probe:gru_keep_bias_-2": 0.0017085993449898077,
+        "probe:rnn16": 0.001639471193388309,
+        "rnn28": 0.0014592792840299816
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0023227610233607803,
+        "mlp": 0.0023510334881583854,
+        "probe:gru_keep_bias_-2": 0.0019581762178671634,
+        "probe:rnn16": 0.0018579081734147267,
+        "rnn28": 0.001733617038098071
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.002258911559103824,
+        "mlp": 0.002485373748481913,
+        "probe:gru_keep_bias_-2": 0.0017111940194031604,
+        "probe:rnn16": 0.0016441467439897376,
+        "rnn28": 0.0014843309673522446
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.002355328895095219,
+        "mlp": 0.002306694711563092,
+        "probe:gru_keep_bias_-2": 0.00196720090034841,
+        "probe:rnn16": 0.0018224176893341176,
+        "rnn28": 0.001633447073776791
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.002257142706003057,
+        "mlp": 0.0023277967158673654,
+        "probe:gru_keep_bias_-2": 0.0018889165817754818,
+        "probe:rnn16": 0.001713728888811675,
+        "rnn28": 0.0015420775116501192
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.002152159337796137,
+        "mlp": 0.002298406709455652,
+        "probe:gru_keep_bias_-2": 0.0017484173624432605,
+        "probe:rnn16": 0.0017543470026734152,
+        "rnn28": 0.0015616358513142288
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 1,
+      "init_seed": 496784383,
+      "mae": {
+        "gru": 0.0022851692468595706,
+        "mlp": 0.0023388139766807475,
+        "probe:gru_keep_bias_-2": 0.001877150009022373,
+        "probe:rnn16": 0.0016942451131798768,
+        "rnn28": 0.0015886206058505674
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.002444702281015071,
+        "mlp": 0.0023490221219715232,
+        "probe:gru_keep_bias_-2": 0.001857622737415784,
+        "probe:rnn16": 0.0017215518939695102,
+        "rnn28": 0.0016647924049183432
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023598243265771546,
+        "mlp": 0.0024814302087138736,
+        "probe:gru_keep_bias_-2": 0.001984362959689303,
+        "probe:rnn16": 0.0018866941823126855,
+        "rnn28": 0.0017813910259449142
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023776360553121757,
+        "mlp": 0.0024425218790645976,
+        "probe:gru_keep_bias_-2": 0.001940447302178733,
+        "probe:rnn16": 0.0019101652354512693,
+        "rnn28": 0.0017876986537924307
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023266416941681834,
+        "mlp": 0.00245052586458425,
+        "probe:gru_keep_bias_-2": 0.0019517814231707017,
+        "probe:rnn16": 0.0018474961282551154,
+        "rnn28": 0.0017374483485842207
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023625260705711056,
+        "mlp": 0.002325056875189792,
+        "probe:gru_keep_bias_-2": 0.0019196732041163848,
+        "probe:rnn16": 0.001678223383781875,
+        "rnn28": 0.0016610536007128295
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023251599353742857,
+        "mlp": 0.0024025114868442077,
+        "probe:gru_keep_bias_-2": 0.001888297067961419,
+        "probe:rnn16": 0.001682902023473604,
+        "rnn28": 0.0016307716585645636
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0024111403562948074,
+        "mlp": 0.0024257253826004163,
+        "probe:gru_keep_bias_-2": 0.0019828273803173223,
+        "probe:rnn16": 0.001862345092814743,
+        "rnn28": 0.0017658748306771056
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023193270424497385,
+        "mlp": 0.0023414355708672166,
+        "probe:gru_keep_bias_-2": 0.0018923033564812281,
+        "probe:rnn16": 0.0017186822882340335,
+        "rnn28": 0.0016826380860154044
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023840000547906037,
+        "mlp": 0.0024293133042745775,
+        "probe:gru_keep_bias_-2": 0.0019264616196522472,
+        "probe:rnn16": 0.001705237022952514,
+        "rnn28": 0.0016619642653385705
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0021769312203259806,
+        "mlp": 0.002284931170075002,
+        "probe:gru_keep_bias_-2": 0.0016725839249552498,
+        "probe:rnn16": 0.0016567923021006334,
+        "rnn28": 0.0016057597792613243
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.002333494305064788,
+        "mlp": 0.002439939539971518,
+        "probe:gru_keep_bias_-2": 0.0019170070584475722,
+        "probe:rnn16": 0.001938586376471303,
+        "rnn28": 0.0018140393176243822
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.005526236043655127,
+        "mlp": 0.0024005398364370673,
+        "probe:gru_keep_bias_-2": 0.0016960099243083465,
+        "probe:rnn16": 0.0016761199683747213,
+        "rnn28": 0.0015969411524534988
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023394645690211244,
+        "mlp": 0.002409989211586085,
+        "probe:gru_keep_bias_-2": 0.001954135407638595,
+        "probe:rnn16": 0.0018427430797120004,
+        "rnn28": 0.0017232617348518612
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.002371979387012355,
+        "mlp": 0.0023704684344798247,
+        "probe:gru_keep_bias_-2": 0.0019150082954142531,
+        "probe:rnn16": 0.0016769389808598415,
+        "rnn28": 0.0016498332727683815
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.002141972442797191,
+        "mlp": 0.002369493953181399,
+        "probe:gru_keep_bias_-2": 0.0017292580191897616,
+        "probe:rnn16": 0.0018091287583770238,
+        "rnn28": 0.0016935574904569563
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 2,
+      "init_seed": 1063723162,
+      "mae": {
+        "gru": 0.0023311996877714643,
+        "mlp": 0.0024281474171152623,
+        "probe:gru_keep_bias_-2": 0.0018829566435993681,
+        "probe:rnn16": 0.001728916409126235,
+        "rnn28": 0.001642166850422151
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.002342490238050064,
+        "mlp": 0.002413827577293496,
+        "probe:gru_keep_bias_-2": 0.0018089618260945124,
+        "probe:rnn16": 0.0017392098629180406,
+        "rnn28": 0.0016196055181065614
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0023441435870530346,
+        "mlp": 0.002473989005221806,
+        "probe:gru_keep_bias_-2": 0.0019444446545324634,
+        "probe:rnn16": 0.001926850603632171,
+        "rnn28": 0.0017475870633807122
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0022688320676820385,
+        "mlp": 0.002410826398239883,
+        "probe:gru_keep_bias_-2": 0.0019319923988682164,
+        "probe:rnn16": 0.0019050199943733332,
+        "rnn28": 0.001742529903056477
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0023020731025082206,
+        "mlp": 0.002436759604737128,
+        "probe:gru_keep_bias_-2": 0.0019626358787629195,
+        "probe:rnn16": 0.0018879827900247657,
+        "rnn28": 0.001727337279704756
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0022589893203526115,
+        "mlp": 0.002296459040104701,
+        "probe:gru_keep_bias_-2": 0.0018977560202661423,
+        "probe:rnn16": 0.001756043047043635,
+        "rnn28": 0.0015985572472216754
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0022541852268594953,
+        "mlp": 0.002349240884367349,
+        "probe:gru_keep_bias_-2": 0.001877990005869903,
+        "probe:rnn16": 0.001713730626118946,
+        "rnn28": 0.0015933448466962565
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0022885517211716187,
+        "mlp": 0.002442317987367213,
+        "probe:gru_keep_bias_-2": 0.0019568450154663825,
+        "probe:rnn16": 0.0018821760276278299,
+        "rnn28": 0.001712926875654699
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.002250119291630344,
+        "mlp": 0.0022350031433182285,
+        "probe:gru_keep_bias_-2": 0.0019122235872947614,
+        "probe:rnn16": 0.0017244682604668454,
+        "rnn28": 0.0015881886455010145
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0022530619130596654,
+        "mlp": 0.0023553733677465546,
+        "probe:gru_keep_bias_-2": 0.0019171142342858636,
+        "probe:rnn16": 0.0017223658778504041,
+        "rnn28": 0.0015983127240688376
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.002119334506543668,
+        "mlp": 0.0023227609915770302,
+        "probe:gru_keep_bias_-2": 0.11523503437712918,
+        "probe:rnn16": 0.001679357432043681,
+        "rnn28": 0.0015377416621591062
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0022950036777877785,
+        "mlp": 0.0023883756334823376,
+        "probe:gru_keep_bias_-2": 0.0018941189178250236,
+        "probe:rnn16": 0.0019234134744832336,
+        "rnn28": 0.0017743653153479495
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.005512314160190338,
+        "mlp": 0.002471234250803838,
+        "probe:gru_keep_bias_-2": 0.008277812586020597,
+        "probe:rnn16": 0.0017022691747099205,
+        "rnn28": 0.0015557544093627966
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0023314342978985486,
+        "mlp": 0.0024626978099150463,
+        "probe:gru_keep_bias_-2": 0.0019463295200074192,
+        "probe:rnn16": 0.0018596016255145167,
+        "rnn28": 0.0017004263036563673
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0022402159192136412,
+        "mlp": 0.0023199918919666607,
+        "probe:gru_keep_bias_-2": 0.0018930940497632648,
+        "probe:rnn16": 0.0017190378091195208,
+        "rnn28": 0.0016003340034282908
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0021223256723052982,
+        "mlp": 0.002349123443685524,
+        "probe:gru_keep_bias_-2": 0.0017148814132819474,
+        "probe:rnn16": 0.001827639624970204,
+        "rnn28": 0.0016195156389561317
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 3,
+      "init_seed": 1529569177,
+      "mae": {
+        "gru": 0.0023010868861312794,
+        "mlp": 0.0023481315538557137,
+        "probe:gru_keep_bias_-2": 0.0019169109747791382,
+        "probe:rnn16": 0.0017356606419162233,
+        "rnn28": 0.0016239569185316298
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0024445647343893638,
+        "mlp": 0.0022649417100715718,
+        "probe:gru_keep_bias_-2": 0.0018547508996728673,
+        "probe:rnn16": 0.001644501658080925,
+        "rnn28": 0.0015313907236275855
+      },
+      "stream_id": "coarse_speed_v1:1036367297",
+      "stream_seed": 1036367297
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0024479488379157976,
+        "mlp": 0.002395460676045833,
+        "probe:gru_keep_bias_-2": 0.0020415633300254247,
+        "probe:rnn16": 0.001769291644512167,
+        "rnn28": 0.0017157360799062485
+      },
+      "stream_id": "coarse_speed_v1:1050041024",
+      "stream_seed": 1050041024
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0023713536945833987,
+        "mlp": 0.0023369327678126484,
+        "probe:gru_keep_bias_-2": 0.0020346163918546897,
+        "probe:rnn16": 0.0018005773799272444,
+        "rnn28": 0.0017470527595839624
+      },
+      "stream_id": "coarse_speed_v1:1166494335",
+      "stream_seed": 1166494335
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002426035650145808,
+        "mlp": 0.002337747699128752,
+        "probe:gru_keep_bias_-2": 0.0020514360251310967,
+        "probe:rnn16": 0.001800516470918982,
+        "rnn28": 0.0017250044047682908
+      },
+      "stream_id": "coarse_speed_v1:1700053205",
+      "stream_seed": 1700053205
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0023431385668908878,
+        "mlp": 0.0022414881010164324,
+        "probe:gru_keep_bias_-2": 0.001956901073067454,
+        "probe:rnn16": 0.0016759627185975714,
+        "rnn28": 0.0015646667185476538
+      },
+      "stream_id": "coarse_speed_v1:1880241968",
+      "stream_seed": 1880241968
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0024216764113892024,
+        "mlp": 0.0022943044157458276,
+        "probe:gru_keep_bias_-2": 0.0018985239504812307,
+        "probe:rnn16": 0.0016532808199970078,
+        "rnn28": 0.0015355687630634852
+      },
+      "stream_id": "coarse_speed_v1:1935068382",
+      "stream_seed": 1935068382
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002394809268350089,
+        "mlp": 0.0023344721844624564,
+        "probe:gru_keep_bias_-2": 0.002050657982260331,
+        "probe:rnn16": 0.0017846370533988298,
+        "rnn28": 0.0017184557042204435
+      },
+      "stream_id": "coarse_speed_v1:2059090135",
+      "stream_seed": 2059090135
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002422545473247139,
+        "mlp": 0.0022143932315695837,
+        "probe:gru_keep_bias_-2": 0.0019125818173067926,
+        "probe:rnn16": 0.0017253889562963674,
+        "rnn28": 0.0015505592223134025
+      },
+      "stream_id": "coarse_speed_v1:233445198",
+      "stream_seed": 233445198
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002352008170054883,
+        "mlp": 0.002306477417641125,
+        "probe:gru_keep_bias_-2": 0.0019473280221031914,
+        "probe:rnn16": 0.001668775937186487,
+        "rnn28": 0.001576128999740984
+      },
+      "stream_id": "coarse_speed_v1:242467470",
+      "stream_seed": 242467470
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002200933624923076,
+        "mlp": 0.002245485995445347,
+        "probe:gru_keep_bias_-2": 0.0017000079347747213,
+        "probe:rnn16": 0.0016071633096988007,
+        "rnn28": 0.0015007116174759682
+      },
+      "stream_id": "coarse_speed_v1:472518699",
+      "stream_seed": 472518699
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002394237629044272,
+        "mlp": 0.0023205418074115063,
+        "probe:gru_keep_bias_-2": 0.001998294264796343,
+        "probe:rnn16": 0.0017936387842749178,
+        "rnn28": 0.001781475292385683
+      },
+      "stream_id": "coarse_speed_v1:639391616",
+      "stream_seed": 639391616
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0023446681221978606,
+        "mlp": 0.002427945181727169,
+        "probe:gru_keep_bias_-2": 0.0016688379315309575,
+        "probe:rnn16": 0.0016058065634418132,
+        "rnn28": 0.0014970763151241245
+      },
+      "stream_id": "coarse_speed_v1:708321133",
+      "stream_seed": 708321133
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0024340281510036236,
+        "mlp": 0.0023605125957416057,
+        "probe:gru_keep_bias_-2": 0.0020570271848615457,
+        "probe:rnn16": 0.0017420162539025876,
+        "rnn28": 0.0016845314753029513
+      },
+      "stream_id": "coarse_speed_v1:730745626",
+      "stream_seed": 730745626
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0023400926736206933,
+        "mlp": 0.002302568665031486,
+        "probe:gru_keep_bias_-2": 0.001929608003925925,
+        "probe:rnn16": 0.0016828882261583885,
+        "rnn28": 0.0015685397147921275
+      },
+      "stream_id": "coarse_speed_v1:807510844",
+      "stream_seed": 807510844
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.0022378383123019736,
+        "mlp": 0.002269323484926207,
+        "probe:gru_keep_bias_-2": 0.001801820789696273,
+        "probe:rnn16": 0.0016914621800987453,
+        "rnn28": 0.0016124528535114036
+      },
+      "stream_id": "coarse_speed_v1:818892995",
+      "stream_seed": 818892995
+    },
+    {
+      "condition": "standard/switching",
+      "failures": {},
+      "family": "coarse_speed_v1",
+      "init_index": 4,
+      "init_seed": 957479563,
+      "mae": {
+        "gru": 0.002363124944195596,
+        "mlp": 0.0022936497717590248,
+        "probe:gru_keep_bias_-2": 0.001951698468795517,
+        "probe:rnn16": 0.001679280012544384,
+        "rnn28": 0.0015399529781336344
+      },
+      "stream_id": "coarse_speed_v1:880875240",
+      "stream_seed": 880875240
+    }
+  ],
+  "schema": "aaa.loop.attack.v3"
+}

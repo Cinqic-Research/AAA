@@ -138,6 +138,22 @@ The full result is [`docs/aaa_1k_report.md`](docs/aaa_1k_report.md); read
 where the four repairs come from -- including the one that would otherwise have
 published a hidden-state advantage thirty times too large.
 
+## The improvement loop (pilot)
+
+`research/aaa_1k_loop/` pilots the process by which AAA is supposed to get
+better: observe a measured weakness, classify it, diagnose it, state competing
+hypotheses and try to falsify them, intervene minimally, attack the
+intervention, confirm on fresh evidence, decide, preserve everything, repeat.
+Development and confirmation evidence are separated mechanically, not by
+convention.
+
+Its first run, on AAA-1K's Q4 result, **promoted nothing**: eight candidates,
+eight rejections, Champion 0 unchanged. It reclassified Q4's "minority tail"
+as one benchmark family, supported a mechanism for it, found a long-horizon
+instability round 3 never measured, and flagged a documented claim as
+unsupported. It never reached fresh confirmation, and the protocol is not yet
+permanent. Read [`docs/loop_pilot_report.md`](docs/loop_pilot_report.md).
+
 ## The learner
 
 Feature vector, from the last four observed positions only:
@@ -211,6 +227,10 @@ python -m research.aaa_1k round3      --selection docs/evidence/aaa_1k_developme
     --output docs/evidence/aaa_1k_evaluation_round3.json
 python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation_round3.json
 python -m research.aaa_1k visualize --family occlusion_v1 --output runs/aaa_1k/dashboard.png
+
+# improvement-loop pilot
+python -m research.aaa_1k_loop validate           # iteration records, Champion 0, identity ledger
+python -m research.aaa_1k_loop reproduce diagnose2 # rerun a stage; committed primitives must reappear exactly
 ```
 
 Formal confirmation requires a predeclared batch, a committed freeze manifest,
@@ -246,6 +266,9 @@ result, and this repository is built to report that rather than to avoid it.
 | [AAA-1K report](docs/aaa_1k_report.md) | the measured result, with its claim boundaries |
 | [AAA-1K self-review](docs/aaa_1k_self_review.md) | the attempt to break those results, and what it found |
 | [AAA-1K handoff](docs/aaa_1k_handoff.md) | everything an independent reviewer needs |
+| [Loop protocol](docs/loop_protocol.md) | the pilot improvement loop, what enforces it, and its known gaps |
+| [Loop pilot report](docs/loop_pilot_report.md) | three iterations on AAA-1K, eight rejections, and an evaluation of the loop itself |
+| [Loop pilot handoff](docs/loop_pilot_handoff.md) | reproduction commands and what an independent reviewer should challenge |
 | [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
 | [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
 | [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |

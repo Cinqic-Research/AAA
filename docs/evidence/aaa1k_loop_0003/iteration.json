@@ -1,0 +1,162 @@
+{
+  "accounting": {
+    "adaptive_state_after": 1414,
+    "adaptive_state_before": 1414,
+    "compute_change": "none: no challenger was frozen; every candidate had 994 parameters and 1414 state scalars",
+    "parameters_after": 994,
+    "parameters_before": 994,
+    "parameters_counted_from_arrays": 994
+  },
+  "artifacts": [
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/observation.json",
+      "role": "observation",
+      "sha256": "b444f8efe92ce38ec2ff23bcf8ca3968fee63d8275ed13fa14e36dcb7c55b87f"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/diagnosis.json",
+      "role": "diagnosis",
+      "sha256": "99c5b8fb56f9becd5b59893b609a6a7dd195685766cab682cba3fd8fb7c13b87"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/diagnosis_2.json",
+      "role": "diagnosis",
+      "sha256": "ef121a61778466f772d6e37ae7a41a4e91fb8aa2d8a47356dd2a202e0e1d215b"
+    },
+    {
+      "path": "research/aaa_1k_loop/iteration3.py",
+      "role": "development",
+      "sha256": "ab4e34c377a499a19b026d6983d58f29c619828ada96fcbd7a8304e38e40ceca"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0003/attack.json",
+      "role": "attack",
+      "sha256": "e6187c941f36c66630fb33faac8b36acbbb55092c18da0e33498d61205f6dfe6"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0003/attack_2.json",
+      "role": "attack",
+      "sha256": "d573f218cd50a5c98fbcea962c154d986082ea04929c09153388bd444423aab1"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "aaa1k-claim-q4-coarse-v2",
+      "evidence": "docs/evidence/aaa1k_loop_0003/attack.json",
+      "intervention": "corrected Q4 / coarse_speed_v1 interpretation (documentation; no model change)",
+      "intervention_class": "claim repair",
+      "reason": "T1 fails: the fixed-speed memory advantage is construction-dependent (share ~0.3 at quantum 0.006 and at speeds 0.10/0.25)",
+      "status": "REJECTED_IN_ATTACK"
+    },
+    {
+      "candidate_id": "aaa1k-claim-q4-coarse-v3",
+      "evidence": "docs/evidence/aaa1k_loop_0003/attack_2.json",
+      "intervention": "claim v2 scoped to the declared construction, carrying the boundary T1 found",
+      "intervention_class": "claim repair",
+      "reason": "R4 fails: the gated fast-dynamics probe's fixed-speed memory advantage is +5.1e-4 with interval [-4.3e-5, +1.04e-3]; R1, R2, R3 and R5 pass",
+      "status": "REJECTED_IN_ATTACK"
+    }
+  ],
+  "challenger": null,
+  "classification": {
+    "final": "unsupported claim; corrected claim not confirmed",
+    "initial": "unsupported claim"
+  },
+  "compute_seconds": {
+    "docs/evidence/aaa1k_loop_0001/champion_0.json": 0.08021275499993408,
+    "docs/evidence/aaa1k_loop_0001/diagnosis.json": 17.38499738200005,
+    "docs/evidence/aaa1k_loop_0001/diagnosis_2.json": 48.16248512099992,
+    "docs/evidence/aaa1k_loop_0001/observation.json": 0.06971343200007141,
+    "docs/evidence/aaa1k_loop_0003/attack.json": 16.520473032000154,
+    "docs/evidence/aaa1k_loop_0003/attack_2.json": 10.733230188999642
+  },
+  "confirmation_evidence": null,
+  "confirmation_freeze": null,
+  "deviations": [
+    "a claim, not a model, was the challenger: the loop's classes include 'unsupported claim' and its interventions include measurement repair; the same outer loop would have applied"
+  ],
+  "diagnostic_identity_blocks": [
+    "aaa1k-loop-0001/diagnostic/coarse",
+    "aaa1k-loop-0001/diagnostic/coarse-2"
+  ],
+  "evidence_that_exposed_the_problem": [
+    "docs/evidence/aaa1k_loop_0001/observation.json",
+    "docs/evidence/aaa1k_loop_0001/diagnosis_2.json (H15)"
+  ],
+  "history": [
+    {
+      "at": "2026-09-21T14:56:51Z",
+      "state": "OBSERVED"
+    },
+    {
+      "at": "2026-09-21T14:56:51Z",
+      "state": "CLASSIFIED"
+    },
+    {
+      "at": "2026-09-21T14:56:51Z",
+      "state": "DIAGNOSED"
+    },
+    {
+      "at": "2026-09-21T14:56:51Z",
+      "state": "TEST_DEFINED"
+    },
+    {
+      "at": "2026-09-21T14:56:51Z",
+      "state": "CHALLENGER_CREATED"
+    },
+    {
+      "at": "2026-09-21T14:59:58Z",
+      "state": "CHALLENGER_ATTACKED"
+    },
+    {
+      "at": "2026-09-21T14:59:58Z",
+      "state": "REJECTED"
+    },
+    {
+      "at": "2026-09-21T14:59:58Z",
+      "state": "PRESERVED"
+    }
+  ],
+  "hypotheses": {
+    "H15": "supported on diagnostic identities",
+    "R1-R5": "attack on claim v3",
+    "T1-T4": "attack on claim v2"
+  },
+  "independent_recomputation": null,
+  "iteration_id": "aaa1k-loop-0003",
+  "limitations": [
+    "R4 used c2 as its instrument although iteration 0001 had already shown c2 to be initialization-unstable; a better-designed criterion would not depend on a known-fragile probe"
+  ],
+  "loop_protocol_version": "aaa.loop.v0-pilot",
+  "outcome": "REJECT",
+  "parent_champion": {
+    "champion_id": "aaa1k-champion-0",
+    "phase_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+    "record": {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    "source_commit": "1ce716c42500003881e379f6d23dc0d807301001"
+  },
+  "parent_iteration": "aaa1k-loop-0002 (REJECTED)",
+  "problem": "the repository documents Q4's unfavourable mean as a minority tail and states that coarse_speed_v1 genuinely tests hidden-regime inference because, at fixed speed, the recurrent model is worse than the stateless control; iteration 0001's diagnoses contradict both statements",
+  "reason": "the corrected interpretation did not survive attack in either form; the existing claim remains unsupported by the pilot's diagnostic and attack evidence and is flagged (AAA-162), but no replacement claim is promoted",
+  "schema": "aaa.loop.iteration.v1",
+  "targeted_tests": [
+    "nearby coarse constructions",
+    "a second memory-capable model",
+    "fresh initializations",
+    "the claim's own boundary"
+  ],
+  "timing": {
+    "note": "human/AI task timing lives in docs/loop_pilot_report.md; scientific compute time is per artifact",
+    "task_start_utc": "2026-09-21T14:19:36Z"
+  },
+  "unregistered_observations": []
+}

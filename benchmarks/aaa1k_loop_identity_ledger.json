@@ -1,0 +1,136 @@
+{
+  "blocks": [
+    {
+      "block_id": "aaa1k-loop-0001/diagnostic/coarse",
+      "count": 16,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "diagnostic_coarse",
+      "purpose": "coarse_speed_v1 streams for the Q4 hypothesis tests",
+      "role": "diagnostic",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/development/all",
+      "count": 48,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "development_all",
+      "purpose": "challenger development on every round-3 family (8 streams per plan entry)",
+      "role": "development",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/attack/env",
+      "count": 96,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "attack_env",
+      "purpose": "adversarial attack streams: nearby conditions, other families, tails",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/attack/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "attack_init",
+      "purpose": "fresh model initialization seeds for the attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/diagnostic/coarse-2",
+      "count": 16,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "diagnostic_coarse_2",
+      "purpose": "fresh coarse_speed_v1 streams for the round-2 hypotheses (H13-H15), declared after round 1",
+      "role": "diagnostic",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0001/diagnostic/long-3",
+      "count": 16,
+      "iteration": "aaa1k-loop-0001",
+      "namespace": "diagnostic_long_3",
+      "purpose": "long-horizon streams for the round-3 stability hypotheses (H16-H19), declared after round 2",
+      "role": "diagnostic",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0002/development/all",
+      "count": 56,
+      "iteration": "aaa1k-loop-0002",
+      "namespace": "development_all",
+      "purpose": "iteration 0002 candidate development: 48 standard plan streams and 8 long-horizon seeds",
+      "role": "development",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0002/attack/env",
+      "count": 96,
+      "iteration": "aaa1k-loop-0002",
+      "namespace": "attack_env",
+      "purpose": "iteration 0002 adversarial attack streams",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0002/attack/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0002",
+      "namespace": "attack_init",
+      "purpose": "iteration 0002 fresh initialization seeds for the attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0003/attack/env",
+      "count": 24,
+      "iteration": "aaa1k-loop-0003",
+      "namespace": "attack_env",
+      "purpose": "iteration 0003 attack on the corrected Q4 interpretation",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0003/attack/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0003",
+      "namespace": "attack_init",
+      "purpose": "iteration 0003 fresh initialization seeds for the attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0003/attack-2/env",
+      "count": 24,
+      "iteration": "aaa1k-loop-0003",
+      "namespace": "attack2_env",
+      "purpose": "iteration 0003 second attack, on the scoped claim v3",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0003/attack-2/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0003",
+      "namespace": "attack2_init",
+      "purpose": "iteration 0003 fresh initialization seeds for the second attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    }
+  ],
+  "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",
+  "schema": "aaa.loop.identity_ledger.v1"
+}

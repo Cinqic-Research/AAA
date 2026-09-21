@@ -152,13 +152,45 @@ them is mistaken for a capability.
 evaluate, and were not independently designed or preregistered before
 evaluation. Independent Sol review later examined the implementation and added
 characterization, but that does not remove the benchmark-origin limitation or
-provide external replication. A decomposition probe established that
-`coarse_speed_v1` genuinely tests hidden-regime inference — with the speed held
-fixed the recurrent model is *worse* than the stateless control — but
-`occlusion_v1` has no equivalent check.
+provide external replication. A decomposition probe was taken to establish
+that `coarse_speed_v1` genuinely tests hidden-regime inference, because with
+the speed held fixed the gated model is *worse* than the stateless control.
+**That conclusion is unsupported (`AAA-162`):** the probe tested only the gated
+model. With the ungated control, memory keeps most of its advantage at fixed
+speed at the declared construction, and how much of the family is regime
+inference depends on the speed-to-quantum ratio. What `coarse_speed_v1`
+isolates is unresolved. `occlusion_v1` has no equivalent check.
 
-**The most useful next experiments**, in order: a distributional analysis of the
-minority of streams where the ungated control wins large; an independently
-designed memory benchmark; and a benchmark with genuine long-range dependence,
-without which the truncation horizon does not matter and an unbiased online
-recurrent learner has nothing to fix.
+**The most useful next experiments** were, in order: a distributional analysis
+of the minority of streams where the ungated control wins large; an
+independently designed memory benchmark; and a benchmark with genuine
+long-range dependence. The first was done by the loop pilot below: the
+"minority" is one whole family.
+
+## What the loop pilot measured about AAA-1K (2026-09-21)
+
+The improvement-loop pilot ([`loop_pilot_report.md`](loop_pilot_report.md))
+promoted nothing; Champion 0 is unchanged. Its measurements were made on
+diagnostic, development and attack identities, never on confirmation
+evidence, so they are characterizations rather than confirmed claims.
+
+- **Q4's negative sign is one family.** Recomputed from round-3 primitives,
+  all 24 `coarse_speed_v1` streams favour the ungated control in every
+  initialization, and without that family the Q4 aggregate is positive.
+- **Why: the gated core's zero-bias operating point.** With `z = r = 0.5` the
+  one-step Jacobian has no sign-alternating mode, so the champion cannot track
+  the slow regime's sub-quantum phase within an episode and behaves like its
+  own stateless ablation there. A keep-gate bias of −2 closes about 73% of the
+  gap without a single extra parameter, but trades away occlusion accuracy
+  (+4–5%) and fails on some unseen initializations. Capacity is not the
+  bottleneck: a 354-parameter ungated RNN beats the 994-parameter champion on
+  this family.
+- **A long-horizon runaway.** On 1120-step fixed-speed quantized streams the
+  champion's online learning diverges (mean error above twice persistence) in
+  roughly a third of cells: the previous-error input closes a feedback loop at
+  the selected learning rate. Bounding the input does not help; removing it
+  does, at a cost of up to 41% on adaptation-heavy families. Round 3 never
+  evaluated coarse streams longer than 280 steps, and its clip statistics
+  ("under 1% of updates") describe that horizon only.
+- **The previous-error input matters more than round 3 showed.** Removing it
+  regresses `aba_v1` by 41% and `dynamics_change` by 39% in development.

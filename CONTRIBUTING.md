@@ -40,6 +40,12 @@ warrants it, declare a fresh batch, and let the multiplicity accounting charge
 you for the extra attempt. This has happened once already and the whole chain is
 in `AAA-120`; follow that shape.
 
+**Improving a model goes through the loop.** A change meant to make a model
+better follows [`docs/loop_protocol.md`](docs/loop_protocol.md): diagnose on
+diagnostic identities, commit hypotheses and rules before running them, attack
+on attack identities, and freeze before any confirmation identity is observed.
+The protocol is still a pilot; its known gaps are listed there.
+
 **Keep confirmation streams clean.** Any confirmation stream that has been
 looked at is contaminated for model selection forever. Do selection on
 development data.

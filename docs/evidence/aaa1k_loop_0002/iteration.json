@@ -1,0 +1,145 @@
+{
+  "accounting": {
+    "adaptive_state_after": 1414,
+    "adaptive_state_before": 1414,
+    "compute_change": "none: no challenger was frozen; every candidate had 994 parameters and 1414 state scalars",
+    "parameters_after": 994,
+    "parameters_before": 994,
+    "parameters_counted_from_arrays": 994
+  },
+  "artifacts": [
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/observation.json",
+      "role": "observation",
+      "sha256": "b444f8efe92ce38ec2ff23bcf8ca3968fee63d8275ed13fa14e36dcb7c55b87f"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/diagnosis_3.json",
+      "role": "diagnosis",
+      "sha256": "0f5c384e0dd97cafd1cac6e9510d11557b1a19ce0648d330180afbb865348bd9"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0002/development.json",
+      "role": "development",
+      "sha256": "e9222d85bad0e76e1d73d5d8b0bb822ee19c3839ecb1161d868b12cc7d3c1752"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "aaa1k-loop-0002-c4",
+      "evidence": "docs/evidence/aaa1k_loop_0002/development.json",
+      "intervention": "clip input 3 to [-8, 8] (encoding repair; parameter-neutral)",
+      "intervention_class": "representation/encoding",
+      "reason": "S1 fails: 27 divergent long coarse cells against the champion's 27",
+      "status": "REJECTED_IN_DEVELOPMENT"
+    },
+    {
+      "candidate_id": "aaa1k-loop-0002-c5",
+      "evidence": "docs/evidence/aaa1k_loop_0002/development.json",
+      "intervention": "clip input 3 to [-4, 4] (encoding repair; parameter-neutral)",
+      "intervention_class": "representation/encoding",
+      "reason": "S1 fails: 28 divergent long coarse cells against the champion's 27",
+      "status": "REJECTED_IN_DEVELOPMENT"
+    },
+    {
+      "candidate_id": "aaa1k-loop-0002-c6",
+      "evidence": "docs/evidence/aaa1k_loop_0002/development.json",
+      "intervention": "remove input 3 (K = 0; the existing no-error-input ablation)",
+      "intervention_class": "mechanism removal",
+      "reason": "S4 fails: every standard plan entry regresses by 4-41% (aba +41%, dynamics_change +39%), although divergences fall to 3",
+      "status": "REJECTED_IN_DEVELOPMENT"
+    }
+  ],
+  "challenger": null,
+  "classification": {
+    "final": "instability through the presence of the previous-error feedback channel at lr 0.03, not through the input's magnitude: bounding the input does nothing, removing it fixes the runaway at a large accuracy cost",
+    "initial": "instability"
+  },
+  "compute_seconds": {
+    "docs/evidence/aaa1k_loop_0001/champion_0.json": 0.08021275499993408,
+    "docs/evidence/aaa1k_loop_0001/diagnosis_3.json": 104.11312114799989,
+    "docs/evidence/aaa1k_loop_0001/observation.json": 0.06971343200007141,
+    "docs/evidence/aaa1k_loop_0002/development.json": 37.03320638099967
+  },
+  "confirmation_evidence": null,
+  "confirmation_freeze": null,
+  "deviations": [],
+  "diagnostic_identity_blocks": [
+    "aaa1k-loop-0001/diagnostic/long-3"
+  ],
+  "evidence_that_exposed_the_problem": [
+    "docs/evidence/aaa1k_loop_0001/diagnosis_2.json (H14 test)",
+    "docs/evidence/aaa1k_loop_0001/diagnosis_3.json"
+  ],
+  "history": [
+    {
+      "at": "2026-09-21T14:37:59Z",
+      "state": "OBSERVED"
+    },
+    {
+      "at": "2026-09-21T14:37:59Z",
+      "state": "CLASSIFIED"
+    },
+    {
+      "at": "2026-09-21T14:37:59Z",
+      "state": "DIAGNOSED"
+    },
+    {
+      "at": "2026-09-21T14:50:34Z",
+      "state": "TEST_DEFINED"
+    },
+    {
+      "at": "2026-09-21T14:52:37Z",
+      "state": "CHALLENGER_CREATED"
+    },
+    {
+      "at": "2026-09-21T14:52:37Z",
+      "state": "REJECTED"
+    },
+    {
+      "at": "2026-09-21T14:52:37Z",
+      "state": "PRESERVED"
+    }
+  ],
+  "hypotheses": {
+    "diagnosis_3": "H16 (error feedback), H17 (learning rate), H18 (recurrence not required), H19 (quantization-specific)",
+    "falsified_in_development": "the magnitude form of H16: clipping input 3 at 8 or 4 leaves the runaway intact",
+    "open": "a closed-loop gain above one learned on alternating targets (not tested in this pilot)"
+  },
+  "independent_recomputation": null,
+  "iteration_id": "aaa1k-loop-0002",
+  "limitations": [
+    "the learning-rate remedy (H17) was excluded on AAA-1K's own development-selection evidence rather than re-tested"
+  ],
+  "loop_protocol_version": "aaa.loop.v0-pilot",
+  "outcome": "REJECT",
+  "parent_champion": {
+    "champion_id": "aaa1k-champion-0",
+    "phase_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+    "record": {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    "source_commit": "1ce716c42500003881e379f6d23dc0d807301001"
+  },
+  "parent_iteration": "aaa1k-loop-0001 (REJECTED); this iteration starts from its resulting state",
+  "problem": "the champion's online learning runs away on long quantized streams: 60 of 160 long coarse cells end worse than twice persistence (diagnosis round 3). By signature it is the likely source of round 3's two largest Q4 gated losses (those cells were not re-run to confirm), and iteration 0001's fresh-initialization failure of c2 has the same signature",
+  "reason": "no candidate passed development screening; Champion 0 retained",
+  "schema": "aaa.loop.iteration.v1",
+  "targeted_tests": [
+    "long-horizon divergence counts across four families on fresh development identities"
+  ],
+  "timing": {
+    "note": "human/AI task timing lives in docs/loop_pilot_report.md; scientific compute time is per artifact",
+    "task_start_utc": "2026-09-21T14:19:36Z"
+  },
+  "unregistered_observations": [
+    "one sanity run of the champion and c4 on an arbitrary 1120-step coarse stream (seed 4242, not a ledger identity) while checking bitwise equality; disclosed in research/aaa_1k_loop/iteration2.py before the development run"
+  ]
+}

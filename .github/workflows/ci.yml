@@ -84,6 +84,12 @@ jobs:
           python -m research.aaa_1k visualize \
             --family occlusion_v1 --output "${RUNNER_TEMP}/aaa1k/dashboard.png"
 
+      - name: Improvement-loop pilot integrity
+        run: |
+          python -m research.aaa_1k_loop champion --verify
+          python -m research.aaa_1k_loop validate
+          python -m research.aaa_1k_loop reproduce observe
+
       - name: Canonical specification identity
         run: python -m aaa.cli spec-hash
 

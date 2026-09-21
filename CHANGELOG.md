@@ -1,5 +1,52 @@
 # Research history
 
+## PR #19 independent final review remediation (2026-09-21)
+
+- Repaired confirmation freeze provenance so every frozen scientific byte and
+  executable bit must exist in the recorded commit; the complete loop package,
+  including CLI admission, is now frozen (`AAA-165`).
+- Replaced recoverable local-only confirmation consumption with atomic,
+  immutable remote Git ownership before observation (`AAA-166`).
+- Hardened iteration records against unsafe paths, symlinks, malformed hashes,
+  duplicate/contradictory artifacts and duplicate candidate IDs (`AAA-167`).
+- Weakened H13/M1 to partial mechanistic support without altering observed
+  evidence, and fixed prospective pilot-gap rules without rewriting L-4
+  (`AAA-168`). Champion 0 and all eight rejected candidates remain unchanged;
+  no confirmation identity was reserved or spent.
+
+## aaa.loop.v0-pilot — Birth of The Loop (2026-09-21)
+
+A pilot of AAA's iterative-improvement loop — observe, classify, diagnose,
+hypothesize, falsify, intervene minimally, attack, confirm fresh, decide,
+preserve — run on AAA-1K from its reviewed round-3 state. It lives in
+`research/aaa_1k_loop/`, outside the AAA-1K fingerprint, so Champion 0 is
+byte-for-byte the reviewed model. Nothing in `research/aaa_1k/`, `aaa/`,
+`results/`, or any AAA-1K evidence or report changed.
+
+**It said no, eight times.** Three iterations tried six model candidates and
+two corrected claims, every one parameter-neutral. All were rejected by rules
+committed before their data existed: five at development screening, three at
+attack. No freeze was written and no confirmation identity was spent, so the
+outer promotion loop exists only as code tested by failure injection. That is
+the pilot's main limitation, stated rather than worked around.
+
+**What it found about AAA-1K.** Q4's "minority tail" is one whole family,
+`coarse_speed_v1`, where zero gate biases leave the gated core without a
+sign-alternating mode to track a quantized phase (supported on fresh
+diagnostic streams; a keep-gate bias of −2 closes 73% of the gap without a
+parameter, and trades away occlusion). A previously unmeasured long-horizon
+runaway through the previous-error input affects about a third of long
+fixed-speed coarse runs. The documented claim that `coarse_speed_v1` measures
+regime inference only is unsupported (`AAA-162`). Capacity is not the
+bottleneck: a 354-parameter ungated RNN beats the 994-parameter champion on
+the family studied.
+
+**What it found about itself.** Classification redirected the work before any
+model change; attack found an initialization-dependent failure development had
+missed; a reproduction check caught a labelling defect in the loop's own code
+(`AAA-164`). Seven protocol gaps are recorded before the protocol may become
+permanent. See [`docs/loop_pilot_report.md`](docs/loop_pilot_report.md).
+
 ## aaa.1k.v1 — a recurrent predictive seed (2026-09-19)
 
 A new versioned research phase in `research/aaa_1k/`, isolated from the frozen
