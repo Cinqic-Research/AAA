@@ -26,6 +26,17 @@ EVIDENCE_DIR = Path("docs/evidence/aaa1k_loop_0001")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
     {
+        "block_id": "aaa1k-loop-0004/diagnostic/gain",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_gain",
+        "count": 16,
+        "purpose": (
+            "iteration 0004 round 2 (audit R-01, M2): closed-loop gain of the previous-error channel; "
+            "hypotheses H24-H28 declared first"
+        ),
+    },
+    {
         "block_id": "aaa1k-loop-0004/diagnostic/scratch",
         "iteration_id": "aaa1k-loop-0004",
         "role": "diagnostic",

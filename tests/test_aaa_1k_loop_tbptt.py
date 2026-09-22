@@ -198,3 +198,85 @@ class HistogramTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LoopGainTests(unittest.TestCase):
+    """The closed-loop measurements against finite differences of the loop they describe."""
+
+    def _trained(self, **overrides: object) -> AAA1KGRU:
+        rng = np.random.default_rng(21)
+        model = AAA1KGRU(seed=4, **{**CHAMPION_CONFIGURATION, **overrides})
+        model.parameters["W_o"][:] = rng.normal(0.0, 0.7, model.parameters["W_o"].shape)
+        for _ in range(5):
+            model.forward(rng.normal(size=3))
+        return model
+
+    @staticmethod
+    def _loop(model: AAA1KGRU, h_prev: np.ndarray, x: np.ndarray) -> np.ndarray:
+        from research.aaa_1k_loop.tbptt import step
+
+        new = step(model.parameters, x, h_prev)
+        return np.concatenate([new.h, [-new.output[0]]])  # e_t = d* - o_t, d* constant
+
+    def test_closed_loop_jacobian_matches_finite_differences(self) -> None:
+        from research.aaa_1k_loop.gain import closed_loop_jacobian
+
+        model = self._trained()
+        cache = model._caches[-1]
+        analytic = closed_loop_jacobian(model)
+        numeric = np.zeros_like(analytic)
+        epsilon = 1e-6
+        for j in range(17):
+            plus_h, minus_h = cache.h_prev.copy(), cache.h_prev.copy()
+            plus_x, minus_x = cache.x.copy(), cache.x.copy()
+            if j < 16:
+                plus_h[j] += epsilon
+                minus_h[j] -= epsilon
+            else:
+                plus_x[2] += epsilon
+                minus_x[2] -= epsilon
+            numeric[:, j] = (self._loop(model, plus_h, plus_x) - self._loop(model, minus_h, minus_x)) / (
+                2 * epsilon
+            )
+        self.assertLess(np.max(np.abs(analytic - numeric)), 1e-7)
+
+    def test_direct_gain_is_the_error_to_error_derivative(self) -> None:
+        from research.aaa_1k_loop.gain import loop_measurements
+
+        model = self._trained()
+        cache = model._caches[-1]
+        plus, minus = cache.x.copy(), cache.x.copy()
+        plus[2] += 1e-6
+        minus[2] -= 1e-6
+        numeric = (
+            self._loop(model, cache.h_prev, plus)[-1] - self._loop(model, cache.h_prev, minus)[-1]
+        ) / 2e-6
+        self.assertAlmostEqual(loop_measurements(model)["direct_gain"], numeric, places=7)
+
+    def test_open_loop_ablation_reports_zero_feedback(self) -> None:
+        from research.aaa_1k_loop.gain import loop_measurements
+
+        measured = loop_measurements(self._trained(zero_error_input=True))
+        self.assertEqual(measured["direct_gain"], 0.0)
+        self.assertAlmostEqual(measured["closed_loop_radius"], measured["state_radius"])
+
+    def test_gain_agent_is_read_only(self) -> None:
+        from research.aaa_1k_loop.gain import GainAgent
+
+        stream = coarse_speed_stream(424242, steps=120, regime_length=10_000)
+        plain = NeuralAgent(AAA1KGRU(seed=2, **CHAMPION_CONFIGURATION), name="plain")
+        measured = GainAgent(AAA1KGRU(seed=2, **CHAMPION_CONFIGURATION), name="measured")
+        result = run_stream(stream, [plain, measured])
+        self.assertTrue(np.array_equal(result.errors("plain"), result.errors("measured")))
+        self.assertEqual(len(measured.gain_trace), len(result.steps))
+
+    def test_trailing_window_and_first_index(self) -> None:
+        from research.aaa_1k_loop.diagnosis4b import first_index, trailing
+
+        values = np.arange(10, dtype=float)
+        rolled = trailing(values, 3, np.median)
+        self.assertTrue(np.all(np.isnan(rolled[:2])))
+        self.assertEqual(rolled[2], 1.0)
+        self.assertEqual(first_index(rolled > 4.5), 6)
+        self.assertEqual(first_index(values > 2, start=5), 5)
+        self.assertIsNone(first_index(values > 100))
