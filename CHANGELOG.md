@@ -1,5 +1,15 @@
 # Research history
 
+## Independent repository review (2026-09-22)
+
+Engineering, automation and documentation consistency only. No model, target
+rule, threshold, estimand, gate, specification, seed mapping, identity,
+retained evidence or scientific claim was changed. The `aaa.1k.v1`
+fingerprint (`5ce6e019…`) and the v2.1 specification hash are unchanged.
+
+- `champion1 verify` now recomputes the live phase fingerprint instead of
+  comparing Champion 1's record with a copy of itself (`AAA-174`).
+
 ## Development hardware and compute strategy documented (2026-09-22)
 
 Documentation and project governance only. No implementation, protocol,

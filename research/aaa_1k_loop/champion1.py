@@ -30,6 +30,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+from research.aaa_1k.identity import phase_fingerprint
 from research.aaa_1k.round3 import run_round3
 from research.aaa_1k.selection import Configuration
 
@@ -225,7 +226,15 @@ def build_record(root: Path) -> dict[str, Any]:
 def verify(root: Path) -> list[str]:
     record = read_strict_json(root / RECORD)
     live = build_record(root)
-    return [f"{key}: recorded differs from repository" for key in live if record.get(key) != live[key]]
+    problems = [f"{key}: recorded differs from repository" for key in live if record.get(key) != live[key]]
+    # build_record copies the fingerprint from Champion 0's record, so comparing
+    # it with the record proves nothing about the tree. Recompute it (AAA-174).
+    fingerprint = phase_fingerprint(root)["sha256"]
+    if record.get("phase_fingerprint") != fingerprint:
+        problems.append(
+            f"phase_fingerprint: recorded {record.get('phase_fingerprint')!r} but repository gives {fingerprint!r}"
+        )
+    return problems
 
 
 def main(argv: list[str] | None = None) -> int:

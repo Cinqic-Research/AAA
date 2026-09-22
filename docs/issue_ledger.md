@@ -1832,3 +1832,37 @@ records. Only actual defects are entered here.
   aggregates over them, such as median gains or divergence counts) are
   platform-dependent at the level of about one cell. The claims rest on the
   verdicts, which are held exact.
+
+---
+
+## Independent repository review (2026-09-22)
+
+Found by the independent end-to-end review of `main` at `efa1fdb`. Each
+entry was reproduced against that tree before it was changed; the review
+record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md).
+
+### AAA-174 — `champion1 verify` did not recompute the phase fingerprint
+- **Source** independent review 2026-09-22 · **Severity** medium · **Status** repaired
+- **Reproduction** In a throwaway copy of `efa1fdb`, appending one byte to the
+  fingerprinted `research/aaa_1k/model.py` changed the `aaa.1k.v1` fingerprint
+  to `e9e65b0c…`. `champion --verify` failed, but
+  `python -m research.aaa_1k_loop.champion1 verify` still printed
+  `champion 1: VALID` and exited 0. Changing a byte of `requirements-lock.txt`
+  gave the same result.
+- **Cause** `champion1.build_record` copies `phase_fingerprint` from Champion
+  0's record, and `verify` compares the record with that rebuilt copy. It
+  never hashed the live tree, so the check compared the record with itself.
+  `CONTRIBUTING.md` says that `champion1 verify` fails when a fingerprinted
+  file changes.
+- **Consequence** No wrong acceptance occurred. `champion --verify`,
+  `validate`, `tests.test_aaa_1k_loop` and CI all recompute the fingerprint and
+  caught the change. Champion 1's record itself is unchanged and correct.
+- **Repair** `champion1.verify` now recomputes `phase_fingerprint(root)` and
+  reports any disagreement with the recorded value. `build_record` and the
+  Champion 1 record are unchanged.
+- **Regression** `ChampionOneTests.test_champion_1_verification_recomputes_the_live_phase_fingerprint`
+  substitutes a drifted fingerprint. It errors on `efa1fdb` and passes after
+  the repair.
+- **Verification** On the review branch the same one-byte injection makes
+  `champion1 verify` print `STALE: phase_fingerprint: …` and exit 1. On the
+  unmodified tree it prints `VALID`, and the fingerprint is still `5ce6e019…`.
