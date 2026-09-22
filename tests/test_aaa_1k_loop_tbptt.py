@@ -364,3 +364,52 @@ class UnfoldingTests(unittest.TestCase):
 
         self.assertEqual(longest_runs([False, True, True, False, True]), [(1, 2), (4, 1)])
         self.assertEqual(longest_runs([]), [])
+
+
+class GatedUnfoldTests(unittest.TestCase):
+    def _agent(self, *positions: float):
+        from research.aaa_1k_loop.unfolding import GatedUnfoldAgent
+
+        agent = GatedUnfoldAgent(AAA1KGRU(seed=0, **CHAMPION_CONFIGURATION), name="c9")
+        agent.begin_episode()
+        for position in positions:
+            agent.accept_observation(position)
+        agent.predict()
+        return agent
+
+    def test_the_lock_step_is_refused(self) -> None:
+        agent = self._agent(0.0, 0.005)  # input 0.005, velocity +0.005
+        agent._raw_prediction = -0.0037  # past the wall, as in the traced lock
+        target = agent._training_target(0.005)
+        self.assertTrue(agent.gate_trace[-1])
+        self.assertFalse(agent.mirror_trace[-1])
+        self.assertAlmostEqual(target, 0.0)
+
+    def test_a_genuine_crossing_is_unfolded_as_the_champion_does(self) -> None:
+        agent = self._agent(0.0044, 0.002)  # moving -0.0024 per step, 0.002 from the wall
+        agent._raw_prediction = -0.0004
+        target = agent._training_target(0.0004)
+        self.assertFalse(agent.gate_trace[-1])
+        self.assertTrue(agent.mirror_trace[-1])
+        self.assertAlmostEqual(target, (-0.0004 - 0.002) / agent.scales.displacement_scale)
+
+    def test_on_smooth_bouncing_the_gate_fires_only_where_no_crossing_happened(self) -> None:
+        # The champion also unfolds the step *after* a bounce onto the mirror branch when its
+        # raw prediction is still past the wall: a frame-mixed target for a transition that
+        # crossed nothing. Those are the only steps the gate may change.
+        from research.aaa_1k.streams import motion_compat_stream
+        from research.aaa_1k_loop.unfolding import GatedUnfoldAgent, UnfoldTraceAgent
+
+        stream = motion_compat_stream("bouncing", 424242, steps=600, change_step=None)
+        champion = UnfoldTraceAgent(AAA1KGRU(seed=2, **CHAMPION_CONFIGURATION), name="champion")
+        gated = GatedUnfoldAgent(AAA1KGRU(seed=2, **CHAMPION_CONFIGURATION), name="gated")
+        result = run_stream(stream, [champion, gated])
+        offset = len(result.steps) - len(gated.gate_trace)
+        fired = [index + offset for index, flag in enumerate(gated.gate_trace) if flag]
+        self.assertTrue(fired)
+        first = fired[0]
+        bounce_steps = {step.index for step in stream.steps if step.event == "bounce"}
+        self.assertNotIn(result.steps[first].target_index, bounce_steps)
+        self.assertTrue(champion.mirror_trace[first - offset])
+        errors_champion, errors_gated = result.errors("champion"), result.errors("gated")
+        self.assertTrue(np.array_equal(errors_champion[: first + 1], errors_gated[: first + 1]))

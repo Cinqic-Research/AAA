@@ -186,3 +186,33 @@ class ConfirmationPathTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Iteration5Tests(unittest.TestCase):
+    def test_iteration5_judges_with_the_identical_functions(self) -> None:
+        from research.aaa_1k_loop import iteration5 as it5
+
+        self.assertIs(it5.screen, it.screen)
+        self.assertIs(it5.adjudicate_attack, it.adjudicate_attack)
+        self.assertIs(it5.decide, it.decide4)
+        self.assertEqual(len(it5.CANDIDATES), 1)
+        self.assertEqual({k: v for k, v in it5.FROZEN_RULES.items() if k != "shared_with"}, it.FROZEN_RULES)
+
+    def test_iteration5_confirmation_path_is_closed(self) -> None:
+        from research.aaa_1k_loop import outer5
+
+        allowed = {
+            Path(n).stem for n in outer5.CONFIRMATION_SOURCES_5 if n.startswith("research/aaa_1k_loop/")
+        }
+        frozen = set(outer5.CONFIRMATION_SOURCES_5) | set(phase_files(ROOT))
+        for name in outer5.CONFIRMATION_SOURCES_5:
+            if not name.startswith("research/aaa_1k_loop/"):
+                continue
+            for node in ast.walk(ast.parse((ROOT / name).read_text(encoding="utf-8"))):
+                if isinstance(node, ast.ImportFrom):
+                    if node.level == 1:
+                        self.assertIn((node.module or "__init__").split(".")[0], allowed, name)
+                    elif node.module and node.module.startswith("research.aaa_1k_loop"):
+                        self.assertIn(node.module.split(".")[-1], allowed, name)
+                    elif node.module and node.module.startswith("aaa."):
+                        self.assertIn(f"{node.module.replace('.', '/')}.py", frozen, name)

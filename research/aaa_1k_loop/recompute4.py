@@ -1,4 +1,4 @@
-"""Independent recomputation of iteration 0004's confirmation, from primitives only.
+"""Independent recomputation of an iteration-0004-style confirmation (0004, 0005), from primitives only.
 
 Does not import :mod:`research.aaa_1k_loop.iteration4`. Grids are rebuilt
 here, the crossed bootstrap is the count-weighted ``R D C^T`` form in
@@ -8,7 +8,7 @@ submatrix indexing, and every threshold and bootstrap index is read from the
 change what this check expects. It also checks that the primitives cover
 exactly the frozen confirmation identities.
 
-    python -m research.aaa_1k_loop.recompute4 [--output PATH]
+    python -m research.aaa_1k_loop.recompute4 --confirmation PATH --freeze PATH [--output PATH]
 """
 
 from __future__ import annotations
@@ -126,8 +126,13 @@ def verify(confirmation_path: Path, freeze_path: Path, ledger: Mapping[str, Any]
         if block["status"] != "spent":
             problems.append(f"{block_id} is not marked spent")
     primitives = confirmation["primitives"]
-    env = set(block_seeds(find_block(ledger, "aaa1k-loop-0004/confirmation/env")))
-    init = set(block_seeds(find_block(ledger, "aaa1k-loop-0004/confirmation/init")))
+    frozen_blocks = sorted(manifest["confirmation_blocks"])
+    env_ids = [b for b in frozen_blocks if b.endswith("/confirmation/env")]
+    init_ids = [b for b in frozen_blocks if b.endswith("/confirmation/init")]
+    if len(env_ids) != 1 or len(init_ids) != 1:
+        raise ValueError("the freeze must name exactly one confirmation env block and one init block")
+    env = set(block_seeds(find_block(ledger, env_ids[0])))
+    init = set(block_seeds(find_block(ledger, init_ids[0])))
     used_env = {int(r["stream_seed"]) for r in primitives}
     used_init = {int(r["init_seed"]) for r in primitives}
     if used_env != env:
@@ -145,8 +150,8 @@ def verify(confirmation_path: Path, freeze_path: Path, ledger: Mapping[str, Any]
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop.recompute4")
-    parser.add_argument("--confirmation", default="docs/evidence/aaa1k_loop_0004/confirmation.json")
-    parser.add_argument("--freeze", default="docs/evidence/aaa1k_loop_0004/freeze.json")
+    parser.add_argument("--confirmation", required=True)
+    parser.add_argument("--freeze", required=True)
     parser.add_argument("--output")
     args = parser.parse_args(argv)
     root = Path(__file__).resolve().parents[2]

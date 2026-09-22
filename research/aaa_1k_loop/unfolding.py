@@ -98,3 +98,51 @@ class DeadReckoningUnfoldAgent(UnfoldTraceAgent):
     def _reference(self) -> float:
         assert self._input_position is not None
         return self._input_position + self.tracker.velocity_estimate()
+
+
+class GatedUnfoldAgent(UnfoldTraceAgent):
+    """Candidate c9: the champion's unfolding, refusing a physically impossible crossing.
+
+    The branch is still chosen by the learner's own raw prediction, exactly as
+    the champion chooses it, so a genuine wall crossing is unfolded exactly as
+    before (``AAA-120``). A mirrored branch ``u`` is refused -- the folded
+    observation is used instead -- only when the one-step crossing it implies
+    is longer than the observed motion can account for::
+
+        |u - p| > |v| + |y - p|
+
+    where ``p`` is the input position, ``y`` the revealed observation and ``v``
+    the tracker's public velocity estimate (the previous displacement). For a
+    genuine crossing at constant speed ``L``, ``|u - p| = L`` and ``|v| = L``,
+    so the gate never fires on one. It fires where the champion mirrors a
+    transition that crossed nothing: throughout a frame lock (where the implied
+    step is about twice the distance from the wall, from the lock's second
+    step) and, on smooth motion, on the step *after* a bounce when the raw
+    prediction is still past the wall -- a small frame-mixed target the
+    champion makes too. The bound is derived from the reflection geometry, not
+    fitted to data.
+    """
+
+    def __init__(self, model: Any, *, name: str, **kwargs: Any) -> None:
+        super().__init__(model, name=name, **kwargs)
+        self.gate_trace: list[bool] = []
+
+    def _training_target(self, revealed: float) -> float:
+        if self._input_position is None:
+            raise RuntimeError("no prediction to build a target for")
+        effective = revealed
+        gated = False
+        if self.unfold_target and self._raw_prediction is not None:
+            effective = unfold_observation(
+                revealed, self._raw_prediction, self.scales.lower_bound, self.scales.upper_bound
+            )
+            if effective != revealed:
+                implied = abs(effective - self._input_position)
+                bound = abs(self.tracker.velocity_estimate()) + abs(revealed - self._input_position)
+                if implied > bound:
+                    effective, gated = revealed, True
+        target = (effective - self._input_position) / self.scales.displacement_scale
+        self.mirror_trace.append(effective != revealed)
+        self.target_trace.append(target)
+        self.gate_trace.append(gated)
+        return target
