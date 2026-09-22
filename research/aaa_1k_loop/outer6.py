@@ -1,9 +1,9 @@
 """Iteration 0006 challenger stages: develop, attack, freeze, confirm.
 
-A copy of :mod:`research.aaa_1k_loop.outer6` with iteration 0006's spec. The
+A copy of :mod:`research.aaa_1k_loop.outer4` with iteration 0006's spec. The
 duplication is deliberate: the protocol says to generalize the outer-loop
-machinery only after a second real use shows what is reusable, and 0005 was that second use; 0006
-reuses its shape unchanged.
+machinery only after a second real use shows what is reusable. 0006's
+confirmation is the first real use of the outer half; generalize after it.
 
     python -m research.aaa_1k_loop.outer6 develop
     python -m research.aaa_1k_loop.outer6 attack
@@ -27,6 +27,7 @@ import argparse
 import hashlib
 import sys
 import time
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -41,8 +42,10 @@ from .iteration6 import (
     CANDIDATES,
     CONFIRMATION_ENV_BLOCK,
     CONFIRMATION_ENV_COUNT,
+    CONFIRMATION_ENV_NAMESPACE,
     CONFIRMATION_INIT_BLOCK,
     CONFIRMATION_INIT_COUNT,
+    CONFIRMATION_INIT_NAMESPACE,
     DEVELOPMENT_BLOCK,
     FROZEN_RULES,
     ITERATION_ID,
@@ -59,8 +62,9 @@ from .iteration6 import (
 EVIDENCE_DIR = Path("docs/evidence/aaa1k_loop_0006")
 DEVELOPMENT = EVIDENCE_DIR / "development.json"
 ATTACK = EVIDENCE_DIR / "attack.json"
-FREEZE = EVIDENCE_DIR / "freeze.json"
-CONFIRMATION = EVIDENCE_DIR / "confirmation.json"
+FREEZE = EVIDENCE_DIR / "freeze_2.json"
+CONFIRMATION = EVIDENCE_DIR / "confirmation_2.json"
+"""Attempt 2: ``freeze.json`` froze the burned attempt-1 blocks and is kept as history."""
 CHAMPION_RECORD = "docs/evidence/aaa1k_loop_0001/champion_0.json"
 
 CONFIRMATION_SOURCES_6 = (
@@ -127,6 +131,35 @@ def _selected(root: Path) -> str | None:
     development = read_strict_json(root / DEVELOPMENT)
     screens = {arm: screen(development["records"], arm) for arm in (c["arm"] for c in CANDIDATES)}
     return select_for_attack(screens)
+
+
+def spend_and_build(ledger: Mapping[str, Any], observer: str) -> tuple[dict[str, Any], list[Any]]:
+    """Mark both confirmation blocks spent by ``observer``, then build the cells they name.
+
+    One function, so the exact admission-to-cells sequence is tested (the
+    sequence whose defect aborted iteration 0006's first attempt).
+    """
+
+    for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
+        ledger = mark(ledger, block_id, status="spent", observed_by=observer)
+    return dict(ledger), confirmation_cells(ledger, observer=observer)
+
+
+def confirmation_payload(
+    manifest: Mapping[str, Any], *, freeze_sha256: str, head: str, primitives: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """The confirmation artifact before its decision is attached (the shape recompute4 verifies)."""
+
+    return {
+        "schema": "aaa.loop.confirmation.v6",
+        "evidence_role": "confirmation",
+        "freeze": {"path": str(FREEZE), "sha256": freeze_sha256, "commit": head},
+        "confirmation_source_fingerprint": manifest["confirmation_source_fingerprint"]["sha256"],
+        "champion_phase_fingerprint": manifest["champion_phase_fingerprint"],
+        "challenger": manifest["frozen"]["challenger"]["arm"],
+        "identity_blocks": [CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK],
+        "primitives": primitives,
+    }
 
 
 # ----------------------------------------------------------------------
@@ -198,18 +231,18 @@ def command_freeze(_args: argparse.Namespace) -> int:
         ledger,
         block_id=CONFIRMATION_ENV_BLOCK,
         role="confirmation",
-        namespace="confirmation_env",
+        namespace=CONFIRMATION_ENV_NAMESPACE,
         count=CONFIRMATION_ENV_COUNT,
-        purpose="iteration 0006 fresh confirmation streams (M2 challenger)",
+        purpose="iteration 0006 fresh confirmation streams (M2 challenger), attempt 2",
         iteration_id=ITERATION_ID,
     )
     ledger = reserve(
         ledger,
         block_id=CONFIRMATION_INIT_BLOCK,
         role="confirmation",
-        namespace="confirmation_init",
+        namespace=CONFIRMATION_INIT_NAMESPACE,
         count=CONFIRMATION_INIT_COUNT,
-        purpose="iteration 0006 fresh confirmation initializations (M2 challenger)",
+        purpose="iteration 0006 fresh confirmation initializations (M2 challenger), attempt 2",
         iteration_id=ITERATION_ID,
     )
     freshness = prove_fresh(ledger, root)
@@ -277,26 +310,17 @@ def command_confirm(args: argparse.Namespace) -> int:
         except ReservationError as error:
             print(f"REFUSED: durable confirmation reservation failed: {error}", file=sys.stderr)
             return 1
-    for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
-        ledger = mark(ledger, block_id, status="spent", observed_by=observer)
+    ledger, cells = spend_and_build(ledger, observer)
     # Spent before the first cell runs: a crash after this point still consumes the identities.
     write_ledger(_ledger(root), ledger)
     started = time.perf_counter()
-    primitives = run(confirmation_cells(ledger), arms=("gru", selected), workers=args.workers)
-    payload: dict[str, Any] = {
-        "schema": "aaa.loop.confirmation.v6",
-        "evidence_role": "confirmation",
-        "freeze": {
-            "path": str(FREEZE),
-            "sha256": hashlib.sha256((root / FREEZE).read_bytes()).hexdigest(),
-            "commit": head,
-        },
-        "confirmation_source_fingerprint": fingerprint,
-        "champion_phase_fingerprint": manifest["champion_phase_fingerprint"],
-        "challenger": selected,
-        "identity_blocks": [CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK],
-        "primitives": primitives,
-    }
+    primitives = run(cells, arms=("gru", selected), workers=args.workers)
+    payload = confirmation_payload(
+        manifest,
+        freeze_sha256=hashlib.sha256((root / FREEZE).read_bytes()).hexdigest(),
+        head=head,
+        primitives=primitives,
+    )
     try:
         payload["decision"] = decide(primitives, selected)
     except Exception as error:  # the primitives are kept whatever happens

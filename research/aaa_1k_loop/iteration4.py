@@ -70,7 +70,7 @@ from research.aaa_1k.streams import coarse_speed_stream, motion_compat_stream, o
 from .arms import gru
 from .develop import plan_streams
 from .harness import Cell, arm_errors, run_cells
-from .identities import block_seeds, find_block, require_usable
+from .identities import block_seeds, find_block, require_claimed, require_usable
 from .unfolding import LOCK_RUN, DeadReckoningUnfoldAgent, UnfoldTraceAgent, longest_runs
 
 ITERATION_ID = "aaa1k-loop-0004"
@@ -227,10 +227,9 @@ def attack_cells(ledger: Mapping[str, Any]) -> list[Cell]:
     return cells
 
 
-def confirmation_cells(ledger: Mapping[str, Any]) -> list[Cell]:
-    env = require_usable(ledger, CONFIRMATION_ENV_BLOCK, purpose="confirmation")
-    init = require_usable(ledger, CONFIRMATION_INIT_BLOCK, purpose="confirmation")
-    del env, init
+def confirmation_cells(ledger: Mapping[str, Any], *, observer: str) -> list[Cell]:
+    require_claimed(ledger, CONFIRMATION_ENV_BLOCK, observer=observer)
+    require_claimed(ledger, CONFIRMATION_INIT_BLOCK, observer=observer)
     seeds = block_seeds(find_block(ledger, CONFIRMATION_ENV_BLOCK))
     plan = seeds[: CONFIRMATION_PER_ENTRY * PLAN_ENTRY_COUNT]
     long = seeds[CONFIRMATION_PER_ENTRY * PLAN_ENTRY_COUNT :][:CONFIRMATION_LONG]

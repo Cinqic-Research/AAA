@@ -36,7 +36,7 @@ from research.aaa_1k.agents import PersistenceAgent
 from . import iteration4 as it4
 from .arms import gru
 from .harness import Cell, run_cells
-from .identities import block_seeds, find_block, require_usable
+from .identities import block_seeds, find_block, require_claimed, require_usable
 from .unfolding import ReachGatedUnfoldAgent, UnfoldTraceAgent
 
 ITERATION_ID = "aaa1k-loop-0006"
@@ -44,8 +44,14 @@ ITERATION_ID = "aaa1k-loop-0006"
 DEVELOPMENT_BLOCK = "aaa1k-loop-0006/development/all"
 ATTACK_ENV_BLOCK = "aaa1k-loop-0006/attack/env"
 ATTACK_INIT_BLOCK = "aaa1k-loop-0006/attack/init"
-CONFIRMATION_ENV_BLOCK = "aaa1k-loop-0006/confirmation/env"
-CONFIRMATION_INIT_BLOCK = "aaa1k-loop-0006/confirmation/init"
+# Attempt 1 (``confirmation/{env,init}``) was claimed and spent, then aborted before
+# observation by an admission defect (``confirmation_attempt_1.json``). Spent identities
+# are never reused, observed or not, so attempt 2 uses new blocks under new namespaces.
+CONFIRMATION_ATTEMPT = 2
+CONFIRMATION_ENV_BLOCK = "aaa1k-loop-0006/confirmation-2/env"
+CONFIRMATION_INIT_BLOCK = "aaa1k-loop-0006/confirmation-2/init"
+CONFIRMATION_ENV_NAMESPACE = "confirmation_env_2"
+CONFIRMATION_INIT_NAMESPACE = "confirmation_init_2"
 
 DEVELOPMENT_BLOCK_SIZE = it4.DEVELOPMENT_BLOCK_SIZE
 ATTACK_ENV_BLOCK_SIZE = it4.ATTACK_ENV_BLOCK_SIZE
@@ -138,9 +144,9 @@ def attack_cells(ledger: Mapping[str, Any]) -> list[Cell]:
     return cells
 
 
-def confirmation_cells(ledger: Mapping[str, Any]) -> list[Cell]:
-    require_usable(ledger, CONFIRMATION_ENV_BLOCK, purpose="confirmation")
-    require_usable(ledger, CONFIRMATION_INIT_BLOCK, purpose="confirmation")
+def confirmation_cells(ledger: Mapping[str, Any], *, observer: str) -> list[Cell]:
+    require_claimed(ledger, CONFIRMATION_ENV_BLOCK, observer=observer)
+    require_claimed(ledger, CONFIRMATION_INIT_BLOCK, observer=observer)
     seeds = block_seeds(find_block(ledger, CONFIRMATION_ENV_BLOCK))
     split = it4.CONFIRMATION_PER_ENTRY * it4.PLAN_ENTRY_COUNT
     inits = it4.init_seeds(block_seeds(find_block(ledger, CONFIRMATION_INIT_BLOCK)), it4.INITIALIZATIONS)

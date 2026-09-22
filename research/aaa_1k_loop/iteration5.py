@@ -37,7 +37,7 @@ from research.aaa_1k.agents import PersistenceAgent
 from . import iteration4 as it4
 from .arms import gru
 from .harness import Cell, run_cells
-from .identities import block_seeds, find_block, require_usable
+from .identities import block_seeds, find_block, require_claimed, require_usable
 from .unfolding import GatedUnfoldAgent, UnfoldTraceAgent
 
 ITERATION_ID = "aaa1k-loop-0005"
@@ -139,9 +139,9 @@ def attack_cells(ledger: Mapping[str, Any]) -> list[Cell]:
     return cells
 
 
-def confirmation_cells(ledger: Mapping[str, Any]) -> list[Cell]:
-    require_usable(ledger, CONFIRMATION_ENV_BLOCK, purpose="confirmation")
-    require_usable(ledger, CONFIRMATION_INIT_BLOCK, purpose="confirmation")
+def confirmation_cells(ledger: Mapping[str, Any], *, observer: str) -> list[Cell]:
+    require_claimed(ledger, CONFIRMATION_ENV_BLOCK, observer=observer)
+    require_claimed(ledger, CONFIRMATION_INIT_BLOCK, observer=observer)
     seeds = block_seeds(find_block(ledger, CONFIRMATION_ENV_BLOCK))
     split = it4.CONFIRMATION_PER_ENTRY * it4.PLAN_ENTRY_COUNT
     inits = it4.init_seeds(block_seeds(find_block(ledger, CONFIRMATION_INIT_BLOCK)), it4.INITIALIZATIONS)

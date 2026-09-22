@@ -141,7 +141,7 @@ class IdentityTests(unittest.TestCase):
             iteration_id=it.ITERATION_ID,
         )
         with self.assertRaises(IdentityError):
-            it.confirmation_cells(ledger)
+            it.confirmation_cells(ledger, observer="anyone")
 
     def test_block_sizes_match_the_designs(self) -> None:
         self.assertEqual(it.DEVELOPMENT_BLOCK_SIZE, 64)
@@ -245,3 +245,136 @@ class Iteration6Tests(unittest.TestCase):
                         self.assertIn(node.module.split(".")[-1], allowed, name)
                     elif node.module and node.module.startswith("aaa."):
                         self.assertIn(f"{node.module.replace('.', '/')}.py", frozen, name)
+
+
+class ConfirmationAdmissionTests(unittest.TestCase):
+    """The admission-to-cells sequence whose defect aborted iteration 0006's first attempt."""
+
+    def _ledger(self, it_module: Any) -> dict[str, Any]:
+        ledger = empty_ledger()
+        for block_id, namespace, count in (
+            (
+                it_module.CONFIRMATION_ENV_BLOCK,
+                getattr(it_module, "CONFIRMATION_ENV_NAMESPACE", "confirmation_env"),
+                it.CONFIRMATION_ENV_COUNT,
+            ),
+            (
+                it_module.CONFIRMATION_INIT_BLOCK,
+                getattr(it_module, "CONFIRMATION_INIT_NAMESPACE", "confirmation_init"),
+                it.CONFIRMATION_INIT_COUNT,
+            ),
+        ):
+            ledger = reserve(
+                ledger,
+                block_id=block_id,
+                role="confirmation",
+                namespace=namespace,
+                count=count,
+                purpose="test",
+                iteration_id=it_module.ITERATION_ID,
+            )
+        return ledger
+
+    def test_spend_then_build_yields_the_full_design_for_every_outer_module(self) -> None:
+        from research.aaa_1k_loop import iteration5, iteration6, outer5, outer6
+
+        for it_module, outer in ((it, outer4), (iteration5, outer5), (iteration6, outer6)):
+            ledger, cells = outer.spend_and_build(self._ledger(it_module), "observer-A")
+            self.assertEqual(len(cells), (it.CONFIRMATION_PER_ENTRY * 6 + it.CONFIRMATION_LONG * 4) * 5)
+            for block_id in (it_module.CONFIRMATION_ENV_BLOCK, it_module.CONFIRMATION_INIT_BLOCK):
+                block = next(b for b in ledger["blocks"] if b["block_id"] == block_id)
+                self.assertEqual((block["status"], block["observed_by"]), ("spent", "observer-A"))
+
+    def test_cells_refuse_unspent_or_foreign_blocks(self) -> None:
+        from research.aaa_1k_loop import iteration6, outer6
+
+        ledger = self._ledger(iteration6)
+        with self.assertRaises(IdentityError):
+            iteration6.confirmation_cells(ledger, observer="observer-A")
+        spent, _cells = outer6.spend_and_build(ledger, "observer-A")
+        with self.assertRaises(IdentityError):
+            iteration6.confirmation_cells(spent, observer="observer-B")
+        with self.assertRaises(IdentityError):
+            outer6.spend_and_build(spent, "observer-B")
+
+    def test_attempt_two_does_not_reuse_the_burned_blocks(self) -> None:
+        from research.aaa_1k_loop import iteration6
+        from research.aaa_1k_loop.identities import load_ledger
+
+        self.assertEqual(iteration6.CONFIRMATION_ATTEMPT, 2)
+        ledger = load_ledger(ROOT / "benchmarks/aaa1k_loop_identity_ledger.json")
+        burned = {
+            b["block_id"]: b
+            for b in ledger["blocks"]
+            if b["block_id"].startswith("aaa1k-loop-0006/confirmation/")
+        }
+        self.assertEqual({b["status"] for b in burned.values()}, {"spent"})
+        self.assertNotIn(iteration6.CONFIRMATION_ENV_BLOCK, burned)
+
+
+class ConfirmationEndToEndTests(unittest.TestCase):
+    """Admission -> cells -> primitives -> payload -> decision -> independent recomputation, synthetically."""
+
+    def test_the_whole_outer_path_agrees_with_its_independent_recomputation(self) -> None:
+        import hashlib
+        import json
+        import tempfile
+
+        from research.aaa_1k_loop import iteration6, outer6
+        from research.aaa_1k_loop.freeze import seed_list_sha256
+
+        ledger = ConfirmationAdmissionTests()._ledger(iteration6)
+        ledger, cells = outer6.spend_and_build(ledger, "observer-A")
+        rng = np.random.default_rng(3)
+        primitives = []
+        for cell in cells:
+            coarse = cell.condition in it.LONG_COARSE
+            base = 1.0 + rng.random()
+            primitives.append(
+                {
+                    "condition": cell.condition,
+                    "init_index": cell.init_index,
+                    "init_seed": cell.init_seed,
+                    "stream_id": cell.stream.stream_id,
+                    "stream_seed": cell.stream.seed,
+                    "family": cell.stream.family,
+                    "failures": {},
+                    "persistence_mae": 1.0,
+                    "arms": {
+                        "gru": {
+                            "mae": base,
+                            "diverged": bool(coarse and rng.random() < 0.4),
+                            "first_lock": None,
+                        },
+                        "c10_reach_gated_unfold": {"mae": base, "diverged": False, "first_lock": None},
+                    },
+                }
+            )
+        manifest = {
+            "confirmation_source_fingerprint": {"sha256": "f" * 64},
+            "champion_phase_fingerprint": "e" * 64,
+            "frozen": {"challenger": {"arm": "c10_reach_gated_unfold"}, "rules": iteration6.FROZEN_RULES},
+            "confirmation_blocks": {
+                block_id: {
+                    "namespace": next(b for b in ledger["blocks"] if b["block_id"] == block_id)["namespace"],
+                    "seed_list_sha256": seed_list_sha256(ledger, block_id),
+                }
+                for block_id in (iteration6.CONFIRMATION_ENV_BLOCK, iteration6.CONFIRMATION_INIT_BLOCK)
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            freeze_path = Path(directory) / "freeze.json"
+            freeze_path.write_text(json.dumps(manifest), encoding="utf-8")
+            payload = outer6.confirmation_payload(
+                manifest,
+                freeze_sha256=hashlib.sha256(freeze_path.read_bytes()).hexdigest(),
+                head="0" * 40,
+                primitives=primitives,
+            )
+            payload["decision"] = iteration6.decide(primitives, payload["challenger"])
+            confirmation_path = Path(directory) / "confirmation.json"
+            confirmation_path.write_text(json.dumps(payload), encoding="utf-8")
+            result = recompute4.verify(confirmation_path, freeze_path, ledger)
+        self.assertEqual(payload["decision"]["outcome"], "PROMOTE")
+        self.assertTrue(result["agrees"], result["problems"])
+        self.assertEqual(result["independent"]["outcome"], "PROMOTE")

@@ -127,8 +127,16 @@ def verify(confirmation_path: Path, freeze_path: Path, ledger: Mapping[str, Any]
             problems.append(f"{block_id} is not marked spent")
     primitives = confirmation["primitives"]
     frozen_blocks = sorted(manifest["confirmation_blocks"])
-    env_ids = [b for b in frozen_blocks if b.endswith("/confirmation/env")]
-    init_ids = [b for b in frozen_blocks if b.endswith("/confirmation/init")]
+    env_ids = [
+        b
+        for b in frozen_blocks
+        if manifest["confirmation_blocks"][b]["namespace"].startswith("confirmation_env")
+    ]
+    init_ids = [
+        b
+        for b in frozen_blocks
+        if manifest["confirmation_blocks"][b]["namespace"].startswith("confirmation_init")
+    ]
     if len(env_ids) != 1 or len(init_ids) != 1:
         raise ValueError("the freeze must name exactly one confirmation env block and one init block")
     env = set(block_seeds(find_block(ledger, env_ids[0])))

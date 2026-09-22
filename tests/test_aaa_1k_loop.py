@@ -275,7 +275,15 @@ class IdentityLedgerTests(unittest.TestCase):
         ledger = load_ledger(ROOT / "benchmarks/aaa1k_loop_identity_ledger.json")
         proof = prove_fresh(ledger, ROOT)
         self.assertEqual(proof["status"], "DISJOINT")
-        self.assertFalse(any(b["role"] == "confirmation" for b in ledger["blocks"]))
+        # Every confirmation block was reserved by a committed freeze, and a spent one names its observer.
+        frozen = set()
+        for manifest in sorted(ROOT.glob("docs/evidence/aaa1k_loop_*/freeze*.json")):
+            frozen |= set(read_strict_json(manifest)["confirmation_blocks"])
+        for block in ledger["blocks"]:
+            if block["role"] == "confirmation":
+                self.assertIn(block["block_id"], frozen)
+                if block["status"] == "spent":
+                    self.assertTrue(block.get("observed_by"))
 
 
 # ======================================================================

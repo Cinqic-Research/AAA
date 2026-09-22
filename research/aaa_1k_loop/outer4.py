@@ -22,6 +22,7 @@ import argparse
 import hashlib
 import sys
 import time
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -120,6 +121,18 @@ def _selected(root: Path) -> str | None:
     development = read_strict_json(root / DEVELOPMENT)
     screens = {arm: screen(development["records"], arm) for arm in (c["arm"] for c in CANDIDATES)}
     return select_for_attack(screens)
+
+
+def spend_and_build(ledger: Mapping[str, Any], observer: str) -> tuple[dict[str, Any], list[Any]]:
+    """Mark both confirmation blocks spent by ``observer``, then build the cells they name.
+
+    One function, so the exact admission-to-cells sequence is tested (the
+    sequence whose defect aborted iteration 0006's first attempt).
+    """
+
+    for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
+        ledger = mark(ledger, block_id, status="spent", observed_by=observer)
+    return dict(ledger), confirmation_cells(ledger, observer=observer)
 
 
 # ----------------------------------------------------------------------
@@ -270,12 +283,11 @@ def command_confirm(args: argparse.Namespace) -> int:
         except ReservationError as error:
             print(f"REFUSED: durable confirmation reservation failed: {error}", file=sys.stderr)
             return 1
-    for block_id in (CONFIRMATION_ENV_BLOCK, CONFIRMATION_INIT_BLOCK):
-        ledger = mark(ledger, block_id, status="spent", observed_by=observer)
+    ledger, cells = spend_and_build(ledger, observer)
     # Spent before the first cell runs: a crash after this point still consumes the identities.
     write_ledger(_ledger(root), ledger)
     started = time.perf_counter()
-    primitives = run(confirmation_cells(ledger), arms=("gru", selected), workers=args.workers)
+    primitives = run(cells, arms=("gru", selected), workers=args.workers)
     payload: dict[str, Any] = {
         "schema": "aaa.loop.confirmation.v4",
         "evidence_role": "confirmation",
