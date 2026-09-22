@@ -495,3 +495,19 @@ class RecomputationTamperTests(unittest.TestCase):
         self.assertEqual(result["independent"]["outcome"], "PROMOTE")
         self.assertFalse(result["agrees"])
         self.assertTrue(any(p.startswith("K1_long_coarse_stability.") for p in result["problems"]))
+
+
+class TolerantComparisonTests(unittest.TestCase):
+    def test_floats_tolerate_last_digit_noise_but_nothing_else_does(self) -> None:
+        from research.aaa_1k_loop.stages4 import compare_tolerant
+
+        mismatches, deviations = compare_tolerant({"x": 0.00010928177700710461}, {"x": 0.0001092817770071042})
+        self.assertEqual(mismatches, [])
+        self.assertEqual(len(deviations), 1)
+        self.assertTrue(compare_tolerant({"x": 1.0}, {"x": 1.0 + 1e-6})[0])
+        self.assertTrue(compare_tolerant({"diverged": True}, {"diverged": False})[0])
+        self.assertTrue(compare_tolerant({"diverged": True}, {"diverged": 1.0})[0])
+        self.assertTrue(compare_tolerant({"n": 3}, {"n": 4})[0])
+        self.assertTrue(compare_tolerant({"verdict": "PASS"}, {"verdict": "FAIL"})[0])
+        self.assertTrue(compare_tolerant({"a": [1.0, 2.0]}, {"a": [1.0]})[0])
+        self.assertEqual(compare_tolerant({"git": "a", "x": 2.0}, {"git": "b", "x": 2.0}), ([], []))

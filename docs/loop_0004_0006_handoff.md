@@ -68,8 +68,14 @@ git diff --stat docs/evidence/aaa1k_loop_0006/                 #   whose non-pro
 python -m unittest discover -s tests -t .
 ```
 
-On the implementer's machine every `reproduce` stage reported zero mismatches
-(only `git` and `compute_seconds` are exempt). To check that the confirmation
+On the implementer's machine every `reproduce` stage is **bit-identical**
+(only `git` and `compute_seconds` are exempt). Across machines it is not
+always: on the first CI run, eight of nine stages were bit-identical, but
+`develop6` differed in the last digit of MAEs (relative ~4×10⁻¹⁵). `reproduce`
+therefore declares a float tolerance (relative 1e-9) and reports the largest
+deviation. Strings, integers, booleans (divergence flags, locks, verdicts) and
+structure must still match exactly (`stages4.FLOAT_RTOL`,
+`TolerantComparisonTests`). To check that the confirmation
 ran under its freeze, verify at the freeze commit:
 
 ```bash

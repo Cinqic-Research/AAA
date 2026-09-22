@@ -198,11 +198,62 @@ REPRODUCIBLE_4: dict[str, tuple[str, str]] = {
 }
 
 
+FLOAT_RTOL = 1e-9
+FLOAT_ATOL = 1e-15
+"""Cross-machine float tolerance for ``reproduce``.
+
+Bitwise reproduction holds on one machine (every stage reproduced with zero
+mismatches locally), but long float computations are not bit-stable across
+CPUs, SIMD widths and library builds: on CI the last digit of MAEs differs
+(relative ~1e-15). Floats therefore reproduce when they agree to a relative
+1e-9; strings, integers, booleans (divergence flags, locks, verdicts) and
+structure must agree exactly, so no adjudicated outcome can drift. The
+largest deviation is always reported, never hidden.
+"""
+
+
+def compare_tolerant(committed: Any, fresh: Any, path: str = "$") -> tuple[list[str], list[float]]:
+    """``(mismatches, float relative deviations)``; volatile provenance fields are skipped."""
+
+    from .cli import VOLATILE
+
+    mismatches: list[str] = []
+    deviations: list[float] = []
+    if isinstance(committed, dict):
+        if not isinstance(fresh, dict):
+            return [f"{path}: type changed"], deviations
+        for key, value in committed.items():
+            if key in VOLATILE:
+                continue
+            if key not in fresh:
+                mismatches.append(f"{path}.{key}: missing from the rerun")
+                continue
+            m, d = compare_tolerant(value, fresh[key], f"{path}.{key}")
+            mismatches += m
+            deviations += d
+    elif isinstance(committed, list):
+        if not isinstance(fresh, list) or len(fresh) != len(committed):
+            return [f"{path}: list length changed"], deviations
+        for index, (c, f) in enumerate(zip(committed, fresh, strict=True)):
+            m, d = compare_tolerant(c, f, f"{path}[{index}]")
+            mismatches += m
+            deviations += d
+    elif isinstance(committed, float) and isinstance(fresh, float):
+        if committed != fresh:
+            relative = abs(committed - fresh) / max(abs(committed), abs(fresh))
+            deviations.append(relative)
+            if abs(committed - fresh) > FLOAT_ATOL + FLOAT_RTOL * max(abs(committed), abs(fresh)):
+                mismatches.append(
+                    f"{path}: committed {committed!r} rerun {fresh!r} (relative {relative:.2e})"
+                )
+    elif type(committed) is not type(fresh) or committed != fresh:
+        mismatches.append(f"{path}: committed {committed!r} rerun {fresh!r}")
+    return mismatches, deviations
+
+
 def command_reproduce(args: argparse.Namespace) -> int:
     import importlib
     import tempfile
-
-    from .cli import compare_evidence
 
     root = project_root()
     target, committed_path = REPRODUCIBLE_4[args.stage]
@@ -222,12 +273,14 @@ def command_reproduce(args: argparse.Namespace) -> int:
         fresh = read_strict_json(fresh_path)
         if command == "confirmation-primitives":
             committed = {"primitives": committed["primitives"]}
-        mismatches, added = compare_evidence(committed, fresh)
+        mismatches, deviations = compare_tolerant(committed, fresh)
     for mismatch in mismatches[:20]:
         print(f"MISMATCH {mismatch}", file=sys.stderr)
+    largest = max(deviations, default=0.0)
     print(
         f"{args.stage}: {'REPRODUCED' if not mismatches else 'NOT REPRODUCED'} "
-        f"({len(mismatches)} mismatches; {len(added)} fields added by later code)"
+        f"({len(mismatches)} mismatches; {len(deviations)} floats not bit-identical, largest relative "
+        f"deviation {largest:.2e}; tolerance {FLOAT_RTOL:g})"
     )
     return 0 if not mismatches else 1
 

@@ -240,8 +240,10 @@ verified by [`champion1.py`](../research/aaa_1k_loop/champion1.py):
   0004–0006 verdict re-adjudicates from its stored records in routine CI; and
   `.github/workflows/loop-reproduction.yml` re-runs all nine stages' models
   (including the confirmation primitives) weekly and on any change to code
-  that can alter a primitive, requiring exact agreement (all nine reproduce
-  locally with zero mismatches). R-13 applies to this branch: it was written
+  that can alter a primitive. Agreement must be bit-identical locally, and
+  across machines floats may differ within a declared relative tolerance of
+  1e-9, while every flag, count and verdict must be exact. The first CI run
+  found last-digit drift in one stage. R-13 applies to this branch: it was written
   by one implementer and needs a fresh reviewer.
 * **Horizon.** M2's repair is verified at 1120 steps on the tested families.
   Other wall geometries, noise, missing observations near walls, and large
