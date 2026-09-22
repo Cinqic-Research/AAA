@@ -1,5 +1,32 @@
 # Research history
 
+## Development hardware and compute strategy documented (2026-09-22)
+
+Documentation and project governance only. No implementation, protocol,
+threshold, identity, evidence file or scientific claim was changed.
+
+- Added [`docs/hardware.md`](docs/hardware.md): FLOWBOX, the current primary
+  local development workstation, with its CPU, GPU, RAM, storage roles and OS.
+- Recorded the boundary explicitly: FLOWBOX contains a discrete GPU, the
+  current validated AAA implementation remains CPU-only, and no retained
+  evidence is GPU-generated. GPU support would be separate future engineering
+  with its own numerical reproduction standard.
+- Recorded the owner's current planning ceiling of approximately 125 million
+  trainable parameters for this FLOWBOX configuration. It is a project
+  constraint, not a scientific result, a target, or a guarantee of
+  trainability, and it is deliberately not encoded as a gate or test.
+  *Complexity must earn its keep* remains the operative discipline.
+- Recorded that FLOWBOX is expected to receive future upgrades, and that a
+  dedicated server for running Juniper models is planned but does not exist
+  and has no frozen specification.
+- Linked the new document from the README, reproduction and dependency docs
+  without replacing per-experiment hardware provenance, and regenerated the
+  tracked-file audit inventory.
+- `docs/aaa_charter.md` is deliberately unchanged: it is inside the frozen
+  `aaa.1k.v1` phase fingerprint that the Champion 0 and Champion 1 records
+  cite, so the charter cross-reference is made from `docs/hardware.md`
+  instead. The reason is recorded there.
+
 ## aaa.loop.v1 — independent review and governance transition (2026-09-22)
 
 - Independently verified iteration 0006's freeze, fresh identities,

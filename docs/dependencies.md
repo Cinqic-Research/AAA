@@ -21,7 +21,9 @@ that the field was not measured rather than guessing.
 
 The repository is Apache License 2.0. No proprietary model API, paid service,
 pretrained model, cloud compute or GPU-only dependency is required, and none is
-used.
+used. The development workstation happens to contain a discrete GPU; no
+dependency here uses it, and [`hardware.md`](hardware.md) explains why that
+changes nothing about this list.
 
 ## Regenerating the lock
 
