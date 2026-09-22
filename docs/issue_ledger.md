@@ -1814,15 +1814,20 @@ records. Only actual defects are entered here.
   chaotic, so ordinary cross-platform float differences (SIMD width, library
   build) do not stay small. Stable cells, including every Champion 1 cell,
   stay within ~1e-9.
-- **Policy** `stages4 reproduce` now reproduces at two tiers:
-  - non-chaotic cells: floats within relative 1e-9, everything else exact;
-  - chaotic cells (any arm diverged or failed): identity fields exact, with
-    their deviation and any divergence-status flips reported;
-  - every adjudicated conclusion (hypothesis verdicts, screen statuses, attack
-    outcome, K1–K3 statuses and the decision) must be identical, recomputed
-    from the rerun's own primitives.
-
-  The workflow logs each runner's CPU.
+- **Platform** on the implementer's Ryzen 7 5700G and on AMD EPYC 7763
+  runners (both Zen 3), every stage is bit-identical. On AMD EPYC 9V74
+  runners (Zen 4, AVX-512 kernels), results drift: up to ~30% in diverged
+  cells, up to ~2e-3 in long (3360-step) non-diverged gain cells, and ≤1e-10
+  in 1120-step stable cells. The drift is an instruction-set effect, not
+  randomness.
+- **Policy** `stages4 reproduce` gates on cell identities, artifact
+  structure and every adjudicated verdict (recomputed from the rerun's own
+  primitives), which must be identical. Per-cell numeric drift is reported
+  (cells that are bit-different, cells beyond relative 1e-9, chaotic cells,
+  divergence-status flips, largest drift) but does not gate, because no fixed
+  tolerance separates instruction-set noise from a defect. `--exact` gates on
+  bitwise identity, which is the guarantee on the evidence platform. The
+  workflow logs each runner's CPU.
 - **Consequence** per-cell magnitudes of Champion 0's diverged cells (and
   aggregates over them, such as median gains or divergence counts) are
   platform-dependent at the level of about one cell. The claims rest on the

@@ -47,7 +47,7 @@ R-13).
 | `champion1.py` | Champion 1 record and the full round-3 re-run in Champion 1's world |
 | `records4.py` | iteration records 0004–0006 |
 | `identities.py` (`require_claimed`), `freeze.py` (source-set parameter), `cli.py` (blocks, records, validate) | the only edits to pilot modules |
-| `tests/test_aaa_1k_loop_tbptt.py`, `tests/test_aaa_1k_loop_iteration4.py` | 33 + 32 new tests; 699 repository tests total |
+| `tests/test_aaa_1k_loop_tbptt.py`, `tests/test_aaa_1k_loop_iteration4.py` | 33 + 33 new tests; 700 repository tests total |
 | `.github/workflows/loop-reproduction.yml`, `ci.yml` | full-stage reproduction job; Champion 1 and recomputation checks in CPU CI |
 
 ## 4. Reproduce
@@ -68,18 +68,15 @@ git diff --stat docs/evidence/aaa1k_loop_0006/                 #   whose non-pro
 python -m unittest discover -s tests -t .
 ```
 
-On the implementer's machine every `reproduce` stage is **bit-identical**
-(only `git` and `compute_seconds` are exempt). Across machines it is not
-(`AAA-173`): Champion 0's diverged, frame-locked cells are chaotic, and a
-last-bit float difference on some CI runner CPUs grows into a different
-trajectory. `reproduce` therefore checks three tiers:
-
-- non-chaotic cells within relative 1e-9;
-- chaotic cells on identity only, with their drift reported;
-- every adjudicated verdict exactly, recomputed from the rerun.
-
-Judge whether that policy is right. The per-cell numbers of diverged champion
-cells in the committed evidence are those of the implementer's platform.
+On the implementer's machine (Ryzen 7 5700G, Zen 3) every stage is
+**bit-identical** under `reproduce --exact`, and so is every stage run on a
+CI runner with an AMD EPYC 7763 (also Zen 3). On AMD EPYC 9V74 runners (Zen 4,
+AVX-512) the numbers drift (`AAA-173`): up to ~30% in Champion 0's diverged,
+chaotic cells and up to ~2e-3 in long non-diverged gain cells. The default
+mode therefore gates on cell identities, structure and every adjudicated
+verdict, which must be identical, and reports the numeric drift and the CPU.
+Judge whether verdict-level cross-platform reproduction is an adequate
+standard. Use `--exact` on a Zen 3 machine for the bitwise check.
 To check that the confirmation
 ran under its freeze, verify at the freeze commit:
 

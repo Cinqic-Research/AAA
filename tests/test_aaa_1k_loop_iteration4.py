@@ -540,13 +540,27 @@ class CrossPlatformReproductionTests(unittest.TestCase):
         result = compare_reproduction(committed, fresh, "c10_reach_gated_unfold")
         self.assertEqual(result["mismatches"], [])
         self.assertGreater(result["largest_chaotic_deviation"], 0.2)
+        self.assertTrue(
+            compare_reproduction(committed, fresh, "c10_reach_gated_unfold", exact=True)["mismatches"]
+        )
 
-    def test_a_drifting_stable_cell_fails(self) -> None:
+    def test_stable_drift_is_reported_by_default_and_gated_when_exact(self) -> None:
         from research.aaa_1k_loop.stages4 import chaotic, compare_reproduction
 
         committed, fresh = self._pair()
         cell = next(r for r in fresh["primitives"] if not chaotic(r))
         cell["arms"]["gru"]["mae"] *= 1.0 + 1e-6
+        default = compare_reproduction(committed, fresh, "c10_reach_gated_unfold")
+        self.assertEqual(default["mismatches"], [])
+        self.assertEqual(default["cells_beyond_float_tolerance"], 1)
+        exact = compare_reproduction(committed, fresh, "c10_reach_gated_unfold", exact=True)
+        self.assertTrue(exact["mismatches"])
+
+    def test_a_changed_cell_identity_always_fails(self) -> None:
+        from research.aaa_1k_loop.stages4 import compare_reproduction
+
+        committed, fresh = self._pair()
+        fresh["primitives"][0]["stream_seed"] += 1
         self.assertTrue(compare_reproduction(committed, fresh, "c10_reach_gated_unfold")["mismatches"])
 
     def test_a_changed_conclusion_fails_even_in_chaotic_cells(self) -> None:
