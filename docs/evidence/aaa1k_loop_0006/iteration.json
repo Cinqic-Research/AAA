@@ -1,0 +1,167 @@
+{
+  "accounting": {
+    "adaptive_state_after": 1414,
+    "adaptive_state_before": 1414,
+    "compute_change": "none: every candidate changes only how the training target is built",
+    "parameters_after": 994,
+    "parameters_before": 994,
+    "parameters_counted_from_arrays": 994
+  },
+  "artifacts": [
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0005/development.json",
+      "role": "observation",
+      "sha256": "e3c1b5162660769ad78617aba803626518a22959f11fdc7f1f5e5ccb5732bd4a"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0004/diagnosis_unfold.json",
+      "role": "diagnosis",
+      "sha256": "189ba3dcd60fc36967f05c49545853612946c43e8915a1bb6315e44527a1949f"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0006/development.json",
+      "role": "development",
+      "sha256": "98339755d41d93766ddbfa95dd678134b51d669b4ed27bc441f9c5e3f1009cc1"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0006/attack.json",
+      "role": "attack",
+      "sha256": "11a82a4a8d25d7a6970ca8f4fecfaa1e40c51da5f44f8318e9e7265242c46900"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0006/freeze_2.json",
+      "role": "freeze",
+      "sha256": "728f7a961990952a5d43ae48d84c0c42a00ab2f421e62f8e85c42a99d11012c4"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0006/freeze.json",
+      "role": "freeze",
+      "sha256": "60f155f6bd2ad39cd3d68dce581074f81d3944080521743982ebca7189f0da8e"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0006/confirmation_2.json",
+      "role": "confirmation",
+      "sha256": "5bf81dfe63f696861b7d63209a74fb14d936dae5674adaf91a867702759f9dcd"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0006/confirmation_attempt_1.json",
+      "role": "confirmation",
+      "sha256": "ae1b51c856a749463595594956789f1cf2f3599c5363e6859e3b2be1e5564e7f"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "c10",
+      "evidence": "docs/evidence/aaa1k_loop_0006/attack.json",
+      "intervention": "refuse a mirror when the input is farther from the crossed wall than |v| + |y - p|",
+      "intervention_class": "target construction",
+      "reason": "screen PASS (bitwise identical on every standard family); attack A1-A5 PASS",
+      "status": "FROZEN"
+    }
+  ],
+  "challenger": "c10",
+  "classification": {
+    "final": "target construction; repaired",
+    "initial": "target construction"
+  },
+  "compute_seconds": {
+    "docs/evidence/aaa1k_loop_0001/champion_0.json": 0.08021275499993408,
+    "docs/evidence/aaa1k_loop_0004/diagnosis_unfold.json": 45.71693498800005,
+    "docs/evidence/aaa1k_loop_0005/development.json": 28.16766186199993,
+    "docs/evidence/aaa1k_loop_0006/attack.json": 53.620025195999915,
+    "docs/evidence/aaa1k_loop_0006/confirmation_2.json": 32.753191118999894,
+    "docs/evidence/aaa1k_loop_0006/development.json": 28.41003062200025
+  },
+  "confirmation_evidence": "docs/evidence/aaa1k_loop_0006/confirmation_2.json",
+  "confirmation_freeze": "docs/evidence/aaa1k_loop_0006/freeze_2.json",
+  "deviations": [
+    "confirmation attempt 1 aborted before observation (admission defect in confirmation_cells); its identities were burned unobserved, the defect fixed with an end-to-end test, and the unchanged challenger refrozen with new confirmation blocks (confirmation_attempt_1.json, freeze_2.json)"
+  ],
+  "diagnostic_identity_blocks": [
+    "aaa1k-loop-0004/diagnostic/unfold"
+  ],
+  "evidence_that_exposed_the_problem": [
+    "docs/evidence/aaa1k_loop_0005/development.json"
+  ],
+  "history": [
+    {
+      "at": "2026-09-22T03:13:34Z",
+      "state": "OBSERVED"
+    },
+    {
+      "at": "2026-09-22T03:13:34Z",
+      "state": "CLASSIFIED"
+    },
+    {
+      "at": "2026-09-22T03:13:34Z",
+      "state": "DIAGNOSED"
+    },
+    {
+      "at": "2026-09-22T03:15:23Z",
+      "state": "TEST_DEFINED"
+    },
+    {
+      "at": "2026-09-22T03:16:05Z",
+      "state": "CHALLENGER_CREATED"
+    },
+    {
+      "at": "2026-09-22T03:17:17Z",
+      "state": "CHALLENGER_ATTACKED"
+    },
+    {
+      "at": "2026-09-22T03:23:35Z",
+      "state": "FROZEN"
+    },
+    {
+      "at": "2026-09-22T03:25:22Z",
+      "state": "CONFIRMED"
+    },
+    {
+      "at": "2026-09-22T03:25:22Z",
+      "state": "DECIDED"
+    },
+    {
+      "at": "2026-09-22T03:36:00Z",
+      "state": "PRESERVED"
+    }
+  ],
+  "hypotheses": {
+    "H32-H34": "carried from 0004"
+  },
+  "independent_recomputation": "docs/evidence/aaa1k_loop_0006/recomputation_2.json",
+  "iteration_id": "aaa1k-loop-0006",
+  "limitations": [
+    "four M2 candidates (c7-c10) were screened across 0004-0006; the fresh attack and fresh confirmation, not the screen, carry the promotion"
+  ],
+  "loop_protocol_version": "aaa.loop.v0-pilot",
+  "outcome": "PROMOTE",
+  "parent_champion": {
+    "champion_id": "aaa1k-champion-0",
+    "phase_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+    "record": {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    "source_commit": "1ce716c42500003881e379f6d23dc0d807301001"
+  },
+  "parent_iteration": "aaa1k-loop-0005 (REJECTED)",
+  "problem": "M2 remains; 0005's c9 refused useful short post-bounce mirror runs",
+  "reason": "fresh confirmation: long coarse divergence 21.3% -> 0%, difference 0.21 [0.08, 0.36]; every standard family and long non-coarse condition bitwise identical; recomputed independently",
+  "schema": "aaa.loop.iteration.v1",
+  "targeted_tests": [
+    "the 0004 screen, attack and K1-K3 decision, unchanged, on fresh blocks"
+  ],
+  "timing": {
+    "note": "scientific compute time is per artifact; narrative timing is in docs/loop_report_0004_0006.md",
+    "task_start_utc": "2026-09-22T02:20:00Z"
+  },
+  "unregistered_observations": [
+    "a post-hoc look at 0005's already-observed development cells (mirror-run lengths on long bouncing and long coarse, two initializations) chose c10; development identities may inform selection"
+  ]
+}

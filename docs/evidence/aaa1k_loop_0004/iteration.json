@@ -1,0 +1,173 @@
+{
+  "accounting": {
+    "adaptive_state_after": 1414,
+    "adaptive_state_before": 1414,
+    "compute_change": "none: every candidate changes only how the training target is built",
+    "parameters_after": 994,
+    "parameters_before": 994,
+    "parameters_counted_from_arrays": 994
+  },
+  "artifacts": [
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/diagnosis_3.json",
+      "role": "observation",
+      "sha256": "0f5c384e0dd97cafd1cac6e9510d11557b1a19ce0648d330180afbb865348bd9"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0004/diagnosis.json",
+      "role": "diagnosis",
+      "sha256": "9fe8d244b2831e1a820499f52e4a481d2b545d9c22ed5be6c525d0bb9b377dcd"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0004/diagnosis_gain.json",
+      "role": "diagnosis",
+      "sha256": "5cc5157224b13f5b9eaef8bc12537fdfe266ba084151c5c40c56d3e4810822c2"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0004/diagnosis_overshoot.json",
+      "role": "diagnosis",
+      "sha256": "747d5e31615ca0006d54f3d5336e460b8057c1dd3cfe2b83afd0e84188ac7964"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0004/diagnosis_unfold.json",
+      "role": "diagnosis",
+      "sha256": "189ba3dcd60fc36967f05c49545853612946c43e8915a1bb6315e44527a1949f"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0004/development.json",
+      "role": "development",
+      "sha256": "646fd6cd0dca35e5dc806816b9785a13da633d9c06f9f985b3e526775bfd165f"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "c7",
+      "evidence": "docs/evidence/aaa1k_loop_0004/development.json",
+      "intervention": "unfold around a prediction-independent reference (input + velocity estimate)",
+      "intervention_class": "target construction",
+      "reason": "screen not passed: long bouncing INCONCLUSIVE and motion_compat:changed INCONCLUSIVE; M2 itself removed (0 of 80)",
+      "status": "REJECTED_IN_DEVELOPMENT"
+    },
+    {
+      "candidate_id": "c8",
+      "evidence": "docs/evidence/aaa1k_loop_0004/development.json",
+      "intervention": "train on folded observations (unfold_target=False)",
+      "intervention_class": "target construction",
+      "reason": "screen FAIL: motion_compat:changed +8.2% and long bouncing +17%; M2 removed",
+      "status": "REJECTED_IN_DEVELOPMENT"
+    }
+  ],
+  "challenger": null,
+  "classification": {
+    "final": "defect in target construction: a self-confirming unfolding frame lock",
+    "initial": "optimization instability (the pilot's hypothesis: learned closed-loop gain above one)"
+  },
+  "compute_seconds": {
+    "docs/evidence/aaa1k_loop_0001/champion_0.json": 0.08021275499993408,
+    "docs/evidence/aaa1k_loop_0001/diagnosis_3.json": 104.11312114799989,
+    "docs/evidence/aaa1k_loop_0004/development.json": 42.47443607699961,
+    "docs/evidence/aaa1k_loop_0004/diagnosis.json": 91.01167487599992,
+    "docs/evidence/aaa1k_loop_0004/diagnosis_gain.json": 88.99778714700005,
+    "docs/evidence/aaa1k_loop_0004/diagnosis_overshoot.json": 40.25327662400014,
+    "docs/evidence/aaa1k_loop_0004/diagnosis_unfold.json": 45.71693498800005
+  },
+  "confirmation_evidence": null,
+  "confirmation_freeze": null,
+  "deviations": [],
+  "diagnostic_identity_blocks": [
+    "aaa1k-loop-0004/diagnostic/tbptt",
+    "aaa1k-loop-0004/diagnostic/gain",
+    "aaa1k-loop-0004/diagnostic/overshoot",
+    "aaa1k-loop-0004/diagnostic/unfold"
+  ],
+  "evidence_that_exposed_the_problem": [
+    "docs/evidence/aaa1k_loop_0001/diagnosis_3.json",
+    "AAA_Research_Audit_2026-09-21 (external document; findings R-01, R-02, R-03, R-04)"
+  ],
+  "history": [
+    {
+      "at": "2026-09-22T02:45:32Z",
+      "state": "OBSERVED"
+    },
+    {
+      "at": "2026-09-22T02:45:32Z",
+      "state": "CLASSIFIED"
+    },
+    {
+      "at": "2026-09-22T02:59:14Z",
+      "state": "DIAGNOSED"
+    },
+    {
+      "at": "2026-09-22T03:05:28Z",
+      "state": "TEST_DEFINED"
+    },
+    {
+      "at": "2026-09-22T03:06:52Z",
+      "state": "CHALLENGER_CREATED"
+    },
+    {
+      "at": "2026-09-22T03:06:52Z",
+      "state": "REJECTED"
+    },
+    {
+      "at": "2026-09-22T03:06:52Z",
+      "state": "PRESERVED"
+    }
+  ],
+  "hypotheses": {
+    "H20": "SUPPORTED: live TBPTT is numerically the realized-trajectory gradient where stable",
+    "H21": "CONTRADICTED: the stale-matrix mismatch does not drive M2",
+    "H22": "SUPPORTED: M2 does not need multi-step credit (T=1 diverges as often)",
+    "H23": "CONTRADICTED: chunk-consistent credit does not prevent M2",
+    "H24": "CONTRADICTED: the loop gain does not cross one before the runaway",
+    "H25": "SUPPORTED",
+    "H26": "INCONCLUSIVE",
+    "H27": "CONTRADICTED: lr 0.01 never runs away even with 3x the updates",
+    "H28": "INSUFFICIENT_EVIDENCE",
+    "H29": "CONTRADICTED: no single-step overshoot before onset",
+    "H30": "SUPPORTED",
+    "H31": "SUPPORTED as declared, mechanistically immaterial (input-3 curvature share ~1%)",
+    "H32": "SUPPORTED: a mirror-branch frame lock precedes every runaway (54/54)",
+    "H33": "SUPPORTED: stable learners never lock",
+    "H34": "SUPPORTED: removing the self-reference removes M2 (0/160 divergences for both probes)"
+  },
+  "independent_recomputation": null,
+  "iteration_id": "aaa1k-loop-0004",
+  "limitations": [
+    "the 1120-step long-horizon conditions are the only horizon tested; M2 at longer horizons for smooth families is untested"
+  ],
+  "loop_protocol_version": "aaa.loop.v0-pilot",
+  "outcome": "REJECT",
+  "parent_champion": {
+    "champion_id": "aaa1k-champion-0",
+    "phase_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+    "record": {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    "source_commit": "1ce716c42500003881e379f6d23dc0d807301001"
+  },
+  "parent_iteration": "aaa1k-loop-0003 (REJECTED)",
+  "problem": "M2: Champion 0's online learning runs away on long quantized streams (diagnosis round 3 of 0001); the audit also asked whether the online TBPTT rule is the gradient it claims to be (R-02)",
+  "reason": "both precommitted candidates removed M2 but neither passed the uncertainty-aware screen",
+  "schema": "aaa.loop.iteration.v1",
+  "targeted_tests": [
+    "four online TBPTT rules on the same state, each proven against finite differences",
+    "direct and closed-loop error-feedback gain along real trajectories",
+    "exact same-sample amplification of every SGD step",
+    "unfolding-branch trace, with folded-target and prediction-independent-reference probes"
+  ],
+  "timing": {
+    "note": "scientific compute time is per artifact; narrative timing is in docs/loop_report_0004_0006.md",
+    "task_start_utc": "2026-09-22T02:20:00Z"
+  },
+  "unregistered_observations": [
+    "a post-hoc look at the overshoot block's already-observed cells (onset vs first bounce, one traced cell) chose H32-H34; disclosed in unfolding.py and judged on a fresh block"
+  ]
+}

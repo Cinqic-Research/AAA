@@ -1,0 +1,122 @@
+{
+  "accounting": {
+    "adaptive_state_after": 1414,
+    "adaptive_state_before": 1414,
+    "compute_change": "none: every candidate changes only how the training target is built",
+    "parameters_after": 994,
+    "parameters_before": 994,
+    "parameters_counted_from_arrays": 994
+  },
+  "artifacts": [
+    {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0004/development.json",
+      "role": "observation",
+      "sha256": "646fd6cd0dca35e5dc806816b9785a13da633d9c06f9f985b3e526775bfd165f"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0004/diagnosis_unfold.json",
+      "role": "diagnosis",
+      "sha256": "189ba3dcd60fc36967f05c49545853612946c43e8915a1bb6315e44527a1949f"
+    },
+    {
+      "path": "docs/evidence/aaa1k_loop_0005/development.json",
+      "role": "development",
+      "sha256": "e3c1b5162660769ad78617aba803626518a22959f11fdc7f1f5e5ccb5732bd4a"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "c9",
+      "evidence": "docs/evidence/aaa1k_loop_0005/development.json",
+      "intervention": "refuse a mirror whose implied one-step crossing exceeds |v| + |y - p|",
+      "intervention_class": "target construction",
+      "reason": "screen FAIL: long bouncing +4.5% [+2.2%, +7.1%]; refusing the champion's post-bounce mirrored targets costs accuracy on smooth motion; M2 removed (0 of 80)",
+      "status": "REJECTED_IN_DEVELOPMENT"
+    }
+  ],
+  "challenger": null,
+  "classification": {
+    "final": "target construction",
+    "initial": "target construction (0004)"
+  },
+  "compute_seconds": {
+    "docs/evidence/aaa1k_loop_0001/champion_0.json": 0.08021275499993408,
+    "docs/evidence/aaa1k_loop_0004/development.json": 42.47443607699961,
+    "docs/evidence/aaa1k_loop_0004/diagnosis_unfold.json": 45.71693498800005,
+    "docs/evidence/aaa1k_loop_0005/development.json": 28.16766186199993
+  },
+  "confirmation_evidence": null,
+  "confirmation_freeze": null,
+  "deviations": [],
+  "diagnostic_identity_blocks": [
+    "aaa1k-loop-0004/diagnostic/unfold"
+  ],
+  "evidence_that_exposed_the_problem": [
+    "docs/evidence/aaa1k_loop_0004/development.json"
+  ],
+  "history": [
+    {
+      "at": "2026-09-22T03:06:52Z",
+      "state": "OBSERVED"
+    },
+    {
+      "at": "2026-09-22T03:06:52Z",
+      "state": "CLASSIFIED"
+    },
+    {
+      "at": "2026-09-22T03:06:52Z",
+      "state": "DIAGNOSED"
+    },
+    {
+      "at": "2026-09-22T03:12:09Z",
+      "state": "TEST_DEFINED"
+    },
+    {
+      "at": "2026-09-22T03:13:34Z",
+      "state": "CHALLENGER_CREATED"
+    },
+    {
+      "at": "2026-09-22T03:13:34Z",
+      "state": "REJECTED"
+    },
+    {
+      "at": "2026-09-22T03:13:34Z",
+      "state": "PRESERVED"
+    }
+  ],
+  "hypotheses": {
+    "H32-H34": "carried from 0004"
+  },
+  "independent_recomputation": null,
+  "iteration_id": "aaa1k-loop-0005",
+  "limitations": [],
+  "loop_protocol_version": "aaa.loop.v0-pilot",
+  "outcome": "REJECT",
+  "parent_champion": {
+    "champion_id": "aaa1k-champion-0",
+    "phase_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+    "record": {
+      "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+      "role": "champion",
+      "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+    },
+    "source_commit": "1ce716c42500003881e379f6d23dc0d807301001"
+  },
+  "parent_iteration": "aaa1k-loop-0004 (REJECTED)",
+  "problem": "M2 remains; 0004's candidates removed it at a cost on smooth bouncing",
+  "reason": "the one precommitted candidate failed the screen",
+  "schema": "aaa.loop.iteration.v1",
+  "targeted_tests": [
+    "the 0004 screen, unchanged, on a fresh development block"
+  ],
+  "timing": {
+    "note": "scientific compute time is per artifact; narrative timing is in docs/loop_report_0004_0006.md",
+    "task_start_utc": "2026-09-22T02:20:00Z"
+  },
+  "unregistered_observations": []
+}

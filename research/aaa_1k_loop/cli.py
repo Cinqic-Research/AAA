@@ -716,9 +716,13 @@ def command_recompute3(args: argparse.Namespace) -> int:
 
 def command_records(_args: argparse.Namespace) -> int:
     from .records import RECORDS
+    from .records4 import RECORDS_POST_AUDIT
 
     root = project_root()
     for iteration_id, (builder, path) in RECORDS.items():
+        write_strict_json(root / path, builder(root))
+        print(f"{iteration_id}: {path}")
+    for iteration_id, (builder, path, _decide) in RECORDS_POST_AUDIT.items():
         write_strict_json(root / path, builder(root))
         print(f"{iteration_id}: {path}")
     return 0
@@ -731,12 +735,15 @@ def command_validate(_args: argparse.Namespace) -> int:
     from .decision import decide
     from .iteration import IterationError, validate_iteration
     from .records import RECORDS
+    from .records4 import RECORDS_POST_AUDIT
 
     root = project_root()
     failures = 0
-    for iteration_id, (_builder, path) in RECORDS.items():
+    entries = [(iteration_id, path, decide) for iteration_id, (_builder, path) in RECORDS.items()]
+    entries += [(iteration_id, path, fn) for iteration_id, (_builder, path, fn) in RECORDS_POST_AUDIT.items()]
+    for iteration_id, path, decision in entries:
         try:
-            result = validate_iteration(read_strict_json(root / path), root, decide=decide)
+            result = validate_iteration(read_strict_json(root / path), root, decide=decision)
             print(
                 f"{iteration_id}: {result['status']} {' -> '.join(result['states'])} outcome={result['outcome']}"
             )
