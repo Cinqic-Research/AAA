@@ -216,3 +216,32 @@ class Iteration5Tests(unittest.TestCase):
                         self.assertIn(node.module.split(".")[-1], allowed, name)
                     elif node.module and node.module.startswith("aaa."):
                         self.assertIn(f"{node.module.replace('.', '/')}.py", frozen, name)
+
+
+class Iteration6Tests(unittest.TestCase):
+    def test_iteration6_judges_with_the_identical_functions_and_one_candidate(self) -> None:
+        from research.aaa_1k_loop import iteration6 as it6
+
+        self.assertIs(it6.screen, it.screen)
+        self.assertIs(it6.adjudicate_attack, it.adjudicate_attack)
+        self.assertIs(it6.decide, it.decide4)
+        self.assertEqual([c["id"] for c in it6.CANDIDATES], ["c10"])
+
+    def test_iteration6_confirmation_path_is_closed(self) -> None:
+        from research.aaa_1k_loop import outer6
+
+        allowed = {
+            Path(n).stem for n in outer6.CONFIRMATION_SOURCES_6 if n.startswith("research/aaa_1k_loop/")
+        }
+        frozen = set(outer6.CONFIRMATION_SOURCES_6) | set(phase_files(ROOT))
+        for name in outer6.CONFIRMATION_SOURCES_6:
+            if not name.startswith("research/aaa_1k_loop/"):
+                continue
+            for node in ast.walk(ast.parse((ROOT / name).read_text(encoding="utf-8"))):
+                if isinstance(node, ast.ImportFrom):
+                    if node.level == 1:
+                        self.assertIn((node.module or "__init__").split(".")[0], allowed, name)
+                    elif node.module and node.module.startswith("research.aaa_1k_loop"):
+                        self.assertIn(node.module.split(".")[-1], allowed, name)
+                    elif node.module and node.module.startswith("aaa."):
+                        self.assertIn(f"{node.module.replace('.', '/')}.py", frozen, name)

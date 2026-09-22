@@ -413,3 +413,41 @@ class GatedUnfoldTests(unittest.TestCase):
         self.assertTrue(champion.mirror_trace[first - offset])
         errors_champion, errors_gated = result.errors("champion"), result.errors("gated")
         self.assertTrue(np.array_equal(errors_champion[: first + 1], errors_gated[: first + 1]))
+
+
+class ReachGatedUnfoldTests(unittest.TestCase):
+    def _agent(self, *positions: float):
+        from research.aaa_1k_loop.unfolding import ReachGatedUnfoldAgent
+
+        agent = ReachGatedUnfoldAgent(AAA1KGRU(seed=0, **CHAMPION_CONFIGURATION), name="c10")
+        agent.begin_episode()
+        for position in positions:
+            agent.accept_observation(position)
+        agent.predict()
+        return agent
+
+    def test_a_post_bounce_mirror_next_to_the_wall_is_kept(self) -> None:
+        # The smooth-motion case c9 refused: p = 0.0008 is within one step of the wall.
+        agent = self._agent(0.0020, 0.0008)
+        agent._raw_prediction = -0.00187
+        agent._training_target(0.00362)
+        self.assertFalse(agent.gate_trace[-1])
+        self.assertTrue(agent.mirror_trace[-1])
+
+    def test_a_lock_far_from_the_wall_is_refused(self) -> None:
+        agent = self._agent(0.005, 0.010)  # input 0.010, one quantum per step
+        agent._raw_prediction = -0.0007
+        target = agent._training_target(0.010)
+        self.assertTrue(agent.gate_trace[-1])
+        self.assertAlmostEqual(target, 0.0)
+
+    def test_the_upper_wall_is_handled_symmetrically(self) -> None:
+        agent = self._agent(0.995, 0.990)
+        agent._raw_prediction = 1.0007
+        agent._training_target(0.990)
+        self.assertTrue(agent.gate_trace[-1])
+        near = self._agent(0.9960, 0.9990)
+        near._raw_prediction = 1.0020
+        near._training_target(0.9980)
+        self.assertFalse(near.gate_trace[-1])
+        self.assertTrue(near.mirror_trace[-1])

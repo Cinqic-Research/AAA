@@ -26,6 +26,30 @@ EVIDENCE_DIR = Path("docs/evidence/aaa1k_loop_0001")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
     {
+        "block_id": "aaa1k-loop-0006/development/all",
+        "iteration_id": "aaa1k-loop-0006",
+        "role": "development",
+        "namespace": "development_all",
+        "count": 64,
+        "purpose": "iteration 0006 screen of the last precommitted M2 candidate c10 (48 plan + 16 long seeds)",
+    },
+    {
+        "block_id": "aaa1k-loop-0006/attack/env",
+        "iteration_id": "aaa1k-loop-0006",
+        "role": "attack",
+        "namespace": "attack_env",
+        "count": 80,
+        "purpose": "iteration 0006 attack streams: 48 plan, 16 long-horizon, 16 nearby quantized",
+    },
+    {
+        "block_id": "aaa1k-loop-0006/attack/init",
+        "iteration_id": "aaa1k-loop-0006",
+        "role": "attack",
+        "namespace": "attack_init",
+        "count": 5,
+        "purpose": "iteration 0006 fresh model initializations for the attack",
+    },
+    {
         "block_id": "aaa1k-loop-0005/development/all",
         "iteration_id": "aaa1k-loop-0005",
         "role": "development",

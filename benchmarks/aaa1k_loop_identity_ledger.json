@@ -239,6 +239,36 @@
       "role": "attack",
       "start": 0,
       "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0006/development/all",
+      "count": 64,
+      "iteration": "aaa1k-loop-0006",
+      "namespace": "development_all",
+      "purpose": "iteration 0006 screen of the last precommitted M2 candidate c10 (48 plan + 16 long seeds)",
+      "role": "development",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0006/attack/env",
+      "count": 80,
+      "iteration": "aaa1k-loop-0006",
+      "namespace": "attack_env",
+      "purpose": "iteration 0006 attack streams: 48 plan, 16 long-horizon, 16 nearby quantized",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0006/attack/init",
+      "count": 5,
+      "iteration": "aaa1k-loop-0006",
+      "namespace": "attack_init",
+      "purpose": "iteration 0006 fresh model initializations for the attack",
+      "role": "attack",
+      "start": 0,
+      "status": "reserved"
     }
   ],
   "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",

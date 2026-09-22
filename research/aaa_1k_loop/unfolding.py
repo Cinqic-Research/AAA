@@ -146,3 +146,46 @@ class GatedUnfoldAgent(UnfoldTraceAgent):
         self.target_trace.append(target)
         self.gate_trace.append(gated)
         return target
+
+
+class ReachGatedUnfoldAgent(UnfoldTraceAgent):
+    """Candidate c10: the champion's unfolding, refused only where the wall was out of reach.
+
+    A mirrored target asserts that the dot crossed a wall during this
+    transition. That requires the input position ``p`` to lie within one step
+    of the crossed wall; the observed motion bounds a step by ``|v| + |y - p|``
+    (previous displacement plus observed displacement). So the mirrored branch
+    is refused -- the folded observation used instead -- only when::
+
+        distance(p, crossed wall) > |v| + |y - p|
+
+    This is a necessary condition for any one-step crossing, weaker than c9's
+    ``|u - p|`` bound: the champion's short mirror runs right after a bounce
+    (where ``p`` is still next to the wall, and which iteration 0005 showed are
+    useful on smooth motion) pass unchanged, and a frame lock is refused once
+    the input has moved beyond reach of the wall.
+    """
+
+    def __init__(self, model: Any, *, name: str, **kwargs: Any) -> None:
+        super().__init__(model, name=name, **kwargs)
+        self.gate_trace: list[bool] = []
+
+    def _training_target(self, revealed: float) -> float:
+        if self._input_position is None:
+            raise RuntimeError("no prediction to build a target for")
+        effective = revealed
+        gated = False
+        lower, upper = self.scales.lower_bound, self.scales.upper_bound
+        if self.unfold_target and self._raw_prediction is not None:
+            effective = unfold_observation(revealed, self._raw_prediction, lower, upper)
+            if effective != revealed:
+                p = self._input_position
+                distance = p - lower if effective < lower else upper - p
+                reach = abs(self.tracker.velocity_estimate()) + abs(revealed - p)
+                if distance > reach:
+                    effective, gated = revealed, True
+        target = (effective - self._input_position) / self.scales.displacement_scale
+        self.mirror_trace.append(effective != revealed)
+        self.target_trace.append(target)
+        self.gate_trace.append(gated)
+        return target
