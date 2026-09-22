@@ -290,11 +290,12 @@ result, and this repository is built to report that rather than to avoid it.
 | [AAA-1K report](docs/aaa_1k_report.md) | the measured result, with its claim boundaries |
 | [AAA-1K self-review](docs/aaa_1k_self_review.md) | the attempt to break those results, and what it found |
 | [AAA-1K handoff](docs/aaa_1k_handoff.md) | everything an independent reviewer needs |
-| [Loop protocol](docs/loop_protocol.md) | the pilot improvement loop, what enforces it, and its known gaps |
+| [Loop protocol](docs/loop_protocol.md) | the improvement loop's current `aaa.loop.v1` governance, what enforces it, and the pilot gaps that became rules |
 | [Loop pilot report](docs/loop_pilot_report.md) | three iterations on AAA-1K, eight rejections, and an evaluation of the loop itself |
 | [Loop pilot handoff](docs/loop_pilot_handoff.md) | reproduction commands and what an independent reviewer should challenge |
 | [Loop iterations 0004–0006](docs/loop_report_0004_0006.md) | the audit response: TBPTT semantics, M2's mechanism, the first real confirmation, Champion 1 |
 | [Loop 0004–0006 handoff](docs/loop_0004_0006_handoff.md) | reproduction commands and what an independent reviewer should challenge |
+| [PR #20 independent review](docs/pr20_independent_review.md) | the review of iterations 0004–0006 and Champion 1 that established `aaa.loop.v1` |
 | [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
 | [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
 | [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |

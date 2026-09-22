@@ -12,6 +12,9 @@ fingerprint (`5ce6e019…`) and the v2.1 specification hash are unchanged.
 - Dependabot no longer opens `pip` pull requests. `requirements-lock.txt` is
   inside the phase fingerprint, and the old rule ignored only patch updates
   (`AAA-175`).
+- Active loop documentation now says the independent review completed and
+  `aaa.loop.v1` is current, and the README lists the PR #20 review record.
+  Historical records are not relabelled (`AAA-176`).
 
 ## Development hardware and compute strategy documented (2026-09-22)
 

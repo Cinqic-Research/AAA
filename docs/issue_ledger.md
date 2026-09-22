@@ -1900,3 +1900,23 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
 - **Remaining limitation** Dependabot's actual behaviour can only be observed
   on GitHub, the next time it runs. This entry relies on GitHub's
   documentation.
+
+### AAA-176 — active loop documentation still described the pre-review state
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired
+- **Reproduction** On `efa1fdb`, `docs/loop_protocol.md` says in its title
+  and status note that `aaa.loop.v1` is current, and
+  `LOOP_PROTOCOL_VERSION == "aaa.loop.v1"`. Its "Status after iterations
+  0004–0006" section still said "The version remains `v0-pilot` pending an
+  independent review of that work", and the PR #20 reconciliation did not
+  catch it. The README described the protocol as "the pilot improvement loop"
+  and did not list `docs/pr20_independent_review.md`, the record that
+  established v1. The historical pilot report links to
+  `loop_protocol.md#known-gaps-to-close-before-v1`. That heading was renamed
+  in `0fbf20e`, so the link no longer resolved.
+- **Repair** A dated, additive note after the stale paragraph. The paragraph
+  itself is kept as the record of the pre-review state. The README row now
+  describes current governance, and a row lists the PR #20 review. An explicit
+  HTML anchor with the old name sits before the renamed heading, so the
+  historical report resolves without being edited.
+- **Verification** A local Markdown link and anchor check reports no broken
+  relative link or anchor in the tracked tree.
