@@ -1,0 +1,53 @@
+name: Loop full-stage reproduction
+
+# Routine CI replays only the loop's observation stage and re-adjudicates the
+# post-audit verdicts from stored records. This job re-runs the models for
+# every iteration 0004-0006 stage and requires the committed primitives to
+# reappear exactly (audit R-12): weekly, on demand, and whenever code that can
+# change a primitive changes.
+on:
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'aaa/__init__.py'
+      - 'aaa/config.py'
+      - 'aaa/environment.py'
+      - 'aaa/predictors.py'
+      - 'research/aaa_1k/**'
+      - 'research/aaa_1k_loop/**'
+      - 'benchmarks/aaa1k_loop_identity_ledger.json'
+      - 'requirements-lock.txt'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  reproduce:
+    name: Reproduce ${{ matrix.stage }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: [diagnose, gain, overshoot, unfold, develop4, develop5, develop6, attack6, confirmation6]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install the locked environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-lock.txt
+          python -m pip install -e . --no-deps
+          python tools/check_lock.py
+      - name: Rerun and compare with the committed primitives
+        run: python -m research.aaa_1k_loop.stages4 reproduce ${{ matrix.stage }}

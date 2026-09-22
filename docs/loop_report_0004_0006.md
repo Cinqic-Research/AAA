@@ -236,9 +236,13 @@ verified by [`champion1.py`](../research/aaa_1k_loop/champion1.py):
   - R-10: missingness encoding.
   - R-11: self-error head.
 
-  R-12 is only partly met: the new outer path now has an end-to-end test, but
-  there is no scheduled full-stage reproduction job. R-13 applies to this
-  branch: it was written by one implementer and needs a fresh reviewer.
+  R-12 is met for this work. The outer path has an end-to-end test; every
+  0004–0006 verdict re-adjudicates from its stored records in routine CI; and
+  `.github/workflows/loop-reproduction.yml` re-runs all nine stages' models
+  (including the confirmation primitives) weekly and on any change to code
+  that can alter a primitive, requiring exact agreement (all nine reproduce
+  locally with zero mismatches). R-13 applies to this branch: it was written
+  by one implementer and needs a fresh reviewer.
 * **Horizon.** M2's repair is verified at 1120 steps on the tested families.
   Other wall geometries, noise, missing observations near walls, and large
   accelerations at walls are untested.

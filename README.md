@@ -244,6 +244,7 @@ python -m research.aaa_1k_loop validate           # iteration records 0001-0006,
 python -m research.aaa_1k_loop.champion1 verify   # Champion 1's record against the repository
 python -m research.aaa_1k_loop.recompute4 --confirmation docs/evidence/aaa1k_loop_0006/confirmation_2.json \
     --freeze docs/evidence/aaa1k_loop_0006/freeze_2.json   # independent PROMOTE recomputation
+python -m research.aaa_1k_loop.stages4 reproduce attack6  # rerun a 0004-0006 stage; primitives must reappear exactly
 python -m research.aaa_1k_loop reproduce diagnose2 # rerun a stage; committed primitives must reappear exactly
 ```
 

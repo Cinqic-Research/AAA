@@ -450,3 +450,22 @@ class ReadjudicationTests(unittest.TestCase):
         decision = iteration6.decide(confirmation["primitives"], confirmation["challenger"])
         self.assertEqual(json.loads(json.dumps(decision)), confirmation["decision"])
         self.assertEqual(decision["outcome"], "PROMOTE")
+
+
+class ReproductionRegistryTests(unittest.TestCase):
+    def test_every_post_audit_evidence_file_with_primitives_is_reproducible(self) -> None:
+        from research.aaa_1k_loop.stages4 import REPRODUCIBLE_4
+
+        registered = {path for _target, path in REPRODUCIBLE_4.values()}
+        for path in sorted(ROOT.glob("docs/evidence/aaa1k_loop_000[456]/*.json")):
+            content = json.loads(path.read_text(encoding="utf-8"))
+            if "records" in content or "primitives" in content:
+                relative = str(path.relative_to(ROOT))
+                self.assertIn(relative, registered, f"{relative} holds primitives but has no reproduction")
+
+    def test_the_scheduled_workflow_covers_every_registered_stage(self) -> None:
+        from research.aaa_1k_loop.stages4 import REPRODUCIBLE_4
+
+        workflow = (ROOT / ".github/workflows/loop-reproduction.yml").read_text(encoding="utf-8")
+        for stage in REPRODUCIBLE_4:
+            self.assertIn(stage, workflow)
