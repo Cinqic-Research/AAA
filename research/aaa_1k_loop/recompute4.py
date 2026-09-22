@@ -56,11 +56,18 @@ def recompute(primitives: Sequence[Mapping[str, Any]], arm: str, rules: Mapping[
     index = rules["bootstrap_indices"]
     by = lambda conditions: [r for r in primitives if r["condition"] in conditions]  # noqa: E731
     statuses: dict[str, str] = {}
+    numbers: dict[str, dict[str, float]] = {}
 
     coarse = by(("long:coarse_no_switch", "long:coarse_switching"))
     champion, challenger = _table(coarse, "gru", "diverged"), _table(coarse, arm, "diverged")
     k1 = crossed(challenger, champion, index=int(index["k1"]), draws=DRAWS, confidence=CONFIDENCE)
     fraction = float(challenger.mean())
+    numbers["K1_long_coarse_stability"] = {
+        "challenger_divergence_fraction": fraction,
+        "champion_divergence_fraction": float(champion.mean()),
+        "ci_low": k1["low"],
+        "ci_high": k1["high"],
+    }
     if k1["low"] > 0 and fraction <= 0.05:
         statuses["K1_long_coarse_stability"] = "PASS"
     elif k1["high"] <= 0 or fraction > 0.20:
@@ -78,6 +85,12 @@ def recompute(primitives: Sequence[Mapping[str, Any]], arm: str, rules: Mapping[
         records = by((condition,))
         low, high = relative(records, int(index["k2"][offset]))
         c_gru, c_arm = _count(records, "gru"), _count(records, arm)
+        numbers[f"K2_{condition}"] = {
+            "relative_ci_low": low,
+            "relative_ci_high": high,
+            "champion_divergences": float(c_gru),
+            "challenger_divergences": float(c_arm),
+        }
         if low > margin or c_arm > c_gru + 2:
             status = "FAIL"
         elif high <= margin and c_arm <= c_gru:
@@ -89,6 +102,7 @@ def recompute(primitives: Sequence[Mapping[str, Any]], arm: str, rules: Mapping[
     plan = sorted({r["condition"] for r in primitives if r["condition"].startswith("plan:")})
     for offset, condition in enumerate(plan):
         low, high = relative(by((condition,)), int(index["k3_start"]) + offset)
+        numbers[f"K3_{condition}"] = {"relative_ci_low": low, "relative_ci_high": high}
         statuses[f"K3_{condition}"] = (
             "PASS" if high <= margin else ("FAIL" if low > margin else "INCONCLUSIVE")
         )
@@ -99,6 +113,7 @@ def recompute(primitives: Sequence[Mapping[str, Any]], arm: str, rules: Mapping[
     )
     return {
         "statuses": statuses,
+        "numbers": numbers,
         "outcome": outcome,
         "k1_interval": [k1["low"], k1["high"]],
         "k1_fraction": fraction,
@@ -153,6 +168,16 @@ def verify(confirmation_path: Path, freeze_path: Path, ledger: Mapping[str, Any]
         problems.append(f"stored outcome {stored.get('outcome')} != independent {independent['outcome']}")
     if stored.get("statuses") != independent["statuses"]:
         problems.append("stored criterion statuses differ from the independent recomputation")
+    # Statuses alone can survive tampering that moves a number within its band; compare the numbers.
+    for criterion, values in independent["numbers"].items():
+        recorded = stored.get("criteria", {}).get(criterion, {})
+        for field, value in values.items():
+            if field not in recorded or abs(float(recorded[field]) - value) > TOLERANCE * max(
+                1.0, abs(value)
+            ):
+                problems.append(
+                    f"{criterion}.{field}: stored {recorded.get(field)!r} != independent {value!r}"
+                )
     return {"independent": independent, "problems": problems, "agrees": not problems}
 
 

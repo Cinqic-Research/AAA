@@ -285,6 +285,7 @@ result, and this repository is built to report that rather than to avoid it.
 | [Loop pilot report](docs/loop_pilot_report.md) | three iterations on AAA-1K, eight rejections, and an evaluation of the loop itself |
 | [Loop pilot handoff](docs/loop_pilot_handoff.md) | reproduction commands and what an independent reviewer should challenge |
 | [Loop iterations 0004–0006](docs/loop_report_0004_0006.md) | the audit response: TBPTT semantics, M2's mechanism, the first real confirmation, Champion 1 |
+| [Loop 0004–0006 handoff](docs/loop_0004_0006_handoff.md) | reproduction commands and what an independent reviewer should challenge |
 | [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
 | [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
 | [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |

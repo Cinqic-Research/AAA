@@ -469,3 +469,29 @@ class ReproductionRegistryTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/loop-reproduction.yml").read_text(encoding="utf-8")
         for stage in REPRODUCIBLE_4:
             self.assertIn(stage, workflow)
+
+
+class RecomputationTamperTests(unittest.TestCase):
+    def test_a_tampered_primitive_that_keeps_every_status_is_still_caught(self) -> None:
+        import tempfile
+
+        from research.aaa_1k_loop.identities import load_ledger
+
+        confirmation_path = ROOT / "docs/evidence/aaa1k_loop_0006/confirmation_2.json"
+        freeze_path = ROOT / "docs/evidence/aaa1k_loop_0006/freeze_2.json"
+        ledger = load_ledger(ROOT / "benchmarks/aaa1k_loop_identity_ledger.json")
+        self.assertTrue(recompute4.verify(confirmation_path, freeze_path, ledger)["agrees"])
+        confirmation = json.loads(confirmation_path.read_text(encoding="utf-8"))
+        cell = next(
+            r
+            for r in confirmation["primitives"]
+            if r["condition"] == "long:coarse_no_switch" and not r["arms"]["gru"]["diverged"]
+        )
+        cell["arms"]["gru"]["diverged"] = True
+        with tempfile.TemporaryDirectory() as directory:
+            tampered = Path(directory) / "confirmation.json"
+            tampered.write_text(json.dumps(confirmation), encoding="utf-8")
+            result = recompute4.verify(tampered, freeze_path, ledger)
+        self.assertEqual(result["independent"]["outcome"], "PROMOTE")
+        self.assertFalse(result["agrees"])
+        self.assertTrue(any(p.startswith("K1_long_coarse_stability.") for p in result["problems"]))
