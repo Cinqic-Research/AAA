@@ -291,6 +291,14 @@ attempt records the CPU model, core count, memory, OS, Python, NumPy, BLAS
 build metadata and available disk space, so a latency number can be read in
 context.
 
+That per-attempt record is the authoritative hardware provenance for an
+experiment, and it is not replaced by anything static. The separate question of
+which machine AAA is currently *developed* on — and its relationship to the
+Zen 3 requirement for `--exact` above — is answered in
+[`hardware.md`](hardware.md). Reproducing this repository does not require that
+machine: cross-platform reproduction is judged at the verdict level
+(`AAA-173`).
+
 ## AAA-1K (`aaa.1k.v1`)
 
 A separate phase with its own identity; see

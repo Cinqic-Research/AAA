@@ -208,6 +208,12 @@ python tools/check_lock.py
 CPU only. NumPy and Matplotlib are the runtime dependencies. No GPU, no
 external API, no pretrained model, no paid service.
 
+That describes what the implementation *requires*, which is not the same as
+what the development workstation *contains*. FLOWBOX, the current primary
+development machine, has a discrete GPU that no AAA code uses, and the project
+carries a current planning ceiling on model size. Both are recorded in
+[`docs/hardware.md`](docs/hardware.md).
+
 ## Commands
 
 ```bash
@@ -277,6 +283,7 @@ result, and this repository is built to report that rather than to avoid it.
 | Document | What it covers |
 |---|---|
 | [Research charter](docs/aaa_charter.md) | what AAA is, what Juniper is, and why the dot is one benchmark |
+| [Development hardware](docs/hardware.md) | FLOWBOX, the CPU-only execution boundary, the current 125M planning ceiling, and future compute |
 | [AAA-1K architecture](docs/aaa_1k_architecture.md) | the frozen 994-parameter specification |
 | [AAA-1K literature review](docs/aaa_1k_literature_review.md) | what was adopted from the literature, and what was refused |
 | [AAA-1K decisions](docs/aaa_1k_decisions.md) | every decision, including three departures from the phase brief |
