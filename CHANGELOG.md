@@ -9,6 +9,9 @@ fingerprint (`5ce6e019…`) and the v2.1 specification hash are unchanged.
 
 - `champion1 verify` now recomputes the live phase fingerprint instead of
   comparing Champion 1's record with a copy of itself (`AAA-174`).
+- Dependabot no longer opens `pip` pull requests. `requirements-lock.txt` is
+  inside the phase fingerprint, and the old rule ignored only patch updates
+  (`AAA-175`).
 
 ## Development hardware and compute strategy documented (2026-09-22)
 

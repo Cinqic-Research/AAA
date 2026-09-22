@@ -33,6 +33,16 @@ python -m pip list --format=freeze
 python tools/check_lock.py
 ```
 
+The lock is also inside the `aaa.1k.v1` phase fingerprint
+(`research/aaa_1k/identity.py`). Changing one pin changes that fingerprint, so
+Champion 0 and Champion 1 verification fail until the change is recorded as a
+new phase identity; see `AAA-152` and the fingerprinted-files rule in
+[`CONTRIBUTING.md`](../CONTRIBUTING.md). For that reason
+`.github/dependabot.yml` ignores every `pip` update, security updates
+included, and Dependabot alerts remain the notification path for a vulnerable
+pin (`AAA-175`). Regenerating the lock is a maintainer decision, never a bot
+pull request.
+
 `pyproject.toml` pins the PEP 517 backend itself to `setuptools==84.0.0`.
 The locked CI job installs the matching lock and builds with
 `python -m build --no-isolation`; `--no-deps` applies only when installing the

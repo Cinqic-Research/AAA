@@ -890,6 +890,11 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
   [`../SECURITY.md`](../SECURITY.md) rather than quietly omitted.
 - **Verification** `gh api repos/Cinqic/AAA/branches/main/protection` and
   `gh api repos/Cinqic/AAA --jq '.delete_branch_on_merge, .security_and_analysis'`.
+- **Note (2026-09-22)** The `pip` entry described above ignored only patch
+  updates, so it could still open minor, major and security pull requests
+  against `requirements-lock.txt`, a fingerprinted file. It now ignores every
+  `pip` update; see `AAA-175`. The repository settings listed above were read
+  back unchanged on 2026-09-22.
 
 ### AAA-112 — confirmation status edits could erase prior-use eligibility
 - **Source** independent Sol reproduction · **Severity** blocking · **Status** repaired
@@ -1866,3 +1871,32 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
 - **Verification** On the review branch the same one-byte injection makes
   `champion1 verify` print `STALE: phase_fingerprint: …` and exit 1. On the
   unmodified tree it prints `VALID`, and the fingerprint is still `5ce6e019…`.
+
+### AAA-175 — Dependabot could open pull requests that rewrite the fingerprinted lock
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired in configuration; not observable until Dependabot next runs
+- **Reproduction** On `efa1fdb`, the `pip` entry in `.github/dependabot.yml`
+  ignored only `version-update:semver-patch`, although its comment says the
+  lock "is regenerated deliberately, not by a bot". Dependabot has already
+  rewritten the lock once: commit `1d1ccfe` (fonttools 4.64.0 → 4.65.0) is a
+  `semver-minor` bump, which that rule does not ignore. `requirements-lock.txt`
+  is one of the 32 `aaa.1k.v1` fingerprint files. In a throwaway copy, one
+  bumped pin changed the fingerprint and made `champion --verify` fail.
+  GitHub's options reference marks `ignore` as applying to version *and*
+  security updates, and `open-pull-requests-limit` as version updates only.
+  So repository-level security updates for `pip` were also constrained only by
+  the patch rule.
+- **Consequence** No bad change could reach `main`, because such a pull
+  request fails required CI. But each one would ask the maintainer to merge a
+  change to scientific identity through a bot pull request, which the
+  project's rules reserve for a recorded decision (`AAA-152`).
+- **Repair** The `pip` entry sets `open-pull-requests-limit: 0` and ignores
+  `dependency-name: "*"` with no `update-types`. `github-actions` updates are
+  unchanged. `SECURITY.md`, `docs/dependencies.md` and a dated note on
+  `AAA-110` record the policy. Dependabot alerts remain enabled. Whether to
+  also change repository-level security-update settings is left to the
+  maintainer and is not changed here.
+- **Regression** `tests/test_repository_automation.py` fails on `efa1fdb`
+  (two failures) and passes after the repair.
+- **Remaining limitation** Dependabot's actual behaviour can only be observed
+  on GitHub, the next time it runs. This entry relies on GitHub's
+  documentation.
