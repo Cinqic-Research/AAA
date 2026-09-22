@@ -74,8 +74,12 @@ class FreezeError(RuntimeError):
     """Raised when a freeze is missing, uncommitted, stale or contradicted."""
 
 
-def confirmation_source_fingerprint(root: Path) -> dict[str, Any]:
-    names = sorted(set(phase_files(root)) | set(CONFIRMATION_SOURCES))
+def confirmation_source_fingerprint(
+    root: Path, sources: tuple[str, ...] = CONFIRMATION_SOURCES
+) -> dict[str, Any]:
+    """Hash every AAA-1K phase file plus ``sources`` (an iteration's own confirmation path)."""
+
+    names = sorted(set(phase_files(root)) | set(sources))
     files: dict[str, dict[str, Any]] = {}
     for name in names:
         path = root / name
@@ -102,6 +106,7 @@ def build_freeze(
     attack_path: str,
     blocks: tuple[str, ...],
     frozen_content: Mapping[str, Any],
+    sources: tuple[str, ...] = CONFIRMATION_SOURCES,
 ) -> dict[str, Any]:
     return {
         "schema": FREEZE_SCHEMA,
@@ -114,7 +119,7 @@ def build_freeze(
             "path": attack_path,
             "sha256": hashlib.sha256((root / attack_path).read_bytes()).hexdigest(),
         },
-        "confirmation_source_fingerprint": confirmation_source_fingerprint(root),
+        "confirmation_source_fingerprint": confirmation_source_fingerprint(root, sources),
         "confirmation_blocks": {
             block_id: {
                 **{
@@ -193,6 +198,7 @@ def verify_freeze(
     *,
     ledger: Mapping[str, Any],
     frozen_content: Mapping[str, Any],
+    sources: tuple[str, ...] = CONFIRMATION_SOURCES,
 ) -> list[str]:
     """Every way the live repository disagrees with the freeze."""
 
@@ -201,7 +207,7 @@ def verify_freeze(
         return ["unknown freeze schema"]
     if phase_fingerprint(root)["sha256"] != manifest["champion_phase_fingerprint"]:
         problems.append("champion phase fingerprint changed since the freeze")
-    live = confirmation_source_fingerprint(root)
+    live = confirmation_source_fingerprint(root, sources)
     frozen_source = manifest["confirmation_source_fingerprint"]
     if live["sha256"] != frozen_source["sha256"]:
         changed = sorted(
