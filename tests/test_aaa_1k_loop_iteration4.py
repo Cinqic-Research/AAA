@@ -9,6 +9,7 @@ touched.
 from __future__ import annotations
 
 import ast
+import json
 import unittest
 from pathlib import Path
 from typing import Any
@@ -378,3 +379,32 @@ class ConfirmationEndToEndTests(unittest.TestCase):
         self.assertEqual(payload["decision"]["outcome"], "PROMOTE")
         self.assertTrue(result["agrees"], result["problems"])
         self.assertEqual(result["independent"]["outcome"], "PROMOTE")
+
+
+class ChampionOneTests(unittest.TestCase):
+    def test_the_committed_champion_1_record_is_derived_from_the_repository(self) -> None:
+        from research.aaa_1k_loop import champion1
+
+        if not (ROOT / champion1.RECORD).exists():
+            self.skipTest("Champion 1 not yet recorded")
+        self.assertEqual(champion1.verify(ROOT), [])
+        record = json.loads((ROOT / champion1.RECORD).read_text(encoding="utf-8"))
+        self.assertEqual(record["parameter_count"], 994)
+        self.assertEqual(record["state_footprint"]["total_adaptive_state_scalars"], 1414)
+        self.assertEqual(record["promoted_by"]["outcome"], "PROMOTE")
+        self.assertTrue(record["round3_evidence"]["round3_identities_design_and_configuration_unchanged"])
+
+    def test_the_champion_1_world_is_always_undone(self) -> None:
+        import research.aaa_1k.agents as agents_module
+        import research.aaa_1k.experiments as experiments_module
+        import research.aaa_1k.measurements as measurements_module
+        from research.aaa_1k.agents import NeuralAgent
+        from research.aaa_1k_loop import champion1
+        from research.aaa_1k_loop.unfolding import ReachGatedUnfoldAgent
+
+        with self.assertRaises(RuntimeError), champion1.champion_1_world():
+            self.assertIs(experiments_module.NeuralAgent, ReachGatedUnfoldAgent)
+            self.assertIs(agents_module.NeuralAgent, ReachGatedUnfoldAgent)
+            raise RuntimeError("interrupted")
+        for module in (agents_module, experiments_module, measurements_module):
+            self.assertIs(module.NeuralAgent, NeuralAgent)
