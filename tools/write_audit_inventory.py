@@ -82,7 +82,33 @@ def verification(path: str) -> str:
     return "read as bytes; retained provenance checked"
 
 
+REVIEW_2026_09_22 = {
+    ".github/dependabot.yml": "AAA-175",
+    "CHANGELOG.md": "AAA-174 through AAA-178",
+    "README.md": "AAA-176",
+    "SECURITY.md": "AAA-175",
+    "docs/dependencies.md": "AAA-175",
+    "docs/evidence_policy.md": "AAA-178",
+    "docs/independent_review_2026-09-22.md": "AAA-174 through AAA-178",
+    "docs/issue_ledger.md": "AAA-174 through AAA-178",
+    "docs/loop_protocol.md": "AAA-176",
+    "research/aaa_1k_loop/champion1.py": "AAA-174",
+    "tests/test_aaa_1k_loop_iteration4.py": "AAA-174",
+    "tests/test_repository_automation.py": "AAA-175",
+    "tools/write_audit_inventory.py": "AAA-174 through AAA-178",
+}
+"""Paths changed by the 2026-09-22 independent review, and the findings that changed them."""
+
+
 def findings(path: str) -> str:
+    inherited = inherited_findings(path)
+    review = REVIEW_2026_09_22.get(path)
+    if review is None:
+        return inherited
+    return review if inherited == "none" else f"{inherited}; {review}"
+
+
+def inherited_findings(path: str) -> str:
     loop_path = (
         path.startswith("research/aaa_1k_loop/")
         or path.startswith("docs/evidence/aaa1k_loop_")
