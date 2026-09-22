@@ -36,7 +36,9 @@ Realistic concerns are correspondingly narrow:
 
 ## Repository settings
 
-These were inspected through the GitHub API again on 2026-09-19. See `AAA-110`
+These were inspected through the GitHub API again on 2026-09-19, and read back
+unchanged on 2026-09-22 by the
+[independent review](docs/independent_review_2026-09-22.md). See `AAA-110`
 in [`docs/issue_ledger.md`](docs/issue_ledger.md).
 
 **Applied and verified on `main`:**
