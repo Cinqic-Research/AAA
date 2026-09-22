@@ -53,6 +53,38 @@ governance version is `aaa.loop.v1`; historical pilot artifacts remain v0.
 looked at is contaminated for model selection forever. Do selection on
 development data.
 
+**Some documents are scientific identity, not prose.** The `aaa.1k.v1` phase
+fingerprint (`research/aaa_1k/identity.py`) hashes these files byte for byte:
+
+- `docs/aaa_charter.md`, `docs/aaa_1k_architecture.md`,
+  `docs/aaa_1k_literature_review.md` and `docs/aaa_1k_decisions.md`;
+- everything under `research/aaa_1k/`;
+- `aaa/__init__.py`, `aaa/config.py`, `aaa/environment.py` and
+  `aaa/predictors.py`;
+- `tests/test_aaa_1k.py` and `requirements-lock.txt`.
+
+The resulting hash, `5ce6e019...`, is recorded in the Champion 0 and Champion 1
+records and in the retained AAA-1K evidence. Changing any byte of any file
+above, including a typo fix, an added link or reformatting, changes the hash.
+`python -m research.aaa_1k_loop champion --verify`,
+`python -m research.aaa_1k_loop.champion1 verify` and
+`tests.test_aaa_1k_loop` then fail, and so does CI. That is the check working,
+not a defect to route around. Do not update the recorded hash, edit the
+evidence to match, or remove a file from the fingerprint to make it pass:
+historical evidence is never rewritten.
+
+Before touching one of these files, ask whether the change belongs somewhere
+else. Documentation that only needs to *refer* to the charter can link to it
+from an unfingerprinted document, as [`docs/hardware.md`](docs/hardware.md)
+does. `docs/aaa_1k_report.md`, `docs/aaa_1k_handoff.md` and
+`docs/aaa_1k_self_review.md` are generated phase outputs and are excluded from
+the fingerprint, so editing them does not change the hash. A change
+that genuinely has to alter a fingerprinted file is a change to the phase's
+scientific identity. It needs its own recorded decision and versioning, like
+`AAA-152`, not an ordinary documentation PR. Run
+`python -m research.aaa_1k fingerprint` before and after an edit if you are
+unsure whether a file is covered.
+
 **Every specification value must be read.** `tests/test_spec.py` fails if a
 declared leaf stops being consumed. If you add a value to the specification,
 use it.
