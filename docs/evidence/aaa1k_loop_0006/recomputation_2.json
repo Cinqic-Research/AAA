@@ -1,0 +1,23 @@
+{
+  "agrees": true,
+  "independent": {
+    "k1_fraction": 0.0,
+    "k1_interval": [
+      0.08125,
+      0.3625
+    ],
+    "outcome": "PROMOTE",
+    "statuses": {
+      "K1_long_coarse_stability": "PASS",
+      "K2_long:bouncing": "PASS",
+      "K2_long:occlusion": "PASS",
+      "K3_plan:aba_v1": "PASS",
+      "K3_plan:coarse_speed_v1": "PASS",
+      "K3_plan:motion_compat:bouncing": "PASS",
+      "K3_plan:motion_compat:changed": "PASS",
+      "K3_plan:motion_compat:dynamics_change": "PASS",
+      "K3_plan:occlusion_v1": "PASS"
+    }
+  },
+  "problems": []
+}
