@@ -275,20 +275,22 @@
       "count": 112,
       "iteration": "aaa1k-loop-0006",
       "namespace": "confirmation_env",
+      "observed_by": "aaa1k-loop-0006 confirmation at f1f19daf5b0d715e603d001d46d1944dd327f9e5",
       "purpose": "iteration 0006 fresh confirmation streams (M2 challenger)",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "aaa1k-loop-0006/confirmation/init",
       "count": 5,
       "iteration": "aaa1k-loop-0006",
       "namespace": "confirmation_init",
+      "observed_by": "aaa1k-loop-0006 confirmation at f1f19daf5b0d715e603d001d46d1944dd327f9e5",
       "purpose": "iteration 0006 fresh confirmation initializations (M2 challenger)",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     }
   ],
   "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",
