@@ -169,6 +169,16 @@
       "role": "diagnostic",
       "start": 0,
       "status": "reserved"
+    },
+    {
+      "block_id": "aaa1k-loop-0004/diagnostic/unfold",
+      "count": 16,
+      "iteration": "aaa1k-loop-0004",
+      "namespace": "diagnostic_unfold",
+      "purpose": "iteration 0004 round 4 (audit R-01, M2): target-unfolding frame lock, declared after a disclosed post-hoc look at round 3; hypotheses H32-H34 declared first",
+      "role": "diagnostic",
+      "start": 0,
+      "status": "reserved"
     }
   ],
   "rule": "blocks never overlap; a confirmation block becomes spent when its result is observed and may never be reserved again; selection may use only diagnostic, development and attack blocks",

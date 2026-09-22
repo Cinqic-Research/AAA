@@ -321,3 +321,46 @@ class OvershootTests(unittest.TestCase):
         model.learn(-1.0)
         self.assertGreater(model.overshoot[-1]["amplification"], 1.0)
         self.assertGreater(model.overshoot[-1]["kappa"], 2.0)
+
+
+class UnfoldingTests(unittest.TestCase):
+    def test_trace_agent_follows_the_champion_bitwise(self) -> None:
+        from research.aaa_1k_loop.unfolding import UnfoldTraceAgent
+
+        stream = coarse_speed_stream(424242, steps=400, regime_length=10_000)
+        champion = NeuralAgent(AAA1KGRU(seed=2, **CHAMPION_CONFIGURATION), name="champion")
+        traced = UnfoldTraceAgent(AAA1KGRU(seed=2, **CHAMPION_CONFIGURATION), name="traced")
+        result = run_stream(stream, [champion, traced])
+        self.assertTrue(np.array_equal(result.errors("champion"), result.errors("traced")))
+        self.assertEqual(len(traced.mirror_trace), champion.trained_steps)
+
+    def test_a_raw_prediction_past_the_wall_mirrors_an_interior_observation(self) -> None:
+        # The self-confirming branch: input 0.035 inside, raw prediction past the lower wall.
+        from aaa.predictors import unfold_observation
+
+        self.assertAlmostEqual(unfold_observation(0.04, -0.03, 0.0, 1.0), -0.04)
+        self.assertAlmostEqual(unfold_observation(0.04, 0.03, 0.0, 1.0), 0.04)
+
+    def test_dead_reckoning_reference_ignores_the_prediction(self) -> None:
+        from research.aaa_1k_loop.unfolding import DeadReckoningUnfoldAgent, UnfoldTraceAgent
+
+        for cls in (UnfoldTraceAgent, DeadReckoningUnfoldAgent):
+            agent = cls(AAA1KGRU(seed=0, **CHAMPION_CONFIGURATION), name="a")
+            agent.begin_episode()
+            agent.accept_observation(0.040)
+            agent.accept_observation(0.035)
+            agent.predict()
+            agent._raw_prediction = -0.03  # force the prediction past the wall
+            target = agent._training_target(0.040)
+            if cls is UnfoldTraceAgent:
+                self.assertTrue(agent.mirror_trace[-1])
+                self.assertAlmostEqual(target, (-0.040 - 0.035) / agent.scales.displacement_scale)
+            else:
+                self.assertFalse(agent.mirror_trace[-1])
+                self.assertAlmostEqual(target, (0.040 - 0.035) / agent.scales.displacement_scale)
+
+    def test_longest_runs(self) -> None:
+        from research.aaa_1k_loop.unfolding import longest_runs
+
+        self.assertEqual(longest_runs([False, True, True, False, True]), [(1, 2), (4, 1)])
+        self.assertEqual(longest_runs([]), [])

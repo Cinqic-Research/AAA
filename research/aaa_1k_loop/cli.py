@@ -26,6 +26,17 @@ EVIDENCE_DIR = Path("docs/evidence/aaa1k_loop_0001")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
     {
+        "block_id": "aaa1k-loop-0004/diagnostic/unfold",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_unfold",
+        "count": 16,
+        "purpose": (
+            "iteration 0004 round 4 (audit R-01, M2): target-unfolding frame lock, declared after a disclosed "
+            "post-hoc look at round 3; hypotheses H32-H34 declared first"
+        ),
+    },
+    {
         "block_id": "aaa1k-loop-0004/diagnostic/overshoot",
         "iteration_id": "aaa1k-loop-0004",
         "role": "diagnostic",

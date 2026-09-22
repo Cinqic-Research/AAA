@@ -9,6 +9,7 @@ enters the ledger.
     python -m research.aaa_1k_loop.stages4 diagnose [--scratch] [--workers N]
     python -m research.aaa_1k_loop.stages4 gain [--scratch] [--workers N]
     python -m research.aaa_1k_loop.stages4 overshoot [--scratch] [--workers N]
+    python -m research.aaa_1k_loop.stages4 unfold [--scratch] [--workers N]
 """
 
 from __future__ import annotations
@@ -134,6 +135,37 @@ def command_overshoot(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_unfold(args: argparse.Namespace) -> int:
+    from . import diagnosis4d as d
+
+    root = project_root()
+    started = time.perf_counter()
+    ledger = load_ledger(_ledger_path(root))
+    if args.scratch:
+        records = d.run_diagnosis4d(
+            ledger, workers=args.workers, block_id=d.SCRATCH_BLOCK, streams=2, initializations=1, steps=280
+        )
+        d.adjudicate4d(records)
+        print(
+            f"scratch shakedown: {len(records)} cells in {time.perf_counter() - started:.1f}s (not evidence)"
+        )
+        return 0
+    records = d.run_diagnosis4d(ledger, workers=args.workers)
+    analysis = d.adjudicate4d(records)
+    payload = {
+        "schema": d.DIAGNOSIS4D_SCHEMA,
+        "evidence_role": "diagnostic",
+        "identity_block": d.DIAGNOSTIC_BLOCK,
+        "hypotheses": list(d.HYPOTHESES),
+        "analysis": analysis,
+        "records": records,
+    }
+    write_strict_json(Path(args.output), {**_stamp(payload, root, started), "iteration_id": ITERATION_ID})
+    for key, value in analysis["verdicts"].items():
+        print(f"{key:4s} {value['verdict']}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop.stages4")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -153,15 +185,24 @@ def build_parser() -> argparse.ArgumentParser:
     overshoot.add_argument(
         "--scratch", action="store_true", help="shake the instrument down on the scratch block"
     )
+    unfold = sub.add_parser("unfold", help="target-unfolding frame lock (R-01), H32-H34")
+    unfold.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis_unfold.json"))
+    unfold.add_argument("--workers", type=int)
+    unfold.add_argument(
+        "--scratch", action="store_true", help="shake the instrument down on the scratch block"
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     return int(
-        {"diagnose": command_diagnose, "gain": command_gain, "overshoot": command_overshoot}[args.command](
-            args
-        )
+        {
+            "diagnose": command_diagnose,
+            "gain": command_gain,
+            "overshoot": command_overshoot,
+            "unfold": command_unfold,
+        }[args.command](args)
     )
 
 
