@@ -8,6 +8,7 @@ enters the ledger.
 
     python -m research.aaa_1k_loop.stages4 diagnose [--scratch] [--workers N]
     python -m research.aaa_1k_loop.stages4 gain [--scratch] [--workers N]
+    python -m research.aaa_1k_loop.stages4 overshoot [--scratch] [--workers N]
 """
 
 from __future__ import annotations
@@ -102,6 +103,37 @@ def command_gain(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_overshoot(args: argparse.Namespace) -> int:
+    from . import diagnosis4c as d
+
+    root = project_root()
+    started = time.perf_counter()
+    ledger = load_ledger(_ledger_path(root))
+    if args.scratch:
+        records = d.run_diagnosis4c(
+            ledger, workers=args.workers, block_id=d.SCRATCH_BLOCK, streams=2, initializations=1, steps=280
+        )
+        d.adjudicate4c(records)
+        print(
+            f"scratch shakedown: {len(records)} cells in {time.perf_counter() - started:.1f}s (not evidence)"
+        )
+        return 0
+    records = d.run_diagnosis4c(ledger, workers=args.workers)
+    analysis = d.adjudicate4c(records)
+    payload = {
+        "schema": d.DIAGNOSIS4C_SCHEMA,
+        "evidence_role": "diagnostic",
+        "identity_block": d.DIAGNOSTIC_BLOCK,
+        "hypotheses": list(d.HYPOTHESES),
+        "analysis": analysis,
+        "records": records,
+    }
+    write_strict_json(Path(args.output), {**_stamp(payload, root, started), "iteration_id": ITERATION_ID})
+    for key, value in analysis["verdicts"].items():
+        print(f"{key:4s} {value['verdict']}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m research.aaa_1k_loop.stages4")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -115,12 +147,22 @@ def build_parser() -> argparse.ArgumentParser:
     gain.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis_gain.json"))
     gain.add_argument("--workers", type=int)
     gain.add_argument("--scratch", action="store_true", help="shake the instrument down on the scratch block")
+    overshoot = sub.add_parser("overshoot", help="single-step SGD overshoot (R-01), H29-H31")
+    overshoot.add_argument("--output", default=str(EVIDENCE_DIR / "diagnosis_overshoot.json"))
+    overshoot.add_argument("--workers", type=int)
+    overshoot.add_argument(
+        "--scratch", action="store_true", help="shake the instrument down on the scratch block"
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    return int({"diagnose": command_diagnose, "gain": command_gain}[args.command](args))
+    return int(
+        {"diagnose": command_diagnose, "gain": command_gain, "overshoot": command_overshoot}[args.command](
+            args
+        )
+    )
 
 
 if __name__ == "__main__":

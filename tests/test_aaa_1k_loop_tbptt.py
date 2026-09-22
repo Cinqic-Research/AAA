@@ -280,3 +280,44 @@ class LoopGainTests(unittest.TestCase):
         self.assertEqual(first_index(rolled > 4.5), 6)
         self.assertEqual(first_index(values > 2, start=5), 5)
         self.assertIsNone(first_index(values > 100))
+
+
+class OvershootTests(unittest.TestCase):
+    def test_overshoot_model_follows_the_champion_bitwise(self) -> None:
+        from research.aaa_1k_loop.overshoot import OvershootGRU
+
+        stream = coarse_speed_stream(424242, steps=150, regime_length=10_000)
+        champion = NeuralAgent(AAA1KGRU(seed=2, **CHAMPION_CONFIGURATION), name="champion")
+        measured = NeuralAgent(OvershootGRU(seed=2, **CHAMPION_CONFIGURATION), name="measured")
+        result = run_stream(stream, [champion, measured])
+        self.assertTrue(np.array_equal(result.errors("champion"), result.errors("measured")))
+        self.assertIn(len(result.steps) - len(measured.model.overshoot), (0, 1))
+
+    def test_small_steps_agree_with_the_linearization(self) -> None:
+        from research.aaa_1k_loop.overshoot import OvershootGRU
+
+        rng = np.random.default_rng(5)
+        model = OvershootGRU(seed=1, **{**CHAMPION_CONFIGURATION, "learning_rate": 1e-4})
+        model.parameters["W_o"][:] = rng.normal(0.0, 0.5, model.parameters["W_o"].shape)
+        for _ in range(6):
+            model.forward(rng.normal(size=3))
+            model.learn(float(rng.normal()))
+        for record in model.overshoot[1:]:
+            # |r'|/|r| = |1 - kappa| to first order; the aux head makes it approximate
+            self.assertAlmostEqual(record["amplification"], abs(1.0 - record["kappa"]), places=3)
+            self.assertLess(record["amplification"], 1.0)
+            self.assertGreaterEqual(record["error_input_share"], 0.0)
+            self.assertLessEqual(record["error_input_share"] + record["head_share"], 1.0 + 1e-12)
+
+    def test_a_huge_step_is_reported_as_overshoot(self) -> None:
+        from research.aaa_1k_loop.overshoot import OvershootGRU
+
+        rng = np.random.default_rng(6)
+        model = OvershootGRU(
+            seed=1, **{**CHAMPION_CONFIGURATION, "learning_rate": 50.0, "gradient_clip": None}
+        )
+        model.parameters["W_o"][:] = rng.normal(0.0, 0.5, model.parameters["W_o"].shape)
+        model.forward(np.array([0.1, 0.5, 2.0]))
+        model.learn(-1.0)
+        self.assertGreater(model.overshoot[-1]["amplification"], 1.0)
+        self.assertGreater(model.overshoot[-1]["kappa"], 2.0)
