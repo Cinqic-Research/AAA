@@ -314,6 +314,25 @@ def require_usable(ledger: Mapping[str, Any], block_id: str, *, purpose: str) ->
     raise IdentityError(f"unknown purpose {purpose!r}")
 
 
+def require_claimed(ledger: Mapping[str, Any], block_id: str, *, observer: str) -> dict[str, Any]:
+    """Fail unless ``block_id`` is a confirmation block already spent by exactly ``observer``.
+
+    A confirmation run marks its blocks spent *before* the first cell runs, so
+    by the time cells are built the block is no longer ``reserved``; what must
+    hold then is that this very run is the one that spent it.
+    """
+
+    block = find_block(ledger, block_id)
+    if block["role"] != "confirmation":
+        raise IdentityError(f"block {block_id} is not a confirmation block")
+    if block["status"] != "spent" or block.get("observed_by") != observer:
+        raise IdentityError(
+            f"confirmation block {block_id} is {block['status']} by {block.get('observed_by')!r}, "
+            f"not spent by this run ({observer!r})"
+        )
+    return block
+
+
 def write_ledger(path: Path, ledger: Mapping[str, Any]) -> None:
     validate_ledger(ledger)
     path.parent.mkdir(parents=True, exist_ok=True)

@@ -185,12 +185,33 @@ evidence, so they are characterizations rather than confirmed claims.
   (+4–5%) and fails on some unseen initializations. Capacity is not the
   bottleneck: a 354-parameter ungated RNN beats the 994-parameter champion on
   this family.
-- **A long-horizon runaway.** On 1120-step fixed-speed quantized streams the
-  champion's online learning diverges (mean error above twice persistence) in
-  roughly a third of cells: the previous-error input closes a feedback loop at
-  the selected learning rate. Bounding the input does not help; removing it
-  does, at a cost of up to 41% on adaptation-heavy families. Round 3 never
+- **A long-horizon runaway (M2), since repaired in Champion 1.** On 1120-step
+  quantized streams Champion 0's online learning diverges (mean error above
+  twice persistence) in about a fifth to a third of cells. Iteration 0004
+  showed the cause is a self-confirming target-unfolding frame lock (`AAA-170`),
+  not the previous-error feedback gain the pilot suspected. Champion 1
+  (iteration 0006) removes it on fresh confirmation (21.3% → 0%) and is
+  bitwise identical to Champion 0 everywhere else tested. Round 3 never
   evaluated coarse streams longer than 280 steps, and its clip statistics
   ("under 1% of updates") describe that horizon only.
 - **The previous-error input matters more than round 3 showed.** Removing it
   regresses `aba_v1` by 41% and `dynamics_change` by 39% in development.
+
+## After iterations 0004–0006 (2026-09-22)
+
+- **Champion 1** is Champion 0 with one target-construction rule changed
+  (reach-gated unfolding). It lives in `research/aaa_1k_loop`, and
+  `research/aaa_1k` (`aaa.1k.v1`) is unchanged. Its round-3 capability vector
+  is measured, not inherited: it equals Champion 0's except for one Q7 verdict
+  that improves.
+- **Its M2 repair is tested at 1120 steps** on the quantized coarse, smooth
+  bouncing and occlusion families and nearby quantized constructions. Other
+  wall geometries, observation noise, missing observations next to a wall,
+  and accelerations at a wall are untested. The gate trusts the tracker's
+  one-step velocity estimate.
+- **The online TBPTT rule is an approximation** (cached activations, current
+  weights; `AAA-169`). It is numerically negligible here, but it is not the
+  exact truncated gradient the model docstring claims.
+- **The v2.1 core RLS learner** uses the same own-prediction unfolding and is
+  untested for the lock (`AAA-172`).
+- **M1** (the Q4 memory-family deficit) is unchanged in Champion 1.

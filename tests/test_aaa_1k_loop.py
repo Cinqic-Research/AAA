@@ -28,7 +28,7 @@ from research.aaa_1k.runner import run_stream
 from research.aaa_1k.seeds import derive_seed
 from research.aaa_1k.stats import crossed_paired_difference
 from research.aaa_1k.streams import coarse_speed_stream, motion_compat_stream, occlusion_stream
-from research.aaa_1k_loop import cli
+from research.aaa_1k_loop import HISTORICAL_PILOT_PROTOCOL_VERSION, LOOP_PROTOCOL_VERSION, cli
 from research.aaa_1k_loop.arms import (
     ARMS,
     CHAMPION_CONFIGURATION,
@@ -73,6 +73,15 @@ from research.aaa_1k_loop.recompute import crossed, verify_confirmation
 
 ROOT = Path(__file__).resolve().parents[1]
 RECORD_0001 = ROOT / "docs/evidence/aaa1k_loop_0001/iteration.json"
+
+
+class ProtocolVersionTests(unittest.TestCase):
+    def test_current_version_does_not_relabel_historical_records(self) -> None:
+        self.assertEqual(LOOP_PROTOCOL_VERSION, "aaa.loop.v1")
+        self.assertEqual(HISTORICAL_PILOT_PROTOCOL_VERSION, "aaa.loop.v0-pilot")
+        for iteration in range(1, 7):
+            record = read_strict_json(ROOT / f"docs/evidence/aaa1k_loop_{iteration:04d}/iteration.json")
+            self.assertEqual(record["loop_protocol_version"], HISTORICAL_PILOT_PROTOCOL_VERSION)
 
 
 def ledger_with(*blocks: dict[str, Any]) -> dict[str, Any]:
@@ -275,7 +284,15 @@ class IdentityLedgerTests(unittest.TestCase):
         ledger = load_ledger(ROOT / "benchmarks/aaa1k_loop_identity_ledger.json")
         proof = prove_fresh(ledger, ROOT)
         self.assertEqual(proof["status"], "DISJOINT")
-        self.assertFalse(any(b["role"] == "confirmation" for b in ledger["blocks"]))
+        # Every confirmation block was reserved by a committed freeze, and a spent one names its observer.
+        frozen = set()
+        for manifest in sorted(ROOT.glob("docs/evidence/aaa1k_loop_*/freeze*.json")):
+            frozen |= set(read_strict_json(manifest)["confirmation_blocks"])
+        for block in ledger["blocks"]:
+            if block["role"] == "confirmation":
+                self.assertIn(block["block_id"], frozen)
+                if block["status"] == "spent":
+                    self.assertTrue(block.get("observed_by"))
 
 
 # ======================================================================

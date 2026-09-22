@@ -31,6 +31,39 @@ python tools/check_exit_codes.py
 
 Set `MPLBACKEND=Agg` in a headless environment.
 
+## Current AAA-1K loop and Champion 1
+
+The commands below verify the current champion, identity separation, all loop
+records and the iteration-0006 promotion without rewriting retained evidence:
+
+```bash
+python -m research.aaa_1k fingerprint
+python -m research.aaa_1k_loop champion --verify
+python -m research.aaa_1k_loop prove-fresh
+python -m research.aaa_1k_loop validate
+python -m research.aaa_1k_loop.champion1 verify
+python -m research.aaa_1k_loop.recompute4 \
+  --confirmation docs/evidence/aaa1k_loop_0006/confirmation_2.json \
+  --freeze docs/evidence/aaa1k_loop_0006/freeze_2.json
+```
+
+Reproduce all nine iteration-0004--0006 stages with:
+
+```bash
+for stage in diagnose gain overshoot unfold develop4 develop5 develop6 attack6 confirmation6; do
+  python -m research.aaa_1k_loop.stages4 reproduce "$stage"
+done
+```
+
+The evidence platform is AMD Zen 3. On that platform, add `--exact` after the
+stage name to require bitwise equality. Long online-learning trajectories are
+not bit-stable across all CPU instruction sets (`AAA-173`): on other platforms,
+the default mode requires identical identities, artifact structure, divergence
+classifications and adjudicated verdicts while reporting numerical drift,
+including chaotic/diverged cells. Default success is therefore verdict-level
+cross-platform reproduction, not a claim of byte identity. Historical pilot
+commands remain documented below and retain their original scope.
+
 ## Identity
 
 ```bash

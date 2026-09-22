@@ -138,7 +138,7 @@ The full result is [`docs/aaa_1k_report.md`](docs/aaa_1k_report.md); read
 where the four repairs come from -- including the one that would otherwise have
 published a hidden-state advantage thirty times too large.
 
-## The improvement loop (pilot)
+## The improvement loop
 
 `research/aaa_1k_loop/` pilots the process by which AAA is supposed to get
 better: observe a measured weakness, classify it, diagnose it, state competing
@@ -147,12 +147,25 @@ intervention, confirm on fresh evidence, decide, preserve everything, repeat.
 Development and confirmation evidence are separated mechanically, not by
 convention.
 
-Its first run, on AAA-1K's Q4 result, **promoted nothing**: eight candidates,
+Its historical v0 pilot, on AAA-1K's Q4 result, **promoted nothing**: eight candidates,
 eight rejections, Champion 0 unchanged. It reclassified Q4's "minority tail"
 as one benchmark family, supported a mechanism for it, found a long-horizon
 instability round 3 never measured, and flagged a documented claim as
-unsupported. It never reached fresh confirmation, and the protocol is not yet
-permanent. Read [`docs/loop_pilot_report.md`](docs/loop_pilot_report.md).
+unsupported. It never reached fresh confirmation. Read
+[`docs/loop_pilot_report.md`](docs/loop_pilot_report.md).
+
+Iterations 0004–0006 answered an external audit. The online TBPTT rule is an
+approximation, but a numerically negligible one. The long-horizon runaway (M2)
+is a self-confirming target-unfolding frame lock, not an optimization
+instability. Three candidate fixes were rejected at a precommitted,
+uncertainty-aware screen. The fourth survived attack, **fresh confirmation**
+and independent recomputation, and became **Champion 1**: the same 994-parameter
+network with one target rule changed, 21% → 0% long-horizon divergence, and
+bitwise identical to Champion 0 in 718 of 720 round-3 cells (the other two
+improve). This was the loop's first real run through its outer path. Read
+[`docs/loop_report_0004_0006.md`](docs/loop_report_0004_0006.md).
+Independent review of that complete cycle established `aaa.loop.v1` for
+future work. The version change does not relabel the retained v0 artifacts.
 
 ## The learner
 
@@ -229,7 +242,11 @@ python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation
 python -m research.aaa_1k visualize --family occlusion_v1 --output runs/aaa_1k/dashboard.png
 
 # improvement-loop pilot
-python -m research.aaa_1k_loop validate           # iteration records, Champion 0, identity ledger
+python -m research.aaa_1k_loop validate           # iteration records 0001-0006, Champion 0, identity ledger
+python -m research.aaa_1k_loop.champion1 verify   # Champion 1's record against the repository
+python -m research.aaa_1k_loop.recompute4 --confirmation docs/evidence/aaa1k_loop_0006/confirmation_2.json \
+    --freeze docs/evidence/aaa1k_loop_0006/freeze_2.json   # independent PROMOTE recomputation
+python -m research.aaa_1k_loop.stages4 reproduce attack6  # rerun a 0004-0006 stage; primitives must reappear exactly
 python -m research.aaa_1k_loop reproduce diagnose2 # rerun a stage; committed primitives must reappear exactly
 ```
 
@@ -269,6 +286,8 @@ result, and this repository is built to report that rather than to avoid it.
 | [Loop protocol](docs/loop_protocol.md) | the pilot improvement loop, what enforces it, and its known gaps |
 | [Loop pilot report](docs/loop_pilot_report.md) | three iterations on AAA-1K, eight rejections, and an evaluation of the loop itself |
 | [Loop pilot handoff](docs/loop_pilot_handoff.md) | reproduction commands and what an independent reviewer should challenge |
+| [Loop iterations 0004–0006](docs/loop_report_0004_0006.md) | the audit response: TBPTT semantics, M2's mechanism, the first real confirmation, Champion 1 |
+| [Loop 0004–0006 handoff](docs/loop_0004_0006_handoff.md) | reproduction commands and what an independent reviewer should challenge |
 | [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
 | [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
 | [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |

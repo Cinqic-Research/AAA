@@ -1,0 +1,345 @@
+{
+  "architecture_id": "AAA1KGRU-3x16x2",
+  "capability_vector": {
+    "Q1_online_learning": {
+      "ci_high": 0.003599125141693297,
+      "ci_low": 0.003027991648436868,
+      "favours_first": 144,
+      "favours_second": 0,
+      "mean_difference": 0.0033079137573567385,
+      "median_difference": 0.0031497164878123976,
+      "streams": 144,
+      "verdict": "POSITIVE"
+    },
+    "Q2_adaptation": {
+      "ci_high": 0.0008666670821397387,
+      "ci_low": 0.00016889095282344988,
+      "favours_first": 15,
+      "favours_second": 9,
+      "mean_difference": 0.0005120513746349793,
+      "median_difference": 0.0006278569063396537,
+      "streams": 24,
+      "verdict": "POSITIVE"
+    },
+    "Q3_hidden_state_vs_state_reset": {
+      "ci_high": 0.00023142340129482107,
+      "ci_low": 0.00011587814683106048,
+      "favours_first": 38,
+      "favours_second": 10,
+      "mean_difference": 0.0001715052846201714,
+      "median_difference": 0.00013232363816586428,
+      "streams": 48,
+      "verdict": "POSITIVE"
+    },
+    "Q3_hidden_state_vs_stateless": {
+      "ci_high": 0.00037197350245934653,
+      "ci_low": 0.00021563385438624447,
+      "favours_first": 40,
+      "favours_second": 8,
+      "mean_difference": 0.00029070765102134097,
+      "median_difference": 0.000309050584662631,
+      "streams": 48,
+      "verdict": "POSITIVE"
+    },
+    "Q4_gating_all_families": {
+      "ci_high": 1.5721181046249353e-05,
+      "ci_low": -9.387051978731625e-05,
+      "favours_first": 113,
+      "favours_second": 31,
+      "mean_difference": -3.910305516642933e-05,
+      "median_difference": 5.424966781521063e-05,
+      "streams": 144,
+      "verdict": "INCONCLUSIVE"
+    },
+    "Q4_gating_memory_families": {
+      "ci_high": -0.0001018725539475653,
+      "ci_low": -0.0003560830876858803,
+      "favours_first": 24,
+      "favours_second": 24,
+      "mean_difference": -0.00023232663926489236,
+      "median_difference": -0.000207514080729716,
+      "streams": 48,
+      "verdict": "NEGATIVE"
+    },
+    "Q5_forgetting": {
+      "ci_high": 0.00012572597984547324,
+      "ci_low": -0.0006417536468928978,
+      "favours_first": 5,
+      "favours_second": 7,
+      "mean_difference": -0.0002024749791292492,
+      "median_difference": -4.091892914330296e-06,
+      "streams": 12,
+      "verdict": "INCONCLUSIVE"
+    },
+    "Q6_error_calibration": {
+      "bias_mean": 0.2343504645818408,
+      "cells_measured": 720,
+      "cells_with_monotone_bins": 112,
+      "spearman_mean": 0.4532255326024118
+    },
+    "Q7_baselines": {
+      "aba_v1": {
+        "constant_motion": "NEGATIVE",
+        "constant_motion_reflected": "NEGATIVE",
+        "dead_reckoning": "NEGATIVE",
+        "linear_fit": "POSITIVE",
+        "persistence": "POSITIVE",
+        "rls_online": "NEGATIVE"
+      },
+      "coarse_speed_v1": {
+        "constant_motion": "POSITIVE",
+        "constant_motion_reflected": "POSITIVE",
+        "dead_reckoning": "POSITIVE",
+        "linear_fit": "NEGATIVE",
+        "persistence": "POSITIVE",
+        "rls_online": "POSITIVE"
+      },
+      "motion_compat": {
+        "constant_motion": "NEGATIVE",
+        "constant_motion_reflected": "NEGATIVE",
+        "dead_reckoning": "NEGATIVE",
+        "linear_fit": "POSITIVE",
+        "persistence": "POSITIVE",
+        "rls_online": "NEGATIVE"
+      },
+      "occlusion_v1": {
+        "constant_motion": "POSITIVE",
+        "constant_motion_reflected": "POSITIVE",
+        "dead_reckoning": "NEGATIVE",
+        "linear_fit": "NEGATIVE",
+        "persistence": "POSITIVE",
+        "rls_online": "NEGATIVE"
+      }
+    }
+  },
+  "capability_vector_basis": "measured: round 3 re-run on its own identities with the reach-gated rule for every neural learner; every cell and trial not listed in round3_evidence equals the committed round 3 exactly",
+  "capability_vector_parent": {
+    "Q1_online_learning": {
+      "ci_high": 0.0035897690088720915,
+      "ci_low": 0.0030134690510009903,
+      "favours_first": 144,
+      "favours_second": 0,
+      "mean_difference": 0.0032986274816493005,
+      "median_difference": 0.0031497164878123976,
+      "streams": 144,
+      "verdict": "POSITIVE"
+    },
+    "Q2_adaptation": {
+      "ci_high": 0.0008666670821397387,
+      "ci_low": 0.00016889095282344988,
+      "favours_first": 15,
+      "favours_second": 9,
+      "mean_difference": 0.0005120513746349793,
+      "median_difference": 0.0006278569063396537,
+      "streams": 24,
+      "verdict": "POSITIVE"
+    },
+    "Q3_hidden_state_vs_state_reset": {
+      "ci_high": 0.00022303403594608144,
+      "ci_low": 2.6447804027368595e-05,
+      "favours_first": 36,
+      "favours_second": 12,
+      "mean_difference": 0.00014364645749785857,
+      "median_difference": 0.00013232363816586428,
+      "streams": 48,
+      "verdict": "POSITIVE"
+    },
+    "Q3_hidden_state_vs_stateless": {
+      "ci_high": 0.0003573599145100915,
+      "ci_low": 0.00015093072725569148,
+      "favours_first": 38,
+      "favours_second": 10,
+      "mean_difference": 0.00026284882389902815,
+      "median_difference": 0.000309050584662631,
+      "streams": 48,
+      "verdict": "POSITIVE"
+    },
+    "Q4_gating_all_families": {
+      "ci_high": 1.3151905715991445e-05,
+      "ci_low": -0.0001157626155754866,
+      "favours_first": 113,
+      "favours_second": 31,
+      "mean_difference": -4.838933087386695e-05,
+      "median_difference": 5.424966781521063e-05,
+      "streams": 144,
+      "verdict": "INCONCLUSIVE"
+    },
+    "Q4_gating_memory_families": {
+      "ci_high": -0.00010906029538121386,
+      "ci_low": -0.00042732352763255794,
+      "favours_first": 24,
+      "favours_second": 24,
+      "mean_difference": -0.0002601854663872052,
+      "median_difference": -0.000207514080729716,
+      "streams": 48,
+      "verdict": "NEGATIVE"
+    },
+    "Q5_forgetting": {
+      "ci_high": 0.00012572597984547324,
+      "ci_low": -0.0006417536468928978,
+      "favours_first": 5,
+      "favours_second": 7,
+      "mean_difference": -0.0002024749791292492,
+      "median_difference": -4.091892914330296e-06,
+      "streams": 12,
+      "verdict": "INCONCLUSIVE"
+    },
+    "Q6_error_calibration": {
+      "bias_mean": 0.23274913592731666,
+      "cells_measured": 720,
+      "cells_with_monotone_bins": 114,
+      "spearman_mean": 0.4540578827174217
+    },
+    "Q7_baselines": {
+      "aba_v1": {
+        "constant_motion": "NEGATIVE",
+        "constant_motion_reflected": "NEGATIVE",
+        "dead_reckoning": "NEGATIVE",
+        "linear_fit": "POSITIVE",
+        "persistence": "POSITIVE",
+        "rls_online": "NEGATIVE"
+      },
+      "coarse_speed_v1": {
+        "constant_motion": "POSITIVE",
+        "constant_motion_reflected": "POSITIVE",
+        "dead_reckoning": "INCONCLUSIVE",
+        "linear_fit": "NEGATIVE",
+        "persistence": "POSITIVE",
+        "rls_online": "POSITIVE"
+      },
+      "motion_compat": {
+        "constant_motion": "NEGATIVE",
+        "constant_motion_reflected": "NEGATIVE",
+        "dead_reckoning": "NEGATIVE",
+        "linear_fit": "POSITIVE",
+        "persistence": "POSITIVE",
+        "rls_online": "NEGATIVE"
+      },
+      "occlusion_v1": {
+        "constant_motion": "POSITIVE",
+        "constant_motion_reflected": "POSITIVE",
+        "dead_reckoning": "NEGATIVE",
+        "linear_fit": "NEGATIVE",
+        "persistence": "POSITIVE",
+        "rls_online": "NEGATIVE"
+      }
+    }
+  },
+  "champion_id": "aaa1k-champion-1",
+  "change": {
+    "agent_class": "research.aaa_1k_loop.unfolding.ReachGatedUnfoldAgent",
+    "agent_source": {
+      "path": "research/aaa_1k_loop/unfolding.py",
+      "sha256": "bfa1b5b3bc3da8019fbd479de0c2bb844ae60dfa50581ee66339db72bc87251e"
+    },
+    "rule": "refuse a mirrored unfolding branch when the input position is farther from the crossed wall than |velocity estimate| + |observed displacement|"
+  },
+  "known_limitations": [
+    "Q4 gating vs ungated control is INCONCLUSIVE overall and NEGATIVE on the memory families",
+    "Q4 mean and median disagree in sign; a minority of streams carries the aggregate",
+    "Q5 forgetting is INCONCLUSIVE; no forgetting measured on the fixed probe bank only",
+    "Q6 self-error head is weakly informative and over-predicts",
+    "Q7 comparisons are exploratory; loses to analytic baselines on smooth fully observed motion",
+    "occlusion missingness code (inputs 2 and 3 zero) is ambiguous with genuine stationarity",
+    "occlusion_v1 and coarse_speed_v1 were designed by the implementer whose model they evaluate",
+    "five initializations is a small second bootstrap level",
+    "TBPTT horizon barely matters on these benchmarks; the online rule is the live cached-activation rule, numerically within ~1e-4 of the realized-trajectory gradient (iteration 0004, H20)",
+    "M2 repair is verified on the tested quantized and smooth families at 1120 steps; other boundary geometries, noise and missing-observation patterns near walls are untested",
+    "the reach gate uses the tracker's one-step velocity estimate; streams where the previous displacement is unrepresentative of the next step (large accelerations at walls) are untested"
+  ],
+  "lineage_note": "Champion 0's network, weights initialization and hyperparameters, trained through the reach-gated unfolding target rule; research/aaa_1k and aaa.1k.v1 are unchanged",
+  "model_format": "aaa.1k.gru.v1",
+  "parameter_count": 994,
+  "parameter_count_parent": 994,
+  "parent_model_id": "aaa1k-champion-0",
+  "parent_record": {
+    "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+    "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+  },
+  "phase_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+  "promoted_by": {
+    "challenger": "c10",
+    "evidence": [
+      {
+        "path": "docs/evidence/aaa1k_loop_0006/development.json",
+        "sha256": "98339755d41d93766ddbfa95dd678134b51d669b4ed27bc441f9c5e3f1009cc1"
+      },
+      {
+        "path": "docs/evidence/aaa1k_loop_0006/attack.json",
+        "sha256": "11a82a4a8d25d7a6970ca8f4fecfaa1e40c51da5f44f8318e9e7265242c46900"
+      },
+      {
+        "path": "docs/evidence/aaa1k_loop_0006/freeze_2.json",
+        "sha256": "728f7a961990952a5d43ae48d84c0c42a00ab2f421e62f8e85c42a99d11012c4"
+      },
+      {
+        "path": "docs/evidence/aaa1k_loop_0006/confirmation_2.json",
+        "sha256": "5bf81dfe63f696861b7d63209a74fb14d936dae5674adaf91a867702759f9dcd"
+      },
+      {
+        "path": "docs/evidence/aaa1k_loop_0006/recomputation_2.json",
+        "sha256": "d17691326b1e7e46c44d6bb80eaaffba64dabaf8ba1902cee3b636f2591ba4f9"
+      }
+    ],
+    "iteration_id": "aaa1k-loop-0006",
+    "outcome": "PROMOTE"
+  },
+  "repaired": [
+    "M2 (long-horizon runaway on quantized streams): 0% divergence against Champion 0's 21.3% on fresh confirmation (1120-step coarse conditions)"
+  ],
+  "round3_evidence": {
+    "cells": 720,
+    "cells_changed": [
+      {
+        "cell": [
+          3,
+          "coarse_speed_v1:1457957002"
+        ],
+        "fields": [
+          "calibration",
+          "clip_events",
+          "clip_rate",
+          "last_quarter_mae",
+          "mae",
+          "q4_worst_steps"
+        ]
+      },
+      {
+        "cell": [
+          3,
+          "coarse_speed_v1:1958089674"
+        ],
+        "fields": [
+          "calibration",
+          "clip_events",
+          "clip_rate",
+          "last_quarter_mae",
+          "mae",
+          "q4_worst_steps"
+        ]
+      }
+    ],
+    "path": "docs/evidence/aaa1k_loop_0006/round3_champion_1.json",
+    "round3_identities_design_and_configuration_unchanged": true,
+    "sha256": "643bba1bda669c4b77e105cc799262d0dfe40f5dc991912f01f25212f6ec64a0",
+    "trials_changed": {
+      "q2_adaptation": [],
+      "q5_retention": []
+    }
+  },
+  "schema": "aaa.loop.champion.v1",
+  "selected_hyperparameters": {
+    "error_loss_weight": 0.25,
+    "gradient_clip": 10.0,
+    "learning_rate": 0.03,
+    "tbptt_steps": 4
+  },
+  "state_footprint": {
+    "hidden_state_scalars": 16,
+    "optimizer_state_scalars": 0,
+    "tbptt_buffer_scalars_capacity": 404,
+    "tbptt_buffer_scalars_current": 0,
+    "total_adaptive_state_scalars": 1414,
+    "trainable_parameters": 994
+  }
+}

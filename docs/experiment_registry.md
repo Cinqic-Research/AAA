@@ -82,3 +82,19 @@ replication budget had no quantitative precision justification. Those IDs must
 never be reactivated. A future formal pair requires a versioned,
 precision-justified protocol and fresh batch identities; its archives must be
 evaluated jointly so A/B do not receive separate multiplicity corrections.
+
+## AAA-1K loop identity registry
+
+The improvement loop has a separate identity state machine in
+`benchmarks/aaa1k_loop_identity_ledger.json`; it does not use the per-trial
+registry above. Every block records an iteration, role, namespace, range,
+lifecycle state and purpose. Blocks are mechanically disjoint from one another,
+from declared AAA-1K identities, and from identities found in retained AAA-1K
+evidence. Selection may use only diagnostic, development and attack blocks.
+Confirmation blocks are durably claimed through immutable
+`aaa-confirmation-claims/*` remote refs, marked spent before observation, and
+can never move backward or inform selection. A spent block records its
+observer; aborted attempt-1 identities remain spent even though no model cell
+was observed. See `docs/loop_protocol.md` for the current `aaa.loop.v1`
+governance and `docs/loop_report_0004_0006.md` for the first completed outer
+cycle.

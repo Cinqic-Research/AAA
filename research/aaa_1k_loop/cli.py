@@ -18,13 +18,139 @@ from typing import Any
 
 from research.aaa_1k.identity import git_provenance
 
-from . import LOOP_PROTOCOL_VERSION, PILOT_ITERATION_ID
+from . import HISTORICAL_PILOT_PROTOCOL_VERSION, PILOT_ITERATION_ID
 from .evidence import read_strict_json, write_strict_json
 from .identities import LEDGER_PATH, empty_ledger, load_ledger, prove_fresh, reserve, write_ledger
 
 EVIDENCE_DIR = Path("docs/evidence/aaa1k_loop_0001")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
+    {
+        "block_id": "aaa1k-loop-0006/development/all",
+        "iteration_id": "aaa1k-loop-0006",
+        "role": "development",
+        "namespace": "development_all",
+        "count": 64,
+        "purpose": "iteration 0006 screen of the last precommitted M2 candidate c10 (48 plan + 16 long seeds)",
+    },
+    {
+        "block_id": "aaa1k-loop-0006/attack/env",
+        "iteration_id": "aaa1k-loop-0006",
+        "role": "attack",
+        "namespace": "attack_env",
+        "count": 80,
+        "purpose": "iteration 0006 attack streams: 48 plan, 16 long-horizon, 16 nearby quantized",
+    },
+    {
+        "block_id": "aaa1k-loop-0006/attack/init",
+        "iteration_id": "aaa1k-loop-0006",
+        "role": "attack",
+        "namespace": "attack_init",
+        "count": 5,
+        "purpose": "iteration 0006 fresh model initializations for the attack",
+    },
+    {
+        "block_id": "aaa1k-loop-0005/development/all",
+        "iteration_id": "aaa1k-loop-0005",
+        "role": "development",
+        "namespace": "development_all",
+        "count": 64,
+        "purpose": "iteration 0005 screen of the one precommitted M2 candidate c9 (48 plan + 16 long seeds)",
+    },
+    {
+        "block_id": "aaa1k-loop-0005/attack/env",
+        "iteration_id": "aaa1k-loop-0005",
+        "role": "attack",
+        "namespace": "attack_env",
+        "count": 80,
+        "purpose": "iteration 0005 attack streams: 48 plan, 16 long-horizon, 16 nearby quantized",
+    },
+    {
+        "block_id": "aaa1k-loop-0005/attack/init",
+        "iteration_id": "aaa1k-loop-0005",
+        "role": "attack",
+        "namespace": "attack_init",
+        "count": 5,
+        "purpose": "iteration 0005 fresh model initializations for the attack",
+    },
+    {
+        "block_id": "aaa1k-loop-0004/development/all",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "development",
+        "namespace": "development_all",
+        "count": 64,
+        "purpose": "iteration 0004 screen of the two precommitted M2 candidates (48 plan + 16 long-horizon seeds)",
+    },
+    {
+        "block_id": "aaa1k-loop-0004/attack/env",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "attack",
+        "namespace": "attack_env",
+        "count": 80,
+        "purpose": "iteration 0004 attack streams: 48 plan, 16 long-horizon, 16 nearby quantized",
+    },
+    {
+        "block_id": "aaa1k-loop-0004/attack/init",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "attack",
+        "namespace": "attack_init",
+        "count": 5,
+        "purpose": "iteration 0004 fresh model initializations for the attack",
+    },
+    {
+        "block_id": "aaa1k-loop-0004/diagnostic/unfold",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_unfold",
+        "count": 16,
+        "purpose": (
+            "iteration 0004 round 4 (audit R-01, M2): target-unfolding frame lock, declared after a disclosed "
+            "post-hoc look at round 3; hypotheses H32-H34 declared first"
+        ),
+    },
+    {
+        "block_id": "aaa1k-loop-0004/diagnostic/overshoot",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_overshoot",
+        "count": 16,
+        "purpose": (
+            "iteration 0004 round 3 (audit R-01, M2): single-step SGD overshoot, declared after round 2 "
+            "falsified the loop-gain hypothesis; hypotheses H29-H31 declared first"
+        ),
+    },
+    {
+        "block_id": "aaa1k-loop-0004/diagnostic/gain",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_gain",
+        "count": 16,
+        "purpose": (
+            "iteration 0004 round 2 (audit R-01, M2): closed-loop gain of the previous-error channel; "
+            "hypotheses H24-H28 declared first"
+        ),
+    },
+    {
+        "block_id": "aaa1k-loop-0004/diagnostic/scratch",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_scratch",
+        "count": 8,
+        "purpose": (
+            "iteration 0004 scratch: instrument shakedown only (does it run, how long); never cited as evidence"
+        ),
+    },
+    {
+        "block_id": "aaa1k-loop-0004/diagnostic/tbptt",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_tbptt",
+        "count": 64,
+        "purpose": (
+            "iteration 0004 round 1 (audit R-02): online TBPTT update rules on 16 long-horizon seeds "
+            "x 4 conditions and 8 streams per standard plan entry; hypotheses H20-H23 declared first"
+        ),
+    },
     {
         "block_id": "aaa1k-loop-0003/attack-2/env",
         "iteration_id": "aaa1k-loop-0003",
@@ -137,7 +263,7 @@ def _ledger_path(root: Path) -> Path:
 def _stamp(payload: dict[str, Any], root: Path, started: float) -> dict[str, Any]:
     return {
         **payload,
-        "loop_protocol_version": LOOP_PROTOCOL_VERSION,
+        "loop_protocol_version": HISTORICAL_PILOT_PROTOCOL_VERSION,
         "iteration_id": PILOT_ITERATION_ID,
         "git": git_provenance(root),
         "compute_seconds": time.perf_counter() - started,
@@ -590,9 +716,13 @@ def command_recompute3(args: argparse.Namespace) -> int:
 
 def command_records(_args: argparse.Namespace) -> int:
     from .records import RECORDS
+    from .records4 import RECORDS_POST_AUDIT
 
     root = project_root()
     for iteration_id, (builder, path) in RECORDS.items():
+        write_strict_json(root / path, builder(root))
+        print(f"{iteration_id}: {path}")
+    for iteration_id, (builder, path, _decide) in RECORDS_POST_AUDIT.items():
         write_strict_json(root / path, builder(root))
         print(f"{iteration_id}: {path}")
     return 0
@@ -605,12 +735,17 @@ def command_validate(_args: argparse.Namespace) -> int:
     from .decision import decide
     from .iteration import IterationError, validate_iteration
     from .records import RECORDS
+    from .records4 import RECORDS_POST_AUDIT
 
     root = project_root()
     failures = 0
-    for iteration_id, (_builder, path) in RECORDS.items():
+    entries: list[tuple[str, str, Any]] = [
+        (iteration_id, path, decide) for iteration_id, (_builder, path) in RECORDS.items()
+    ]
+    entries += [(iteration_id, path, fn) for iteration_id, (_builder, path, fn) in RECORDS_POST_AUDIT.items()]
+    for iteration_id, path, decision in entries:
         try:
-            result = validate_iteration(read_strict_json(root / path), root, decide=decide)
+            result = validate_iteration(read_strict_json(root / path), root, decide=decision)
             print(
                 f"{iteration_id}: {result['status']} {' -> '.join(result['states'])} outcome={result['outcome']}"
             )

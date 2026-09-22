@@ -189,16 +189,32 @@ then eliminated by the stability margin are in `stage_one_eliminated` with
 their scores intact, which is the only way a reader can check what the rule
 cost.
 
-## AAA-1K improvement-loop pilot
+## AAA-1K improvement loop
 
-Each loop stage writes one strict-JSON artifact under
+The original v0 pilot (iterations 0001--0003) writes strict-JSON artifacts under
 `docs/evidence/aaa1k_loop_000N/`, holding the per-cell primitives its verdicts
 are computed from, and each iteration has a record (`iteration.json`) that
 references its artifacts by SHA-256. Together they are about 6 MB, most of it
 diagnosis round 1 (2 MB) and the first attack (0.7 MB). Failed and rejected
 candidates are kept on the same terms as anything else: they are most of the
-evidence. Per-step traces are not committed; every stage is deterministic and
-`python -m research.aaa_1k_loop reproduce <stage>` regenerates it and requires
-every committed value to reappear exactly. The identity ledger,
+evidence. Per-step traces are not committed; the historical pilot's
+`python -m research.aaa_1k_loop reproduce <stage>` path retains its original
+exact comparison.
+
+Iterations 0004--0006 add roughly 27 MB because the retained diagnostic,
+screen, attack and confirmation primitives support independent adjudication of
+TBPTT semantics, two falsified M2 explanations, the frame-lock mechanism and
+the first promotion. These observed artifacts, including the aborted attempt-1
+record and the original `recomputation_2.json`, are immutable. The current
+`recompute4` path is stricter than that historical recomputation artifact and
+compares underlying numbers as well as statuses.
+
+`python -m research.aaa_1k_loop.stages4 reproduce <stage>` reproduces the nine
+post-audit stages. `--exact` requires bitwise agreement on the matching Zen 3
+evidence platform. Default cross-platform reproduction requires the same cell
+identities, structure, divergence classifications and adjudicated verdicts,
+and reports numerical drift in chaotic/diverged trajectories (`AAA-173`).
+This distinction does not weaken artifact hashes: stored evidence bytes remain
+bound by SHA-256. The identity ledger,
 `benchmarks/aaa1k_loop_identity_ledger.json`, is append-only in the sense that
 matters: blocks never overlap and a spent block never becomes usable again.

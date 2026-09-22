@@ -1,0 +1,20 @@
+{
+  "attempt": 1,
+  "blocks_spent": [
+    "aaa1k-loop-0006/confirmation/env",
+    "aaa1k-loop-0006/confirmation/init"
+  ],
+  "consequence": "The two blocks stay spent and are never reused, although unobserved. The admission defect is fixed with a test; a new freeze reserves new confirmation blocks for the unchanged challenger, claim and rules.",
+  "failure": "IdentityError raised by iteration6.confirmation_cells: it re-checked the blocks with require_usable(purpose='confirmation'), which demands status 'reserved', after command_confirm had correctly marked them 'spent' (spent-before-run rule). Raised before the first cell was constructed: no stream was generated, no model was run, no primitive or statistic exists.",
+  "freeze": {
+    "commit": "f1f19daf5b0d715e603d001d46d1944dd327f9e5",
+    "path": "docs/evidence/aaa1k_loop_0006/freeze.json"
+  },
+  "iteration": "aaa1k-loop-0006",
+  "outcome": "ABORTED_BEFORE_OBSERVATION",
+  "remote_claims": [
+    "83cc3b6f8c0ed80322248191e85a59296eac7c0f\trefs/heads/aaa-confirmation-claims/aaa1k-loop-0006-confirmation-env",
+    "0e043e6fa5e15f4440fd8016acae35aaf6236bef\trefs/heads/aaa-confirmation-claims/aaa1k-loop-0006-confirmation-init"
+  ],
+  "schema": "aaa.loop.confirmation_attempt.v1"
+}

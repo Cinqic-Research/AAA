@@ -12,7 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from . import LOOP_PROTOCOL_VERSION
+from . import HISTORICAL_PILOT_PROTOCOL_VERSION
 from .evidence import read_strict_json
 from .iteration import ITERATION_SCHEMA, artifact_entry
 
@@ -69,7 +69,7 @@ def record_0001(root: Path) -> dict[str, Any]:
     return {
         "schema": ITERATION_SCHEMA,
         "iteration_id": "aaa1k-loop-0001",
-        "loop_protocol_version": LOOP_PROTOCOL_VERSION,
+        "loop_protocol_version": HISTORICAL_PILOT_PROTOCOL_VERSION,
         "parent_champion": _parent(root),
         "problem": (
             "Round 3 Q4 (ungated minus gated error) is INCONCLUSIVE with its mean and median disagreeing in "
@@ -198,7 +198,7 @@ def record_0002(root: Path) -> dict[str, Any]:
     return {
         "schema": ITERATION_SCHEMA,
         "iteration_id": "aaa1k-loop-0002",
-        "loop_protocol_version": LOOP_PROTOCOL_VERSION,
+        "loop_protocol_version": HISTORICAL_PILOT_PROTOCOL_VERSION,
         "parent_champion": _parent(root),
         "parent_iteration": "aaa1k-loop-0001 (REJECTED); this iteration starts from its resulting state",
         "problem": (
@@ -295,7 +295,7 @@ def record_0003(root: Path) -> dict[str, Any]:
     return {
         "schema": ITERATION_SCHEMA,
         "iteration_id": "aaa1k-loop-0003",
-        "loop_protocol_version": LOOP_PROTOCOL_VERSION,
+        "loop_protocol_version": HISTORICAL_PILOT_PROTOCOL_VERSION,
         "parent_champion": _parent(root),
         "parent_iteration": "aaa1k-loop-0002 (REJECTED)",
         "problem": (

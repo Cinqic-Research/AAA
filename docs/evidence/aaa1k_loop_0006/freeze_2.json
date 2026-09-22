@@ -1,0 +1,312 @@
+{
+  "attack_evidence": {
+    "path": "docs/evidence/aaa1k_loop_0006/attack.json",
+    "sha256": "11a82a4a8d25d7a6970ca8f4fecfaa1e40c51da5f44f8318e9e7265242c46900"
+  },
+  "champion_phase_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+  "champion_record": {
+    "path": "docs/evidence/aaa1k_loop_0001/champion_0.json",
+    "sha256": "eee40268c3b94d9ae102761c54a1470d67642540cf098e8fd1b301d9b0d6c9fe"
+  },
+  "confirmation_blocks": {
+    "aaa1k-loop-0006/confirmation-2/env": {
+      "count": 112,
+      "iteration": "aaa1k-loop-0006",
+      "namespace": "confirmation_env_2",
+      "role": "confirmation",
+      "seed_list_sha256": "7e05e243de6bb1b90da29c694ee42144c0bba698b9a3b75b0c3444460ec85ecf",
+      "start": 0
+    },
+    "aaa1k-loop-0006/confirmation-2/init": {
+      "count": 5,
+      "iteration": "aaa1k-loop-0006",
+      "namespace": "confirmation_init_2",
+      "role": "confirmation",
+      "seed_list_sha256": "0c0275b9b8c214efd24da92a8d25e53c00a19b501847ff2c934f6d52f07ed1b6",
+      "start": 0
+    }
+  },
+  "confirmation_source_fingerprint": {
+    "file_count": 49,
+    "files": {
+      "aaa/__init__.py": {
+        "executable": false,
+        "sha256": "15d052694b6e087294345b9bd5532208791d9ef2e64760f19938d3a14e63cf3e"
+      },
+      "aaa/config.py": {
+        "executable": false,
+        "sha256": "c2b43898d73bfbf92c8bc1eb74a0ec50610f28f8d15512172ef25507eaef6592"
+      },
+      "aaa/environment.py": {
+        "executable": false,
+        "sha256": "cfc037c51e58a2da6558eb1c8df511272b2dfade78db4d63b998f7cd9a2ce356"
+      },
+      "aaa/noise/reservation.py": {
+        "executable": false,
+        "sha256": "80dfb2b48a54c64ab379998702b3615cc96ca79b884b05832926c7e261c67f5a"
+      },
+      "aaa/predictors.py": {
+        "executable": false,
+        "sha256": "6337a672d41174a1197fb4ba7aaee9ecf6b6e53d8cb0147db1473399e3a649da"
+      },
+      "docs/aaa_1k_architecture.md": {
+        "executable": false,
+        "sha256": "31684ac149e46ef4eb33c663f9de1d19321a23c4ff60f93c12db024542a3166a"
+      },
+      "docs/aaa_1k_decisions.md": {
+        "executable": false,
+        "sha256": "2435319c90ad4ac4231c36f7b4d88e3b66bea77cb3d0a1c5347feece155e6539"
+      },
+      "docs/aaa_1k_literature_review.md": {
+        "executable": false,
+        "sha256": "368d150d83eb6a026e8664c516d42f7affffc8146e971090ee0fb290ec79dcb5"
+      },
+      "docs/aaa_charter.md": {
+        "executable": false,
+        "sha256": "e60a593d69feae57fcea95966a252bc6bc963b2ae773d29ceebfe7a4a69ee370"
+      },
+      "requirements-lock.txt": {
+        "executable": false,
+        "sha256": "2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6"
+      },
+      "research/__init__.py": {
+        "executable": false,
+        "sha256": "c48d3ec4408522b445139f4d7859aa5e8d02ef748a2516969bc737d60b1d32a3"
+      },
+      "research/aaa_1k/__init__.py": {
+        "executable": false,
+        "sha256": "60eee91f9708c86dd22462da2ee6053c9fec9dd70e73eb8cfb8678e4eec8ec9a"
+      },
+      "research/aaa_1k/__main__.py": {
+        "executable": false,
+        "sha256": "4869f6c0e96dca7afee627c40db65f1531e8bb5646c0bf79255e0e20ced03dbb"
+      },
+      "research/aaa_1k/adversarial.py": {
+        "executable": false,
+        "sha256": "8447580564795b4f84af3c06cdc753ec4e8b64ccc867718c2055ec0b49a93144"
+      },
+      "research/aaa_1k/agents.py": {
+        "executable": false,
+        "sha256": "6958a846bad2a999cc6b268b420a55ef9c916a8ae6c318438f25efcdf79ef60a"
+      },
+      "research/aaa_1k/characterization.py": {
+        "executable": false,
+        "sha256": "ca2da3e746ca03d60f90d7c6a6c525e60ac80b0bd582081b0721614d7c0b0bfe"
+      },
+      "research/aaa_1k/cli.py": {
+        "executable": false,
+        "sha256": "27946dee1a072abe2c63e55415d2df2025d9bb7ba585f50c0338b5b7113978ef"
+      },
+      "research/aaa_1k/controls.py": {
+        "executable": false,
+        "sha256": "cbac0171f93523b5d4c0816afa9fbf710c1d9d3d219449e40d3a70832d03d257"
+      },
+      "research/aaa_1k/experiments.py": {
+        "executable": false,
+        "sha256": "d58fa36897663d413577e76860f5f945208e6bddcb90fa32dd52c298f0b632e7"
+      },
+      "research/aaa_1k/features.py": {
+        "executable": false,
+        "sha256": "ebc6395b4b5773dd7527aec88f1a4ba00bce45bc8e191cb0c889c8cafda0f695"
+      },
+      "research/aaa_1k/gradcheck.py": {
+        "executable": false,
+        "sha256": "8233a7c8768a44ebf14b7b75ed374bf202b26236c8511ea12385a7a6b5922047"
+      },
+      "research/aaa_1k/identity.py": {
+        "executable": false,
+        "sha256": "6d5ce84b27467dd9b5aeeec1f5297c9db854e81cc71cc926b674d207df2c1ab8"
+      },
+      "research/aaa_1k/measurements.py": {
+        "executable": false,
+        "sha256": "773d73023365267719503cd43a7fd6452c886458ba6d6c17f6a3fe8de2521342"
+      },
+      "research/aaa_1k/model.py": {
+        "executable": false,
+        "sha256": "49afdb58e7c7920fa64aecf3eacf3e55370f433e14b9f1ae769dde95aed5e65f"
+      },
+      "research/aaa_1k/report.py": {
+        "executable": false,
+        "sha256": "16f4b3703cecff38813a87812f044865d06995974c758f8697c79a93cef36e32"
+      },
+      "research/aaa_1k/round2.py": {
+        "executable": false,
+        "sha256": "6f09edc8f8361db08ec9f8b21dcd2b12171fcbd6f661547f33eb2adc1be41ecb"
+      },
+      "research/aaa_1k/round3.py": {
+        "executable": false,
+        "sha256": "e1f860a94a147c318adf9ae23daa591d253af2a3b8e1f9baeb7f96c4bfa14256"
+      },
+      "research/aaa_1k/runner.py": {
+        "executable": false,
+        "sha256": "e6ac3a3c9697785d5bf53fb5fc349b0c7c18d702db0ce9ef1a50e66ce97d40ab"
+      },
+      "research/aaa_1k/seeds.py": {
+        "executable": false,
+        "sha256": "2da2c7ea979717f1bc56d95f4ea8930254b02cb37ca6f53b0f2089047ee6ec31"
+      },
+      "research/aaa_1k/selection.py": {
+        "executable": false,
+        "sha256": "c23213042bdbc18aab944ecdcb617ff15f4398916113d6d7e5931b300ad658be"
+      },
+      "research/aaa_1k/stats.py": {
+        "executable": false,
+        "sha256": "2534d002938bd098b9c160bc62e34f6ef2583abca059987c42dce7f1fe38dcc8"
+      },
+      "research/aaa_1k/streams.py": {
+        "executable": false,
+        "sha256": "5d378757adb3f7029a0fa221aa91c9a98e32e8d0f1369577eb38255b01852031"
+      },
+      "research/aaa_1k/visualize.py": {
+        "executable": false,
+        "sha256": "c1f89b4177d5891537902b9cc9b453d5f99b2875e4b0c516d404e4790721053e"
+      },
+      "research/aaa_1k_loop/__init__.py": {
+        "executable": false,
+        "sha256": "a2838dbd4b7e9ddfb5e6b2ff03cf4808bb031759b8dfc9801c31f3514cfb9271"
+      },
+      "research/aaa_1k_loop/arms.py": {
+        "executable": false,
+        "sha256": "50bfa6619ebacdac2f5934744a4cbcc65248e91b4280563e5181f809d5f80751"
+      },
+      "research/aaa_1k_loop/bounded.py": {
+        "executable": false,
+        "sha256": "72bbf44a160dcb104e18eb28dd5db1eb00276766faa06dd31d0afde1327830ad"
+      },
+      "research/aaa_1k_loop/challengers.py": {
+        "executable": false,
+        "sha256": "4171b7c5aae5b3f34d871edc5f8967ec09107af97441de36efc982884bce76d2"
+      },
+      "research/aaa_1k_loop/develop.py": {
+        "executable": false,
+        "sha256": "e014f8260217ac0fc7940791a76b5018d067470003e61c2511bf11c4de3d6d38"
+      },
+      "research/aaa_1k_loop/dynamics.py": {
+        "executable": false,
+        "sha256": "538e3e6891e9d813b1aff6a350a905b24bfc050589419444fb098fd41069bd4b"
+      },
+      "research/aaa_1k_loop/evidence.py": {
+        "executable": false,
+        "sha256": "ba3d85684a0072f6fa548a75e6e475f96d3e2d78cc4fa813c4c34d231d0e7b33"
+      },
+      "research/aaa_1k_loop/freeze.py": {
+        "executable": false,
+        "sha256": "f2f454c450a29938c4e4cbf33d94dacd318775b0a27fc32cb7885288d046e7fb"
+      },
+      "research/aaa_1k_loop/harness.py": {
+        "executable": false,
+        "sha256": "567b2bcb7731758b06db4c6a4fbcbec249affacb9d14504bb744c7c0e1a51553"
+      },
+      "research/aaa_1k_loop/identities.py": {
+        "executable": false,
+        "sha256": "b0308dc01a967b37f708096a05381ca042cf77bf70dfd38fea04aa257734cfc0"
+      },
+      "research/aaa_1k_loop/iteration4.py": {
+        "executable": false,
+        "sha256": "342fbc15f7847be846da24edfe02ec1ddd75e6f41c791754734e9641c4d6c6b9"
+      },
+      "research/aaa_1k_loop/iteration5.py": {
+        "executable": false,
+        "sha256": "0af4958b32cf850858d58514eb8201c68e96b786f710da680e91dbb12ee822f3"
+      },
+      "research/aaa_1k_loop/iteration6.py": {
+        "executable": false,
+        "sha256": "87fa389a8af4a5692c2498d3724226f147a62c6fb3325e25272d8756718fa50a"
+      },
+      "research/aaa_1k_loop/outer6.py": {
+        "executable": false,
+        "sha256": "c7d5844ff982f542652fe546252a61eb8ffa2c813d1b85f1268e6c173eb14f60"
+      },
+      "research/aaa_1k_loop/unfolding.py": {
+        "executable": false,
+        "sha256": "bfa1b5b3bc3da8019fbd479de0c2bb844ae60dfa50581ee66339db72bc87251e"
+      },
+      "tests/test_aaa_1k.py": {
+        "executable": false,
+        "sha256": "8cec2803083d29ac567481acec0cb6861ec90994964b8046c0005625c4135224"
+      }
+    },
+    "sha256": "83f363b3dabc3ec932156038fd17ab7585a51c48c44bde90db9245642f1b80aa"
+  },
+  "freshness_proof": {
+    "aaa1k_declared_seed_count": 499927,
+    "aaa1k_evidence_files": [
+      "docs/evidence/aaa_1k_adversarial_probes.json",
+      "docs/evidence/aaa_1k_characterization.json",
+      "docs/evidence/aaa_1k_development_selection.json",
+      "docs/evidence/aaa_1k_evaluation_round1_superseded.json",
+      "docs/evidence/aaa_1k_evaluation_round2_superseded.json",
+      "docs/evidence/aaa_1k_evaluation_round3.json"
+    ],
+    "aaa1k_evidence_seed_count": 569,
+    "aaa1k_index_horizon": 100000,
+    "aaa1k_namespaces": [
+      "model_init",
+      "development_env",
+      "evaluation_env",
+      "benchmark_generation",
+      "bootstrap"
+    ],
+    "intersections": {
+      "declared": 0,
+      "evidence": 0,
+      "within_ledger": 0
+    },
+    "loop_blocks": 31,
+    "loop_seed_count": 1213,
+    "status": "DISJOINT"
+  },
+  "frozen": {
+    "challenger": {
+      "arm": "c10_reach_gated_unfold",
+      "change": "keep the champion's unfolding but refuse a mirrored branch when the input position is farther from the crossed wall than the previous displacement plus the observed displacement",
+      "id": "c10",
+      "sentence": "this change should remove M2 because a frame lock mirrors targets after the input has moved out of reach of the wall (H32-H34), while the champion's short post-bounce mirror runs, which 0005 showed are useful on smooth motion, start within reach and are kept"
+    },
+    "champion": "aaa1k-champion-0",
+    "claim": "Champion 0 with c10 (keep the champion's unfolding but refuse a mirrored branch when the input position is farther from the crossed wall than the previous displacement plus the observed displacement) removes the long-horizon runaway M2 without regressing any round-3 standard family or long-horizon non-coarse condition by more than the margin",
+    "consequence": "PROMOTE makes the challenger Champion 1 (same network, same 994 parameters, same state; one target-construction change). REJECT keeps Champion 0 and M2 open. INCONCLUSIVE keeps Champion 0 and records that fresh evidence did not resolve the claim; the spent identities are not reused.",
+    "iteration": "aaa1k-loop-0006",
+    "rules": {
+      "bootstrap_indices": {
+        "k1": 480,
+        "k2": [
+          482,
+          483
+        ],
+        "k3_start": 490
+      },
+      "confirmation_design": {
+        "initializations": 5,
+        "long_conditions": [
+          "long:coarse_no_switch",
+          "long:coarse_switching",
+          "long:bouncing",
+          "long:occlusion"
+        ],
+        "long_seeds": 16,
+        "long_steps": 1120,
+        "per_entry": 16
+      },
+      "divergence_factor": 2.0,
+      "k1": {
+        "fail": "ci_high <= 0 or fraction > 0.20",
+        "pass": "ci_low > 0 and challenger fraction <= 0.05"
+      },
+      "k2": {
+        "fail": "relative ci_low > margin or challenger divergences > champion's + 2",
+        "pass": "relative ci_high <= margin and challenger divergences <= champion's"
+      },
+      "k3": {
+        "fail": "relative ci_low > margin",
+        "pass": "relative ci_high <= margin"
+      },
+      "margin": 0.02,
+      "outcome": "PROMOTE iff all PASS; REJECT if any FAIL; else INCONCLUSIVE",
+      "shared_with": "aaa1k-loop-0004 (identical functions, imported)"
+    }
+  },
+  "frozen_at": "2026-09-22T03:23:35Z",
+  "frozen_sha256": "7ada20f9d600031edcb71bbaac555d2a2e3c1c3dec30b56fcbc5bed9cf6e45b4",
+  "schema": "aaa.loop.freeze.v1"
+}
