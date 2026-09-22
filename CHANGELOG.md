@@ -1,5 +1,15 @@
 # Research history
 
+## aaa.loop.v1 — independent review and governance transition (2026-09-22)
+
+- Independently verified iteration 0006's freeze, fresh identities,
+  confirmation primitives, decision, Champion 1 record, round-3 replay and
+  platform-scoped reproduction policy.
+- Promoted only the current governance version. Every iteration-0001--0006
+  artifact remains immutable and labelled `aaa.loop.v0-pilot`.
+- Reconciled current protocol, reproduction, registry, evidence-policy and
+  tracked-file-audit documentation after the first real outer cycle.
+
 ## Loop iterations 0004–0006 — audit response and Champion 1 (2026-09-22)
 
 Answers the first four steps of the 2026-09-21 external research audit.
@@ -29,8 +39,9 @@ Answers the first four steps of the 2026-09-21 external research audit.
   defect (`AAA-171`). The identities were burned, not reused. The defect is
   fixed with an end-to-end outer-path test.
 - **Open:** `AAA-172` (the v2.1 RLS learner uses the same own-prediction
-  unfolding), M1, and audit items R-05 to R-13. The protocol stays `v0-pilot`
-  pending independent review.
+  unfolding), M1, and audit items R-05 to R-11. R-12 is satisfied for this
+  work; R-13 and R-14 are closed by the independent review and refreshed
+  tracked-file audit.
 
 ## PR #19 independent final review remediation (2026-09-21)
 

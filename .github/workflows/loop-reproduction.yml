@@ -2,9 +2,10 @@ name: Loop full-stage reproduction
 
 # Routine CI replays only the loop's observation stage and re-adjudicates the
 # post-audit verdicts from stored records. This job re-runs the models for
-# every iteration 0004-0006 stage and requires the committed primitives to
-# reappear exactly (audit R-12): weekly, on demand, and whenever code that can
-# change a primitive changes.
+# every iteration 0004-0006 stage. It requires bitwise identity in --exact
+# mode on the evidence platform and identity/structure/verdict identity in the
+# default cross-platform mode (AAA-173): weekly, on demand, and whenever code
+# or retained evidence capable of changing a verdict changes.
 on:
   schedule:
     - cron: '17 5 * * 1'
@@ -18,6 +19,10 @@ on:
       - 'research/aaa_1k/**'
       - 'research/aaa_1k_loop/**'
       - 'benchmarks/aaa1k_loop_identity_ledger.json'
+      - 'docs/evidence/aaa1k_loop_0004/**'
+      - 'docs/evidence/aaa1k_loop_0005/**'
+      - 'docs/evidence/aaa1k_loop_0006/**'
+      - '.github/workflows/loop-reproduction.yml'
       - 'requirements-lock.txt'
 
 permissions:

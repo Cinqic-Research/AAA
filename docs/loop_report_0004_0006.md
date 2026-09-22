@@ -1,7 +1,9 @@
 # Loop iterations 0004–0006: the audit's first four steps
 
-**Branch** `opus/audit-tbptt-semantics` · **Protocol** `aaa.loop.v0-pilot` (see
-[§8](#8-what-this-means-for-the-protocol)) · **Date** 2026-09-21/22 (UTC)
+**Branch** `opus/audit-tbptt-semantics` · **Artifact protocol**
+`aaa.loop.v0-pilot` · **Current governance after independent review**
+`aaa.loop.v1` (see [§8](#8-what-this-means-for-the-protocol)) · **Date**
+2026-09-21/22 (UTC)
 
 This report answers the external research audit of 2026-09-21
 (`AAA_Research_Audit_2026-09-21.md`, reviewing `main` at `daea2ff`). The audit's
@@ -243,8 +245,10 @@ verified by [`champion1.py`](../research/aaa_1k_loop/champion1.py):
   that can alter a primitive. It is bit-identical on Zen 3 CPUs, the
   evidence platform included (`--exact`). On Zen 4 / AVX-512 runners, long
   and diverged trajectories drift numerically (`AAA-173`), so CI gates on
-  identities and verdicts, which must be identical, and reports the drift. R-13 applies to this branch: it was written
-  by one implementer and needs a fresh reviewer.
+  identities and verdicts, which must be identical, and reports the drift.
+  R-13 was closed by the independent PR #20 review recorded in
+  `pr20_independent_review.md`; R-14 was closed by regenerating and
+  mechanically checking `final_audit.md` on the final candidate.
 * **Horizon.** M2's repair is verified at 1120 steps on the tested families.
   Other wall geometries, noise, missing observations near walls, and large
   accelerations at walls are untested.
@@ -254,9 +258,10 @@ verified by [`champion1.py`](../research/aaa_1k_loop/champion1.py):
 The outer path has now run once, for real, and it caught a real defect in
 itself. A crash between claim and observation burned identities rather than
 reusing them, exactly as designed. I recommend `aaa.loop.v1` after an
-independent review of this branch (audit R-13). The version string stays
-`v0-pilot` until then, because a promotion the implementer reviews alone is
-the collapse R-13 warns about.
+independent review of this branch (audit R-13). That review passed, so the
+current governance version is `aaa.loop.v1`. The observed iteration records,
+freezes and confirmation evidence remain `aaa.loop.v0-pilot`; the version
+transition does not rewrite their identity.
 
 For v1, generalize the outer machinery only as far as this use showed.
 `outer4/5/6` are copies differing only in their spec, and `recompute4` is

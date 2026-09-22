@@ -1,12 +1,14 @@
-# The AAA improvement loop — protocol `aaa.loop.v0-pilot`
+# The AAA improvement loop — protocol `aaa.loop.v1`
 
-> **Status: pilot, not permanent.** This protocol was run once, as three
-> iterations on AAA-1K, in the PR titled *Birth of The Loop*. Nothing it
-> produced passed attack, so its outer (promotion) loop has only been exercised
-> by failure-injection tests, never on real confirmation evidence. It earns
-> `v1` only after independent review and at least one real cycle through fresh
-> confirmation. What the pilot showed about the protocol itself is in
-> [`loop_pilot_report.md`](loop_pilot_report.md#evaluating-the-loop).
+> **Status: independently reviewed v1 governance.** Iterations 0001--0003 were
+> the `aaa.loop.v0-pilot` run described in
+> [`loop_pilot_report.md`](loop_pilot_report.md#evaluating-the-loop); nothing
+> in that historical pilot passed attack. Iteration 0006 later completed the
+> first real freeze → durable claim → fresh confirmation → independent
+> recomputation → promotion cycle, including a safely burned pre-observation
+> attempt. Independent review of that cycle earned `aaa.loop.v1`. Historical
+> records keep their recorded `aaa.loop.v0-pilot` identity; v1 is the protocol
+> for future work, not a relabeling of old evidence.
 
 ## The loop
 
@@ -96,9 +98,13 @@ disagrees with the counted arrays.
 * primitives and interpretation are kept apart: stage artifacts hold per-cell
   primitives; iteration records hold narrative and reference artifacts by
   SHA-256;
-* `python -m research.aaa_1k_loop reproduce <stage>` reruns a stage and
-  requires every committed value to reappear exactly (only provenance and
-  wall-clock fields are exempt; fields added by later code are reported);
+* the historical pilot command `python -m research.aaa_1k_loop reproduce
+  <stage>` retains its original exact comparison; post-audit stages use
+  `python -m research.aaa_1k_loop.stages4 reproduce <stage>`;
+* post-audit reproduction is bitwise under `--exact` on the matching Zen 3
+  evidence platform; the default cross-platform mode requires identical
+  identities, structure, divergence classifications and adjudicated verdicts
+  while reporting numerical drift in chaotic trajectories (`AAA-173`);
 * historical evidence is never rewritten.
 
 ## Capacity is an experiment, not a reward

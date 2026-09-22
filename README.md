@@ -138,7 +138,7 @@ The full result is [`docs/aaa_1k_report.md`](docs/aaa_1k_report.md); read
 where the four repairs come from -- including the one that would otherwise have
 published a hidden-state advantage thirty times too large.
 
-## The improvement loop (pilot)
+## The improvement loop
 
 `research/aaa_1k_loop/` pilots the process by which AAA is supposed to get
 better: observe a measured weakness, classify it, diagnose it, state competing
@@ -147,12 +147,12 @@ intervention, confirm on fresh evidence, decide, preserve everything, repeat.
 Development and confirmation evidence are separated mechanically, not by
 convention.
 
-Its first run, on AAA-1K's Q4 result, **promoted nothing**: eight candidates,
+Its historical v0 pilot, on AAA-1K's Q4 result, **promoted nothing**: eight candidates,
 eight rejections, Champion 0 unchanged. It reclassified Q4's "minority tail"
 as one benchmark family, supported a mechanism for it, found a long-horizon
 instability round 3 never measured, and flagged a documented claim as
-unsupported. It never reached fresh confirmation, and the protocol is not yet
-permanent. Read [`docs/loop_pilot_report.md`](docs/loop_pilot_report.md).
+unsupported. It never reached fresh confirmation. Read
+[`docs/loop_pilot_report.md`](docs/loop_pilot_report.md).
 
 Iterations 0004–0006 answered an external audit. The online TBPTT rule is an
 approximation, but a numerically negligible one. The long-horizon runaway (M2)
@@ -164,6 +164,8 @@ network with one target rule changed, 21% → 0% long-horizon divergence, and
 bitwise identical to Champion 0 in 718 of 720 round-3 cells (the other two
 improve). This was the loop's first real run through its outer path. Read
 [`docs/loop_report_0004_0006.md`](docs/loop_report_0004_0006.md).
+Independent review of that complete cycle established `aaa.loop.v1` for
+future work. The version change does not relabel the retained v0 artifacts.
 
 ## The learner
 

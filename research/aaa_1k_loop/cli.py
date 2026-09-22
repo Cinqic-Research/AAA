@@ -18,7 +18,7 @@ from typing import Any
 
 from research.aaa_1k.identity import git_provenance
 
-from . import LOOP_PROTOCOL_VERSION, PILOT_ITERATION_ID
+from . import HISTORICAL_PILOT_PROTOCOL_VERSION, PILOT_ITERATION_ID
 from .evidence import read_strict_json, write_strict_json
 from .identities import LEDGER_PATH, empty_ledger, load_ledger, prove_fresh, reserve, write_ledger
 
@@ -263,7 +263,7 @@ def _ledger_path(root: Path) -> Path:
 def _stamp(payload: dict[str, Any], root: Path, started: float) -> dict[str, Any]:
     return {
         **payload,
-        "loop_protocol_version": LOOP_PROTOCOL_VERSION,
+        "loop_protocol_version": HISTORICAL_PILOT_PROTOCOL_VERSION,
         "iteration_id": PILOT_ITERATION_ID,
         "git": git_provenance(root),
         "compute_seconds": time.perf_counter() - started,

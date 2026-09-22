@@ -16,6 +16,8 @@ def git(*args: str) -> str:
 
 
 def purpose(path: str) -> str:
+    if path.startswith("research/aaa_1k_loop/"):
+        return "active AAA-1K improvement-loop research and protocol implementation"
     if path.startswith("research/aaa_1k/"):
         return "active isolated AAA-1K research implementation"
     if path.startswith("aaa/"):
@@ -81,6 +83,20 @@ def verification(path: str) -> str:
 
 
 def findings(path: str) -> str:
+    loop_path = (
+        path.startswith("research/aaa_1k_loop/")
+        or path.startswith("docs/evidence/aaa1k_loop_")
+        or path.startswith("docs/loop_")
+        or path == "benchmarks/aaa1k_loop_identity_ledger.json"
+        or path
+        in {
+            "tests/test_aaa_1k_loop.py",
+            "tests/test_aaa_1k_loop_iteration4.py",
+            "tests/test_aaa_1k_loop_tbptt.py",
+        }
+    )
+    if loop_path:
+        return "AAA-162 through AAA-173; v0 artifacts retained under current aaa.loop.v1 governance"
     aaa_1k_path = (
         path.startswith("research/aaa_1k/")
         or path.startswith("docs/aaa_1k_")

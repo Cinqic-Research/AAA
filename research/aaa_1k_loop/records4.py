@@ -13,7 +13,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from . import LOOP_PROTOCOL_VERSION
+from . import HISTORICAL_PILOT_PROTOCOL_VERSION
 from .evidence import read_strict_json
 from .iteration import ITERATION_SCHEMA, artifact_entry
 from .records import CHAMPION, _compute, _parent
@@ -79,7 +79,7 @@ def record_0004(root: Path) -> dict[str, Any]:
     return {
         "schema": ITERATION_SCHEMA,
         "iteration_id": "aaa1k-loop-0004",
-        "loop_protocol_version": LOOP_PROTOCOL_VERSION,
+        "loop_protocol_version": HISTORICAL_PILOT_PROTOCOL_VERSION,
         "parent_champion": _parent(root),
         "parent_iteration": "aaa1k-loop-0003 (REJECTED)",
         "problem": (
@@ -171,7 +171,7 @@ def record_0005(root: Path) -> dict[str, Any]:
     return {
         "schema": ITERATION_SCHEMA,
         "iteration_id": "aaa1k-loop-0005",
-        "loop_protocol_version": LOOP_PROTOCOL_VERSION,
+        "loop_protocol_version": HISTORICAL_PILOT_PROTOCOL_VERSION,
         "parent_champion": _parent(root),
         "parent_iteration": "aaa1k-loop-0004 (REJECTED)",
         "problem": "M2 remains; 0004's candidates removed it at a cost on smooth bouncing",
@@ -236,7 +236,7 @@ def record_0006(root: Path) -> dict[str, Any]:
     return {
         "schema": ITERATION_SCHEMA,
         "iteration_id": "aaa1k-loop-0006",
-        "loop_protocol_version": LOOP_PROTOCOL_VERSION,
+        "loop_protocol_version": HISTORICAL_PILOT_PROTOCOL_VERSION,
         "parent_champion": _parent(root),
         "parent_iteration": "aaa1k-loop-0005 (REJECTED)",
         "problem": "M2 remains; 0005's c9 refused useful short post-bounce mirror runs",
