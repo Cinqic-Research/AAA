@@ -1035,7 +1035,7 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
   is cancelled explicitly, without a fabricated consumer or outcome.
 
 ### AAA-128 — observation-noise phase needed a separate evidence boundary
-- **Source** observation-noise v1 design audit · **Severity** high · **Status** implemented; confirmation pending
+- **Source** observation-noise v1 design audit · **Severity** high · **Status** implemented; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Finding** Reusing the v2.1 record, metric, or gate namespace would make a
   noisy rerun look like a deterministic reference result and would permit
   clean latent targets to enter a predictor through the existing environment
@@ -1099,7 +1099,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   `docs/evidence/observation_noise_development_selection.json`.
 
 ### AAA-131 — observation-noise scientific gates were permanent placeholders
-- **Source** fresh observation-noise completion audit · **Severity** critical · **Status** partially repaired; confirmation pending
+- **Source** fresh observation-noise completion audit · **Severity** critical · **Status** partially repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** The runner emitted `INSUFFICIENT_EVIDENCE` for scientific
   endpoints on every role and had no machine-readable primary bound evaluator.
 - **Repair** Exact acceptance formulas, one-sided 95% bound direction,
@@ -1111,7 +1111,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   independent review have not been executed.
 
 ### AAA-132 — separate A/B analyses did not implement one joint multiplicity family
-- **Source** fresh observation-noise completion audit · **Severity** high · **Status** repaired in code; confirmation pending
+- **Source** fresh observation-noise completion audit · **Severity** high · **Status** repaired in code; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** Existing per-attempt paired statistics applied their own
   local comparison output and could not enumerate the combined A+B endpoint,
   cell and batch family.
@@ -1147,7 +1147,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   observation.
 
 ### AAA-135 — verifier accepted an archive with no checksum manifest
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** A complete synthetic attempt with `checksums.json` omitted
   returned `PASS`. Structural and arithmetic checks therefore did not establish
   complete byte coverage.
@@ -1157,7 +1157,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   rejects missing, extra, or mismatched entries.
 
 ### AAA-136 — stored NaN values bypassed verifier comparisons
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** Replacing a stored summary MAE with JSON `NaN` left
   `abs(stored - recomputed) > tolerance` false, and the verifier returned
   `PASS`.
@@ -1167,7 +1167,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   bypass as a negative fixture.
 
 ### AAA-137 — adaptation implementation used the wrong estimand
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** For heterogeneous frozen denominators 1 and 3, with online
   values 1 and 1.5, the implemented mean of per-identity ratios is 0.25 while
   the declared ratio of means is 0.375.
@@ -1195,7 +1195,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   incumbent was retained explicitly as the no-refinement control.
 
 ### AAA-139 — formal joint evaluation admitted mutable analysis identity
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** The public formal evaluator accepts a caller-selected draw
   count and hard-codes the first A/B batch IDs rather than resolving the frozen
   registry identities.
@@ -1205,7 +1205,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   confirmation freeze and registry rather than hard-coded IDs.
 
 ### AAA-140 — batch consumption was local to an output directory
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** Confirmation admission reads `planned` from the repository
   registry, but the visible `consumed` transition is written only to the
   attempt-local lifecycle. Two output roots or checkouts can therefore spend
@@ -1250,7 +1250,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   and `>` operator identical and allocates fresh unobserved A/B batch IDs.
 
 ### AAA-143 — zero-noise reference executed current code instead of a pinned checkout
-- **Source** independent Sol reference-isolation audit · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reference-isolation audit · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** The protocol recorded v2.1 file identities but no commit, and
   `_zero_noise_fixture` imported both sides from the current checkout. Shared
   drift could therefore pass as reference preservation.
@@ -1342,7 +1342,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   are repeated separately in the final validation record.
 
 ### AAA-149 — hosted CI omitted the pinned reference commit
-- **Source** final-head GitHub CPU CI runs `34922456399` and `34922458676` · **Severity** high · **Status** repaired; replacement CI pending
+- **Source** final-head GitHub CPU CI runs `34922456399` and `34922458676` · **Severity** high · **Status** repaired; hosted CI verified (2026-09-22, `AAA-177`; was "replacement CI pending")
 - **Reproduction** The Python matrix failed across versions at
   `test_zero_noise_reference_runs_from_the_pinned_v21_commit`. Actions checked
   out only the PR head, so `git cat-file -e 25b6c32...^{commit}` failed and the
@@ -1353,9 +1353,17 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Regression** The fail-closed unit test remains unchanged. Replacement
   final-head GitHub checks must pass all required Python versions before this
   repair is considered hosted-CI verified.
+- **Hosted verification (2026-09-22)** Satisfied. Exact PR #11 head
+  `e463773` passed all six jobs in push run `35451372899` and pull-request run
+  `35451375484`, and integration commit `ff7199d` passed run `35451862857`
+  (recorded in [`handoff_sol.md`](handoff_sol.md) and read back through the
+  API). On `main` at `efa1fdb`, run `35775776610` passed all six jobs. Its
+  locked job reports
+  `test_zero_noise_reference_runs_from_the_pinned_v21_commit ... ok`, and all
+  701 tests passed on Python 3.10, 3.11, 3.12 and 3.13.
 
 ### AAA-150 — schedule filenames were not portable to GitHub artifact storage
-- **Source** final-head GitHub CPU CI runs `34922822759` and `34922825001` · **Severity** high · **Status** repaired locally; final hosted artifact upload pending
+- **Source** final-head GitHub CPU CI runs `34922822759` and `34922825001` · **Severity** high · **Status** repaired; hosted artifact upload verified (2026-09-22, `AAA-177`; was "repaired locally; final hosted artifact upload pending")
 - **Reproduction** Both the locked and fresh-install jobs completed their
   environment, static, test, benchmark, recomputation, and exit-code work, then
   `actions/upload-artifact` rejected schedule paths such as
@@ -1370,6 +1378,11 @@ corruption, missing scientific gates, and strict-type substitutions.
   channel, scale, lineage, episode, realization, and shift form. It checks
   determinism, uniqueness, fixed length, and exclusion of all forbidden path
   characters. Final hosted CI must also pass the real artifact-upload step.
+- **Hosted verification (2026-09-22)** Satisfied. Runs `35451372899`,
+  `35451375484` and `35451862857` each retain unexpired `ci-locked-evidence`
+  and `ci-fresh-install-evidence` artifacts. On `main` at `efa1fdb`, run
+  `35775776610` logged both uploads as successful: 42,132,387 bytes including
+  the observation-noise smoke archive, and 40,451,944 bytes.
 
 ### AAA-151 — formal execution had no output-filesystem capacity preflight
 - **Source** 2026-09-19 storage audit · **Severity** high · **Status** repaired and locally verified
@@ -1920,3 +1933,21 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
   historical report resolves without being edited.
 - **Verification** A local Markdown link and anchor check reports no broken
   relative link or anchor in the tracked tree.
+
+### AAA-177 — ledger statuses still read "pending" after the pending event resolved
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired
+- **Reproduction** On `efa1fdb`, `AAA-149` read "replacement CI pending" and
+  `AAA-150` read "final hosted artifact upload pending". The GitHub API shows
+  the replacement runs that [`handoff_sol.md`](handoff_sol.md) cites
+  (`35451372899`, `35451375484`, `35451862857`) as successful in all six jobs,
+  with both evidence artifacts uploaded, and current `main` CI passes the same
+  steps. `AAA-128`, `-131`, `-132`, `-135`, `-136`, `-137`, `-139`, `-140` and
+  `-143` read "confirmation pending". Both declared v1.1 batches, however, are
+  `retired_unobserved` in `benchmarks/observation_noise_registry.json`, and
+  the README, limitations and handoff say formal A/B was not executed.
+- **Repair** Each status line now states the current fact and keeps its
+  earlier wording in quotation marks with the date. `AAA-149` and `AAA-150`
+  also gain a dated hosted-verification line. No observation-noise protocol,
+  registry, evidence or conclusion changed. "Not executed" is not a negative,
+  inconclusive or positive result, as [`handoff_sol.md`](handoff_sol.md)
+  already says.
