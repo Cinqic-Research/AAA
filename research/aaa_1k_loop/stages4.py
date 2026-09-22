@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import sys
 import time
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -251,6 +252,116 @@ def compare_tolerant(committed: Any, fresh: Any, path: str = "$") -> tuple[list[
     return mismatches, deviations
 
 
+CELL_IDENTITY = ("condition", "init_index", "init_seed", "stream_id", "stream_seed")
+RESULT_FIELDS = ("analysis", "screens", "selected_for_attack", "adjudication", "decision")
+"""Aggregates recomputed from the cells; judged at the verdict level, never number by number."""
+
+
+def chaotic(record: Any) -> bool:
+    """A cell in which any arm diverged or failed: its trajectory is not bit-stable across platforms.
+
+    The champion's frame-locked cells amplify a last-bit float difference into a
+    different trajectory (observed on CI runners: MAE differences of up to ~30%
+    in diverged cells, none above 1e-9 elsewhere). Detected from the cell's own
+    primitives, so it needs no stage-specific knowledge.
+    """
+
+    if not isinstance(record, dict):
+        return False
+    if record.get("failures"):
+        return True
+    mae = record.get("mae")
+    if isinstance(mae, dict) and isinstance(mae.get("persistence"), float):
+        limit = 2.0 * mae["persistence"]
+        return any(isinstance(v, float) and v > limit for k, v in mae.items() if k != "persistence")
+
+    def any_diverged(node: Any) -> bool:
+        if isinstance(node, dict):
+            return node.get("diverged") is True or any(any_diverged(v) for v in node.values())
+        if isinstance(node, list):
+            return any(any_diverged(v) for v in node)
+        return False
+
+    return any_diverged(record.get("arms", {}))
+
+
+def verdicts(payload: Mapping[str, Any], challenger: str | None = None) -> Any:
+    """The adjudicated conclusions of a stage's artifact (recomputed for confirmation primitives)."""
+
+    if "analysis" in payload:
+        return {key: value["verdict"] for key, value in payload["analysis"]["verdicts"].items()}
+    if "screens" in payload:
+        return {
+            "selected_for_attack": payload["selected_for_attack"],
+            "screens": {
+                arm: {
+                    "passed": screen["passed"],
+                    "S1": screen["S1_long_horizon_stability"]["status"],
+                    **{c: v["status"] for c, v in screen["S2_standard_families"].items()},
+                    **{c: v["status"] for c, v in screen["S3_long_non_coarse"].items()},
+                }
+                for arm, screen in payload["screens"].items()
+            },
+        }
+    if "adjudication" in payload:
+        return {
+            "outcome": payload["adjudication"]["outcome"],
+            "advance": payload["adjudication"]["advance_to_freeze"],
+        }
+    from . import iteration6
+
+    decision = iteration6.decide(payload["primitives"], str(challenger))
+    return {"statuses": decision["statuses"], "outcome": decision["outcome"]}
+
+
+def compare_reproduction(
+    committed: Mapping[str, Any], fresh: Mapping[str, Any], challenger: str | None = None
+) -> dict[str, Any]:
+    """Two-tier cross-platform comparison: stable cells numerically, conclusions exactly."""
+
+    key = "records" if "records" in committed else "primitives"
+    mismatches: list[str] = []
+    deviations: list[float] = []
+    top_committed = {k: v for k, v in committed.items() if k not in (key, *RESULT_FIELDS)}
+    top_fresh = {k: v for k, v in fresh.items() if k not in (key, *RESULT_FIELDS)}
+    m, d = compare_tolerant(top_committed, top_fresh)
+    mismatches += m
+    deviations += d
+    old, new = committed[key], fresh[key]
+    chaotic_cells = flag_flips = 0
+    chaotic_deviation = 0.0
+    if len(old) != len(new):
+        mismatches.append(f"$.{key}: {len(old)} cells committed, {len(new)} rerun")
+    for index, (c, f) in enumerate(zip(old, new, strict=False)):
+        identity = [field for field in CELL_IDENTITY if c.get(field) != f.get(field)]
+        if identity:
+            mismatches.append(f"$.{key}[{index}]: cell identity differs in {identity}")
+            continue
+        if chaotic(c) or chaotic(f):
+            chaotic_cells += 1
+            flag_flips += int(chaotic(c) != chaotic(f))
+            _m, cell_deviations = compare_tolerant(c, f)
+            chaotic_deviation = max([chaotic_deviation, *cell_deviations])
+            continue
+        m, d = compare_tolerant(c, f, f"$.{key}[{index}]")
+        mismatches += m
+        deviations += d
+    committed_verdicts = verdicts(committed, challenger)
+    fresh_verdicts = verdicts(fresh, challenger)
+    if committed_verdicts != fresh_verdicts:
+        mismatches.append(f"verdicts differ: committed {committed_verdicts} rerun {fresh_verdicts}")
+    return {
+        "mismatches": mismatches,
+        "cells": len(old),
+        "chaotic_cells": chaotic_cells,
+        "chaotic_flag_flips": flag_flips,
+        "largest_stable_deviation": max(deviations, default=0.0),
+        "stable_floats_not_bit_identical": len(deviations),
+        "largest_chaotic_deviation": chaotic_deviation,
+        "verdicts": committed_verdicts,
+    }
+
+
 def command_reproduce(args: argparse.Namespace) -> int:
     import importlib
     import tempfile
@@ -271,18 +382,22 @@ def command_reproduce(args: argparse.Namespace) -> int:
             return 1
         committed = read_strict_json(root / committed_path)
         fresh = read_strict_json(fresh_path)
-        if command == "confirmation-primitives":
-            committed = {"primitives": committed["primitives"]}
-        mismatches, deviations = compare_tolerant(committed, fresh)
-    for mismatch in mismatches[:20]:
+    challenger = committed.get("challenger")
+    if command == "confirmation-primitives":
+        committed = {"primitives": committed["primitives"]}
+    result = compare_reproduction(committed, fresh, challenger)
+    for mismatch in result["mismatches"][:20]:
         print(f"MISMATCH {mismatch}", file=sys.stderr)
-    largest = max(deviations, default=0.0)
     print(
-        f"{args.stage}: {'REPRODUCED' if not mismatches else 'NOT REPRODUCED'} "
-        f"({len(mismatches)} mismatches; {len(deviations)} floats not bit-identical, largest relative "
-        f"deviation {largest:.2e}; tolerance {FLOAT_RTOL:g})"
+        f"{args.stage}: {'REPRODUCED' if not result['mismatches'] else 'NOT REPRODUCED'}: "
+        f"{len(result['mismatches'])} mismatches; verdicts {'identical' if not result['mismatches'] else 'see above'}; "
+        f"{result['cells']} cells, {result['chaotic_cells']} chaotic (diverged/failed; "
+        f"{result['chaotic_flag_flips']} changed divergence status, largest deviation "
+        f"{result['largest_chaotic_deviation']:.2e}); stable cells: "
+        f"{result['stable_floats_not_bit_identical']} floats not bit-identical, largest relative deviation "
+        f"{result['largest_stable_deviation']:.2e} (tolerance {FLOAT_RTOL:g})"
     )
-    return 0 if not mismatches else 1
+    return 0 if not result["mismatches"] else 1
 
 
 def build_parser() -> argparse.ArgumentParser:

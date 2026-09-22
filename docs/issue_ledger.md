@@ -1801,3 +1801,29 @@ records. Only actual defects are entered here.
 - **Next** instrument without modifying it, on long quantized and smooth
   streams, with predeclared lock and stall thresholds. The v2.1 core and
   round 3's `rls_online` baseline both use it.
+
+### AAA-173 — Champion 0's diverged cells are not bit-reproducible across CPUs
+- **Source** first CI runs of `loop-reproduction.yml` (PR #20) · **Severity** medium (reproducibility semantics) · **Status** characterized; reproduction policy made explicit
+- **Observation** on the implementer's machine every iteration 0004–0006
+  stage reproduces bit for bit. On GitHub runners, results depend on the
+  runner's CPU. Some jobs were bit-identical. Others differed in the last
+  digit of stable-cell MAEs (relative ~4e-15). In cells where the champion
+  diverges (the frame lock, M2), the difference amplified into different
+  trajectories: MAE differences up to ~30%, and different mirror-step counts.
+- **Cause** long online-learning trajectories in a runaway regime are
+  chaotic, so ordinary cross-platform float differences (SIMD width, library
+  build) do not stay small. Stable cells, including every Champion 1 cell,
+  stay within ~1e-9.
+- **Policy** `stages4 reproduce` now reproduces at two tiers:
+  - non-chaotic cells: floats within relative 1e-9, everything else exact;
+  - chaotic cells (any arm diverged or failed): identity fields exact, with
+    their deviation and any divergence-status flips reported;
+  - every adjudicated conclusion (hypothesis verdicts, screen statuses, attack
+    outcome, K1–K3 statuses and the decision) must be identical, recomputed
+    from the rerun's own primitives.
+
+  The workflow logs each runner's CPU.
+- **Consequence** per-cell magnitudes of Champion 0's diverged cells (and
+  aggregates over them, such as median gains or divergence counts) are
+  platform-dependent at the level of about one cell. The claims rest on the
+  verdicts, which are held exact.

@@ -511,3 +511,50 @@ class TolerantComparisonTests(unittest.TestCase):
         self.assertTrue(compare_tolerant({"verdict": "PASS"}, {"verdict": "FAIL"})[0])
         self.assertTrue(compare_tolerant({"a": [1.0, 2.0]}, {"a": [1.0]})[0])
         self.assertEqual(compare_tolerant({"git": "a", "x": 2.0}, {"git": "b", "x": 2.0}), ([], []))
+
+
+class CrossPlatformReproductionTests(unittest.TestCase):
+    """Chaotic cells may drift; stable cells may not beyond tolerance; verdicts never may."""
+
+    def _pair(self) -> tuple[dict[str, Any], dict[str, Any]]:
+        confirmation = json.loads(
+            (ROOT / "docs/evidence/aaa1k_loop_0006/confirmation_2.json").read_text(encoding="utf-8")
+        )
+        committed = {"primitives": confirmation["primitives"]}
+        return committed, json.loads(json.dumps(committed))
+
+    def test_identical_reruns_reproduce(self) -> None:
+        from research.aaa_1k_loop.stages4 import compare_reproduction
+
+        committed, fresh = self._pair()
+        result = compare_reproduction(committed, fresh, "c10_reach_gated_unfold")
+        self.assertEqual(result["mismatches"], [])
+        self.assertGreater(result["chaotic_cells"], 0)
+
+    def test_a_drifting_chaotic_cell_is_reported_not_failed(self) -> None:
+        from research.aaa_1k_loop.stages4 import chaotic, compare_reproduction
+
+        committed, fresh = self._pair()
+        cell = next(r for r in fresh["primitives"] if chaotic(r))
+        cell["arms"]["gru"]["mae"] *= 1.3
+        result = compare_reproduction(committed, fresh, "c10_reach_gated_unfold")
+        self.assertEqual(result["mismatches"], [])
+        self.assertGreater(result["largest_chaotic_deviation"], 0.2)
+
+    def test_a_drifting_stable_cell_fails(self) -> None:
+        from research.aaa_1k_loop.stages4 import chaotic, compare_reproduction
+
+        committed, fresh = self._pair()
+        cell = next(r for r in fresh["primitives"] if not chaotic(r))
+        cell["arms"]["gru"]["mae"] *= 1.0 + 1e-6
+        self.assertTrue(compare_reproduction(committed, fresh, "c10_reach_gated_unfold")["mismatches"])
+
+    def test_a_changed_conclusion_fails_even_in_chaotic_cells(self) -> None:
+        from research.aaa_1k_loop.stages4 import compare_reproduction
+
+        committed, fresh = self._pair()
+        coarse = [r for r in fresh["primitives"] if r["condition"].startswith("long:coarse")]
+        for cell in coarse[:40]:
+            cell["arms"]["c10_reach_gated_unfold"]["diverged"] = True
+        result = compare_reproduction(committed, fresh, "c10_reach_gated_unfold")
+        self.assertTrue(any(m.startswith("verdicts differ") for m in result["mismatches"]))

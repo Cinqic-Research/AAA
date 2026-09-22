@@ -49,5 +49,9 @@ jobs:
           python -m pip install -r requirements-lock.txt
           python -m pip install -e . --no-deps
           python tools/check_lock.py
+      - name: Record the platform (diverged cells are not bit-stable across CPUs)
+        run: |
+          lscpu | grep -E 'Model name|Flags' | cut -c1-200
+          python -c "import numpy, platform; print(platform.platform(), 'numpy', numpy.__version__)"
       - name: Rerun and compare with the committed primitives
         run: python -m research.aaa_1k_loop.stages4 reproduce ${{ matrix.stage }}

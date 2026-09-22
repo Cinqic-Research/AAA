@@ -47,7 +47,7 @@ R-13).
 | `champion1.py` | Champion 1 record and the full round-3 re-run in Champion 1's world |
 | `records4.py` | iteration records 0004–0006 |
 | `identities.py` (`require_claimed`), `freeze.py` (source-set parameter), `cli.py` (blocks, records, validate) | the only edits to pilot modules |
-| `tests/test_aaa_1k_loop_tbptt.py`, `tests/test_aaa_1k_loop_iteration4.py` | 33 + 27 new tests; 694 repository tests total |
+| `tests/test_aaa_1k_loop_tbptt.py`, `tests/test_aaa_1k_loop_iteration4.py` | 33 + 32 new tests; 699 repository tests total |
 | `.github/workflows/loop-reproduction.yml`, `ci.yml` | full-stage reproduction job; Champion 1 and recomputation checks in CPU CI |
 
 ## 4. Reproduce
@@ -70,12 +70,17 @@ python -m unittest discover -s tests -t .
 
 On the implementer's machine every `reproduce` stage is **bit-identical**
 (only `git` and `compute_seconds` are exempt). Across machines it is not
-always: on the first CI run, eight of nine stages were bit-identical, but
-`develop6` differed in the last digit of MAEs (relative ~4×10⁻¹⁵). `reproduce`
-therefore declares a float tolerance (relative 1e-9) and reports the largest
-deviation. Strings, integers, booleans (divergence flags, locks, verdicts) and
-structure must still match exactly (`stages4.FLOAT_RTOL`,
-`TolerantComparisonTests`). To check that the confirmation
+(`AAA-173`): Champion 0's diverged, frame-locked cells are chaotic, and a
+last-bit float difference on some CI runner CPUs grows into a different
+trajectory. `reproduce` therefore checks three tiers:
+
+- non-chaotic cells within relative 1e-9;
+- chaotic cells on identity only, with their drift reported;
+- every adjudicated verdict exactly, recomputed from the rerun.
+
+Judge whether that policy is right. The per-cell numbers of diverged champion
+cells in the committed evidence are those of the implementer's platform.
+To check that the confirmation
 ran under its freeze, verify at the freeze commit:
 
 ```bash
