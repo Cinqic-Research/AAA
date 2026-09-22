@@ -26,6 +26,27 @@ EVIDENCE_DIR = Path("docs/evidence/aaa1k_loop_0001")
 
 INNER_LOOP_BLOCKS: tuple[dict[str, Any], ...] = (
     {
+        "block_id": "aaa1k-loop-0004/diagnostic/scratch",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_scratch",
+        "count": 8,
+        "purpose": (
+            "iteration 0004 scratch: instrument shakedown only (does it run, how long); never cited as evidence"
+        ),
+    },
+    {
+        "block_id": "aaa1k-loop-0004/diagnostic/tbptt",
+        "iteration_id": "aaa1k-loop-0004",
+        "role": "diagnostic",
+        "namespace": "diagnostic_tbptt",
+        "count": 64,
+        "purpose": (
+            "iteration 0004 round 1 (audit R-02): online TBPTT update rules on 16 long-horizon seeds "
+            "x 4 conditions and 8 streams per standard plan entry; hypotheses H20-H23 declared first"
+        ),
+    },
+    {
         "block_id": "aaa1k-loop-0003/attack-2/env",
         "iteration_id": "aaa1k-loop-0003",
         "role": "attack",
