@@ -46,8 +46,9 @@ deliberately reported as different claims.
 The manual benchmark workflow (`.github/workflows/benchmark.yml`) retains
 the full attempt directory of each run it makes for 90 days. That workflow
 runs only development and high-replication roles (see below and `AAA-125`).
-A formal confirmation attempt therefore has **no** CI copy: its raw bytes exist
-only in the maintained checkout that produced it until they are regenerated.
+A formal confirmation attempt therefore has **no** CI copy. Its omitted raw
+bytes survive only in whatever local copy the maintainer keeps, or by
+regeneration.
 Routine CPU CI keeps its smoke-run artifacts for 14 days (`AAA-178`).
 
 `tools/archive_attempt.py` creates the compact Git archive. It omits `raw/` and
@@ -65,10 +66,11 @@ jobs from spending the same planned stream while both believe they own it.
 ## Known limitation
 
 Regenerability is weaker than durable archival. For a formal confirmation
-attempt, losing the recorded commit alone would leave the summaries and
-checksums without the bytes they describe, because no CI artifact exists for
-it. For a CI-run development or high-replication attempt, it would take the
-recorded commit being lost *and* the 90-day artifact expiring.
+attempt there is no CI artifact to fall back on: losing the recorded commit
+and the maintainer's local raw records would leave the summaries and
+checksums without the bytes they describe. For a CI-run development or
+high-replication attempt, it would take the recorded commit being lost *and*
+the 90-day artifact expiring.
 
 Git LFS, or an external archive with content addresses recorded here, would be
 stronger. Neither is in place. This is stated as a recommendation rather than
