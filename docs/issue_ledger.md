@@ -646,6 +646,10 @@ wrong acceptance decision. `medium` — wrong or misleading measurement.
   independently archived. Git LFS or an external archive would be stronger and
   is a documented recommendation, not something claimed to be in place. See
   [`evidence_policy.md`](evidence_policy.md).
+- **Note (2026-09-22)** Since `AAA-125`, formal confirmation does not run in
+  Actions, so the 90-day retention above covers only development and
+  high-replication dispatches. Confirmation raw bytes have no CI copy
+  (`AAA-178`).
 
 ### AAA-078 — private filesystem paths in public documentation
 - **Source** Sol · **Severity** low · **Status** repaired
@@ -1951,3 +1955,21 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
   registry, evidence or conclusion changed. "Not executed" is not a negative,
   inconclusive or positive result, as [`handoff_sol.md`](handoff_sol.md)
   already says.
+
+### AAA-178 — the evidence policy implied a 90-day CI copy of confirmation evidence
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired
+- **Reproduction** On `efa1fdb`, the "How raw evidence stays recoverable"
+  section of `docs/evidence_policy.md` said "CI additionally retains the full
+  attempt directory for 90 days". Its known limitation needed "the recorded
+  commit lost *and* the CI artifact expired". The sentence dates from
+  `a85b506` (2026-09-11). Since `2e54cc3` (2026-09-12, `AAA-125`),
+  `benchmark.yml` accepts only `development` and `high_replication` and
+  refuses any batch id, so no formal confirmation attempt has a CI artifact.
+  Routine CPU CI retains its smoke artifacts for 14 days.
+- **Consequence** The policy overstated how durable confirmation raw evidence
+  is. No evidence was lost, and `AAA-077` already records that
+  regenerability is weaker than archival.
+- **Repair** The policy now says which runs the 90-day retention covers, that
+  confirmation attempts have no CI copy, and that routine CI keeps artifacts
+  for 14 days. The known limitation is restated for each case, and `AAA-077`
+  has a dated note. No workflow retention value changed.

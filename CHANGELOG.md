@@ -19,6 +19,9 @@ fingerprint (`5ce6e019…`) and the v2.1 specification hash are unchanged.
   are verified in hosted CI. Nine observation-noise entries now say
   confirmation was not executed, instead of "pending", because the v1.1 batches
   were retired unobserved (`AAA-177`).
+- The evidence policy no longer implies that CI keeps a 90-day copy of
+  formal confirmation evidence. Only development and high-replication
+  dispatches run in Actions (`AAA-178`).
 
 ## Development hardware and compute strategy documented (2026-09-22)
 
