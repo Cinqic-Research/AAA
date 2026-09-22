@@ -1726,3 +1726,78 @@ records. Only actual defects are entered here.
   support while preserving the observed evidence and its computed operational
   verdict. M2's closed-loop-gain explanation remains explicitly a hypothesis.
 - **Outcome** No model or historical evidence changed.
+
+### AAA-169 — AAA1KGRU's docstring misnames its online TBPTT rule
+- **Source** external research audit 2026-09-21 (R-02) · **Severity** low (numerically) · **Status** documented; code intentionally unchanged
+- **Reproduction** `research/aaa_1k_loop/tbptt.py`: after interleaved SGD
+  updates, `AAA1KGRU.backward()` equals neither the realized-trajectory
+  gradient (`snapshot`, which backpropagates each cache through the matrices
+  it was computed with) nor the current-parameter chunk gradient (`replay`).
+  Both references are proven against finite differences; the tests fail if
+  live equals either one once parameters drift.
+- **Root cause** cached activations from older parameters are multiplied
+  through the current recurrent matrices. The model docstring calls the
+  result "exact for the realized trajectory up to the truncation horizon".
+- **Measured impact** (iteration 0004, H20–H23, fresh diagnostic block): the
+  median per-step update difference from `snapshot` is 7.1e-5 (q99 8.9e-3);
+  snapshot is EQUIVALENT to live on every standard family; M2 is identical
+  under live, snapshot, replay and T = 1.
+- **Disposition** the rule is a standard approximation (online TBPTT with
+  cached activations and current weights). The docstring is corrected in
+  `errata.md`, not in `model.py`, because editing `model.py` changes the AAA-1K
+  phase fingerprint that every AAA-1K result and both loop champions carry.
+
+### AAA-170 — M2 is a self-confirming target-unfolding frame lock
+- **Source** loop iteration 0004, diagnosis rounds 2–4 · **Severity** high · **Status** repaired in Champion 1 (loop); AAA-1K core unchanged
+- **Reproduction** `python -m research.aaa_1k_loop.stages4 unfold`: on
+  1120-step quantized coarse streams, every diverged champion cell (54/54)
+  first holds a run of at least 10 consecutive mirrored unfolded targets,
+  11–20 steps before onset. No stable cell does.
+- **Root cause** `NeuralAgent._training_target` unfolds the revealed
+  observation onto the branch nearest the learner's *own* raw prediction
+  (`aaa.predictors.unfold_observation`). After a slow bounce the raw
+  prediction can remain past the wall. Later observations are then mirrored,
+  and the target, relative to the real-frame input position, is about −2 ×
+  distance-from-wall / scale. That keeps the prediction past the wall and
+  grows as the dot moves away.
+- **Corrects** the pilot's M2 attribution to a learned previous-error loop
+  gain (falsified: H24, H27) and the implicit overshoot reading (falsified:
+  H29). The previous-error input sustains the lock but does not cause it. The
+  pilot's "likely source of round 3's two burst cells" is confirmed: those
+  two cells differ, and only those, when round 3 is re-run with the repair.
+- **Repair** Champion 1 (`docs/evidence/aaa1k_loop_0006/champion_1.json`):
+  refuse a mirrored branch when the input position is farther from the crossed
+  wall than |velocity estimate| + |observed displacement|. Promoted through
+  fresh confirmation (21.3% → 0% long-coarse divergence; bitwise identical on
+  every standard family).
+- **Not repaired** `research/aaa_1k/agents.py` itself: porting the rule
+  there is a new AAA-1K phase version.
+
+### AAA-171 — loop confirmation refused its own freshly spent identities
+- **Source** iteration 0006 confirmation attempt 1 · **Severity** high (burned identities) · **Status** repaired
+- **Reproduction** `outer6 confirm` created both remote claims and marked the
+  blocks spent (the spent-before-run rule), then `confirmation_cells()`
+  called `require_usable(purpose="confirmation")`, which demands `reserved`,
+  and raised before the first cell was built.
+- **Consequence** nothing was observed. Blocks
+  `aaa1k-loop-0006/confirmation/{env,init}` stay spent and are never reused
+  (`confirmation_attempt_1.json`). The unchanged challenger was refrozen on
+  new blocks (`freeze_2.json`).
+- **Repair** `identities.require_claimed` (confirmation role, status spent,
+  observed by *this* observer). `spend_and_build()` puts admission-to-cells
+  in one function for every outer module.
+- **Regression** `ConfirmationAdmissionTests` and `ConfirmationEndToEndTests`
+  cover admission → cells → primitives → payload → decision → independent
+  recomputation. The gap was that the outer path had only ever been
+  unit-tested in pieces (audit R-12).
+
+### AAA-172 — the v2.1 core RLS learner unfolds around its own prediction too
+- **Source** AAA-170 follow-up · **Severity** unknown · **Status** open
+- **Observation** `OnlineRLSPredictor.update` (`aaa/predictors.py`) builds
+  its target with `unfold_observation(target, raw, …)`, the same
+  self-reference as AAA-170. It also has `skip_after_reflected_prediction`,
+  which might prevent the chase, or might instead stall learning while its
+  raw prediction stays past a wall.
+- **Next** instrument without modifying it, on long quantized and smooth
+  streams, with predeclared lock and stall thresholds. The v2.1 core and
+  round 3's `rls_online` baseline both use it.

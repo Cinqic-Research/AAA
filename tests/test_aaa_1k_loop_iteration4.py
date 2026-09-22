@@ -408,3 +408,45 @@ class ChampionOneTests(unittest.TestCase):
             raise RuntimeError("interrupted")
         for module in (agents_module, experiments_module, measurements_module):
             self.assertIs(module.NeuralAgent, NeuralAgent)
+
+
+class ReadjudicationTests(unittest.TestCase):
+    """Every committed 0004-0006 verdict must re-derive exactly from its own stored records."""
+
+    @staticmethod
+    def _load(path: str) -> Any:
+        return json.loads((ROOT / path).read_text(encoding="utf-8"))
+
+    def test_diagnoses_screens_attack_and_decision_readjudicate_exactly(self) -> None:
+        from research.aaa_1k_loop import (
+            diagnosis4,
+            diagnosis4b,
+            diagnosis4c,
+            diagnosis4d,
+            iteration5,
+            iteration6,
+        )
+
+        evidence = "docs/evidence/aaa1k_loop_000"
+        for adjudicate, name in (
+            (diagnosis4.adjudicate4, "4/diagnosis.json"),
+            (diagnosis4b.adjudicate4b, "4/diagnosis_gain.json"),
+            (diagnosis4c.adjudicate4c, "4/diagnosis_overshoot.json"),
+            (diagnosis4d.adjudicate4d, "4/diagnosis_unfold.json"),
+        ):
+            stored = self._load(evidence + name)
+            self.assertEqual(json.loads(json.dumps(adjudicate(stored["records"]))), stored["analysis"], name)
+        for module, number in ((it, "4"), (iteration5, "5"), (iteration6, "6")):
+            stored = self._load(f"{evidence}{number}/development.json")
+            for candidate in module.CANDIDATES:
+                recomputed = json.loads(json.dumps(module.screen(stored["records"], candidate["arm"])))
+                self.assertEqual(recomputed, stored["screens"][candidate["arm"]], (number, candidate["id"]))
+        attack = self._load(f"{evidence}6/attack.json")
+        self.assertEqual(
+            json.loads(json.dumps(iteration6.adjudicate_attack(attack["records"], attack["attacked"]))),
+            attack["adjudication"],
+        )
+        confirmation = self._load(f"{evidence}6/confirmation_2.json")
+        decision = iteration6.decide(confirmation["primitives"], confirmation["challenger"])
+        self.assertEqual(json.loads(json.dumps(decision)), confirmation["decision"])
+        self.assertEqual(decision["outcome"], "PROMOTE")

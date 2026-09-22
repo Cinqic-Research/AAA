@@ -29,6 +29,11 @@ unchanged (tested bitwise), and records:
 ``curvature``
     ``|J|^2`` for the displacement output, and the share of it carried by the
     input-3 columns of the gate matrices and by the output head.
+
+**Outcome (diagnosis_overshoot.json): falsified.** Every update still shrinks
+its own sample's error until onset (H29), and the input-3 columns carry about
+1% of the curvature. M2 is a target-unfolding frame lock
+(:mod:`research.aaa_1k_loop.unfolding`).
 """
 
 from __future__ import annotations

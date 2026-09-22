@@ -36,6 +36,12 @@ no stable fixed point: the gradient keeps pushing ``a = -k`` upward, at a rate
 set by the learning rate, through ``a = 1``. That argument is what the round-2
 hypotheses test; it is a hypothesis, not a result.
 
+**Outcome (diagnosis_gain.json): falsified.** The gain is ~0.2-0.5 at onset
+and crosses one only 500-3000 steps after it (H24), and lr 0.01 never runs
+away even with three times the updates (H27): the argument above ignores the
+velocity input, which supplies a stable solution. M2 is a target-unfolding
+frame lock (:mod:`research.aaa_1k_loop.unfolding`).
+
 With ``zero_error_input`` the loop is open by construction and both
 measurements are reported as exactly zero feedback.
 """
@@ -43,7 +49,7 @@ measurements are reported as exactly zero feedback.
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -108,5 +114,5 @@ class GainAgent(NeuralAgent):
 
     def predict(self) -> float:
         prediction = super().predict()
-        self.gain_trace.append(loop_measurements(self.model))
+        self.gain_trace.append(loop_measurements(cast(AAA1KGRU, self.model)))
         return prediction

@@ -1,5 +1,37 @@
 # Research history
 
+## Loop iterations 0004–0006 — audit response and Champion 1 (2026-09-22)
+
+Answers the first four steps of the 2026-09-21 external research audit.
+
+- **R-02 online TBPTT.** The live rule backpropagates stale activations
+  through current matrices, so it is not the "exact realized-trajectory"
+  gradient `model.py` claims (`AAA-169`). It is within 7×10⁻⁵ of that gradient,
+  and M2 is identical under every rule, including T = 1.
+- **R-01 M2's mechanism.** Four predeclared diagnosis rounds on fresh blocks
+  falsified the pilot's loop-gain hypothesis and single-step overshoot. They
+  established a self-confirming target-unfolding frame lock (54/54 diverged
+  cells; `AAA-170`).
+- **Prospective rules.** The pilot's seven gaps became hard rules, and
+  stability became the primary gate. Every criterion is uncertainty-aware and
+  three-valued (R-04). The candidate budget was precommitted: c7 and c8
+  (0004) and c9 (0005) were REJECTED at the screen.
+- **R-03 the first real outer path.** c10 (0006) passed screen and attack, was
+  frozen, durably claimed on the remote, confirmed fresh (long-coarse
+  divergence 21.3% → 0%; bitwise identical on every standard family),
+  recomputed independently, and PROMOTED.
+- **Champion 1** is Champion 0 plus c10: the same 994 parameters, 1414 state
+  scalars and phase fingerprint; `research/aaa_1k` is untouched. Its round-3
+  capability vector is measured by re-running round 3. Only round 3's two
+  burst cells change (−56%, −62%; now confirmed as M2), and only one Q7
+  verdict flips (an improvement).
+- **Attempt 1 of the confirmation aborted before observation** on an admission
+  defect (`AAA-171`). The identities were burned, not reused. The defect is
+  fixed with an end-to-end outer-path test.
+- **Open:** `AAA-172` (the v2.1 RLS learner uses the same own-prediction
+  unfolding), M1, and audit items R-05 to R-13. The protocol stays `v0-pilot`
+  pending independent review.
+
 ## PR #19 independent final review remediation (2026-09-21)
 
 - Repaired confirmation freeze provenance so every frozen scientific byte and

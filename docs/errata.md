@@ -193,3 +193,15 @@ The historical AAA-1K reports are unchanged; this notice travels with them.
 
 The recomputation is `python -m research.aaa_1k_loop observe`; the diagnostic
 and attack evidence is under `docs/evidence/aaa1k_loop_000*/`.
+
+## Corrections from loop iterations 0004–0006 (2026-09-22)
+
+Historical documents are unchanged; this notice travels with them.
+Details: [`loop_report_0004_0006.md`](loop_report_0004_0006.md).
+
+| Where | Statement | Correction |
+|---|---|---|
+| `research/aaa_1k/model.py` docstring ("Learning") | the TBPTT gradient "is exact for the realized trajectory up to the truncation horizon" | **inaccurate** (`AAA-169`): older caches are backpropagated through the *current* recurrent matrices, not the ones that produced them. The rule is online TBPTT with cached activations and current weights. It is within 7×10⁻⁵ (median per-step update difference) of the realized-trajectory gradient, and no measured result depends on the difference. The file is not edited, because that would change the AAA-1K phase fingerprint |
+| `loop_pilot_report.md` (M2), `limitations.md`, `issue_ledger.md` `AAA-168` | M2 is "a runaway through the previous-error feedback channel"; the refined hypothesis is a learned closed-loop gain above one | **falsified** (`AAA-170`): the gain is ~0.2–0.5 at onset and crosses one only 500–3000 steps later (H24), and lr 0.01 never runs away (H27). M2 is a self-confirming target-unfolding frame lock (H32–H34). The previous-error input sustains it but does not cause it |
+| `loop_pilot_report.md` | round 3's two burst cells are "by signature" the likely product of M2 | **confirmed**: re-running round 3 with the repair changes exactly those two cells (and nothing else in 720 cells and 180 trials), improving them by 56% and 62% |
+| `aaa_1k_report.md`, `aaa_1k_architecture.md` | the champion is stable in online learning on the benchmark families | true at round 3's horizons (≤ 280 steps); at 1120 steps Champion 0 diverges in about a fifth to a third of quantized coarse cells. Champion 1 does not |

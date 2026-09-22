@@ -88,6 +88,10 @@ jobs:
         run: |
           python -m research.aaa_1k_loop champion --verify
           python -m research.aaa_1k_loop validate
+          python -m research.aaa_1k_loop.champion1 verify
+          python -m research.aaa_1k_loop.recompute4 \
+            --confirmation docs/evidence/aaa1k_loop_0006/confirmation_2.json \
+            --freeze docs/evidence/aaa1k_loop_0006/freeze_2.json
           python -m research.aaa_1k_loop reproduce observe
 
       - name: Canonical specification identity

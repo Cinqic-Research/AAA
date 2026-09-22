@@ -208,7 +208,7 @@ def adjudicate4d(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
 
     counts = {name: sum(_diverged(r, name) for r in coarse) for name in LEARNERS}
     reference = counts["gru"]
-    probes = {}
+    probes: dict[str, tuple[str, float | None]] = {}
     for name in ("probe:gru_no_unfold", "probe:gru_unfold_dr"):
         if reference < MINIMUM_CELLS:
             probes[name] = ("INSUFFICIENT_EVIDENCE", None)

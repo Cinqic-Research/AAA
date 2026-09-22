@@ -153,6 +153,41 @@ remains `v0-pilot` until a real challenger completes fresh confirmation.
    ledgered. Scratch identities may never satisfy development, attack or
    confirmation criteria and every look must be recorded.
 
+## Status after iterations 0004–0006 (2026-09-22)
+
+The seven gaps above were made hard rules in `research/aaa_1k_loop/iteration4.py`
+before any iteration-0004 development identity was observed, and iterations
+0005 and 0006 imported the same judgement functions unchanged:
+
+1. **Candidate budget:** a precommitted budget per iteration (two, one, one).
+2. **Screen-failed tradeoff candidates:** a failed screen is a veto; none
+   advanced.
+3. **Screens without uncertainty:** non-inferiority on crossed-bootstrap
+   interval bounds; a straddling interval is not a PASS (it stopped c7).
+4. **Attack instruments:** only instruments validated earlier in the
+   iteration.
+5. **Generic freeze:** `freeze.py` takes an iteration-specific source set;
+   `recompute4.py` is iteration-agnostic.
+6. **Claims as challengers:** not exercised.
+7. **Unregistered observations:** a scratch block for shakedowns. The two
+   post-hoc looks at already-observed cells are disclosed in the records.
+
+Stability is a primary gate of screen, attack and confirmation. Every
+confirmation criterion is three-valued, and borderline evidence resolves to
+INCONCLUSIVE (audit R-04).
+
+**The outer path has run once for real** (iteration 0006: freeze, durable
+remote claim, fresh confirmation, independent recomputation, PROMOTE). Its
+first attempt aborted before observation on an admission defect (`AAA-171`);
+the burned identities were not reused. The version remains `v0-pilot` pending
+an independent review of that work. See
+[`loop_report_0004_0006.md`](loop_report_0004_0006.md).
+
+Post-audit iterations run from `research/aaa_1k_loop/stages4.py`
+(diagnoses) and `outer4.py`/`outer5.py`/`outer6.py` (develop, attack,
+freeze, confirm). Their confirmation paths import only their own frozen
+source sets (tested).
+
 ## Running an iteration
 
 The pilot's commands are in [`loop_pilot_handoff.md`](loop_pilot_handoff.md).

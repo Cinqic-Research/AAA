@@ -66,6 +66,12 @@ CONFIRMATION_SOURCES = (
     "research/aaa_1k_loop/observation.py",
     "research/aaa_1k_loop/recompute.py",
     "research/aaa_1k_loop/records.py",
+    # reached from cli.py's records/validate commands since the post-audit records exist
+    "research/aaa_1k_loop/records4.py",
+    "research/aaa_1k_loop/iteration4.py",
+    "research/aaa_1k_loop/iteration5.py",
+    "research/aaa_1k_loop/iteration6.py",
+    "research/aaa_1k_loop/unfolding.py",
 )
 """Loop modules on the confirmation path, in addition to every AAA-1K phase file."""
 

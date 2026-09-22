@@ -166,7 +166,7 @@ def diagnostic_cells(
     if block["role"] != "diagnostic":
         raise ValueError("diagnosis round 4b must run on a diagnostic block")
     seeds = block_seeds(find_block(ledger, block_id))[:streams]
-    cells = []
+    cells: list[Cell] = []
     for condition, options in CONDITIONS.items():
         steps = max(WINDOW * 4, int(options["steps"] * step_scale))
         for seed in seeds:
@@ -270,8 +270,10 @@ def _fraction_verdict(hits: int, total: int) -> tuple[str, float | None]:
     ), fraction
 
 
-def _arm(record: Mapping[str, Any], name: str) -> Mapping[str, Any] | None:
-    return record["arms"].get(name)
+def _arm(record: Mapping[str, Any], name: str) -> Mapping[str, Any]:
+    """The arm's reduction, or an empty (falsy) mapping when the arm failed in that cell."""
+
+    return record["arms"].get(name, {})
 
 
 def _failed(record: Mapping[str, Any], name: str) -> bool:
@@ -280,10 +282,10 @@ def _failed(record: Mapping[str, Any], name: str) -> bool:
 
 def adjudicate4b(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     coarse = [r for r in records if r["condition"] in COARSE_CONDITIONS]
-    champion = [(r, _arm(r, "gru")) for r in coarse if _arm(r, "gru") is not None]
+    champion = [(r, _arm(r, "gru")) for r in coarse if _arm(r, "gru")]
     diverged = [a for _r, a in champion if a["diverged"]]
     stable = [a for _r, a in champion if not a["diverged"]]
-    failed_champion = sum(_failed(r, "gru") for r in coarse)
+    failed_champion = sum(int(_failed(r, "gru")) for r in coarse)
 
     h24_hits = sum(
         1
@@ -321,10 +323,10 @@ def adjudicate4b(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         if r["condition"] == "coarse_no_switch" and _arm(r, "gru") and _arm(r, "gru_lr0.01")
     ]
     champion_prefix = sum(1 for r in paired if _arm(r, "gru")["prefix_diverged"]) + sum(
-        _failed(r, "gru") for r in records if r["condition"] == "coarse_no_switch"
+        int(_failed(r, "gru")) for r in records if r["condition"] == "coarse_no_switch"
     )
     slow_full = sum(1 for r in paired if _arm(r, "gru_lr0.01")["diverged"]) + sum(
-        _failed(r, "gru_lr0.01") for r in records if r["condition"] == "coarse_no_switch"
+        int(_failed(r, "gru_lr0.01")) for r in records if r["condition"] == "coarse_no_switch"
     )
     if champion_prefix < MINIMUM_CELLS:
         h27, r27 = "INSUFFICIENT_EVIDENCE", None
@@ -356,7 +358,7 @@ def adjudicate4b(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
                 "cells": len(rows),
                 "diverged": sum(1 for r in rows if _arm(r, name) and _arm(r, name)["diverged"]),
                 "prefix_diverged": sum(1 for r in rows if _arm(r, name) and _arm(r, name)["prefix_diverged"]),
-                "failed": sum(_failed(r, name) for r in rows),
+                "failed": sum(int(_failed(r, name)) for r in rows),
                 "crossed": sum(
                     1 for r in rows if _arm(r, name) and _arm(r, name)["gain_crossing"] is not None
                 ),

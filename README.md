@@ -154,6 +154,17 @@ instability round 3 never measured, and flagged a documented claim as
 unsupported. It never reached fresh confirmation, and the protocol is not yet
 permanent. Read [`docs/loop_pilot_report.md`](docs/loop_pilot_report.md).
 
+Iterations 0004–0006 answered an external audit. The online TBPTT rule is an
+approximation, but a numerically negligible one. The long-horizon runaway (M2)
+is a self-confirming target-unfolding frame lock, not an optimization
+instability. Three candidate fixes were rejected at a precommitted,
+uncertainty-aware screen. The fourth survived attack, **fresh confirmation**
+and independent recomputation, and became **Champion 1**: the same 994-parameter
+network with one target rule changed, 21% → 0% long-horizon divergence, and
+bitwise identical to Champion 0 in 718 of 720 round-3 cells (the other two
+improve). This was the loop's first real run through its outer path. Read
+[`docs/loop_report_0004_0006.md`](docs/loop_report_0004_0006.md).
+
 ## The learner
 
 Feature vector, from the last four observed positions only:
@@ -229,7 +240,10 @@ python -m research.aaa_1k recompute   --evidence docs/evidence/aaa_1k_evaluation
 python -m research.aaa_1k visualize --family occlusion_v1 --output runs/aaa_1k/dashboard.png
 
 # improvement-loop pilot
-python -m research.aaa_1k_loop validate           # iteration records, Champion 0, identity ledger
+python -m research.aaa_1k_loop validate           # iteration records 0001-0006, Champion 0, identity ledger
+python -m research.aaa_1k_loop.champion1 verify   # Champion 1's record against the repository
+python -m research.aaa_1k_loop.recompute4 --confirmation docs/evidence/aaa1k_loop_0006/confirmation_2.json \
+    --freeze docs/evidence/aaa1k_loop_0006/freeze_2.json   # independent PROMOTE recomputation
 python -m research.aaa_1k_loop reproduce diagnose2 # rerun a stage; committed primitives must reappear exactly
 ```
 
@@ -269,6 +283,7 @@ result, and this repository is built to report that rather than to avoid it.
 | [Loop protocol](docs/loop_protocol.md) | the pilot improvement loop, what enforces it, and its known gaps |
 | [Loop pilot report](docs/loop_pilot_report.md) | three iterations on AAA-1K, eight rejections, and an evaluation of the loop itself |
 | [Loop pilot handoff](docs/loop_pilot_handoff.md) | reproduction commands and what an independent reviewer should challenge |
+| [Loop iterations 0004–0006](docs/loop_report_0004_0006.md) | the audit response: TBPTT semantics, M2's mechanism, the first real confirmation, Champion 1 |
 | [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
 | [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
 | [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |

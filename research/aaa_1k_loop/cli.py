@@ -739,7 +739,9 @@ def command_validate(_args: argparse.Namespace) -> int:
 
     root = project_root()
     failures = 0
-    entries = [(iteration_id, path, decide) for iteration_id, (_builder, path) in RECORDS.items()]
+    entries: list[tuple[str, str, Any]] = [
+        (iteration_id, path, decide) for iteration_id, (_builder, path) in RECORDS.items()
+    ]
     entries += [(iteration_id, path, fn) for iteration_id, (_builder, path, fn) in RECORDS_POST_AUDIT.items()]
     for iteration_id, path, decision in entries:
         try:

@@ -63,14 +63,14 @@ def champion_1_world() -> Iterator[None]:
     import research.aaa_1k.measurements as measurements_module
 
     modules = (agents_module, experiments_module, measurements_module)
-    saved = [module.NeuralAgent for module in modules]
+    saved = [getattr(module, "NeuralAgent") for module in modules]  # noqa: B009
     for module in modules:
-        module.NeuralAgent = ReachGatedUnfoldAgent
+        setattr(module, "NeuralAgent", ReachGatedUnfoldAgent)  # noqa: B010
     try:
         yield
     finally:
         for module, original in zip(modules, saved, strict=True):
-            module.NeuralAgent = original
+            setattr(module, "NeuralAgent", original)  # noqa: B010
 
 
 def run_round3_champion_1(root: Path) -> dict[str, Any]:
