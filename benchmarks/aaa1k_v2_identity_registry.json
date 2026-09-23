@@ -1405,280 +1405,311 @@
       "block_id": "v2-capacity-init",
       "count": 5,
       "namespace": "init",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity model initializations",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.v1_motion_straight",
       "count": 8,
       "namespace": "env.v1_motion_straight",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of v1_motion_straight",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.v1_motion_bouncing",
       "count": 8,
       "namespace": "env.v1_motion_bouncing",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of v1_motion_bouncing",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.v1_motion_changed",
       "count": 8,
       "namespace": "env.v1_motion_changed",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of v1_motion_changed",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.v1_motion_dynamics",
       "count": 8,
       "namespace": "env.v1_motion_dynamics",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of v1_motion_dynamics",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.v1_occlusion",
       "count": 8,
       "namespace": "env.v1_occlusion",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of v1_occlusion",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.v1_coarse_speed",
       "count": 8,
       "namespace": "env.v1_coarse_speed",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of v1_coarse_speed",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.v1_aba",
       "count": 8,
       "namespace": "env.v1_aba",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of v1_aba",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.long_bouncing",
       "count": 8,
       "namespace": "env.long_bouncing",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of long_bouncing",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.long_coarse",
       "count": 8,
       "namespace": "env.long_coarse",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of long_coarse",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.random_gaps",
       "count": 8,
       "namespace": "env.random_gaps",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of random_gaps",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.wall_gaps",
       "count": 8,
       "namespace": "env.wall_gaps",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of wall_gaps",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.long_gap_recall",
       "count": 8,
       "namespace": "env.long_gap_recall",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of long_gap_recall",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.stationary_mixed",
       "count": 8,
       "namespace": "env.stationary_mixed",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of stationary_mixed",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.noise",
       "count": 8,
       "namespace": "env.noise",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of noise",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.change_gaps",
       "count": 8,
       "namespace": "env.change_gaps",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of change_gaps",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.quantized",
       "count": 8,
       "namespace": "env.quantized",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of quantized",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.oscillator_long",
       "count": 8,
       "namespace": "env.oscillator_long",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of oscillator_long",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.noise_gaps",
       "count": 8,
       "namespace": "env.noise_gaps",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of noise_gaps",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.change_noise",
       "count": 8,
       "namespace": "env.change_noise",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of change_noise",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.accel_switch",
       "count": 8,
       "namespace": "env.accel_switch",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of accel_switch",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.coarse_near",
       "count": 8,
       "namespace": "env.coarse_near",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of coarse_near",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.long_gap_recall_extended",
       "count": 8,
       "namespace": "env.long_gap_recall_extended",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of long_gap_recall_extended",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.gravity_bounce",
       "count": 8,
       "namespace": "env.gravity_bounce",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of gravity_bounce",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.soft_wall",
       "count": 8,
       "namespace": "env.soft_wall",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of soft_wall",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.inelastic_wall",
       "count": 8,
       "namespace": "env.inelastic_wall",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of inelastic_wall",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-env.abcab",
       "count": 8,
       "namespace": "env.abcab",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity streams of abcab",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-ext.narma10",
       "count": 3,
       "namespace": "ext.narma10",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity realizations of narma10",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-ext.narma20",
       "count": 3,
       "namespace": "ext.narma20",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity realizations of narma20",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-ext.mackey_glass17",
       "count": 3,
       "namespace": "ext.mackey_glass17",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity realizations of mackey_glass17",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-capacity-bootstrap",
       "count": 64,
       "namespace": "bootstrap",
+      "observed_by": "capacity:capacity.json",
       "purpose": "capacity bootstrap generator seeds",
       "role": "capacity",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-qualification-init",
