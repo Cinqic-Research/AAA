@@ -213,8 +213,10 @@ evidence, so they are characterizations rather than confirmed claims.
   weights; `AAA-169`). It is numerically negligible here, but it is not the
   exact truncated gradient the model docstring claims.
 - **The v2.1 core RLS learner** uses the same own-prediction unfolding and is
-  untested for the lock (`AAA-172`).
-- **M1** (the Q4 memory-family deficit) is unchanged in Champion 1.
+  untested for the lock (`AAA-172`). *Tested in `aaa.1k.v2`: no lock, no
+  stall (see below).*
+- **M1** (the Q4 memory-family deficit) is unchanged in Champion 1. *Diagnosed
+  in `aaa.1k.v2` as a coarse-observation operating-point effect (see below).*
 
 ## After `aaa.1k.v2` (2026-09-23)
 

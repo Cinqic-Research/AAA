@@ -120,9 +120,11 @@ initializations. Round 3 uses fresh identities and corrected designs.
 - **persistent hidden state helps on these families** -- it beats both the
   direct state-reset ablation and matched stateless control;
 - **it adapts on the paired-change benchmark**: the change-specific component
-  is `+5.12e-04` and 43% of the combined online advantage;
+  is `+5.12e-04` and 43% of the combined online advantage. *This did not
+  replicate on fresh identities in `aaa.1k.v2`* (see below);
 - **no forgetting was measured on the fixed probe bank**, but the corrected
-  interval crosses zero; this is not general retention immunity;
+  interval crosses zero; this is not general retention immunity (`aaa.1k.v2`
+  later resolved it in the good direction on fresh identities);
 - **whether gating pays for itself is inconclusive**. Round 1 said it loses;
   that did not survive giving the ungated control its own rule-selected
   learning rate. Gating does buy stability -- the ungated arm diverges at a
