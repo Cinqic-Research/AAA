@@ -105,10 +105,11 @@ have affected a promotion. Both are recorded as `AAA-180`.
 | `inelastic_wall` | held-out | +0.0% | -0.1% | +10.7% ↑ | +63.4% ↑ | +174.5% ↑ | +77.3% ↑ | +102.7% ↑ | +88.3% ↑ | +114.0% ↑ | +83.7% ↑ | +53.6% ↑ |
 | `abcab` | held-out | +0.0% | -0.6% | +34.7% ↑ | +38.8% ↑ | +44.9% ↑ | +30.9% ↑ | +50.3% ↑ | +50.1% ↑ | +253.2% ↑ | +29.3% ↑ | +40.0% ↑ |
 
-Read across rows: the families where anything beats Champion 1 are the coarse-observation families
-(`v1_coarse_speed`, `long_coarse`, `quantized`, `coarse_near`) and some noisy ones, which is the M1
-pattern diagnosed in V2-D16. On the held-out families (`gravity_bounce`, `soft_wall`, `inelastic_wall`,
-`abcab`), which no selection ever saw, every candidate is worse than Champion 1.
+Read across rows: the clearest candidate gains over Champion 1 concentrate in the coarse-observation
+families (`v1_coarse_speed`, `long_coarse`, `quantized`, `coarse_near`) and some noisy ones, which is
+the M1 pattern diagnosed in V2-D16. Small favourable ablation differences also occur outside those
+families. On the held-out families (`gravity_bounce`, `soft_wall`, `inelastic_wall`, `abcab`), which no
+selection ever saw, every named candidate is worse than Champion 1.
 
 ## The error head
 
@@ -117,13 +118,13 @@ pattern diagnosed in V2-D16. On the held-out families (`gravity_bounce`, `soft_w
 * `c1_champion1:no_error_input`: mean Spearman correlation of the error head with realized error 0.246, mean calibration slope 0.381 (3328 cells).
 * `c1_champion1:state_reset`: mean Spearman correlation of the error head with realized error 0.363, mean calibration slope 0.383 (3328 cells).
 
-Removing the error head's loss term leaves prediction unchanged (K3 ratio at 1.000 above), so the head's
-training signal neither helps nor hurts prediction. Removing the error *input* (the fed-back previous
+Removing the error head's loss term has no material predictive effect here (K3 ratio
+1.000 with a 95% interval of [0.998, 1.002]). Removing the error *input* (the fed-back previous
 error) is clearly harmful, on stress and even more on external tasks. The useful part of the error
 pathway is the recurrent error feedback, not the auxiliary objective. As an uncertainty signal the head
 is weak on fresh identities: it ranks errors only loosely and under-predicts their scale (the
-correlation and slope above). Keeping it costs 34 parameters and no accuracy; it is retained because
-Champion 1 is frozen, not because it earned its place.
+correlation and slope above). Keeping it costs 34 parameters without a measured accuracy gain;
+it is retained because Champion 1 is frozen, not because it earned its place.
 
 ## External benchmarks
 
@@ -152,8 +153,9 @@ Champion 1 beats ar_rls on 11 of 15 tasks, persistence on 15 of 15 tasks. ar_rls
 ## Monash forecasting archive
 
 Mean forecast MASE on the archive's test horizons. The published methods fit offline, often as global
-models across series; AAA models learn online per series and forecast recursively, so the comparison is
-same data, horizon and metric, not same regime (`docs/aaa_1k_v2_external_benchmarks.md`).
+models across series; AAA models learn online per series and forecast recursively. Dataset names,
+horizons and metrics are aligned where verifiable, but training regimes differ. The published
+`aus_elec_demand` row is matched by name only (`docs/aaa_1k_v2_external_benchmarks.md`).
 
 | Dataset | series | `c1_champion1` | `elman_v2` | `gru_v1_keep-2` | `gru_v1_retuned` | `gru_v2` | `lru_v2` | `mgu_v2` | persistence | seasonal naive | AR-RLS | best published |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -162,10 +164,10 @@ same data, horizon and metric, not same regime (`docs/aaa_1k_v2_external_benchma
 | `aus_elec_demand` | 5 | 2.986 | 30.681 | 5.477 | 8.161 | 3.400 | 2.580 | 15.142 | 2.844 | 2.042 | 2.261 | 0.705 (CatBoost) |
 | `fred_md` | 107 | 0.739 | 0.569 | 0.628 | 0.629 | 0.613 | 0.625 | 0.647 | 0.622 | 1.101 | 0.470 | 0.468 (ETS) |
 
-No AAA-1K model is competitive with the best published methods on these datasets; on the strongly
-seasonal ones a seasonal-naive forecast beats every online model, because a 1K online learner
-forecasting recursively has no seasonal memory at those periods. The Monash rows are an honest
-out-of-domain check, not a target this phase optimized.
+The best published MASE is below every AAA arm on saugeen, m4_hourly, aus_elec_demand, fred_md. A seasonal-naive
+forecast is below every AAA arm on m4_hourly, aus_elec_demand. These descriptive rows use the same
+dataset labels and metric but different training regimes. They do not isolate why the online recursive
+models lag, and this phase did not optimize for these datasets.
 
 ## Champion 1's capability vector on fresh identities
 
@@ -282,9 +284,8 @@ everything else unchanged, on fresh capacity identities. Relative MAE against th
 
 Verdict by the predeclared rule: **NOT_CAPACITY_LIMITED**. Families improving by more than 5% at ~4K with an
 interval below zero: `v1_aba`, `oscillator_long`, `accel_switch`, `gravity_bounce`, `abcab` (5 of 26; monotone: 5).
-Four times the parameters buys 10-20% on the memory-heavy families (`v1_aba`, `abcab`,
-`oscillator_long`, `accel_switch`, `gravity_bounce`) and little elsewhere; the coarse-observation deficit
-(M1) does not move with width at all. The remaining failures are therefore not primarily a capacity
+At ~4K these 5 families improve by 9.7% to 20.6% in relative MAE; the coarse-observation deficit (M1) does not materially
+improve with width. The remaining failures are therefore not primarily a capacity
 limit at 1K: they are the operating point on coarse streams (M1) and memory horizon on segment-recall
 families.
 

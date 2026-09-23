@@ -229,14 +229,18 @@ evidence, so they are characterizations rather than confirmed claims.
 - **Round 3's adaptation claim (Q2) did not replicate** on fresh confirmation
   identities: -1.8e-05 [-3.9e-04, +4.3e-04]. Round 3's evidence is unchanged,
   but "continued learning helps because the world changed" is no longer a
-  supported property of Champion 1.
+  supported property of Champion 1. A diagnostic replay of all 120 historical
+  cells found exact primitive parity between the historical and batched v2
+  measurement paths, including Champion 1. This narrows the discrepancy to
+  fresh identities and their statistical variation on the tested design; it
+  does not turn the replay into new confirmation evidence.
 - **M1 remains.** Champion 1 is 28% worse than an ungated Elman cell on
   `v1_coarse_speed` and similarly on the other coarse-observation families. A
   keep-gate bias closes most of the gap but costs occlusion accuracy, and width
   does not help (capacity `NOT_CAPACITY_LIMITED`).
 - **The error head is a weak uncertainty signal** on fresh identities (rank
-  correlation about 0.30, slope about 0.40), and its loss term does not affect
-  accuracy.
+  correlation about 0.30, slope about 0.40); its loss term has no material
+  measured accuracy effect at the reported precision.
 - **External benchmarks are descriptive.** On Monash, AAA-1K models learn
   online per series and forecast recursively, unlike the published offline
   methods, and they are not competitive with the best of them. The
@@ -248,4 +252,5 @@ evidence, so they are characterizations rather than confirmed claims.
   reproduction elsewhere (`AAA-173`).
 - **`AAA-180`**: the v2 confirmation's K5 omitted Monash, and its two K5
   implementations disagree on a single-series dataset. There was no effect
-  here (no challenger), but a later phase must fix it before any promotion.
+  here (no challenger). A versioned successor must repair and test this before
+  any future promotion; frozen v2 K5 cannot be reused as a promotion path.

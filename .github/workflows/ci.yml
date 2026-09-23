@@ -106,6 +106,7 @@ jobs:
           python -m research.aaa_1k_v2 recompute --freeze docs/evidence/aaa_1k_v2/freeze.json \
             --confirmation docs/evidence/aaa_1k_v2/confirmation.json
           python tools/write_aaa_1k_v2_report.py --check
+          python tools/check_adaptation_parity.py
 
       - name: Canonical specification identity
         run: python -m aaa.cli spec-hash

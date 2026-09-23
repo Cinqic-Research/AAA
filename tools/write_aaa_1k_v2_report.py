@@ -287,6 +287,7 @@ def build() -> str:
     ]
     disagreements = []
     ratios: dict[str, tuple[str, str]] = {}
+    error_loss_k3: Mapping[str, Any] | None = None
 
     def state_of(arm: str) -> int:
         from research.aaa_1k_v2.arms import audit
@@ -302,6 +303,8 @@ def build() -> str:
             continue
         d = descriptive(conf, manifest, registry, arm)
         crit = d["decide"]["criteria"]
+        if arm == "c1_champion1:no_error_head_loss":
+            error_loss_k3 = crit["K3_stress_improvement"]
         st = d["decide"]["statuses"]
         agree = "yes" if d["agree"] else "**no**"
         if not arm.startswith("c1_champion1:"):
@@ -321,6 +324,8 @@ def build() -> str:
         f"| `{arm}` | {arms_frozen[arm]['spec']['core']['parameters']} | {state_of(arm)} | {ratios[arm][0]} | {ratios[arm][1]} |"
         for arm in sorted(ratios, key=lambda a: ratios[a][0])
     ]
+    if error_loss_k3 is None:
+        raise ValueError("missing no-error-head-loss ablation in the frozen arms")
     out += [
         "",
         f"Champion 1 itself: {sum(1 for c in conf['primitives']['c1_champion1'] if c.get('failed'))} failed cells of"
@@ -346,10 +351,11 @@ def build() -> str:
     out += family_table(conf, [a for a in arms_frozen if a != "c1_champion1"])
     out += [
         "",
-        "Read across rows: the families where anything beats Champion 1 are the coarse-observation families",
-        "(`v1_coarse_speed`, `long_coarse`, `quantized`, `coarse_near`) and some noisy ones, which is the M1",
-        "pattern diagnosed in V2-D16. On the held-out families (`gravity_bounce`, `soft_wall`, `inelastic_wall`,",
-        "`abcab`), which no selection ever saw, every candidate is worse than Champion 1.",
+        "Read across rows: the clearest candidate gains over Champion 1 concentrate in the coarse-observation",
+        "families (`v1_coarse_speed`, `long_coarse`, `quantized`, `coarse_near`) and some noisy ones, which is",
+        "the M1 pattern diagnosed in V2-D16. Small favourable ablation differences also occur outside those",
+        "families. On the held-out families (`gravity_bounce`, `soft_wall`, `inelastic_wall`, `abcab`), which no",
+        "selection ever saw, every named candidate is worse than Champion 1.",
         "",
         "## The error head",
         "",
@@ -372,13 +378,15 @@ def build() -> str:
         )
     out += [
         "",
-        "Removing the error head's loss term leaves prediction unchanged (K3 ratio at 1.000 above), so the head's",
-        "training signal neither helps nor hurts prediction. Removing the error *input* (the fed-back previous",
+        "Removing the error head's loss term has no material predictive effect here (K3 ratio",
+        f"{error_loss_k3['geometric_ratio']:.3f} with a 95% interval of "
+        f"[{error_loss_k3['lower']:.3f}, {error_loss_k3['upper']:.3f}]). "
+        "Removing the error *input* (the fed-back previous",
         "error) is clearly harmful, on stress and even more on external tasks. The useful part of the error",
         "pathway is the recurrent error feedback, not the auxiliary objective. As an uncertainty signal the head",
         "is weak on fresh identities: it ranks errors only loosely and under-predicts their scale (the",
-        "correlation and slope above). Keeping it costs 34 parameters and no accuracy; it is retained because",
-        "Champion 1 is frozen, not because it earned its place.",
+        "correlation and slope above). Keeping it costs 34 parameters without a measured accuracy gain;",
+        "it is retained because Champion 1 is frozen, not because it earned its place.",
         "",
         "## External benchmarks",
         "",
@@ -421,8 +429,9 @@ def build() -> str:
         "## Monash forecasting archive",
         "",
         "Mean forecast MASE on the archive's test horizons. The published methods fit offline, often as global",
-        "models across series; AAA models learn online per series and forecast recursively, so the comparison is",
-        "same data, horizon and metric, not same regime (`docs/aaa_1k_v2_external_benchmarks.md`).",
+        "models across series; AAA models learn online per series and forecast recursively. Dataset names,",
+        "horizons and metrics are aligned where verifiable, but training regimes differ. The published",
+        "`aus_elec_demand` row is matched by name only (`docs/aaa_1k_v2_external_benchmarks.md`).",
         "",
         "| Dataset | series | "
         + " | ".join(f"`{a}`" for a in manifest["frozen"]["monash_arms"])
@@ -436,12 +445,24 @@ def build() -> str:
         row += [_f(entry["baselines"][n]["mean_mase"]) for n in ("persistence", "seasonal_naive", "ar_rls")]
         row.append(f"{best[1]:.3f} ({best[0]})")
         out.append("| " + " | ".join(row) + " |")
+    monash_arms = manifest["frozen"]["monash_arms"]
+    published_below_all = [
+        task.split(":", 1)[1]
+        for task, entry in summary.items()
+        if min(entry["published"].values()) < min(entry["arms"][a]["mean_mase"] for a in monash_arms)
+    ]
+    seasonal_below_all = [
+        task.split(":", 1)[1]
+        for task, entry in summary.items()
+        if entry["baselines"]["seasonal_naive"]["mean_mase"]
+        < min(entry["arms"][a]["mean_mase"] for a in monash_arms)
+    ]
     out += [
         "",
-        "No AAA-1K model is competitive with the best published methods on these datasets; on the strongly",
-        "seasonal ones a seasonal-naive forecast beats every online model, because a 1K online learner",
-        "forecasting recursively has no seasonal memory at those periods. The Monash rows are an honest",
-        "out-of-domain check, not a target this phase optimized.",
+        f"The best published MASE is below every AAA arm on {', '.join(published_below_all)}. A seasonal-naive",
+        f"forecast is below every AAA arm on {', '.join(seasonal_below_all)}. These descriptive rows use the same",
+        "dataset labels and metric but different training regimes. They do not isolate why the online recursive",
+        "models lag, and this phase did not optimize for these datasets.",
         "",
         "## Champion 1's capability vector on fresh identities",
         "",
@@ -460,6 +481,7 @@ def build() -> str:
         )
     adapt = _crossed_mean(capability["adaptation"], "difference_of_differences", boot[7] % 2**32)
     forget = _crossed_mean(capability["retention"], "forgetting", boot[8] % 2**32)
+    gains_4k = [100 * cap["comparisons"][f]["4000"]["relative"] for f in cap["improving_at_4k"]]
     out += [
         "",
         "* **Online learning.** Continued learning beats a bitwise-identical frozen twin on every family (ratio",
@@ -546,9 +568,9 @@ def build() -> str:
         f"Verdict by the predeclared rule: **{cap['verdict']}**. Families improving by more than 5% at ~4K with an",
         f"interval below zero: {', '.join(f'`{f}`' for f in cap['improving_at_4k'])}"
         f" ({len(cap['improving_at_4k'])} of 26; monotone: {len(cap['monotone_improving'])}).",
-        "Four times the parameters buys 10-20% on the memory-heavy families (`v1_aba`, `abcab`,",
-        "`oscillator_long`, `accel_switch`, `gravity_bounce`) and little elsewhere; the coarse-observation deficit",
-        "(M1) does not move with width at all. The remaining failures are therefore not primarily a capacity",
+        f"At ~4K these {len(gains_4k)} families improve by {abs(max(gains_4k)):.1f}% to "
+        f"{abs(min(gains_4k)):.1f}% in relative MAE; the coarse-observation deficit (M1) does not materially",
+        "improve with width. The remaining failures are therefore not primarily a capacity",
         "limit at 1K: they are the operating point on coarse streams (M1) and memory horizon on segment-recall",
         "families.",
         "",

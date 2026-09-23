@@ -122,9 +122,10 @@ initializations. Round 3 uses fresh identities and corrected designs.
 - it **learns online** on every family;
 - **persistent hidden state helps on these families** -- it beats both the
   direct state-reset ablation and matched stateless control;
-- **it adapts on the paired-change benchmark**: the change-specific component
-  is `+5.12e-04` and 43% of the combined online advantage. *This did not
-  replicate on fresh identities in `aaa.1k.v2`* (see below);
+- **round 3 measured a positive paired-change effect**: the change-specific
+  component was `+5.12e-04` and 43% of the combined online advantage. It did
+  not replicate on fresh identities in `aaa.1k.v2`, so a general adaptation
+  claim is unsupported (see below);
 - **no forgetting was measured on the fixed probe bank**, but the corrected
   interval crosses zero; this is not general retention immunity (`aaa.1k.v2`
   later resolved it in the good direction on fresh identities);
