@@ -1,0 +1,167 @@
+"""Independent recomputation of an ``aaa.python.v0`` development run.
+
+Three checks, each failing closed:
+
+1. **Records.** The per-action records match the digest and count the evidence
+   declares.
+2. **Evaluator.** Every scored task is regenerated from its identity, its
+   program (and, for repair, every candidate against the reference) is
+   re-executed by CPython, and the answer is derived by this module's own
+   mapping. It does not use the generator's ``answer_from``. Each record's
+   ``truth`` must equal it, and each record's ``correct`` must equal
+   ``answer == truth and not abstain``.
+3. **Primitives.** Cell counts are re-aggregated from the records by a separate
+   loop and compared with the stored cells; the summary is recomputed from the
+   stored cells and compared with the stored summary.
+
+A stored value is never trusted because it is stored.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+from collections.abc import Mapping, Sequence
+from typing import Any
+
+from . import generator
+from . import spec as spec_module
+from .experiment import Plan, records_sha256, summarize
+from .oracle import check_syntax, execute
+
+
+class RecomputeError(RuntimeError):
+    pass
+
+
+def _refuse_constant(token: str) -> Any:
+    raise RecomputeError(f"non-standard JSON constant {token}")
+
+
+def load_evidence(text: str) -> dict[str, Any]:
+    payload = json.loads(text, parse_constant=_refuse_constant)
+    if not isinstance(payload, dict) or payload.get("schema") != "aaa.python.v0.development.v1":
+        raise RecomputeError("not an aaa.python.v0 development evidence document")
+    return payload
+
+
+def _oracle_truth(task: generator.Task) -> Any:
+    """The answer, re-derived from fresh CPython executions (independent of the generator's mapping)."""
+
+    if task.family == "syntax":
+        status = check_syntax(task.source).status
+        if status not in ("valid", "syntax_error"):
+            raise RecomputeError(f"{task.task_id}: sandbox returned {status}")
+        return "valid" if status == "valid" else "invalid"
+    if task.family == "repair":
+        assert task.repair_line is not None
+        lines = task.source.rstrip("\n").split("\n")
+        inputs = [i for i, _ in (*task.visible_tests, *task.hidden_tests)]
+        passing = []
+        for index, candidate in enumerate(task.candidates):
+            patched = [*lines[: task.repair_line - 1], candidate, *lines[task.repair_line :]]
+            program = "\n".join(patched + [f"print(f({value}))" for value in inputs]) + "\n"
+            outcome = execute(program)
+            observed = outcome.stdout.split() if outcome.status == "ok" else []
+            expected = [str(o) for _, o in task.hidden_tests]
+            if observed[len(task.visible_tests) :] == expected:
+                passing.append(index)
+        if len(passing) != 1:
+            raise RecomputeError(f"{task.task_id}: {len(passing)} candidates pass the hidden tests")
+        return passing[0]
+    outcome = execute(task.source)
+    if task.family == "outcome":
+        if outcome.status == "ok":
+            return "ok"
+        if outcome.status != "exception":
+            raise RecomputeError(f"{task.task_id}: sandbox returned {outcome.status}")
+        return outcome.exception
+    if task.family == "output":
+        if outcome.status != "ok":
+            raise RecomputeError(f"{task.task_id}: output program did not run cleanly")
+        return int(outcome.stdout.strip())
+    if task.family == "localize":
+        if outcome.status != "exception" or outcome.line is None:
+            raise RecomputeError(f"{task.task_id}: localization program did not fail")
+        return outcome.line
+    raise RecomputeError(f"unknown family {task.family}")
+
+
+def _tasks_by_id(task_ids: set[str]) -> dict[str, generator.Task]:
+    wanted: dict[tuple[str, str], list[int]] = {}
+    for identity in task_ids:
+        protocol, split, family, index = identity.split(":")
+        if protocol != "aaa.python.v0" or split not in ("development", "probe"):
+            raise RecomputeError(f"record names a task outside development/probe: {identity}")
+        wanted.setdefault((split, family), []).append(int(index))
+    tasks: dict[str, generator.Task] = {}
+    for (split, family), indices in wanted.items():
+        for task in generator.build(split, family, sorted(indices)):
+            tasks[task.task_id] = task
+    return tasks
+
+
+def verify(evidence: Mapping[str, Any], records: Sequence[Mapping[str, Any]] | None) -> dict[str, Any]:
+    spec = spec_module.load()
+    problems: list[str] = []
+    if evidence.get("spec_sha256") != spec_module.canonical_hash(spec):
+        problems.append("the evidence was produced under a different specification")
+    plan = Plan(
+        **{
+            **evidence["plan"],
+            "representations": tuple(evidence["plan"]["representations"]),
+            "adaptation_families": tuple(evidence["plan"]["adaptation_families"]),
+        }
+    )
+    recomputed_summary = summarize(evidence["cells"], plan, spec)
+    if json.dumps(recomputed_summary, sort_keys=True) != json.dumps(evidence["summary"], sort_keys=True):
+        problems.append("the summary does not recompute from the stored cells")
+    result: dict[str, Any] = {"summary_recomputed": not problems}
+    if records is None:
+        result.update(records_checked=False, problems=problems, verdict="FAIL" if problems else "PASS")
+        return result
+    if (
+        len(records) != evidence["records"]["count"]
+        or records_sha256(records) != evidence["records"]["sha256"]
+    ):
+        problems.append("the records do not match the declared count and digest")
+    totals: dict[tuple[str, str, int, int], list[int]] = {}
+    for record in records:
+        key = (record["arm"], record["family"], record["init"], record["stream"])
+        row = totals.setdefault(key, [0, 0, 0, 0])
+        row[0] += 1
+        row[1] += 1 if record["correct"] else 0
+        row[2] += 1 if record["abstain"] else 0
+        row[3] += 1 if record["updated"] else 0
+        expected_correct = (not record["abstain"]) and record["answer"] == record["truth"]
+        if record["correct"] != expected_correct:
+            problems.append(f"{record['task_id']} ({record['arm']}): stored score disagrees with its answer")
+        confidence = record["confidence"]
+        if (
+            isinstance(confidence, bool)
+            or not isinstance(confidence, int | float)
+            or not 0.0 <= confidence <= 1.0
+        ):
+            problems.append(f"{record['task_id']} ({record['arm']}): malformed confidence")
+        elif not math.isfinite(confidence):
+            problems.append(f"{record['task_id']}: non-finite confidence")
+    stored = {
+        (c["arm"], c["family"], c["init"], c["stream"]): [c["n"], c["correct"], c["abstained"], c["updates"]]
+        for c in evidence["cells"]
+    }
+    if stored != totals:
+        problems.append("stored cell counts differ from counts re-aggregated from the records")
+    tasks = _tasks_by_id({r["task_id"] for r in records})
+    truths = {identity: _oracle_truth(task) for identity, task in sorted(tasks.items())}
+    mismatched = sorted({r["task_id"] for r in records if truths[r["task_id"]] != r["truth"]})
+    if mismatched:
+        problems.append(
+            f"{len(mismatched)} tasks' recorded truth differs from fresh CPython execution: {mismatched[:5]}"
+        )
+    result.update(
+        records_checked=True,
+        tasks_reexecuted=len(truths),
+        problems=problems,
+        verdict="FAIL" if problems else "PASS",
+    )
+    return result

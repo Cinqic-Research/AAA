@@ -1,0 +1,87 @@
+{
+  "protocol": "aaa.python.v0",
+  "status": "development",
+  "generator_version": "aaa.python.gen.v0",
+  "question": "Can an adaptive system acquire and retain useful Python knowledge from programs and execution feedback, and use it to improve on fresh programs without evaluator leakage?",
+  "interpreter": {
+    "implementation": "CPython",
+    "supported": ["3.10", "3.11", "3.12", "3.13"],
+    "answer_keys": "canonical across supported versions; tests/test_aaa_python_oracle.py compares every version with the packaged golden keys"
+  },
+  "subset": {
+    "statements": ["Assign", "AugAssign", "Expr", "If", "For", "FunctionDef", "Return", "Pass"],
+    "expressions": ["Constant", "Name", "BinOp", "UnaryOp", "Compare", "BoolOp", "Call", "List", "Subscript", "IfExp"],
+    "operators": ["Add", "Sub", "Mult", "FloorDiv", "Mod", "USub", "Not", "And", "Or", "Eq", "NotEq", "Lt", "LtE", "Gt", "GtE"],
+    "builtins": ["print", "range", "len", "abs", "min", "max", "int", "str", "bool", "sum"],
+    "reserved_names": ["abs", "aiter", "all", "anext", "any", "ascii", "bin", "bool", "breakpoint", "bytearray", "bytes", "callable", "chr", "classmethod", "compile", "complex", "copyright", "credits", "delattr", "dict", "dir", "divmod", "enumerate", "eval", "exec", "exit", "filter", "float", "format", "frozenset", "getattr", "globals", "hasattr", "hash", "help", "hex", "id", "input", "int", "isinstance", "issubclass", "iter", "len", "license", "list", "locals", "map", "max", "memoryview", "min", "next", "object", "oct", "open", "ord", "pow", "print", "property", "quit", "range", "repr", "reversed", "round", "set", "setattr", "slice", "sorted", "staticmethod", "str", "sum", "super", "tuple", "type", "vars", "zip"],
+    "identifier_pattern": "^[a-z][a-z0-9]{0,11}$",
+    "forbidden_examples": ["import and from-import", "attribute access of any kind (blocks dunder reflection)", "eval, exec, compile, open, input, globals, locals, getattr and every builtin not listed", "while loops", "lambda, comprehensions, generators", "try, with, raise, class, del, global, nonlocal, async", "f-strings", "exponentiation and true division", "recursion or calls to functions defined later"],
+    "limits": {
+      "max_source_bytes": 2000,
+      "max_lines": 40,
+      "max_ast_nodes": 400,
+      "max_int_literal": 999,
+      "max_string_literal": 16,
+      "max_list_literal": 10,
+      "max_range_bound": 50,
+      "max_loop_depth": 2
+    }
+  },
+  "sandbox": {
+    "isolation": "a separate CPython process started with -I -S, an empty environment, a fresh temporary working directory, restricted builtins, and the AST validator applied first",
+    "wall_timeout_seconds": 5.0,
+    "cpu_seconds": 2,
+    "address_space_bytes": 536870912,
+    "max_stdout_chars": 4096,
+    "parallel_workers": 8
+  },
+  "families": {
+    "syntax": {"labels": ["valid", "invalid"], "rung": "1 syntax validity", "feedback": ["compile_status", "syntax_error_line"]},
+    "outcome": {"labels": ["ok", "ZeroDivisionError", "NameError", "TypeError", "IndexError", "ValueError"], "rung": "5-6 execution success and exception class", "feedback": ["status", "exception", "error_line", "stdout"]},
+    "output": {"labels": "integers from -50 to 50", "min": -50, "max": 50, "rung": "2-4 semantics, state tracking, output prediction", "feedback": ["stdout"]},
+    "localize": {"labels": "line numbers from 1 to 40", "max_line": 40, "rung": "10 bug localization", "feedback": ["exception", "error_line"]},
+    "repair": {"labels": "candidate index", "candidates": 4, "visible_tests": 2, "hidden_tests": 4, "rung": "11 candidate repair selection", "feedback": ["chosen_candidate_hidden_results"]}
+  },
+  "templates": {
+    "in_distribution": ["straight_line", "conditional", "loop_accumulate", "function_call"],
+    "novel_structure": ["nested_loop", "list_walk"],
+    "literals": {"in_distribution": [0, 9], "novel_literals": [10, 19]}
+  },
+  "splits": {
+    "order": ["train", "development", "probe", "attack", "confirmation"],
+    "pool_per_family": {"train": 600, "development": 400, "probe": 60, "attack": 200},
+    "confirmation": "reserved; generation refuses without an admitted freeze, and none exists in aaa.python.v0",
+    "disjointness": "a split's items exclude every normalized source hash in the declared pools of all earlier splits"
+  },
+  "learner": {
+    "representations": ["bytes", "lexical", "lexical_types", "ast_nodes"],
+    "default_representation": "lexical",
+    "feature_dimensions": 1024,
+    "learning_rate": 0.2,
+    "init_scale": 0.01,
+    "train_epochs": 2,
+    "abstain_below": 0.0
+  },
+  "development": {
+    "initializations": 3,
+    "streams": 4,
+    "stream_length": 25,
+    "adaptation": {"prefix": 10, "branch": 15, "changed_slice": "novel_structure", "families": ["outcome", "output", "localize"]},
+    "probe_bank": 40
+  },
+  "metrics": ["accuracy", "balanced_accuracy", "coverage", "brier", "expected_calibration_error", "lookup_hit_rate"],
+  "statistics": {
+    "unit": "initialization x stream cell; tasks and tokens are never resampled as independent units",
+    "method": "crossed percentile bootstrap over initializations and streams",
+    "draws": 4000,
+    "confidence": 0.95,
+    "bootstrap_seed": 20260923,
+    "adaptation_estimand": "difference of differences: (frozen - online error, changed branch) - (frozen - online error, control branch), from one cloned state per cell",
+    "retention_estimand": "probe-bank error after branch updates minus before, on a fixed bank never trained on",
+    "calibration_bins": 10
+  },
+  "promotion": {
+    "contract": "aaa.promotion.crossed.v1",
+    "status": "not frozen: no candidate, criteria, thresholds or confirmation identities are declared in aaa.python.v0"
+  }
+}
