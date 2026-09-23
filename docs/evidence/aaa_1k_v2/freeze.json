@@ -1,0 +1,1506 @@
+{
+ "aaa_1k_v1_fingerprint": "5ce6e019bd5389c5d8d466cc2be809ff9777e3bd6acba10917bc6a7ce98f771e",
+ "confirmation_blocks": {
+  "v2-confirmation-bootstrap": {
+   "count": 64,
+   "namespace": "bootstrap",
+   "seed_list_sha256": "559e08c976f00b1ecf35d972c09d7b9a2657736704efd150a3e0baac4f2a083f",
+   "start": 0
+  },
+  "v2-confirmation-env.abcab": {
+   "count": 16,
+   "namespace": "env.abcab",
+   "seed_list_sha256": "e3160d0cf4da1bea35877474111629e706db1984f634435fdc9e734de759d744",
+   "start": 0
+  },
+  "v2-confirmation-env.accel_switch": {
+   "count": 16,
+   "namespace": "env.accel_switch",
+   "seed_list_sha256": "0bb63ebe553785a10ae30f9931a29c6c071f66a98c669509a764e5b105e9dc2a",
+   "start": 0
+  },
+  "v2-confirmation-env.change_gaps": {
+   "count": 16,
+   "namespace": "env.change_gaps",
+   "seed_list_sha256": "c2c9a8cefebfe935cbbadf991a4a22d49ee69927f15d1abafb180940b3935f0b",
+   "start": 0
+  },
+  "v2-confirmation-env.change_noise": {
+   "count": 16,
+   "namespace": "env.change_noise",
+   "seed_list_sha256": "377232fac6e0fa23e1bad8d1782212419aca73c54657d947821368d5d0cb1fdd",
+   "start": 0
+  },
+  "v2-confirmation-env.coarse_near": {
+   "count": 16,
+   "namespace": "env.coarse_near",
+   "seed_list_sha256": "9782893406550939c3490e3307efdb1292892f74444a2510a1facf10ba473173",
+   "start": 0
+  },
+  "v2-confirmation-env.gravity_bounce": {
+   "count": 16,
+   "namespace": "env.gravity_bounce",
+   "seed_list_sha256": "4af9e2d890115ecc63d81f92097cfaa6920335f80315c82ff4d52b467d0ca9b1",
+   "start": 0
+  },
+  "v2-confirmation-env.inelastic_wall": {
+   "count": 16,
+   "namespace": "env.inelastic_wall",
+   "seed_list_sha256": "a4dd62bdd02c86c6a67e16e930e2cd50b71dd59d8ff42d30574ee509a7ac19c2",
+   "start": 0
+  },
+  "v2-confirmation-env.long_bouncing": {
+   "count": 16,
+   "namespace": "env.long_bouncing",
+   "seed_list_sha256": "f0c6a714a4270b3bdc657b42ab8b3cd6aa9acefce9db504b39636a40957a5a7c",
+   "start": 0
+  },
+  "v2-confirmation-env.long_coarse": {
+   "count": 16,
+   "namespace": "env.long_coarse",
+   "seed_list_sha256": "bd066cd4831cf4b9e88c26e0218197242f4e7e294adb8b30795803cee987afa8",
+   "start": 0
+  },
+  "v2-confirmation-env.long_gap_recall": {
+   "count": 16,
+   "namespace": "env.long_gap_recall",
+   "seed_list_sha256": "d0b904e480a369a35b402def067e68bec9c00fa7f5dc2042880402dfb313c203",
+   "start": 0
+  },
+  "v2-confirmation-env.long_gap_recall_extended": {
+   "count": 16,
+   "namespace": "env.long_gap_recall_extended",
+   "seed_list_sha256": "7388bdae0e8a2959ee4bcbc6d85fd21f6713a752c31016a5b1b635ebe438e91d",
+   "start": 0
+  },
+  "v2-confirmation-env.noise": {
+   "count": 16,
+   "namespace": "env.noise",
+   "seed_list_sha256": "acb8f3a30f40c00f74dbd507e9b683fc71b2a424fbd6d010855e113037e169e7",
+   "start": 0
+  },
+  "v2-confirmation-env.noise_gaps": {
+   "count": 16,
+   "namespace": "env.noise_gaps",
+   "seed_list_sha256": "30768d62219fa9d3d203ea29ecf33899981ba630378bfd70e4f09a7932329add",
+   "start": 0
+  },
+  "v2-confirmation-env.oscillator_long": {
+   "count": 16,
+   "namespace": "env.oscillator_long",
+   "seed_list_sha256": "2784aecb9d418e16f861d4fca9b5b15d7414266b1d9e067d2c8c5bb7f42dedcd",
+   "start": 0
+  },
+  "v2-confirmation-env.paired_change": {
+   "count": 16,
+   "namespace": "env.paired_change",
+   "seed_list_sha256": "1eaa52bec168b4bc7dc708420dbee21de0542f1283d774f98a927c6cc10da939",
+   "start": 0
+  },
+  "v2-confirmation-env.quantized": {
+   "count": 16,
+   "namespace": "env.quantized",
+   "seed_list_sha256": "f3cb5bffcdf9afccc98263d64279eaea56f08e7b5a4f1ba0d2bf1882e9c8c99e",
+   "start": 0
+  },
+  "v2-confirmation-env.random_gaps": {
+   "count": 16,
+   "namespace": "env.random_gaps",
+   "seed_list_sha256": "d1aac2b58d8b07df20264ee3d231eeb390f0efdaf7bbe5443d68d9f27224a6d6",
+   "start": 0
+  },
+  "v2-confirmation-env.retention": {
+   "count": 16,
+   "namespace": "env.retention",
+   "seed_list_sha256": "6f8c52de7b448387e2542340b88199ac4a32fb4c5fcec1cf3de1ab24f8aed3ed",
+   "start": 0
+  },
+  "v2-confirmation-env.soft_wall": {
+   "count": 16,
+   "namespace": "env.soft_wall",
+   "seed_list_sha256": "768e92db5a22486c74711155f98d7bdfb1be0b1e0d5ff102bcf061d727b8ba2e",
+   "start": 0
+  },
+  "v2-confirmation-env.stationary_mixed": {
+   "count": 16,
+   "namespace": "env.stationary_mixed",
+   "seed_list_sha256": "595950991d511325c0702ccb7b72fe95b4506a5a5816e240f5b97508e54a6aee",
+   "start": 0
+  },
+  "v2-confirmation-env.v1_aba": {
+   "count": 16,
+   "namespace": "env.v1_aba",
+   "seed_list_sha256": "938d64bbfa9befeb7f5c508d3281e21dc578a439af6b3bfdc5ef788d4ca22556",
+   "start": 0
+  },
+  "v2-confirmation-env.v1_coarse_speed": {
+   "count": 16,
+   "namespace": "env.v1_coarse_speed",
+   "seed_list_sha256": "1307c65827ed22be6e8fc2847b1d3c8924b658dcfde61bef3dee4171f6d5b328",
+   "start": 0
+  },
+  "v2-confirmation-env.v1_motion_bouncing": {
+   "count": 16,
+   "namespace": "env.v1_motion_bouncing",
+   "seed_list_sha256": "8509d1edd7d689ef269b1120938f464d2f5f1a0ee2fb860f47213b852501d4e6",
+   "start": 0
+  },
+  "v2-confirmation-env.v1_motion_changed": {
+   "count": 16,
+   "namespace": "env.v1_motion_changed",
+   "seed_list_sha256": "3fa578dd0b1045bf3da8998710e3e1337bf7ae3fcea2200320481baaf624ecb6",
+   "start": 0
+  },
+  "v2-confirmation-env.v1_motion_dynamics": {
+   "count": 16,
+   "namespace": "env.v1_motion_dynamics",
+   "seed_list_sha256": "c7a2a6f98ff5a88fe7b1081421845e069f35cb3edc8760f7fc9bc8abb493cca0",
+   "start": 0
+  },
+  "v2-confirmation-env.v1_motion_straight": {
+   "count": 16,
+   "namespace": "env.v1_motion_straight",
+   "seed_list_sha256": "993246aadb5c1245ec7822e360ce210637fa915a961d003ab09cd71f7b5e4e4a",
+   "start": 0
+  },
+  "v2-confirmation-env.v1_occlusion": {
+   "count": 16,
+   "namespace": "env.v1_occlusion",
+   "seed_list_sha256": "9a8592e4729b4b1282bb0465d494d1a0065760564d8512e09f42c4a465ae6b56",
+   "start": 0
+  },
+  "v2-confirmation-env.wall_gaps": {
+   "count": 16,
+   "namespace": "env.wall_gaps",
+   "seed_list_sha256": "52c0ac4f0dfd76d227d4eb6ce508889519667f4645a2bba2d5a5f617373288bd",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-Chen": {
+   "count": 4,
+   "namespace": "ext.dysts-Chen",
+   "seed_list_sha256": "8a468c1d4e828eb23a7ec5aec1f7ed11b0fa9211c7ac01cdb850753895a33950",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-Colpitts": {
+   "count": 4,
+   "namespace": "ext.dysts-Colpitts",
+   "seed_list_sha256": "7fce09ceb34360af7ef1bc4b2deb72355e23abef0697b1b5bde161f24c45b9cf",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-Hadley": {
+   "count": 4,
+   "namespace": "ext.dysts-Hadley",
+   "seed_list_sha256": "368a7d0ebb3aa4eeea38b7dd9ea438e43ed59699f5691111b5f89e801de3e4ef",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-Halvorsen": {
+   "count": 4,
+   "namespace": "ext.dysts-Halvorsen",
+   "seed_list_sha256": "81a531ac228c0c60f46600ac17acd8ee53a9d4b74ffe3ddc9189f1883ada2430",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-HastingsPowell": {
+   "count": 4,
+   "namespace": "ext.dysts-HastingsPowell",
+   "seed_list_sha256": "a951864251fd22e7f81fc282872f3d99dffa5b4f0cd5dbab06f87c32ce68066f",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-KawczynskiStrizhak": {
+   "count": 4,
+   "namespace": "ext.dysts-KawczynskiStrizhak",
+   "seed_list_sha256": "b34e4d4c210c3412d0ca8dd5e8b137958de05f5ba95c1eda9c1398498b3b094f",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-SprottD": {
+   "count": 4,
+   "namespace": "ext.dysts-SprottD",
+   "seed_list_sha256": "a380f768ec23b5c4cc5aa73f203797e6cdcfa661102b85bb6317674b4b452703",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-SprottE": {
+   "count": 4,
+   "namespace": "ext.dysts-SprottE",
+   "seed_list_sha256": "cf84568ebd1fa30efe141537d183631152ffacf669bf5eb6704deba1bc64ebc3",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-SprottJerk": {
+   "count": 4,
+   "namespace": "ext.dysts-SprottJerk",
+   "seed_list_sha256": "1366830842ae1d64d2f0d8768ed9475285283224248e56b72fbf4553543cac2a",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-SprottK": {
+   "count": 4,
+   "namespace": "ext.dysts-SprottK",
+   "seed_list_sha256": "b350821c970848705090abc50aa20c05773ef262cf437daea70fe354cbaa2411",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-SprottMore": {
+   "count": 4,
+   "namespace": "ext.dysts-SprottMore",
+   "seed_list_sha256": "068c88e808000046b172a65a1fca17d89ba242272d1d45b3319d7131502b88ea",
+   "start": 0
+  },
+  "v2-confirmation-ext.dysts-ZhouChen": {
+   "count": 4,
+   "namespace": "ext.dysts-ZhouChen",
+   "seed_list_sha256": "e955825a457330acd3777e48c4c5443e5af5469d0b89f6b0dcef4829059814d2",
+   "start": 0
+  },
+  "v2-confirmation-ext.mackey_glass17": {
+   "count": 8,
+   "namespace": "ext.mackey_glass17",
+   "seed_list_sha256": "dc3bf8d9ccb0a84e31364d4b7facd0fa88d6d631903b0326d1d3712f43181920",
+   "start": 0
+  },
+  "v2-confirmation-ext.narma10": {
+   "count": 8,
+   "namespace": "ext.narma10",
+   "seed_list_sha256": "a17d20fc86672bf542ca7db6bbccd7921a3682a1b43d5db79a46e401cd802039",
+   "start": 0
+  },
+  "v2-confirmation-ext.narma20": {
+   "count": 8,
+   "namespace": "ext.narma20",
+   "seed_list_sha256": "e224ec0973a860322a1fca55602b0f9adc8eaee2b818f4d5fff1d5d051c3a5ef",
+   "start": 0
+  },
+  "v2-confirmation-init": {
+   "count": 8,
+   "namespace": "init",
+   "seed_list_sha256": "7ae668a312e3f5f4e2b4beaf98d970e4a17ae85188a87198ec111e97f0634be0",
+   "start": 0
+  },
+  "v2-confirmation-probe.v1_aba": {
+   "count": 8,
+   "namespace": "probe.v1_aba",
+   "seed_list_sha256": "77f7aecc3d98bf9010fafe8962b5bb7cb10c9ec2183c4313f6318d353e0611b9",
+   "start": 0
+  }
+ },
+ "evidence": {
+  "attack": null,
+  "development": {
+   "path": "docs/evidence/aaa_1k_v2/development.json",
+   "sha256": "0d5a327d532b00dae815a3b24a15f808a3a69ff7e674fb516b126b5feae7af89"
+  }
+ },
+ "frozen": {
+  "arms": {
+   "c0_champion0": {
+    "external": false,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": 10.0,
+      "learning_rate": 0.03,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 16,
+      "inputs": 3,
+      "kind": "gru",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_n": [
+        16,
+        16
+       ],
+       "U_r": [
+        16,
+        16
+       ],
+       "U_z": [
+        16,
+        16
+       ],
+       "W_n": [
+        16,
+        3
+       ],
+       "W_o": [
+        2,
+        16
+       ],
+       "W_r": [
+        16,
+        3
+       ],
+       "W_z": [
+        16,
+        3
+       ],
+       "b_n": [
+        16
+       ],
+       "b_o": [
+        2
+       ],
+       "b_r": [
+        16
+       ],
+       "b_z": [
+        16
+       ]
+      },
+      "parameters": 994
+     },
+     "description": "Champion 0: identical except own-prediction unfolding (the M2 frame lock)",
+     "features": "v1",
+     "init": {},
+     "kind": "control",
+     "name": "c0_champion0",
+     "rule": "live",
+     "target_rule": "own",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "c1_champion1": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": 10.0,
+      "learning_rate": 0.03,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 16,
+      "inputs": 3,
+      "kind": "gru",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_n": [
+        16,
+        16
+       ],
+       "U_r": [
+        16,
+        16
+       ],
+       "U_z": [
+        16,
+        16
+       ],
+       "W_n": [
+        16,
+        3
+       ],
+       "W_o": [
+        2,
+        16
+       ],
+       "W_r": [
+        16,
+        3
+       ],
+       "W_z": [
+        16,
+        3
+       ],
+       "b_n": [
+        16
+       ],
+       "b_o": [
+        2
+       ],
+       "b_r": [
+        16
+       ],
+       "b_z": [
+        16
+       ]
+      },
+      "parameters": 994
+     },
+     "description": "Champion 1 exactly: AAA1KGRU-3x16x2, reach-gated unfolding, live TBPTT-4, SGD 0.03, clip 10",
+     "features": "v1",
+     "init": {},
+     "kind": "reference",
+     "name": "c1_champion1",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "c1_champion1:no_error_head_loss": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.0,
+      "freeze_recurrent": false,
+      "gradient_clip": 10.0,
+      "learning_rate": 0.03,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 16,
+      "inputs": 3,
+      "kind": "gru",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_n": [
+        16,
+        16
+       ],
+       "U_r": [
+        16,
+        16
+       ],
+       "U_z": [
+        16,
+        16
+       ],
+       "W_n": [
+        16,
+        3
+       ],
+       "W_o": [
+        2,
+        16
+       ],
+       "W_r": [
+        16,
+        3
+       ],
+       "W_z": [
+        16,
+        3
+       ],
+       "b_n": [
+        16
+       ],
+       "b_o": [
+        2
+       ],
+       "b_r": [
+        16
+       ],
+       "b_z": [
+        16
+       ]
+      },
+      "parameters": 994
+     },
+     "description": "Champion 1 exactly: AAA1KGRU-3x16x2, reach-gated unfolding, live TBPTT-4, SGD 0.03, clip 10",
+     "features": "v1",
+     "init": {},
+     "kind": "ablation",
+     "name": "c1_champion1:no_error_head_loss",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "c1_champion1:no_error_input": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": 10.0,
+      "learning_rate": 0.03,
+      "reset_state_every_step": false,
+      "zero_input": [
+       2
+      ]
+     },
+     "core": {
+      "hidden": 16,
+      "inputs": 3,
+      "kind": "gru",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_n": [
+        16,
+        16
+       ],
+       "U_r": [
+        16,
+        16
+       ],
+       "U_z": [
+        16,
+        16
+       ],
+       "W_n": [
+        16,
+        3
+       ],
+       "W_o": [
+        2,
+        16
+       ],
+       "W_r": [
+        16,
+        3
+       ],
+       "W_z": [
+        16,
+        3
+       ],
+       "b_n": [
+        16
+       ],
+       "b_o": [
+        2
+       ],
+       "b_r": [
+        16
+       ],
+       "b_z": [
+        16
+       ]
+      },
+      "parameters": 994
+     },
+     "description": "Champion 1 exactly: AAA1KGRU-3x16x2, reach-gated unfolding, live TBPTT-4, SGD 0.03, clip 10",
+     "features": "v1",
+     "init": {},
+     "kind": "ablation",
+     "name": "c1_champion1:no_error_input",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "c1_champion1:state_reset": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": 10.0,
+      "learning_rate": 0.03,
+      "reset_state_every_step": true,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 16,
+      "inputs": 3,
+      "kind": "gru",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_n": [
+        16,
+        16
+       ],
+       "U_r": [
+        16,
+        16
+       ],
+       "U_z": [
+        16,
+        16
+       ],
+       "W_n": [
+        16,
+        3
+       ],
+       "W_o": [
+        2,
+        16
+       ],
+       "W_r": [
+        16,
+        3
+       ],
+       "W_z": [
+        16,
+        3
+       ],
+       "b_n": [
+        16
+       ],
+       "b_o": [
+        2
+       ],
+       "b_r": [
+        16
+       ],
+       "b_z": [
+        16
+       ]
+      },
+      "parameters": 994
+     },
+     "description": "Champion 1 exactly: AAA1KGRU-3x16x2, reach-gated unfolding, live TBPTT-4, SGD 0.03, clip 10",
+     "features": "v1",
+     "init": {},
+     "kind": "ablation",
+     "name": "c1_champion1:state_reset",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "elman_v2": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": null,
+      "learning_rate": 0.003,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 28,
+      "inputs": 4,
+      "kind": "elman",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U": [
+        28,
+        28
+       ],
+       "W": [
+        28,
+        4
+       ],
+       "W_o": [
+        2,
+        28
+       ],
+       "b": [
+        28
+       ],
+       "b_o": [
+        2
+       ]
+      },
+      "parameters": 982
+     },
+     "description": "ungated tanh recurrence at the widest state the cap allows, with the observed flag",
+     "features": "v2",
+     "init": {},
+     "kind": "candidate",
+     "name": "elman_v2",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 16,
+     "update_enabled": true
+    }
+   },
+   "gru_v1_keep-2": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 16,
+      "inputs": 3,
+      "kind": "gru",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_n": [
+        16,
+        16
+       ],
+       "U_r": [
+        16,
+        16
+       ],
+       "U_z": [
+        16,
+        16
+       ],
+       "W_n": [
+        16,
+        3
+       ],
+       "W_o": [
+        2,
+        16
+       ],
+       "W_r": [
+        16,
+        3
+       ],
+       "W_z": [
+        16,
+        3
+       ],
+       "b_n": [
+        16
+       ],
+       "b_o": [
+        2
+       ],
+       "b_r": [
+        16
+       ],
+       "b_z": [
+        16
+       ]
+      },
+      "parameters": 994
+     },
+     "description": "Champion 1 with the keep-gate bias initialized at -2 (M1 hypothesis: the zero-bias operating point cannot track the coarse family's sub-quantum phase); loop candidate c2 re-attacked on Champion 1's rule",
+     "features": "v1",
+     "init": {
+      "keep_bias": -2.0
+     },
+     "kind": "candidate",
+     "name": "gru_v1_keep-2",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "gru_v1_retuned": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 16,
+      "inputs": 3,
+      "kind": "gru",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_n": [
+        16,
+        16
+       ],
+       "U_r": [
+        16,
+        16
+       ],
+       "U_z": [
+        16,
+        16
+       ],
+       "W_n": [
+        16,
+        3
+       ],
+       "W_o": [
+        2,
+        16
+       ],
+       "W_r": [
+        16,
+        3
+       ],
+       "W_z": [
+        16,
+        3
+       ],
+       "b_n": [
+        16
+       ],
+       "b_o": [
+        2
+       ],
+       "b_r": [
+        16
+       ],
+       "b_z": [
+        16
+       ]
+      },
+      "parameters": 994
+     },
+     "description": "Champion 1's architecture and target rule with hyperparameters re-selected under the v2 rule, separating architecture from hyperparameter effects",
+     "features": "v1",
+     "init": {},
+     "kind": "candidate",
+     "name": "gru_v1_retuned",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "gru_v2": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 15,
+      "inputs": 4,
+      "kind": "gru",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_n": [
+        15,
+        15
+       ],
+       "U_r": [
+        15,
+        15
+       ],
+       "U_z": [
+        15,
+        15
+       ],
+       "W_n": [
+        15,
+        4
+       ],
+       "W_o": [
+        2,
+        15
+       ],
+       "W_r": [
+        15,
+        4
+       ],
+       "W_z": [
+        15,
+        4
+       ],
+       "b_n": [
+        15
+       ],
+       "b_o": [
+        2
+       ],
+       "b_r": [
+        15
+       ],
+       "b_z": [
+        15
+       ]
+      },
+      "parameters": 932
+     },
+     "description": "GRU with the explicit observed flag (R-10), 15 hidden units to stay under the cap",
+     "features": "v2",
+     "init": {},
+     "kind": "candidate",
+     "name": "gru_v2",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "lru_v2": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": 10.0,
+      "learning_rate": 0.01,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 24,
+      "inputs": 4,
+      "kind": "lru",
+      "online_rule": "rtrl",
+      "outputs": 2,
+      "parameter_shapes": {
+       "B_im": [
+        24,
+        4
+       ],
+       "B_re": [
+        24,
+        4
+       ],
+       "V": [
+        13,
+        4
+       ],
+       "W1": [
+        13,
+        48
+       ],
+       "W_o": [
+        2,
+        13
+       ],
+       "b1": [
+        13
+       ],
+       "b_o": [
+        2
+       ],
+       "nu": [
+        24
+       ],
+       "theta": [
+        24
+       ]
+      },
+      "parameters": 957,
+      "readout_hidden": 13
+     },
+     "description": "complex-diagonal linear recurrence, |lambda|<1 by construction, exact untruncated online gradient (RTRL with diagonal traces), tanh readout; long-memory/stability hypothesis",
+     "features": "v2",
+     "init": {},
+     "kind": "candidate",
+     "name": "lru_v2",
+     "rule": "rtrl",
+     "target_rule": "reach_gated",
+     "tbptt_steps": null,
+     "update_enabled": true
+    }
+   },
+   "mgu_v2": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 19,
+      "inputs": 4,
+      "kind": "mgu",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "U_f": [
+        19,
+        19
+       ],
+       "U_n": [
+        19,
+        19
+       ],
+       "W_f": [
+        19,
+        4
+       ],
+       "W_n": [
+        19,
+        4
+       ],
+       "W_o": [
+        2,
+        19
+       ],
+       "b_f": [
+        19
+       ],
+       "b_n": [
+        19
+       ],
+       "b_o": [
+        2
+       ]
+      },
+      "parameters": 952
+     },
+     "description": "minimal gated unit (one gate) with the observed flag",
+     "features": "v2",
+     "init": {},
+     "kind": "candidate",
+     "name": "mgu_v2",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 4,
+     "update_enabled": true
+    }
+   },
+   "mlp_v2": {
+    "external": true,
+    "spec": {
+     "config": {
+      "error_loss_weight": 0.25,
+      "freeze_recurrent": false,
+      "gradient_clip": null,
+      "learning_rate": 0.01,
+      "reset_state_every_step": false,
+      "zero_input": []
+     },
+     "core": {
+      "hidden": 27,
+      "inputs": 4,
+      "kind": "mlp",
+      "online_rule": "tbptt",
+      "outputs": 2,
+      "parameter_shapes": {
+       "W1": [
+        27,
+        4
+       ],
+       "W2": [
+        27,
+        27
+       ],
+       "W_o": [
+        2,
+        27
+       ],
+       "b1": [
+        27
+       ],
+       "b2": [
+        27
+       ],
+       "b_o": [
+        2
+       ]
+      },
+      "parameters": 947
+     },
+     "description": "stateless matched-capacity control with the observed flag",
+     "features": "v2",
+     "init": {},
+     "kind": "control",
+     "name": "mlp_v2",
+     "rule": "live",
+     "target_rule": "reach_gated",
+     "tbptt_steps": 1,
+     "update_enabled": true
+    }
+   }
+  },
+  "backend": "cpu",
+  "capability_arms": [
+   "c1_champion1"
+  ],
+  "challenger": null,
+  "criteria": {
+   "K1_stability": "challenger: zero failed cells and diverged cells <= Champion 1's",
+   "K2_v1_noninferiority": "every v1 family non-inferior at +2%",
+   "K3_status_rule": "PASS if the geometric-mean ratio is <= 0.95 and its upper bound < 1.0; FAIL if its lower bound > 0.95 (an improvement of at least 5% is excluded); otherwise INCONCLUSIVE",
+   "K3_stress_improvement": "geometric-mean relative MAE over all 19 stress families <= 0.95 with upper bound < 1.0",
+   "K4_regression_guard": "no stress family with relative-MAE lower bound > +5%",
+   "K5_external_noninferiority": "external suite geometric-mean relative error upper bound <= 1.02",
+   "decision": "PROMOTE if every criterion PASSES; REJECT if any FAILS; otherwise INCONCLUSIVE (Champion 1 retained)",
+   "multiplicity": "intersection-union: promotion requires every criterion, so no alpha is spent per criterion"
+  },
+  "dtype": "float64",
+  "external_tasks": [
+   "narma10",
+   "narma20",
+   "mackey_glass17",
+   "dysts:Hadley",
+   "dysts:SprottD",
+   "dysts:SprottK",
+   "dysts:KawczynskiStrizhak",
+   "dysts:SprottE",
+   "dysts:ZhouChen",
+   "dysts:Chen",
+   "dysts:Halvorsen",
+   "dysts:SprottJerk",
+   "dysts:Colpitts",
+   "dysts:HastingsPowell",
+   "dysts:SprottMore"
+  ],
+  "families": [
+   "v1_motion_straight",
+   "v1_motion_bouncing",
+   "v1_motion_changed",
+   "v1_motion_dynamics",
+   "v1_occlusion",
+   "v1_coarse_speed",
+   "v1_aba",
+   "long_bouncing",
+   "long_coarse",
+   "random_gaps",
+   "wall_gaps",
+   "long_gap_recall",
+   "stationary_mixed",
+   "noise",
+   "change_gaps",
+   "quantized",
+   "oscillator_long",
+   "noise_gaps",
+   "change_noise",
+   "accel_switch",
+   "coarse_near",
+   "long_gap_recall_extended",
+   "gravity_bounce",
+   "soft_wall",
+   "inelastic_wall",
+   "abcab"
+  ],
+  "held_out_families": [
+   "gravity_bounce",
+   "soft_wall",
+   "inelastic_wall",
+   "abcab"
+  ],
+  "monash_arms": [
+   "c1_champion1",
+   "elman_v2",
+   "gru_v1_keep-2",
+   "gru_v1_retuned",
+   "gru_v2",
+   "lru_v2",
+   "mgu_v2"
+  ],
+  "monash_tasks": [
+   "monash:saugeen",
+   "monash:m4_hourly",
+   "monash:aus_elec_demand",
+   "monash:fred_md"
+  ],
+  "protocol": "aaa.1k.v2.protocol.v1",
+  "reproduction_standard": "CPU (NumPy float64). Bitwise reproduction of every cell on the Zen 3 evidence platform; elsewhere verdict-level (identical identities, structure and adjudicated verdicts, numerical drift reported; AAA-173).",
+  "statistics": {
+   "bootstrap_draws": 4000,
+   "bootstrap_seed_block": "v2-confirmation-bootstrap",
+   "confidence": 0.95,
+   "designs": "crossed initialization x stream percentile bootstrap; geometric mean over families with shared-initialization resampling (research/aaa_1k_v2/stats.py)"
+  },
+  "thresholds": {
+   "divergence_factor": 2.0,
+   "external_margin": 0.02,
+   "noninferiority_margin": 0.02,
+   "regression_guard": 0.05,
+   "stress_improvement": 0.95
+  }
+ },
+ "frozen_sha256": "c2786ffc7c3e8da51c50095791461688fe37955b6f52c331edf833cb9ef71373",
+ "locks": {
+  "requirements-cuda-lock.txt": "aa12fceae9b2ae72e1a4e6215b2f4f1d3981b2f61dfa591ec66dd43342ceb9f6",
+  "requirements-lock.txt": "2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6"
+ },
+ "machine_profile_sha256": "cd15c6f9526d44e0f09f36370d357d34a66470c320d91315f790a0affd6ede56",
+ "phase": "aaa.1k.v2",
+ "schema": "aaa.1k.v2.freeze.v1",
+ "source_commit": "47cec71859fc3178394d67fe0ed867fa98b526fd",
+ "v2_fingerprint": "e5b11bdba08c6db77a1b2fb494bbea26b3a6c5352b54523c166c9788b59026eb",
+ "v2_fingerprint_files": {
+  "aaa/__init__.py": {
+   "bytes": 85,
+   "sha256": "15d052694b6e087294345b9bd5532208791d9ef2e64760f19938d3a14e63cf3e"
+  },
+  "aaa/compute/__init__.py": {
+   "bytes": 1293,
+   "sha256": "424353fcd9d7138a0af28624897af298452974e658c06644eafab78ba9e218a9"
+  },
+  "aaa/compute/__main__.py": {
+   "bytes": 2397,
+   "sha256": "b4d17804e41e1d8559494dd9708263c65bfcc246b47166ed005f3d6bac93ce3d"
+  },
+  "aaa/compute/device.py": {
+   "bytes": 7932,
+   "sha256": "6070f63aeb58a2ca910ac211b0ca4fb5868290b3735e5e7a7c01a1c79af9e22d"
+  },
+  "aaa/compute/hardware.py": {
+   "bytes": 19447,
+   "sha256": "bf33e6593c377c0e999ffc1bdfccbc3d3da0573058ce70d1e333d6b41878cf67"
+  },
+  "aaa/compute/provenance.py": {
+   "bytes": 6230,
+   "sha256": "9936977b04c52e01e33989ac2a0af6b13f41221c366551bc908a583607912def"
+  },
+  "aaa/config.py": {
+   "bytes": 7120,
+   "sha256": "c2b43898d73bfbf92c8bc1eb74a0ec50610f28f8d15512172ef25507eaef6592"
+  },
+  "aaa/environment.py": {
+   "bytes": 16680,
+   "sha256": "cfc037c51e58a2da6558eb1c8df511272b2dfade78db4d63b998f7cd9a2ce356"
+  },
+  "aaa/predictors.py": {
+   "bytes": 38728,
+   "sha256": "6337a672d41174a1197fb4ba7aaee9ecf6b6e53d8cb0147db1473399e3a649da"
+  },
+  "docs/aaa_1k_v2_architecture.md": {
+   "bytes": 7501,
+   "sha256": "7998121859883a1b38003b48908e3e2c5a92155af627dec4f5632eba30fbd1dc"
+  },
+  "docs/aaa_1k_v2_benchmark_protocol.md": {
+   "bytes": 9395,
+   "sha256": "4785d6220b35eb41fa58db5813017956356a03fdb58a6be2dd66a2a3ca85f0a4"
+  },
+  "docs/aaa_1k_v2_external_benchmarks.md": {
+   "bytes": 9848,
+   "sha256": "c6077a590302e29b6aa027686386bcb7f3e2ff1c64b19d002f6b3086700d3032"
+  },
+  "docs/aaa_1k_v2_research_brief.md": {
+   "bytes": 8634,
+   "sha256": "e04b0f8cbcfd31631bacbf3d2b3bc533f1612791854a142f7aa5c05614dd0dc2"
+  },
+  "requirements-cuda-lock.txt": {
+   "bytes": 1507,
+   "sha256": "aa12fceae9b2ae72e1a4e6215b2f4f1d3981b2f61dfa591ec66dd43342ceb9f6"
+  },
+  "requirements-lock.txt": {
+   "bytes": 723,
+   "sha256": "2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6"
+  },
+  "research/__init__.py": {
+   "bytes": 295,
+   "sha256": "c48d3ec4408522b445139f4d7859aa5e8d02ef748a2516969bc737d60b1d32a3"
+  },
+  "research/aaa_1k/__init__.py": {
+   "bytes": 684,
+   "sha256": "60eee91f9708c86dd22462da2ee6053c9fec9dd70e73eb8cfb8678e4eec8ec9a"
+  },
+  "research/aaa_1k/__main__.py": {
+   "bytes": 99,
+   "sha256": "4869f6c0e96dca7afee627c40db65f1531e8bb5646c0bf79255e0e20ced03dbb"
+  },
+  "research/aaa_1k/adversarial.py": {
+   "bytes": 6654,
+   "sha256": "8447580564795b4f84af3c06cdc753ec4e8b64ccc867718c2055ec0b49a93144"
+  },
+  "research/aaa_1k/agents.py": {
+   "bytes": 27633,
+   "sha256": "6958a846bad2a999cc6b268b420a55ef9c916a8ae6c318438f25efcdf79ef60a"
+  },
+  "research/aaa_1k/characterization.py": {
+   "bytes": 20758,
+   "sha256": "ca2da3e746ca03d60f90d7c6a6c525e60ac80b0bd582081b0721614d7c0b0bfe"
+  },
+  "research/aaa_1k/cli.py": {
+   "bytes": 29449,
+   "sha256": "27946dee1a072abe2c63e55415d2df2025d9bb7ba585f50c0338b5b7113978ef"
+  },
+  "research/aaa_1k/controls.py": {
+   "bytes": 23939,
+   "sha256": "cbac0171f93523b5d4c0816afa9fbf710c1d9d3d219449e40d3a70832d03d257"
+  },
+  "research/aaa_1k/experiments.py": {
+   "bytes": 24021,
+   "sha256": "d58fa36897663d413577e76860f5f945208e6bddcb90fa32dd52c298f0b632e7"
+  },
+  "research/aaa_1k/features.py": {
+   "bytes": 5634,
+   "sha256": "ebc6395b4b5773dd7527aec88f1a4ba00bce45bc8e191cb0c889c8cafda0f695"
+  },
+  "research/aaa_1k/gradcheck.py": {
+   "bytes": 7813,
+   "sha256": "8233a7c8768a44ebf14b7b75ed374bf202b26236c8511ea12385a7a6b5922047"
+  },
+  "research/aaa_1k/identity.py": {
+   "bytes": 6798,
+   "sha256": "6d5ce84b27467dd9b5aeeec1f5297c9db854e81cc71cc926b674d207df2c1ab8"
+  },
+  "research/aaa_1k/measurements.py": {
+   "bytes": 7541,
+   "sha256": "773d73023365267719503cd43a7fd6452c886458ba6d6c17f6a3fe8de2521342"
+  },
+  "research/aaa_1k/model.py": {
+   "bytes": 30722,
+   "sha256": "49afdb58e7c7920fa64aecf3eacf3e55370f433e14b9f1ae769dde95aed5e65f"
+  },
+  "research/aaa_1k/report.py": {
+   "bytes": 48302,
+   "sha256": "16f4b3703cecff38813a87812f044865d06995974c758f8697c79a93cef36e32"
+  },
+  "research/aaa_1k/round2.py": {
+   "bytes": 21749,
+   "sha256": "6f09edc8f8361db08ec9f8b21dcd2b12171fcbd6f661547f33eb2adc1be41ecb"
+  },
+  "research/aaa_1k/round3.py": {
+   "bytes": 15910,
+   "sha256": "e1f860a94a147c318adf9ae23daa591d253af2a3b8e1f9baeb7f96c4bfa14256"
+  },
+  "research/aaa_1k/runner.py": {
+   "bytes": 9364,
+   "sha256": "e6ac3a3c9697785d5bf53fb5fc349b0c7c18d702db0ce9ef1a50e66ce97d40ab"
+  },
+  "research/aaa_1k/seeds.py": {
+   "bytes": 1756,
+   "sha256": "2da2c7ea979717f1bc56d95f4ea8930254b02cb37ca6f53b0f2089047ee6ec31"
+  },
+  "research/aaa_1k/selection.py": {
+   "bytes": 27932,
+   "sha256": "c23213042bdbc18aab944ecdcb617ff15f4398916113d6d7e5931b300ad658be"
+  },
+  "research/aaa_1k/stats.py": {
+   "bytes": 13429,
+   "sha256": "2534d002938bd098b9c160bc62e34f6ef2583abca059987c42dce7f1fe38dcc8"
+  },
+  "research/aaa_1k/streams.py": {
+   "bytes": 20202,
+   "sha256": "5d378757adb3f7029a0fa221aa91c9a98e32e8d0f1369577eb38255b01852031"
+  },
+  "research/aaa_1k/visualize.py": {
+   "bytes": 10359,
+   "sha256": "c1f89b4177d5891537902b9cc9b453d5f99b2875e4b0c516d404e4790721053e"
+  },
+  "research/aaa_1k_v2/__init__.py": {
+   "bytes": 1393,
+   "sha256": "e22d78b668b0f7a4a5ba3ff33071ada01369047a4fbbd410cb973f2240930fe7"
+  },
+  "research/aaa_1k_v2/__main__.py": {
+   "bytes": 66,
+   "sha256": "657221b39ceab92cc51d4f31393a0cdde1f3de8c4906233273e02364df73b3ae"
+  },
+  "research/aaa_1k_v2/adapters.py": {
+   "bytes": 18974,
+   "sha256": "c1ba1e871d68f185ae11fadcf941013c360dd3cc19ace3edee741eb3d1c77c52"
+  },
+  "research/aaa_1k_v2/arms.py": {
+   "bytes": 8837,
+   "sha256": "6b52298bd59363a8ef1e49309616741be2c981cff3eab8ea2d4d78e56bfd3ae6"
+  },
+  "research/aaa_1k_v2/attack.py": {
+   "bytes": 14959,
+   "sha256": "624d5d7f08aae6c74157df52eee2ab24075ad8b660309c496706d4592b9f3194"
+  },
+  "research/aaa_1k_v2/baselines.py": {
+   "bytes": 3114,
+   "sha256": "70cd0ba7cf10c9c4922344ddd635a65e30cea60841f578de7cdedad7616b23b5"
+  },
+  "research/aaa_1k_v2/capability.py": {
+   "bytes": 6945,
+   "sha256": "81bf949da422ff9669cd79eb519a2a8c9fd244b74ce37884029783af05da5488"
+  },
+  "research/aaa_1k_v2/capacity.py": {
+   "bytes": 5712,
+   "sha256": "72eaca45163b68ed708b19db16626094524e20217889c61c63659d21f8e14d03"
+  },
+  "research/aaa_1k_v2/cli.py": {
+   "bytes": 20724,
+   "sha256": "db334e4691a6cf863bd137adb16d8813b7767c240ea35324abd24221e7b122f5"
+  },
+  "research/aaa_1k_v2/confirmation.py": {
+   "bytes": 13270,
+   "sha256": "6412a2d40cf870afbb6ba211136a56335310d26a6c11d3e182b20b1798b700c2"
+  },
+  "research/aaa_1k_v2/cores.py": {
+   "bytes": 20924,
+   "sha256": "0e753f4388c4e6bfe32cf189310b28f4c1a729c6bd2184af9421de26ffe08a0e"
+  },
+  "research/aaa_1k_v2/diagnostics.py": {
+   "bytes": 27303,
+   "sha256": "7b9326090542e42e744db416eda71ed3345765069a5e1a0bc02aa8e88c3df5ae"
+  },
+  "research/aaa_1k_v2/engine.py": {
+   "bytes": 27777,
+   "sha256": "e402775bf9506e284c40d8bc615a2141697786bb9df12ac367fc24ac5a88a7d0"
+  },
+  "research/aaa_1k_v2/evidence.py": {
+   "bytes": 2296,
+   "sha256": "5e6b6f772feb15167575c0ce2ab44f590fd89a2cf87b34bc75fb37f8d66f81e9"
+  },
+  "research/aaa_1k_v2/external/__init__.py": {
+   "bytes": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "research/aaa_1k_v2/external/data/dysts_0.96_chaotic_attractors.json": {
+   "bytes": 161128,
+   "sha256": "f750c02d69c18d76b3a82f00673db0a410456ae3fec4b4a726a4fdcb46f73174"
+  },
+  "research/aaa_1k_v2/external/dysts_subset.py": {
+   "bytes": 10669,
+   "sha256": "377d7da9abdf45de1c45f816076e9dc15998456def713832a0a4787381f0b4d1"
+  },
+  "research/aaa_1k_v2/external/metrics.py": {
+   "bytes": 3630,
+   "sha256": "3f3f37e362171c1efe6ed2c45a69ec8c465eae7e5627711a29fbb9222482ae5e"
+  },
+  "research/aaa_1k_v2/external/monash.py": {
+   "bytes": 11288,
+   "sha256": "d255ec7e3aec74bc53ec43de96ac1e6a062b6555739524acfb069a202a8fa6ec"
+  },
+  "research/aaa_1k_v2/external/synthetic.py": {
+   "bytes": 5804,
+   "sha256": "33c45c23b7c4c22bf69a255292b8223f29a24b5013fbde7eeb0448287e89554e"
+  },
+  "research/aaa_1k_v2/external/tasks.py": {
+   "bytes": 14928,
+   "sha256": "be0eb1a2fa9b0e09f600d82c5307d0898e0b3d20bf3282a8d1bc54570354e8e6"
+  },
+  "research/aaa_1k_v2/freeze.py": {
+   "bytes": 9810,
+   "sha256": "998c10b2bb1df6be92bc3f1a9f2a8359edfc22db8f0c16e3d65664447a193123"
+  },
+  "research/aaa_1k_v2/identities.py": {
+   "bytes": 10327,
+   "sha256": "ea7210bbea2941683b1c174b868372f538d19d31652a94edefdb30fcb991d026"
+  },
+  "research/aaa_1k_v2/identity.py": {
+   "bytes": 3339,
+   "sha256": "7838e1b06b19abe053f78264ccdba266fb9374cbf50b20f3271ab591606d7880"
+  },
+  "research/aaa_1k_v2/jobs.py": {
+   "bytes": 16420,
+   "sha256": "881751bd9750f27e4f3709a817edbb10c01086ea5e22911a366c2e22d9e7461e"
+  },
+  "research/aaa_1k_v2/parallel.py": {
+   "bytes": 4055,
+   "sha256": "9ad4c8decfa38954b0a84be206823e8025e091f9e45ef176232e8ef77c32e3f1"
+  },
+  "research/aaa_1k_v2/plan.py": {
+   "bytes": 11580,
+   "sha256": "1c168b430962a1a9744d76defbdf8f093ad31e0fcffe2c72d32434ac3ae8add6"
+  },
+  "research/aaa_1k_v2/qualify.py": {
+   "bytes": 13041,
+   "sha256": "7a48d09d66ccea984f94ddd41f1684b39d803ae7a6dc50b208e308a76f86d773"
+  },
+  "research/aaa_1k_v2/recompute.py": {
+   "bytes": 11195,
+   "sha256": "8d8c4921a09093ab3d4d82d220a8dba2ea67c979160e404d083539eae0a3f17f"
+  },
+  "research/aaa_1k_v2/report.py": {
+   "bytes": 9038,
+   "sha256": "9be7245f3ff0ef4c48e0f753245414884de044af7b4dafceb4aba6d3e36c344c"
+  },
+  "research/aaa_1k_v2/runner.py": {
+   "bytes": 11767,
+   "sha256": "8463f608f56f0a9e1707a98e7d3933fbd6470b9ac5d7512f599984e32b64d67a"
+  },
+  "research/aaa_1k_v2/stats.py": {
+   "bytes": 7352,
+   "sha256": "50ef4e750b5394b08edce44acaf56a2102f02bf44297199c34124c6df039ed5b"
+  },
+  "research/aaa_1k_v2/stress.py": {
+   "bytes": 24297,
+   "sha256": "1f1a4851e3e3447aa59d9aeb739abf788b814c17d5ac101aba2f6bfcc7a869af"
+  },
+  "research/aaa_1k_v2/tournament.py": {
+   "bytes": 24944,
+   "sha256": "f04c7a82cd20f6115fa21c8890427cffcfd9d2472a728e0a2bee7f45a4c9f16e"
+  },
+  "tests/test_aaa_1k_v2.py": {
+   "bytes": 33175,
+   "sha256": "37b834cb3d10c5714945a11864d332681f7ae7326f78084ca4f7b072fa7e6cd9"
+  },
+  "tests/test_compute.py": {
+   "bytes": 6374,
+   "sha256": "f019977bca36da012eed7488d2d08bba611270b81d731afff352ba4280daea2b"
+  }
+ }
+}
