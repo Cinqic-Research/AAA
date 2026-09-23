@@ -15,7 +15,34 @@ def git(*args: str) -> str:
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
 
+V2_PATHS = (
+    "research/aaa_1k_v2/",
+    "aaa/compute/",
+    "docs/aaa_1k_v2_",
+    "docs/evidence/aaa_1k_v2/",
+    "benchmarks/aaa1k_v2_",
+    "benchmarks/hardware/",
+    "tests/test_aaa_1k_v2",
+    "tests/test_compute.py",
+    "tools/write_aaa_1k_v2_report.py",
+    "tools/reproduce_aaa_1k_v2_confirmation.py",
+    "tools/aaa_1k_v2_dysts_validation.py",
+    "requirements-cuda-lock.txt",
+)
+"""Paths added or owned by the aaa.1k.v2 phase and the FLOWBOX compute layer."""
+
+
+def is_v2(path: str) -> bool:
+    return path.startswith(V2_PATHS)
+
+
 def purpose(path: str) -> str:
+    if path.startswith("research/aaa_1k_v2/"):
+        return "active AAA-1K v2 research implementation (frozen by the v2 fingerprint)"
+    if path.startswith("aaa/compute/"):
+        return "active compute layer: device selection, backend provenance, hardware probe"
+    if path.startswith("docs/evidence/aaa_1k_v2/"):
+        return "current retained AAA-1K v2 evidence"
     if path.startswith("research/aaa_1k_loop/"):
         return "active AAA-1K improvement-loop research and protocol implementation"
     if path.startswith("research/aaa_1k/"):
@@ -61,6 +88,8 @@ def category(path: str) -> str:
     }:
         return "superseded evidence"
     if path == "docs/evidence/aaa_1k_evaluation_round3.json":
+        return "current evidence"
+    if path.startswith("docs/evidence/aaa_1k_v2/"):
         return "current evidence"
     if path.startswith("results/benchmark_v2_1/") or path.startswith("docs/evidence/"):
         return "retained evidence"
@@ -109,6 +138,8 @@ def findings(path: str) -> str:
 
 
 def inherited_findings(path: str) -> str:
+    if is_v2(path):
+        return "AAA-179, AAA-180; AAA-162, AAA-163 and AAA-172 revisited in aaa.1k.v2"
     loop_path = (
         path.startswith("research/aaa_1k_loop/")
         or path.startswith("docs/evidence/aaa1k_loop_")
