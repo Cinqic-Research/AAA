@@ -2051,4 +2051,24 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
   predeclare how a single-series dataset enters a crossed bootstrap (resample
   initializations only, or exclude it from interval estimation), and (c) share
   that rule between both implementations, with a regression test that runs
-  both on one fixture containing a single-series group.
+  both on one fixture containing a single-series group. **Hard precondition:**
+  the frozen v2 K5 path may not be used to promote any future candidate. A
+  versioned successor must fail closed on omitted groups or decision/recompute
+  disagreement before its held-out evidence is observed. See
+  [`docs/scaling_readiness.md`](scaling_readiness.md).
+
+### AAA-181 — static v2 report prose overstated the family and error-head readings
+- **Source** independent pre-scale review, 2026-09-23 · **Severity** recommendation · **Status** corrected in current report generator and regenerated report; frozen results unchanged
+- **Reproduction** the v2 family table contains small favourable differences
+  for an ablation outside the coarse/noisy families, while its static sentence
+  said those were the only families where *anything* beats Champion 1. The K3
+  error-head-loss interval is [0.998, 1.002], so a literal claim of unchanged
+  prediction or no effect is stronger than the measured result. The Monash
+  sentence attributed a seasonal-naive advantage to missing seasonal memory
+  without isolating that mechanism, and the capacity paragraph rounded a
+  measured range into a fixed verbal range.
+- **Scientific impact** no primitive, decision, verdict or frozen identity
+  changes. The revised interpretation distinguishes small ablation effects,
+  generates the auxiliary-loss interval, Monash comparisons and capacity range
+  from retained values, and no longer asserts an untested Monash mechanism.
+  `tools/write_aaa_1k_v2_report.py --check` guards the regenerated report bytes.

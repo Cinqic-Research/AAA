@@ -128,13 +128,30 @@ REVIEW_2026_09_22 = {
 }
 """Paths changed by the 2026-09-22 independent review, and the findings that changed them."""
 
+REVIEW_2026_09_23 = {
+    ".github/workflows/ci.yml": "Q2 measurement parity",
+    "README.md": "Q2 non-replication; current research direction",
+    "docs/aaa_1k_v2_handoff.md": "Q2 measurement parity; AAA-180",
+    "docs/aaa_1k_v2_report.md": "AAA-181",
+    "docs/hardware.md": "105M planning decision",
+    "docs/issue_ledger.md": "AAA-180, AAA-181",
+    "docs/limitations.md": "Q2 measurement parity; AAA-180, AAA-181",
+    "docs/pre_scale_review_2026-09-23.md": "AAA-180, AAA-181; Q2 measurement parity",
+    "docs/research_direction.md": "Python-first coding decision",
+    "docs/scaling_readiness.md": "AAA-180; 105M planning decision",
+    "tools/check_adaptation_parity.py": "Q2 measurement parity",
+    "tools/write_aaa_1k_v2_report.py": "AAA-181",
+}
+
 
 def findings(path: str) -> str:
-    inherited = inherited_findings(path)
-    review = REVIEW_2026_09_22.get(path)
-    if review is None:
-        return inherited
-    return review if inherited == "none" else f"{inherited}; {review}"
+    notes = [
+        inherited_findings(path),
+        REVIEW_2026_09_22.get(path),
+        REVIEW_2026_09_23.get(path),
+    ]
+    relevant = [note for note in notes if note and note != "none"]
+    return "; ".join(relevant) if relevant else "none"
 
 
 def inherited_findings(path: str) -> str:
@@ -221,10 +238,10 @@ def main() -> None:
             "",
             "Generated deterministically by `tools/write_audit_inventory.py` from the staged review candidate.",
             f"It inventories **{len(rows)} tracked regular files**; the count and path set must equal `git ls-files --cached`.",
-            "Hashes are SHA-256 of the reviewed worktree bytes, not Git blob IDs.",
-            "A row records inspection coverage; it does not upgrade historical evidence into fresh verification.",
+            "Hashes are SHA-256 of the tracked worktree bytes, not Git blob IDs.",
+            "Rows retain inspection classifications across documented reviews; they do not prove a fresh reread in this review or upgrade historical evidence.",
             "",
-            "| Path | Reviewed SHA-256 | Purpose | Category | Verification | Related findings | Disposition |",
+            "| Path | Tracked SHA-256 | Purpose | Category | Verification | Related findings | Disposition |",
             "|---|---|---|---|---|---|---|",
             *rows,
             "",

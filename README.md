@@ -14,7 +14,10 @@ AAA is the research programme, not the dot. The long-term objective is a
 persistent agent called Juniper; the dot is one benchmark family, and the
 current learners are the smallest things that can be measured honestly on it.
 See [the research charter](docs/aaa_charter.md) before assuming the benchmark
-is the project.
+is the project. AAA's current first deliberate specialization is
+[Coding, beginning with Python](docs/research_direction.md); this is a new
+research direction, not a demonstrated capability or the permanent scope of
+the programme.
 
 AAA makes no claim to general intelligence, physical understanding, or
 independent goal formation. "Autonomous" here means the observe / predict /
@@ -119,9 +122,10 @@ initializations. Round 3 uses fresh identities and corrected designs.
 - it **learns online** on every family;
 - **persistent hidden state helps on these families** -- it beats both the
   direct state-reset ablation and matched stateless control;
-- **it adapts on the paired-change benchmark**: the change-specific component
-  is `+5.12e-04` and 43% of the combined online advantage. *This did not
-  replicate on fresh identities in `aaa.1k.v2`* (see below);
+- **round 3 measured a positive paired-change effect**: the change-specific
+  component was `+5.12e-04` and 43% of the combined online advantage. It did
+  not replicate on fresh identities in `aaa.1k.v2`, so a general adaptation
+  claim is unsupported (see below);
 - **no forgetting was measured on the fixed probe bank**, but the corrected
   interval crosses zero; this is not general retention immunity (`aaa.1k.v2`
   later resolved it in the good direction on fresh identities);
@@ -337,7 +341,9 @@ result, and this repository is built to report that rather than to avoid it.
 | Document | What it covers |
 |---|---|
 | [Research charter](docs/aaa_charter.md) | what AAA is, what Juniper is, and why the dot is one benchmark |
-| [Development hardware](docs/hardware.md) | FLOWBOX, when to use its CPU or GPU, the current 125M planning ceiling, and future compute |
+| [Current research direction](docs/research_direction.md) | Python-first coding scope, causal evaluation, capability ladder, and self-improvement boundaries |
+| [Scaling readiness](docs/scaling_readiness.md) | current evidence, open promotion blocker, and gates for capacity experiments |
+| [Development hardware](docs/hardware.md) | FLOWBOX, when to use its CPU or GPU, the approximate 105M long-term AAA 1 planning goal, and future compute |
 | [AAA-1K architecture](docs/aaa_1k_architecture.md) | the frozen 994-parameter specification |
 | [AAA-1K literature review](docs/aaa_1k_literature_review.md) | what was adopted from the literature, and what was refused |
 | [AAA-1K decisions](docs/aaa_1k_decisions.md) | every decision, including three departures from the phase brief |

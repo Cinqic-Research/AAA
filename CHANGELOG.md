@@ -1,5 +1,19 @@
 # Research history
 
+## Pre-scale review and current direction (2026-09-23)
+
+- Recorded Coding, beginning with Python, as AAA's first deliberate
+  specialization in [`docs/research_direction.md`](docs/research_direction.md).
+  This is a research direction, not a present capability or permanent limit.
+- Superseded the earlier 125M FLOWBOX planning ceiling as current guidance.
+  AAA 1 now has an approximate **105M long-term parameter goal**. It is not a
+  hard ceiling, immediate model size, promotion criterion or evidence of need;
+  the final size remains experimental. The historical decision below remains
+  intact as a dated record.
+- Added a [scaling-readiness record](docs/scaling_readiness.md) that preserves
+  `AAA-180` as a hard precondition for any future promotion and distinguishes
+  round-3 adaptation from the fresh v2 non-replication.
+
 ## AAA-1K v2: FLOWBOX compute and the final 1K pass (2026-09-23)
 
 A new versioned phase, `aaa.1k.v2`. It does not modify `aaa.1k.v1`: that
