@@ -695,388 +695,431 @@
       "block_id": "v2-confirmation-init",
       "count": 8,
       "namespace": "init",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation model initializations",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.v1_motion_straight",
       "count": 16,
       "namespace": "env.v1_motion_straight",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of v1_motion_straight",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.v1_motion_bouncing",
       "count": 16,
       "namespace": "env.v1_motion_bouncing",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of v1_motion_bouncing",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.v1_motion_changed",
       "count": 16,
       "namespace": "env.v1_motion_changed",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of v1_motion_changed",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.v1_motion_dynamics",
       "count": 16,
       "namespace": "env.v1_motion_dynamics",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of v1_motion_dynamics",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.v1_occlusion",
       "count": 16,
       "namespace": "env.v1_occlusion",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of v1_occlusion",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.v1_coarse_speed",
       "count": 16,
       "namespace": "env.v1_coarse_speed",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of v1_coarse_speed",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.v1_aba",
       "count": 16,
       "namespace": "env.v1_aba",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of v1_aba",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.long_bouncing",
       "count": 16,
       "namespace": "env.long_bouncing",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of long_bouncing",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.long_coarse",
       "count": 16,
       "namespace": "env.long_coarse",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of long_coarse",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.random_gaps",
       "count": 16,
       "namespace": "env.random_gaps",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of random_gaps",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.wall_gaps",
       "count": 16,
       "namespace": "env.wall_gaps",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of wall_gaps",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.long_gap_recall",
       "count": 16,
       "namespace": "env.long_gap_recall",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of long_gap_recall",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.stationary_mixed",
       "count": 16,
       "namespace": "env.stationary_mixed",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of stationary_mixed",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.noise",
       "count": 16,
       "namespace": "env.noise",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of noise",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.change_gaps",
       "count": 16,
       "namespace": "env.change_gaps",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of change_gaps",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.quantized",
       "count": 16,
       "namespace": "env.quantized",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of quantized",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.oscillator_long",
       "count": 16,
       "namespace": "env.oscillator_long",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of oscillator_long",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.noise_gaps",
       "count": 16,
       "namespace": "env.noise_gaps",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of noise_gaps",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.change_noise",
       "count": 16,
       "namespace": "env.change_noise",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of change_noise",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.accel_switch",
       "count": 16,
       "namespace": "env.accel_switch",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of accel_switch",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.coarse_near",
       "count": 16,
       "namespace": "env.coarse_near",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of coarse_near",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.long_gap_recall_extended",
       "count": 16,
       "namespace": "env.long_gap_recall_extended",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of long_gap_recall_extended",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.gravity_bounce",
       "count": 16,
       "namespace": "env.gravity_bounce",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of gravity_bounce",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.soft_wall",
       "count": 16,
       "namespace": "env.soft_wall",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of soft_wall",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.inelastic_wall",
       "count": 16,
       "namespace": "env.inelastic_wall",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of inelastic_wall",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.abcab",
       "count": 16,
       "namespace": "env.abcab",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation streams of abcab",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.narma10",
       "count": 8,
       "namespace": "ext.narma10",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation realizations of narma10",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.narma20",
       "count": 8,
       "namespace": "ext.narma20",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation realizations of narma20",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.mackey_glass17",
       "count": 8,
       "namespace": "ext.mackey_glass17",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation realizations of mackey_glass17",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-Hadley",
       "count": 4,
       "namespace": "ext.dysts-Hadley",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of Hadley",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-SprottD",
       "count": 4,
       "namespace": "ext.dysts-SprottD",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of SprottD",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-SprottK",
       "count": 4,
       "namespace": "ext.dysts-SprottK",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of SprottK",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-KawczynskiStrizhak",
       "count": 4,
       "namespace": "ext.dysts-KawczynskiStrizhak",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of KawczynskiStrizhak",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-SprottE",
       "count": 4,
       "namespace": "ext.dysts-SprottE",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of SprottE",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-ZhouChen",
       "count": 4,
       "namespace": "ext.dysts-ZhouChen",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of ZhouChen",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-Chen",
       "count": 4,
       "namespace": "ext.dysts-Chen",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of Chen",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-Halvorsen",
       "count": 4,
       "namespace": "ext.dysts-Halvorsen",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of Halvorsen",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-SprottJerk",
       "count": 4,
       "namespace": "ext.dysts-SprottJerk",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of SprottJerk",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-Colpitts",
       "count": 4,
       "namespace": "ext.dysts-Colpitts",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of Colpitts",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-HastingsPowell",
       "count": 4,
       "namespace": "ext.dysts-HastingsPowell",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of HastingsPowell",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-ext.dysts-SprottMore",
       "count": 4,
       "namespace": "ext.dysts-SprottMore",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation initial conditions of SprottMore",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-bootstrap",
       "count": 64,
       "namespace": "bootstrap",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "confirmation bootstrap generator seeds",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-diagnostic-init",
@@ -2298,28 +2341,31 @@
       "block_id": "v2-confirmation-probe.v1_aba",
       "count": 8,
       "namespace": "probe.v1_aba",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "retention probe bank (regime A episodes)",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.paired_change",
       "count": 16,
       "namespace": "env.paired_change",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "paired-change adaptation streams",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-confirmation-env.retention",
       "count": 16,
       "namespace": "env.retention",
+      "observed_by": "confirmation:1d9ee72295642a0f",
       "purpose": "A/B/A retention training streams",
       "role": "confirmation",
       "start": 0,
-      "status": "reserved"
+      "status": "spent"
     },
     {
       "block_id": "v2-development-external.dysts-selection",
