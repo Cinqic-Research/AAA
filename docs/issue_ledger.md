@@ -2031,7 +2031,7 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
   the development evidence.
 
 ### AAA-180 — the v2 confirmation's K5 omitted Monash, and its two K5 implementations disagree on a single-series dataset
-- **Source** self-found while writing the v2 report, 2026-09-23 · **Severity** high had a challenger existed; none in this phase · **Status** open; latent, documented, not repaired (the v2 source is frozen)
+- **Source** self-found while writing the v2 report, 2026-09-23 · **Severity** high had a challenger existed; none in this phase · **Status** repaired prospectively; frozen aaa.1k.v2 defect retained and forbidden for future promotion (2026-09-23; was "open; latent, documented, not repaired (the v2 source is frozen)")
 - **Reproduction** `python tools/write_aaa_1k_v2_report.py` applies the frozen
   K1-K5 criteria to every confirmation arm twice. (1) `run_confirmation`
   (`research/aaa_1k_v2/confirmation.py`) calls `decide` without
@@ -2056,6 +2056,36 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
   versioned successor must fail closed on omitted groups or decision/recompute
   disagreement before its held-out evidence is observed. See
   [`docs/scaling_readiness.md`](scaling_readiness.md).
+- **Prospective repair (2026-09-23)** Independently reproduced before any change
+  (`tools/check_promotion_successor.py` shows it on every run): the frozen
+  `run_confirmation` passes `decide` only `persistence, external_base,
+  bootstrap, families, external`; K5 is computed on 15 groups without Monash
+  and on 19 with it; `monash:saugeen` is an 8 x 1 grid, so frozen `decide`
+  returns `INCONCLUSIVE` (`INSUFFICIENT_EVIDENCE` interval) while frozen
+  `recompute` returns `FAIL`, for all six arms with Monash cells. The frozen
+  v2 source and evidence are **unchanged** and still reproduce this. The
+  successor `aaa.promotion.crossed.v1` (`aaa/promotion/`,
+  [`promotion_contract.md`](promotion_contract.md)) implements (a) mandatory
+  presence of every declared group, (b) a predeclared per-group design, where a
+  single-series group is `conditional_on_single_series` (sole series fixed,
+  shared initializations resampled, scope reported as conditional on that
+  series, no series dimension fabricated), and (c) a primary index-resampling
+  evaluator plus a structurally independent count-weighted recomputation that
+  must agree on point value, interval status, bounds, criteria and verdict,
+  failing closed as `DISAGREEMENT` or `INVALID_EVIDENCE`. It does not share
+  implementation code between the two sides. `aaa.1k.v2.k1-k5` is in
+  `FORBIDDEN_CONTRACTS`, and the v2 registry's spent confirmation blocks
+  cannot be re-frozen. On the retained v2 K5 groups, descriptively, both
+  successor implementations agree for all six arms.
+- **Regression** `tests/test_promotion.py` (28 cases): single- and multi-series
+  agreement on point value, interval status, bounds, criteria and verdict; an
+  explicit initialization-only check of the single-series interval; omitted
+  groups (including one arm only) cannot promote; extra groups, mismatched
+  initialization or series identities, missing and duplicate cells,
+  non-finite, non-positive, `None`, string and boolean values, and malformed
+  records are refused by each implementation separately; injected point,
+  bound, status, criterion and verdict disagreements; the frozen defect is
+  asserted to remain in the frozen source; the forbidden contract is refused.
 
 ### AAA-181 — static v2 report prose overstated the family and error-head readings
 - **Source** independent pre-scale review, 2026-09-23 · **Severity** recommendation · **Status** corrected in current report generator and regenerated report; frozen results unchanged
@@ -2072,3 +2102,99 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
   generates the auxiliary-loss interval, Monash comparisons and capacity range
   from retained values, and no longer asserts an untested Monash mechanism.
   `tools/write_aaa_1k_v2_report.py --check` guards the regenerated report bytes.
+
+---
+
+## Python-first transition (2026-09-23)
+
+Found while moving AAA's active research to `aaa.python.v0`. Each was
+reproduced before it was changed. The development-construction defects
+(`AAA-184`, `AAA-185`) were all found and repaired **before** any development
+evidence was produced, so no retained evidence carries them.
+
+### AAA-182 — frozen v2 recomputation silently skipped Monash for a challenger without Monash primitives
+- **Source** self, while reproducing `AAA-180` · **Severity** high had a challenger existed; none did · **Status** frozen defect retained; repaired prospectively by `aaa.promotion.crossed.v1`
+- **Reproduction** `research/aaa_1k_v2/recompute.py` adds the four Monash
+  groups to K5 only `if name in monash`. A challenger whose Monash primitives
+  are absent is therefore adjudicated on 15 of the 19 declared K5 groups, with
+  no problem recorded. The declared-group set is not checked.
+- **Scientific impact** none on recorded evidence (`NO_CHALLENGER`). It is the
+  independent side's counterpart of `AAA-180`'s omission: both implementations
+  could have agreed on an incomplete group set.
+- **Repair** prospective only; the frozen file is unchanged. The successor
+  requires every declared group for both arms, in both implementations, and
+  returns `INVALID_EVIDENCE` otherwise.
+- **Regression** `FailClosedTests.test_omitting_a_required_group_cannot_promote`
+  and `test_omitting_a_group_for_one_arm_only_cannot_promote`, against a
+  challenger that would otherwise be promoted.
+
+### AAA-183 — current-facing documents still presented the dot as AAA's active research
+- **Source** self, transition audit · **Severity** low (claims) · **Status** repaired
+- **Reproduction** At `f56caaf`: the README's first sentences described "one
+  moving dot on a line" and a three-parameter learner as the project and
+  called AAA-1K "the current research phase"; `CONTRIBUTING.md`'s scope named
+  only dot-era work; `CITATION.cff`'s abstract described only the dot
+  prototype; `SECURITY.md`'s threat model said AAA runs one-dimensional
+  simulations with no `eval`, which stopped being true when the Python phase
+  began executing programs; `docs/hardware.md` still called the 105M planning
+  goal a ceiling in its introduction.
+- **Repair** Those documents now lead with the research problem and the
+  Python specialization. The dot era is mapped in `dot_benchmark_archive.md`,
+  and SECURITY describes the sandbox and what it is not. Fingerprinted and
+  protected historical documents (the charter, protocols, reports, reviews,
+  handoffs) are **unchanged**; `errata.md` carries the notice instead.
+- **Verification** a relative-link and anchor check over every tracked Markdown
+  file; `tools/check_protected_identities.py` shows no protected byte moved.
+
+### AAA-184 — an AST representation would have handed the syntax answer to the learner
+- **Source** self, first `aaa.python.v0` development smoke · **Severity** critical for that family had it been retained · **Status** repaired before any evidence
+- **Reproduction** With `ast_nodes`, programs that fail `ast.parse` received a
+  single `<unparsable>` feature. The online and frozen `ast_nodes` arms then
+  scored 1.0 on `syntax` in the quick smoke, against about 0.5 for every other
+  representation.
+- **Root cause** whether CPython's parser accepts the source *is* the
+  `syntax` family's answer key. A representation built on that parser carries
+  the evaluator's verdict into the learner before the action.
+- **Repair** `representation.effective_representation` refuses `ast_nodes` for
+  `syntax` (and for lone repair-candidate fragments, which do not parse) and
+  falls back to `lexical`; `vector()` raises rather than emit a parse verdict.
+  After the repair, `ast_nodes` syntax accuracy is at chance-level 0.58 in the
+  smoke.
+- **Regression** `RepresentationTests.test_the_ast_representation_never_sees_a_syntax_verdict`.
+  `CONTRIBUTING.md` names this as the pattern to avoid.
+
+### AAA-185 — `aaa.python.v0` construction defects found by its own tests and smoke
+- **Source** self, during construction · **Severity** medium (each would have biased or broken development evidence) · **Status** repaired before any evidence
+- **Findings and repairs**
+  - *Construction cues.* Every fault assigned to a variable named `t`, and each
+    faulty program had one risky line, so a heuristic localized 92% of
+    failures from surface form in the quick smoke (24 tasks). Faults now assign a name the program never
+    uses, fire only on value-dependent conditions over earlier-bound names,
+    and half carry a decoy fault. The heuristic still wins, at 0.73, and that
+    is reported.
+  - *Cross-family memory.* The lookup baseline keyed memory by source alone;
+    an identical program in two families returned an output value for a
+    localization task. The causal boundary refused the out-of-space answer,
+    which is how it was found. The key now includes the family.
+  - *Out-of-pool identities.* The first runner requested development indices
+    past the declared 400-item pool, where probe items are not excluded.
+    Runs now use exactly the declared pool, and `build()` refuses any index
+    outside a split's pool.
+  - *Resume that could never resume.* Checkpoints compared the stored plan
+    (JSON lists) with `asdict(plan)` (tuples), so every resume was refused.
+    Found by `test_resuming_from_checkpoints_reproduces_the_run_exactly`;
+    the comparison is now JSON-normalized.
+  - *Incomplete memory reset.* The memory-disabled control restored weights
+    but not its update counter, which is part of persistent state. Found by
+    a state-hash test; it now restores both.
+  - *Decorative specification values.* Repair counts, the adaptation's changed
+    slice and two pool sizes were declared but hardcoded or unread. The
+    spec-consumption test's first version passed vacuously, because
+    `json.dumps` of the specification recorded every leaf. It now fails on
+    an injected unread leaf, and the code reads every non-descriptive value.
+- **Regression** `tests/test_aaa_python_generation.py`,
+  `tests/test_aaa_python_learning.py` and `tests/test_aaa_python_spec.py`,
+  each written to fail on the defective behaviour. The golden answer keys and
+  the 250-task generation digest were unchanged by the late spec-consumption
+  repairs, so no task changed.
+

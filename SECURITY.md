@@ -11,16 +11,33 @@ maintained on a best-effort basis; there is no commercial support commitment.
 
 ## Threat model
 
-AAA runs local, seeded simulations of a one-dimensional world. It has no
-network client or server, no authentication, no user accounts and no persistent
-service. It reads and writes JSON under a directory the caller chooses.
+AAA runs local, seeded experiments: the dot-era simulations of a
+one-dimensional world and, since `aaa.python.v0`, small generated Python
+programs executed as an external oracle. It has no network client or server,
+no authentication, no user accounts and no persistent service. It reads and
+writes JSON under a directory the caller chooses.
 
 Realistic concerns are correspondingly narrow:
 
+- **Executing Python programs (`aaa.python.v0`).** AAA executes only programs
+  its own deterministic generator produces, never code from the network, a
+  corpus, a user or a learner. Each program must pass an allow-list AST
+  validator first (no imports, attribute access, `eval`/`exec`/`open`/`getattr`
+  or any unlisted builtin, `while`, recursion, `**` or `/`; bounded literals and
+  loops). It then runs in a separate `python -I -S` process with an empty
+  environment, a fresh temporary working directory, only the allowed builtins,
+  CPU, address-space, file-size and process-count limits where the platform
+  provides them, a wall-clock timeout and an output cap. Syntax checks only
+  compile. `python -m research.aaa_python safety` exercises 68 escape and
+  containment cases. This is defence in depth for generated code, not a
+  hardened sandbox for hostile code: it relies on POSIX resource limits, has
+  no network or filesystem namespace isolation, and must not be used to run
+  untrusted programs. Learners run in-process and are trusted research code.
 - **Untrusted checkpoint or specification files.** Everything AAA loads is JSON
-  with a declared schema version and strict validation. No `pickle`, no `eval`,
-  no dynamic import of file content. An unknown schema version or an
-  out-of-range value is refused rather than coerced.
+  with a declared schema version and strict validation. No `pickle`, no dynamic
+  import of file content, and nothing loaded from a file is executed as code.
+  An unknown schema version or an out-of-range value is refused rather than
+  coerced.
 - **Path handling.** A run writes only under its requested output root. This is
   covered by `tests/test_legacy_v1.py::test_a_run_writes_nothing_outside_the_requested_output_root`.
 - **Supply chain.** Runtime dependencies are NumPy and Matplotlib, pinned in
