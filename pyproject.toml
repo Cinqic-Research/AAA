@@ -53,6 +53,7 @@ include = ["aaa*", "research*"]
 # a repository-relative path disappears the moment AAA is installed elsewhere.
 "aaa.benchmark" = ["data/*.json"]
 "aaa.noise" = ["data/*.json"]
+"research.aaa_1k_v2.external" = ["data/*.json"]
 
 [tool.ruff]
 line-length = 110

@@ -1,6 +1,6 @@
 # Dependencies and licenses
 
-AAA runs on CPU with public open-source Python packages. Direct dependencies are
+AAA runs on CPU with public open-source Python packages; new work can optionally use an NVIDIA GPU through CuPy. Direct dependencies are
 declared in `pyproject.toml`; the validated environment is pinned in
 `requirements-lock.txt`, which CI installs and then verifies against the
 installed set with `tools/check_lock.py`.
@@ -16,14 +16,32 @@ installed set with `tools/check_lock.py`.
 | setuptools | pinned PEP 517 build backend | MIT |
 | Python standard library | JSON/JSONL, gzip, hashing, timing, CLI, platform metadata | PSF License |
 
+### Optional CUDA environment (new work from `aaa.1k.v2`)
+
+| Dependency | Use | License |
+|---|---|---|
+| CuPy 14.2.0 (`cupy-cuda13x`) | the CUDA backend of `aaa.compute`: the same array program as NumPy on an NVIDIA GPU | MIT |
+| `cuda-toolkit` 13.2.2 metapackage, `nvidia-cuda-runtime` 13.2.86, `nvidia-cuda-nvrtc` 13.2.86, `nvidia-cublas` 13.4.1.3, `cuda-pathfinder` 1.8.2 | NVIDIA's CUDA runtime, runtime compiler and BLAS, installed from PyPI so no system CUDA toolkit is needed | NVIDIA proprietary (redistributable wheels) |
+
+They are pinned, together with every base pin, in `requirements-cuda-lock.txt` and
+verified with `python tools/check_lock.py --lock requirements-cuda-lock.txt`.
+Nothing in the base installation, CI or any historical phase needs them, and
+CUDA is never selected implicitly: a requested but unavailable device raises.
+See [`aaa_1k_v2_compute_strategy.md`](aaa_1k_v2_compute_strategy.md) for why
+CuPy was chosen over PyTorch (measured on the RTX 2060).
+
+External benchmark data (Monash archive, CC BY 4.0) is downloaded on demand
+into `$AAA_DATA_ROOT` and checksum-verified; it is not a Python dependency and
+is never committed. The dysts 0.96 metadata file (Apache-2.0) is vendored with
+attribution in `research/aaa_1k_v2/external/data/`.
+
 `psutil` is optional metadata enrichment only. When it is absent the run records
 that the field was not measured rather than guessing.
 
 The repository is Apache License 2.0. No proprietary model API, paid service,
-pretrained model, cloud compute or GPU-only dependency is required, and none is
-used. The development workstation happens to contain a discrete GPU; no
-dependency here uses it, and [`hardware.md`](hardware.md) explains why that
-changes nothing about this list.
+pretrained model, cloud compute or GPU-only dependency is required. The
+optional CUDA environment above is the only GPU-related dependency, and no
+historical result depends on it ([`hardware.md`](hardware.md)).
 
 ## Regenerating the lock
 

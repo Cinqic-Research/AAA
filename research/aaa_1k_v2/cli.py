@@ -104,8 +104,17 @@ def command_develop(args: argparse.Namespace) -> int:
     captured = environment(plan.DEVELOPMENT_BACKEND)
     started = time.time()
     raw_dir = Path(args.raw_root) / "aaa_1k_v2" if args.raw_root else None
+    candidates = tuple(args.candidates.split(",")) if args.candidates else plan.CANDIDATES
+    if args.role == "development" and candidates != plan.CANDIDATES:
+        print("error: the development stage runs the full precommitted candidate budget", file=sys.stderr)
+        return 2
     result = tournament.run_development(
-        registry, workers=args.workers, role=args.role, raw_dir=raw_dir, log=lambda m: print(m, flush=True)
+        registry,
+        workers=args.workers,
+        role=args.role,
+        raw_dir=raw_dir,
+        candidates=candidates,
+        log=lambda m: print(m, flush=True),
     )
     result["environment"] = captured
     result["wall_seconds"] = time.time() - started
@@ -444,6 +453,7 @@ def main(argv: list[str] | None = None) -> int:
     develop.add_argument("--role", choices=("development", "scratch"), default="development")
     develop.add_argument("--workers", default="auto")
     develop.add_argument("--raw-root", help="directory for full raw archives (e.g. $AAA_DATA_ROOT)")
+    develop.add_argument("--candidates", help="comma-separated subset (scratch shakedowns only)")
     develop.set_defaults(func=command_develop)
     diagnose = sub.add_parser("diagnose")
     diagnose.add_argument("--output", required=True)

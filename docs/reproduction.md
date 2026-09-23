@@ -286,7 +286,8 @@ and for nothing else; its temporal semantics are tested headlessly.
 
 ## Hardware
 
-No GPU is required and none is used. The model has three parameters. Every
+No GPU is required and none is used by the v2.1 benchmark (the model has three
+parameters); only the separate `aaa.1k.v2` phase below can optionally use CUDA. Every
 attempt records the CPU model, core count, memory, OS, Python, NumPy, BLAS
 build metadata and available disk space, so a latency number can be read in
 context.
@@ -357,3 +358,63 @@ python -m unittest tests.test_aaa_1k_loop
 
 See [`loop_pilot_handoff.md`](loop_pilot_handoff.md) for timings and what each
 stage checks.
+
+## AAA-1K v2 (`aaa.1k.v2`, the final 1K pass)
+
+Identity and accounting (CPU, no GPU needed):
+
+```bash
+python -m research.aaa_1k_v2 audit          # every arm <= 1,000 parameters, recounted from arrays
+python -m research.aaa_1k_v2 fingerprint    # v2 scientific source fingerprint
+python -m research.aaa_1k_v2 registry       # the identity registry equals the declared plan
+python -m research.aaa_1k_v2 prove-fresh    # 64-bit v2 seeds disjoint from every historical identity
+python -m research.aaa_1k fingerprint       # aaa.1k.v1 is still 5ce6e019...f771e
+```
+
+Stages. Formal stages run from a clean `git worktree` checked out at the
+commit they are recorded against (decision V2-D14), with
+`AAA_DATA_ROOT` pointing at a directory for raw archives and the Monash data:
+
+```bash
+git worktree add --detach ../aaa-stage <commit>
+cd ../aaa-stage
+export AAA_DATA_ROOT=/path/to/large/storage
+python -m research.aaa_1k_v2 develop --output docs/evidence/aaa_1k_v2/development.json --workers 8 --raw-root "$AAA_DATA_ROOT"
+python -m research.aaa_1k_v2 diagnose --output docs/evidence/aaa_1k_v2/diagnostics.json
+python -m research.aaa_1k_v2 attack --output docs/evidence/aaa_1k_v2/attack.json        # needs CUDA for A6, or --cuda none
+python -m research.aaa_1k_v2 freeze --output docs/evidence/aaa_1k_v2/freeze.json --attack docs/evidence/aaa_1k_v2/attack.json
+git add docs/evidence/aaa_1k_v2/freeze.json && git commit -m "freeze"
+python -m research.aaa_1k_v2 confirm --freeze docs/evidence/aaa_1k_v2/freeze.json --output docs/evidence/aaa_1k_v2/confirmation.json
+python -m research.aaa_1k_v2 recompute --freeze docs/evidence/aaa_1k_v2/freeze.json --confirmation docs/evidence/aaa_1k_v2/confirmation.json
+python -m research.aaa_1k_v2 capacity --freeze docs/evidence/aaa_1k_v2/freeze.json --confirmation docs/evidence/aaa_1k_v2/confirmation.json --output docs/evidence/aaa_1k_v2/capacity.json
+```
+
+Every stage refuses to overwrite an existing artifact. `confirm` refuses an
+uncommitted or stale freeze and a dirty tree, and spends and commits every
+confirmation block before the first cell runs, so it can only run once.
+Recomputation reads only committed artifacts:
+
+```bash
+python -m research.aaa_1k_v2 recompute --freeze docs/evidence/aaa_1k_v2/freeze.json \
+    --confirmation docs/evidence/aaa_1k_v2/confirmation.json
+```
+
+Reproduction standard: confirmation evidence was produced on the CPU (float64)
+on FLOWBOX (Zen 3). A rerun there must reproduce every cell bitwise; elsewhere
+the standard is verdict-level, with numerical drift reported (`AAA-173`).
+Development evidence carries its own backend record.
+
+CUDA qualification (FLOWBOX, optional CUDA environment, quiet machine):
+
+```bash
+python -m venv .venv-cuda && . .venv-cuda/bin/activate
+python -m pip install -r requirements-cuda-lock.txt && python -m pip install -e . --no-deps
+python tools/check_lock.py --lock requirements-cuda-lock.txt
+python -m aaa.compute info --device cuda
+python -m research.aaa_1k_v2 qualify --output docs/evidence/aaa_1k_v2/compute_qualification.json
+python -m unittest tests.test_compute tests.test_aaa_1k_v2   # CUDA tests run only where a device exists
+```
+
+External benchmarks: the dysts validation reruns dysts itself in a separate
+environment (`tools/aaa_1k_v2_dysts_validation.py`); the Monash files are
+fetched and verified on first use, and a checksum mismatch refuses them.
