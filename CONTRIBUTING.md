@@ -1,8 +1,10 @@
 # Contributing to AAA
 
-AAA is a small research prototype whose whole point is that its measurements can
-be trusted. Contributions are welcome; the conventions below exist to keep that
-property.
+AAA is a research programme whose whole point is that its measurements can be
+trusted. Its current focus is **Coding, beginning with Python** (`aaa.python.v0`);
+the moving-dot work is retained as evidence and benchmark lineage
+([archive](docs/dot_benchmark_archive.md)). Contributions are welcome; the
+conventions below exist to keep that property.
 
 ## Before you change anything
 
@@ -96,6 +98,30 @@ report, compute report, self-review, handoff, decision log and
 that needs different v2 code copies it into a new versioned package; it does
 not edit `research/aaa_1k_v2/`.
 
+**`aaa.python.v0` has its own identity, and its evidence is protected like the rest.**
+`python -m research.aaa_python fingerprint` hashes `research/aaa_python/`,
+`aaa/promotion/`, the `tests/test_aaa_python*.py` files, `tests/test_promotion.py`,
+the phase brief, protocol, architecture and promotion-contract documents, and the
+lock. Changing the exam (the specification, subset, generator, oracle or
+answer keys) is a new generator or protocol version: the golden answer keys
+refuse to be rewritten (`golden --write` exits 2), and every earlier task
+identity must keep meaning the same program. Changing the learner does not
+change the exam. `tools/check_protected_identities.py` fails if any retained
+dot-era evidence byte or identity moves; adding new evidence is fine.
+
+**Python tasks keep the causal boundary.** A learner sees only a `TaskView`,
+never a `Task`. Feedback is post-action and limited to the family's declared
+fields. Answer keys come from CPython, never from what a generator meant to
+produce. No program runs without passing the subset validator, and none runs
+outside the sandbox. A new representation must not smuggle in an interpreter
+verdict; `AAA-184` is what that looks like.
+
+**Promotion uses a versioned contract.** A promotion decision declares an
+`aaa.promotion` contract before held-out observation. The frozen
+`aaa.1k.v2` K5 path is forbidden (`AAA-180`). The primary and independent
+implementations must stay structurally independent; do not "fix" a
+disagreement by making one call the other.
+
 **Every specification value must be read.** `tests/test_spec.py` fails if a
 declared leaf stops being consumed. If you add a value to the specification,
 use it.
@@ -117,6 +143,11 @@ python -m mypy
 python -m unittest discover -s tests -t .
 python tools/check_lock.py
 python tools/check_exit_codes.py
+python tools/check_protected_identities.py
+python -m aaa.promotion selftest
+python -m research.aaa_python safety
+python -m research.aaa_python leakage
+python -m research.aaa_python golden
 ```
 
 `unittest` is the project's test framework. Please do not introduce a second
@@ -139,9 +170,16 @@ process record separate from scientific experiment evidence.
 
 ## Scope
 
-Observation noise is implemented only in the separately versioned
-`aaa.observation_noise.v1.1` phase. Do not fold it into benchmark v2.1 or change
-either protocol's frozen thresholds, samples, endpoints, or historical evidence.
-Larger models, extra dimensions, process noise, missing observations and other
-research directions remain out of scope. See
-[`docs/limitations.md`](docs/limitations.md) for the current evidence boundary.
+The active scope is `aaa.python.v0`: the frozen safe subset, its five task
+families, its baselines and its minimal learner. Rungs of the
+[capability ladder](docs/research_direction.md) beyond it are added in order,
+each with baselines that can beat it. Not in scope now: English or natural-language
+training, other programming languages, scraped code corpora, executing
+untrusted code, larger models before a measured deficiency justifies them,
+and any self-modification of AAA's own code.
+
+The dot-era phases are frozen. Observation noise lives only in the separately
+versioned `aaa.observation_noise.v1.1` phase; do not fold it into benchmark
+v2.1 or change either protocol's frozen thresholds, samples, endpoints or
+historical evidence. See [`docs/limitations.md`](docs/limitations.md) for the
+current evidence boundary.

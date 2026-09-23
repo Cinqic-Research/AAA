@@ -227,3 +227,36 @@ This distinction does not weaken artifact hashes: stored evidence bytes remain
 bound by SHA-256. The identity ledger,
 `benchmarks/aaa1k_loop_identity_ledger.json`, is append-only in the sense that
 matters: blocks never overlap and a spent block never becomes usable again.
+
+## `aaa.python.v0`
+
+| Committed | Why |
+|---|---|
+| `docs/evidence/aaa_python_v0/development.json` | provenance captured before the run, the plan, parameter accounting, trained-state hashes, cell-level primitives (counts, calibration bins, per-class recall counts) and the summary derived from them |
+| `docs/evidence/aaa_python_v0/development_records.jsonl.gz` | every scored action (27,840): arm, task identity, answer, recorded truth, confidence, abstention, correctness, update flag; 373 KB |
+| `docs/aaa_python_development_report.md` | generated from the evidence; `--check` guards it |
+| `research/aaa_python/data/golden_answers_v0.json` | cross-version answer keys for 100 development tasks |
+
+**Regenerable, not committed:** the task programs themselves (a pure function
+of identity and generator version), trained checkpoints (42 MB, deterministic
+from the plan) and quick smoke runs. Regenerate them from the recorded commit
+([reproduction](reproduction.md)); put large outputs under `$AAA_DATA_ROOT`.
+
+**Derivable, never trusted:** `recompute` re-aggregates cell counts from the
+records, recomputes the summary from the cells, regenerates every scored task,
+re-executes it with CPython and re-derives its answer with its own mapping.
+Any disagreement fails. The strict JSON writer rejects NaN and infinity.
+Reports are generated from primitives; report prose is never the only copy of a
+result.
+
+**Development only.** This evidence is labelled development evidence. v0
+generates no confirmation identities, and any later confirmation must be frozen
+and claimed before observation, under a successor protocol.
+
+## Protected historical identities
+
+`benchmarks/protected_identities.json` records the dot-era identities and the
+SHA-256 of 471 retained files. `python tools/check_protected_identities.py`
+fails on any change. New evidence may be added; retained evidence may not
+change.
+

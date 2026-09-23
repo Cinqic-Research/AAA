@@ -1,9 +1,9 @@
 # AAA development hardware and compute strategy
 
 This document records the machine AAA is currently developed on, what AAA can
-use of it, what historical work actually used, the model-size ceiling the
-project owner has adopted for this hardware generation, and the direction
-future compute is expected to take.
+use of it, what historical work actually used, the revisable long-term
+model-size planning goal for this hardware generation (not a ceiling), and
+the direction future compute is expected to take.
 
 It is a **project and planning document**. Nothing in it is a scientific
 result, a benchmark outcome, or a claim about what any model can do. Where it
@@ -146,6 +146,22 @@ run in lockstep, not by model size. In brief, from the compute report:
 
 Larger future models do more arithmetic per step and shift the balance toward
 the GPU; that has to be measured when they exist.
+
+### `aaa.python.v0`: CPU only, by measurement
+
+The Python phase's learner is a 153,600-parameter linear model trained one task
+at a time, and its cost is dominated by the CPython oracle: one sandboxed
+interpreter process per program, about 20 ms of CPU each, fanned out to 8
+processes. A complete development run takes about a minute of wall time and
+writes 1.4 MB of evidence (42 MB more with resumable checkpoints). There is
+nothing for a GPU to accelerate, so `--device` accepts only `cpu`, and a CUDA
+request is refused rather than silently served by the CPU. Development runs
+write large or disposable output under `$AAA_DATA_ROOT` on the HDD. The NVMe
+had about 15.7 GB free during this transition.
+
+This says nothing about later Python learners. When one exists, measure
+whether CUDA helps before offering it, and keep FLOWBOX's 16 GB RAM and 6 GB
+VRAM as the constraint until an upgrade actually exists.
 
 ## Hardware provenance is per experiment
 

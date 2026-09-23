@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Cinqic" }]
-keywords = ["online-learning", "adaptation", "benchmark", "reproducibility"]
+keywords = ["online-learning", "adaptation", "python", "causal-evaluation", "benchmark", "reproducibility"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
