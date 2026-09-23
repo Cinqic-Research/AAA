@@ -14,7 +14,10 @@ AAA is the research programme, not the dot. The long-term objective is a
 persistent agent called Juniper; the dot is one benchmark family, and the
 current learners are the smallest things that can be measured honestly on it.
 See [the research charter](docs/aaa_charter.md) before assuming the benchmark
-is the project.
+is the project. AAA's current first deliberate specialization is
+[Coding, beginning with Python](docs/research_direction.md); this is a new
+research direction, not a demonstrated capability or the permanent scope of
+the programme.
 
 AAA makes no claim to general intelligence, physical understanding, or
 independent goal formation. "Autonomous" here means the observe / predict /
@@ -337,7 +340,9 @@ result, and this repository is built to report that rather than to avoid it.
 | Document | What it covers |
 |---|---|
 | [Research charter](docs/aaa_charter.md) | what AAA is, what Juniper is, and why the dot is one benchmark |
-| [Development hardware](docs/hardware.md) | FLOWBOX, when to use its CPU or GPU, the current 125M planning ceiling, and future compute |
+| [Current research direction](docs/research_direction.md) | Python-first coding scope, causal evaluation, capability ladder, and self-improvement boundaries |
+| [Scaling readiness](docs/scaling_readiness.md) | current evidence, open promotion blocker, and gates for capacity experiments |
+| [Development hardware](docs/hardware.md) | FLOWBOX, when to use its CPU or GPU, the approximate 105M long-term AAA 1 planning goal, and future compute |
 | [AAA-1K architecture](docs/aaa_1k_architecture.md) | the frozen 994-parameter specification |
 | [AAA-1K literature review](docs/aaa_1k_literature_review.md) | what was adopted from the literature, and what was refused |
 | [AAA-1K decisions](docs/aaa_1k_decisions.md) | every decision, including three departures from the phase brief |

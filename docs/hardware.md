@@ -169,23 +169,18 @@ Historical evidence keeps the machine and platform provenance under which it
 was actually produced. Upgrading FLOWBOX does not retroactively change the
 environment that produced an earlier result.
 
-## The current model-size planning ceiling
+## Current AAA 1 model-size goal
 
-**For the current version of FLOWBOX, the project owner does not plan to
-develop AAA/Juniper models larger than approximately 125 million trainable
-parameters.**
+The current long-term planning goal for **AAA 1** is approximately **105
+million trainable parameters**. This supersedes the earlier owner-selected
+125M FLOWBOX planning ceiling as *current guidance*. The older entry in
+[`CHANGELOG.md`](../CHANGELOG.md) remains a dated record of that decision.
 
-This is a self-imposed practical development ceiling for the present hardware
-generation. It is stated so that planning has a concrete upper bound. It is
-explicitly **not**:
-
-- a scientific finding or a benchmark result;
-- a statement that AAA needs 125M parameters;
-- a target AAA is expected to reach, or a schedule for reaching it;
-- proof that a 125M-parameter model fits on this hardware for any given
-  workload;
-- proof that such a model could be trained efficiently here;
-- a permanent limit on the Juniper architecture.
+105M is a revisable planning target, not a hard ceiling, required final count,
+immediate next step, promotion criterion, or scientific finding. It does not
+show that a particular 105M architecture fits or trains efficiently on
+FLOWBOX. Hardware upgrades and a dedicated model server are plans, not present
+resources.
 
 The repository's existing discipline is unchanged and remains the stronger
 constraint: **complexity must earn its keep** ([charter](aaa_charter.md), claim
@@ -195,15 +190,12 @@ reward*. A parameter increase requires a persistent measured failure, a
 diagnosis that points specifically at capacity, parameter-neutral remedies
 having failed, and a gain that transfers to fresh held-out evidence.
 
-In practice that means AAA may stay far below the ceiling indefinitely. The
-current champion is a 994-parameter recurrent core, roughly five orders of
-magnitude below 125M, and nothing about the ceiling suggests that number should
-grow faster than the evidence justifies. A smaller model that accomplishes the
-same objective remains preferable. **125M is a ceiling, not a destination.**
-
-The ceiling is not a promotion criterion and is not enforced by any test or
-gate. Encoding an arbitrary parameter threshold as a scientific check would be
-weaker than the discipline above, not stronger.
+AAA may remain far below 105M. The current Champion 1 has 994 trainable
+parameters, and the v2 capacity diagnosis on the tested dot/external mixture
+was `NOT_CAPACITY_LIMITED` through roughly 4K parameters. A new Python coding
+domain may demand a different representation and more capacity, but that must
+be measured. Prefer a smaller model whenever it accomplishes the same research
+objective. The parameter goal is not enforced by any scientific gate.
 
 ### Parameter count is not a compute budget
 
@@ -222,10 +214,14 @@ given hardware. Feasibility also depends on at least:
 - CPU versus GPU implementation;
 - inference versus training requirements.
 
-So 125M is an **owner-selected upper planning bound**, not a promise that every
-possible 125M-parameter architecture or training regime is practical on present
-FLOWBOX hardware. Some much smaller configurations will be infeasible here;
-establishing that a specific configuration fits requires measuring it.
+For scale only, 105M float32 parameters occupy about 420 MB (401 MiB). A
+float32 gradient and two Adam moments raise parameter-related storage to about
+1.68 GB (1.56 GiB), before master weights, activations, recurrent state,
+sequence length, batch size, temporary kernels, data loading, checkpoints and
+display-resident GPU memory. Those omitted terms can dominate 6 GB VRAM.
+This arithmetic is an estimate, not a fit or throughput measurement. A
+specific architecture and workload need a measured peak-memory and throughput
+probe before a feasibility claim.
 
 ## Future FLOWBOX upgrades
 
@@ -233,14 +229,9 @@ FLOWBOX is not a permanently fixed platform. The owner plans multiple future
 hardware upgrades. No dates, budgets, replacement components or target
 specifications are decided, and none are asserted here.
 
-The consequences for this document:
-
-- the 125M ceiling applies to the **current** FLOWBOX configuration;
-- future hardware may justify revisiting that ceiling;
-- any change to the ceiling is a new project decision and is documented as one,
-  with the configuration it applies to;
-- changing hardware does not retroactively change the environment that produced
-  historical evidence, which keeps its original provenance.
+Future evidence or hardware may justify another explicit goal. A change must
+be recorded as a new project decision. It cannot retroactively change the
+environment that produced historical evidence.
 
 Nothing in this section describes hardware that is purchased, installed or
 ordered.
