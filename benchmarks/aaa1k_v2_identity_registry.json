@@ -4,307 +4,341 @@
       "block_id": "v2-development-init",
       "count": 4,
       "namespace": "init",
+      "observed_by": "development:development.json",
       "purpose": "development model initializations",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.v1_motion_straight",
       "count": 12,
       "namespace": "env.v1_motion_straight",
+      "observed_by": "development:development.json",
       "purpose": "development streams of v1_motion_straight",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.v1_motion_bouncing",
       "count": 12,
       "namespace": "env.v1_motion_bouncing",
+      "observed_by": "development:development.json",
       "purpose": "development streams of v1_motion_bouncing",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.v1_motion_changed",
       "count": 12,
       "namespace": "env.v1_motion_changed",
+      "observed_by": "development:development.json",
       "purpose": "development streams of v1_motion_changed",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.v1_motion_dynamics",
       "count": 12,
       "namespace": "env.v1_motion_dynamics",
+      "observed_by": "development:development.json",
       "purpose": "development streams of v1_motion_dynamics",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.v1_occlusion",
       "count": 12,
       "namespace": "env.v1_occlusion",
+      "observed_by": "development:development.json",
       "purpose": "development streams of v1_occlusion",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.v1_coarse_speed",
       "count": 12,
       "namespace": "env.v1_coarse_speed",
+      "observed_by": "development:development.json",
       "purpose": "development streams of v1_coarse_speed",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.v1_aba",
       "count": 12,
       "namespace": "env.v1_aba",
+      "observed_by": "development:development.json",
       "purpose": "development streams of v1_aba",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.long_bouncing",
       "count": 12,
       "namespace": "env.long_bouncing",
+      "observed_by": "development:development.json",
       "purpose": "development streams of long_bouncing",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.long_coarse",
       "count": 12,
       "namespace": "env.long_coarse",
+      "observed_by": "development:development.json",
       "purpose": "development streams of long_coarse",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.random_gaps",
       "count": 12,
       "namespace": "env.random_gaps",
+      "observed_by": "development:development.json",
       "purpose": "development streams of random_gaps",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.wall_gaps",
       "count": 12,
       "namespace": "env.wall_gaps",
+      "observed_by": "development:development.json",
       "purpose": "development streams of wall_gaps",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.long_gap_recall",
       "count": 12,
       "namespace": "env.long_gap_recall",
+      "observed_by": "development:development.json",
       "purpose": "development streams of long_gap_recall",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.stationary_mixed",
       "count": 12,
       "namespace": "env.stationary_mixed",
+      "observed_by": "development:development.json",
       "purpose": "development streams of stationary_mixed",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.noise",
       "count": 12,
       "namespace": "env.noise",
+      "observed_by": "development:development.json",
       "purpose": "development streams of noise",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.change_gaps",
       "count": 12,
       "namespace": "env.change_gaps",
+      "observed_by": "development:development.json",
       "purpose": "development streams of change_gaps",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.quantized",
       "count": 12,
       "namespace": "env.quantized",
+      "observed_by": "development:development.json",
       "purpose": "development streams of quantized",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-env.oscillator_long",
       "count": 12,
       "namespace": "env.oscillator_long",
+      "observed_by": "development:development.json",
       "purpose": "development streams of oscillator_long",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.narma10",
       "count": 3,
       "namespace": "ext.narma10",
+      "observed_by": "development:development.json",
       "purpose": "development realizations of narma10",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.narma20",
       "count": 3,
       "namespace": "ext.narma20",
+      "observed_by": "development:development.json",
       "purpose": "development realizations of narma20",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.mackey_glass17",
       "count": 3,
       "namespace": "ext.mackey_glass17",
+      "observed_by": "development:development.json",
       "purpose": "development realizations of mackey_glass17",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-Hadley",
       "count": 2,
       "namespace": "ext.dysts-Hadley",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of Hadley",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-SprottD",
       "count": 2,
       "namespace": "ext.dysts-SprottD",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of SprottD",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-SprottK",
       "count": 2,
       "namespace": "ext.dysts-SprottK",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of SprottK",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-KawczynskiStrizhak",
       "count": 2,
       "namespace": "ext.dysts-KawczynskiStrizhak",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of KawczynskiStrizhak",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-SprottE",
       "count": 2,
       "namespace": "ext.dysts-SprottE",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of SprottE",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-ZhouChen",
       "count": 2,
       "namespace": "ext.dysts-ZhouChen",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of ZhouChen",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-Chen",
       "count": 2,
       "namespace": "ext.dysts-Chen",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of Chen",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-Halvorsen",
       "count": 2,
       "namespace": "ext.dysts-Halvorsen",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of Halvorsen",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-SprottJerk",
       "count": 2,
       "namespace": "ext.dysts-SprottJerk",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of SprottJerk",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-Colpitts",
       "count": 2,
       "namespace": "ext.dysts-Colpitts",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of Colpitts",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-HastingsPowell",
       "count": 2,
       "namespace": "ext.dysts-HastingsPowell",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of HastingsPowell",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-ext.dysts-SprottMore",
       "count": 2,
       "namespace": "ext.dysts-SprottMore",
+      "observed_by": "development:development.json",
       "purpose": "development initial conditions of SprottMore",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-bootstrap",
       "count": 64,
       "namespace": "bootstrap",
+      "observed_by": "development:development.json",
       "purpose": "development bootstrap generator seeds",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-attack-init",
@@ -2263,145 +2297,161 @@
       "block_id": "v2-development-external.dysts-selection",
       "count": 1,
       "namespace": "external.dysts-selection",
+      "observed_by": "development:development.json",
       "purpose": "dysts subset selection draw",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.narma10",
       "count": 4,
       "namespace": "calibration.narma10",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for narma10",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.narma20",
       "count": 4,
       "namespace": "calibration.narma20",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for narma20",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.mackey_glass17",
       "count": 4,
       "namespace": "calibration.mackey_glass17",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for mackey_glass17",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-Hadley",
       "count": 4,
       "namespace": "calibration.dysts-Hadley",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:Hadley",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-SprottD",
       "count": 4,
       "namespace": "calibration.dysts-SprottD",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:SprottD",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-SprottK",
       "count": 4,
       "namespace": "calibration.dysts-SprottK",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:SprottK",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-KawczynskiStrizhak",
       "count": 4,
       "namespace": "calibration.dysts-KawczynskiStrizhak",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:KawczynskiStrizhak",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-SprottE",
       "count": 4,
       "namespace": "calibration.dysts-SprottE",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:SprottE",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-ZhouChen",
       "count": 4,
       "namespace": "calibration.dysts-ZhouChen",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:ZhouChen",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-Chen",
       "count": 4,
       "namespace": "calibration.dysts-Chen",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:Chen",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-Halvorsen",
       "count": 4,
       "namespace": "calibration.dysts-Halvorsen",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:Halvorsen",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-SprottJerk",
       "count": 4,
       "namespace": "calibration.dysts-SprottJerk",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:SprottJerk",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-Colpitts",
       "count": 4,
       "namespace": "calibration.dysts-Colpitts",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:Colpitts",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-HastingsPowell",
       "count": 4,
       "namespace": "calibration.dysts-HastingsPowell",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:HastingsPowell",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     },
     {
       "block_id": "v2-development-calibration.dysts-SprottMore",
       "count": 4,
       "namespace": "calibration.dysts-SprottMore",
+      "observed_by": "development:development.json",
       "purpose": "normalization calibration for dysts:SprottMore",
       "role": "development",
       "start": 0,
-      "status": "reserved"
+      "status": "used"
     }
   ],
   "phase": "aaa.1k.v2",

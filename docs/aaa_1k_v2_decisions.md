@@ -149,3 +149,48 @@ that archive exactly (a determinism check).
 score of 1.27 (27% worse than Champion 1's geometric mean). Nothing was changed
 in response. The protocol was already frozen, and the rerun computes the same
 thing.
+
+## V2-D15. Development: no challenger, and why
+
+Development ran at `ac905e7` from a pinned worktree (2026-09-23 08:18-08:52,
+2,004 s, CPU, 8 workers; `docs/evidence/aaa_1k_v2/development.json`, sha256
+`0d5a327d...`). Its raw per-grid-point archives are outside the repository with
+recorded hashes. The rerun reproduced the aborted run's `gru_v1_retuned`
+archive byte for byte (sha256 `75bd0742...` both times), which checks run-to-run
+determinism and the SGD-path equivalence discussed in V2-D14.
+
+Consistency checks: `gru_v1_retuned` at Champion 1's exact configuration
+scores exactly 1.000 against Champion 1, with zero unstable cells; Champion 1
+has zero failed or diverged development cells.
+
+Result under the preregistered rules: **no candidate passed the screen**, so
+there is no challenger. Selected configurations score 1.17-1.30 (development
+geometric mean relative to Champion 1; lower is better), and every candidate
+fails S2 (v1 non-inferiority) and S3 (stress superiority).
+
+The binding constraint is the stability-margin rule. Each architecture's
+*unclipped* reference configuration diverged on some development cells at
+lr 0.1 (Elman: once, on NARMA-10, at 0.03). The rule therefore capped eligible
+learning rates at 0.01 (Elman 0.003), below Champion 1's frozen 0.03. Several
+ineligible configurations, at lr 0.03-0.1 with clipping, score 0.84-0.97,
+i.e. better than Champion 1 on development. Under this v2 rule Champion 1's own
+configuration would be ineligible too; it is the frozen reference, not a
+re-selected candidate.
+
+This is recorded as a finding, not repaired. Changing the margin rule after
+seeing which configurations it excludes would be tuning a rule to a result.
+What it shows is that the v2 protocol's stability rule is stricter than the v1
+rule under which Champion 1 was selected. The v1 rule measured the unclipped
+boundary on short streams, where it sat at 0.3; the v2 development streams
+include 2,000-step and noisy streams, which move the unclipped boundary to 0.1.
+A future phase that wants to test the high-learning-rate, clipped
+configurations must predeclare a different stability rule (for example, a
+margin measured with the clip in place, or a long-horizon stability gate
+instead of a learning-rate margin) and confirm them on fresh identities. They
+are *not* evidence of improvement here. They are development observations
+excluded by a rule written in advance.
+
+Consequences, as the protocol prescribes: no attack stage runs; the
+confirmation is a characterization-only run (no promotion is possible) that
+measures Champion 1 and the other candidates on fresh identities, held-out
+families and the external suite; Champion 1 remains the phase's final 1K system.

@@ -1989,3 +1989,25 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
   confirmation attempts have no CI copy, and that routine CI keeps artifacts
   for 14 days. The known limitation is restated for each case, and `AAA-077`
   has a dated note. No workflow retention value changed.
+
+---
+
+## AAA-1K v2 final 1K pass (2026-09-23)
+
+### AAA-179 — the first v2 development run could have recorded code that did not produce its evidence
+- **Source** self-found during the v2 development run, 2026-09-23 · **Severity** medium (provenance) · **Status** repaired before any v2 evidence was written
+- **Reproduction** `python -m research.aaa_1k_v2 develop` at `621e2a9` captured
+  the environment (commit, dirty flag, v2 fingerprint) only *after* the run.
+  `run_jobs` also spawns a fresh worker pool for every call, and each worker
+  re-imports the package from disk. Stage code edited in the working tree while
+  the run was in progress was therefore imported by later workers, and would
+  have been fingerprinted as the producing code.
+- **Scientific impact** none recorded: the run was stopped and nothing it
+  produced became evidence (decision V2-D14). The edits made during it were
+  designed to leave the SGD path unchanged, but that was not treated as proof.
+- **Repair** the CLI captures provenance before any stage runs, and every formal
+  v2 stage runs from a separate `git worktree` checked out at a named commit
+  (`docs/reproduction.md`), so no edit can reach a running stage.
+- **Regression** the rerun of development reproduces the aborted run's one
+  completed raw archive (`gru_v1_retuned`) exactly; this check is recorded with
+  the development evidence.
