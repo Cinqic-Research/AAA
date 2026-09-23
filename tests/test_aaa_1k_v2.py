@@ -598,3 +598,97 @@ class SeriesAdapterTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ----------------------------------------------------------------------
+# stage code added after the design freeze
+# ----------------------------------------------------------------------
+class OptimizerTests(unittest.TestCase):
+    def test_sgd_cells_are_unchanged_by_stateful_neighbours(self) -> None:
+        stream = build_stream("occlusion_v1", 31, steps=90)
+        sgd = CHAMPION_1.config
+        adam = CellConfig(learning_rate=0.001, gradient_clip=10.0, optimizer="adam")
+        momentum = CellConfig(learning_rate=0.003, gradient_clip=10.0, optimizer="momentum")
+        mixed = execute(
+            DotJob(
+                arm=CHAMPION_1,
+                seeds=(1, 1, 1),
+                batch=batch_from_streams([stream], 3),
+                configs=(sgd, adam, momentum),
+            )
+        )
+        alone = execute(DotJob(arm=CHAMPION_1, seeds=(1,), batch=batch_from_streams([stream])))
+        self.assertEqual(mixed["cells"][0]["mae"], alone["cells"][0]["mae"])
+        self.assertNotEqual(mixed["cells"][1]["mae"], alone["cells"][0]["mae"])
+
+    def test_adam_first_step_matches_the_formula(self) -> None:
+        learner = BatchedLearner(
+            GRUCore(inputs=3, hidden=4),
+            CPU,
+            seeds=[2],
+            configs=[CellConfig(learning_rate=0.01, optimizer="adam")],
+        )
+        learner.params["W_o"] = np.full_like(learner.params["W_o"], 0.1)
+        learner.forward(np.asarray([[0.1, 0.2, 0.3]]))
+        before = {k: v.copy() for k, v in learner.params.items()}
+        g = learner.gradients(np.asarray([0.5]))
+        learner.learn(np.asarray([0.5]), np.asarray([True]))
+        for name in before:
+            # at t = 1 Adam's bias-corrected step is lr * g / (|g| + eps)
+            expected = before[name] - 0.01 * g[name] / (np.abs(g[name]) + 1e-8)
+            self.assertTrue(np.allclose(learner.params[name], expected, atol=1e-12), name)
+        self.assertEqual(learner.state_footprint()["optimizer_state_scalars"], 2 * learner.parameter_count())
+
+
+class DiagnosticsInstrumentTests(unittest.TestCase):
+    def test_instrumented_rls_changes_nothing(self) -> None:
+        from research.aaa_1k.agents import RLSAgent
+        from research.aaa_1k_v2.diagnostics import InstrumentedRLSAgent
+
+        stream = build_stream("coarse_speed_v1", 41, steps=300)
+        plain, instrumented = RLSAgent(), InstrumentedRLSAgent()
+        for agent in (plain, instrumented):
+            agent.begin_episode()
+            agent.accept_observation(stream.steps[0].true_position)
+        for step in stream.steps[1:]:
+            self.assertEqual(plain.predict(), instrumented.predict())
+            plain.accept_observation(step.true_position)
+            instrumented.accept_observation(step.true_position)
+        self.assertGreater(len(instrumented.trace), 0)
+
+
+class ConfirmationRuleTests(unittest.TestCase):
+    def test_k3_three_valued_rule(self) -> None:
+        from research.aaa_1k_v2.confirmation import k3_status
+
+        base = {"interval_status": "MEASURED"}
+        self.assertEqual(k3_status({**base, "geometric_ratio": 0.9, "lower": 0.85, "upper": 0.97}), "PASS")
+        self.assertEqual(
+            k3_status({**base, "geometric_ratio": 0.9, "lower": 0.8, "upper": 1.02}), "INCONCLUSIVE"
+        )
+        self.assertEqual(k3_status({**base, "geometric_ratio": 0.97, "lower": 0.96, "upper": 0.99}), "FAIL")
+        self.assertEqual(
+            k3_status({**base, "geometric_ratio": 0.97, "lower": 0.93, "upper": 0.99}), "INCONCLUSIVE"
+        )
+
+    def test_capability_designs_run_and_keep_the_probe_read_only(self) -> None:
+        from research.aaa_1k_v2.capability import adaptation, retention
+
+        trials = adaptation(CHAMPION_1, [1], [5])
+        self.assertIn("difference_of_differences", trials[0])
+        kept = retention(CHAMPION_1, [1], [6], [7, 8])
+        self.assertIn("forgetting", kept[0])
+
+    def test_weight_scale_leaves_biases_and_readout(self) -> None:
+        from dataclasses import replace
+
+        from research.aaa_1k_v2.jobs import build_learner, scalable_weight
+
+        arm = replace(CHAMPION_1, init=(("weight_scale", 1.5),))
+        _, scaled = build_learner(arm, [3], [arm.config], "cpu")
+        _, plain = build_learner(CHAMPION_1, [3], [CHAMPION_1.config], "cpu")
+        for name in plain.params:
+            factor = 1.5 if scalable_weight(name) else 1.0
+            self.assertTrue(np.array_equal(scaled.params[name], plain.params[name] * factor), name)
+        self.assertFalse(scalable_weight("W_o"))
+        self.assertFalse(scalable_weight("b_z"))

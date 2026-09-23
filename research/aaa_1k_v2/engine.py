@@ -71,9 +71,16 @@ class CellConfig:
     freeze_recurrent: bool = False
     reset_state_every_step: bool = False
     zero_input: tuple[int, ...] = ()
+    optimizer: str = "sgd"
+    """``sgd`` (no state), ``momentum`` (one parameter-sized vector) or ``adam`` (two). The tournament is
+    SGD-only; the stateful optimizers exist for the optimizer diagnostic and are always accounted."""
+
+    def __post_init__(self) -> None:
+        if self.optimizer not in OPTIMIZERS:
+            raise ValueError(f"unknown optimizer {self.optimizer!r}")
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        record: dict[str, Any] = {
             "learning_rate": self.learning_rate,
             "gradient_clip": self.gradient_clip,
             "error_loss_weight": self.error_loss_weight,
@@ -81,6 +88,15 @@ class CellConfig:
             "reset_state_every_step": self.reset_state_every_step,
             "zero_input": list(self.zero_input),
         }
+        if self.optimizer != "sgd":
+            record["optimizer"] = self.optimizer
+        return record
+
+
+OPTIMIZERS = ("sgd", "momentum", "adam")
+MOMENTUM = 0.9
+ADAM_BETAS = (0.9, 0.999)
+ADAM_EPSILON = 1e-8
 
 
 def softplus(xp: Any, value: Any) -> Any:
@@ -145,6 +161,7 @@ class BatchedLearner:
         self.any_reset_every_step = bool(np.any([c.reset_state_every_step for c in self.configs]))
         self.any_zero_input = not bool(keep.all())
         self.any_freeze = bool(np.any([c.freeze_recurrent for c in self.configs]))
+        self._init_optimizer_state()
         self.h = backend.zeros((B, core.state_size()))
         self.epoch = xp.zeros(B, dtype=np.int64)
         self._caches: deque[dict[str, Any]] = deque(maxlen=max(self.tbptt_steps, 1))
@@ -162,6 +179,18 @@ class BatchedLearner:
         self.fail_step = xp.full(B, -1, dtype=np.int64)
         self.step_index = 0
 
+    def _init_optimizer_state(self) -> None:
+        xp = self.xp
+        kinds = [c.optimizer for c in self.configs]
+        self.any_stateful = any(kind != "sgd" for kind in kinds)
+        self.opt_momentum = xp.asarray(np.asarray([k == "momentum" for k in kinds]))
+        self.opt_adam = xp.asarray(np.asarray([k == "adam" for k in kinds]))
+        self.opt_m: dict[str, Any] = {}
+        self.opt_v: dict[str, Any] = {}
+        if self.any_stateful:
+            self.opt_m = {name: xp.zeros_like(array) for name, array in self.params.items()}
+            self.opt_v = {name: xp.zeros_like(array) for name, array in self.params.items()}
+
     # ------------------------------------------------------------------
     # accounting
     # ------------------------------------------------------------------
@@ -176,10 +205,12 @@ class BatchedLearner:
         cache = self.core.cache_size() * self.tbptt_steps
         replay_extra = 0
         trainable = self.parameter_count()
+        kinds = {c.optimizer for c in self.configs}
+        per_cell_optimizer = 2 * trainable if "adam" in kinds else (trainable if "momentum" in kinds else 0)
         return {
             "trainable_parameters": trainable,
             "hidden_state_scalars": self.core.state_size(),
-            "optimizer_state_scalars": 0,
+            "optimizer_state_scalars": per_cell_optimizer,
             "tbptt_buffer_scalars_capacity": cache + replay_extra,
             "eligibility_trace_scalars": self.core.trace_size(),
             "normalization_statistics_scalars": 0,
@@ -187,7 +218,8 @@ class BatchedLearner:
             "total_adaptive_state_scalars": trainable
             + self.core.state_size()
             + cache
-            + self.core.trace_size(),
+            + self.core.trace_size()
+            + per_cell_optimizer,
         }
 
     # ------------------------------------------------------------------
@@ -355,6 +387,8 @@ class BatchedLearner:
                 cell_step = step
             shaped = cell_step.reshape((-1,) + (1,) * (array.ndim - 1))
             updated = array - shaped * G[name]
+            if self.any_stateful:
+                updated = self._stateful_update(name, array, updated, G[name], cell_step, scale, mask)
             self.params[name] = xp.where(mask.reshape((-1,) + (1,) * (array.ndim - 1)), updated, array)
         healthy = xp.ones(self.size, dtype=bool)
         for array in self.params.values():
@@ -362,6 +396,31 @@ class BatchedLearner:
         self._fail(~healthy)
         self.update_count = self.update_count + (mask & ~self.failed).astype(np.int64)
         return {"gradient_norm": norm, "clipped": clipped, "updated": mask & ~self.failed}
+
+    def _stateful_update(
+        self, name: str, array: Any, sgd_updated: Any, gradient: Any, cell_step: Any, scale: Any, mask: Any
+    ) -> Any:
+        """Momentum / Adam for the cells that use them; SGD cells keep ``sgd_updated`` exactly."""
+
+        xp = self.xp
+        shape = (-1,) + (1,) * (array.ndim - 1)
+        live = mask.reshape(shape)
+        g = gradient * scale.reshape(shape)
+        m_old, v_old = self.opt_m[name], self.opt_v[name]
+        beta1, beta2 = ADAM_BETAS
+        momentum_m = MOMENTUM * m_old + g
+        adam_m = beta1 * m_old + (1.0 - beta1) * g
+        adam_v = beta2 * v_old + (1.0 - beta2) * g * g
+        t = (self.update_count + 1).astype(np.float64).reshape(shape)
+        adam_step = (adam_m / (1.0 - beta1**t)) / (xp.sqrt(adam_v / (1.0 - beta2**t)) + ADAM_EPSILON)
+        lr = xp.where(cell_step > 0, self.lr, 0.0).reshape(shape)
+        momentum_cells = self.opt_momentum.reshape(shape)
+        adam_cells = self.opt_adam.reshape(shape)
+        new_m = xp.where(momentum_cells, momentum_m, xp.where(adam_cells, adam_m, m_old))
+        self.opt_m[name] = xp.where(live, new_m, m_old)
+        self.opt_v[name] = xp.where(live & adam_cells, adam_v, v_old)
+        stateful = xp.where(momentum_cells, array - lr * momentum_m, array - lr * adam_step)
+        return xp.where(momentum_cells | adam_cells, stateful, sgd_updated)
 
     def advance_clock(self) -> None:
         self.step_index += 1
@@ -405,6 +464,14 @@ class BatchedLearner:
         clone.any_reset_every_step = bool(np.any([c.reset_state_every_step for c in clone.configs]))
         clone.any_zero_input = not bool(keep.all())
         clone.any_freeze = bool(np.any([c.freeze_recurrent for c in clone.configs]))
+        clone.any_stateful = any(c.optimizer != "sgd" for c in clone.configs)
+        clone.opt_momentum = xp.asarray(np.asarray([c.optimizer == "momentum" for c in clone.configs]))
+        clone.opt_adam = xp.asarray(np.asarray([c.optimizer == "adam" for c in clone.configs]))
+        clone.opt_m = {name: array[index].copy() for name, array in self.opt_m.items()}
+        clone.opt_v = {name: array[index].copy() for name, array in self.opt_v.items()}
+        if clone.any_stateful and not clone.opt_m:
+            clone.opt_m = {name: xp.zeros_like(array) for name, array in clone.params.items()}
+            clone.opt_v = {name: xp.zeros_like(array) for name, array in clone.params.items()}
         clone.h = self.h[index].copy()
         clone.epoch = self.epoch[index].copy()
         clone._caches = deque(
@@ -461,6 +528,10 @@ class BatchedLearner:
             "epoch": host(self.epoch).tolist(),
             "caches": [{key: host(value).tolist() for key, value in cache.items()} for cache in self._caches],
             "traces": {name: host(array).tolist() for name, array in self.traces.items()},
+            "optimizer_state": {
+                "m": {name: host(array).tolist() for name, array in self.opt_m.items()},
+                "v": {name: host(array).tolist() for name, array in self.opt_v.items()},
+            },
             "last": None if self._last is None else {k: host(v).tolist() for k, v in self._last.items()},
             "counters": {
                 "update_count": host(self.update_count).tolist(),
@@ -499,6 +570,11 @@ class BatchedLearner:
                 }
             )
         self.traces = {name: asarray(value) for name, value in state["traces"].items()}
+        optimizer_state = state.get("optimizer_state", {"m": {}, "v": {}})
+        self.opt_m = {name: asarray(value) for name, value in optimizer_state["m"].items()}
+        self.opt_v = {name: asarray(value) for name, value in optimizer_state["v"].items()}
+        if self.any_stateful and set(self.opt_m) != set(self.params):
+            raise ValueError("checkpoint is missing optimizer state for a stateful optimizer")
         last = state["last"]
         if last is None:
             self._last = None

@@ -78,6 +78,7 @@ def build_learner(arm: ArmSpec, seeds: Sequence[int], configs: Sequence[CellConf
     backend = resolve_backend(device)
     core = arm.build_core()
     init = arm.init_options()
+    weight_scale = float(init.pop("weight_scale", 1.0))
     options = []
     for seed in seeds:
         option = dict(init)
@@ -95,7 +96,19 @@ def build_learner(arm: ArmSpec, seeds: Sequence[int], configs: Sequence[CellConf
         rule=arm.rule,
         init_options=options,
     )
+    if weight_scale != 1.0:
+        # attack A7: input and recurrent initial weights scaled; biases, the zero readout and the
+        # LRU's eigenvalue parameters (which set stability) are left as initialized
+        for name in learner.params:
+            if scalable_weight(name):
+                learner.params[name] = learner.params[name] * weight_scale
     return backend, learner
+
+
+def scalable_weight(name: str) -> bool:
+    """Input and recurrent weight matrices (``W*``, ``U*``, ``V``, ``B_*``), not biases or the readout."""
+
+    return name != "W_o" and (name.startswith(("W", "U", "B_")) or name == "V")
 
 
 def build(

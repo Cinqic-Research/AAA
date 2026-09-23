@@ -99,12 +99,15 @@ def command_develop(args: argparse.Namespace) -> int:
         print(f"error: {output} exists; evidence is never overwritten", file=sys.stderr)
         return 2
     registry = identities.load_registry(ROOT / identities.REGISTRY_PATH)
+    # provenance is captured before anything runs, so later edits to the working tree cannot be
+    # recorded as the code that produced this evidence (AAA-179)
+    captured = environment(plan.DEVELOPMENT_BACKEND)
     started = time.time()
     raw_dir = Path(args.raw_root) / "aaa_1k_v2" if args.raw_root else None
     result = tournament.run_development(
         registry, workers=args.workers, role=args.role, raw_dir=raw_dir, log=lambda m: print(m, flush=True)
     )
-    result["environment"] = environment(plan.DEVELOPMENT_BACKEND)
+    result["environment"] = captured
     result["wall_seconds"] = time.time() - started
     digest = write(output, result)
     if args.role == "development":

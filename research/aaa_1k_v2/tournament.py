@@ -216,6 +216,16 @@ def series_jobs(
 
 
 def external_metric(task: str) -> str:
+    """The scoring metric of an external task: NMSE for NARMA, forecast MASE for Monash, else NRMSE."""
+
+    if task.startswith("monash:"):
+        return "forecast_mase"
+    return "prequential_nmse" if task.startswith("narma") else "prequential_nrmse"
+
+
+def divergence_metric(task: str) -> str:
+    """Divergence is judged on the prequential (online) error for every external task."""
+
     return "prequential_nmse" if task.startswith("narma") else "prequential_nrmse"
 
 
@@ -261,7 +271,7 @@ def diverged(
         return True
     if "stream_id" in cell:
         return cell["mae"] is None or cell["mae"] > plan.DIVERGENCE_FACTOR * persistence[cell["stream_id"]]
-    metric = external_metric(cell["group"])
+    metric = divergence_metric(cell["group"])
     base = external_persistence[cell["series_id"]]["persistence"][metric]
     value = cell.get(metric)
     return (

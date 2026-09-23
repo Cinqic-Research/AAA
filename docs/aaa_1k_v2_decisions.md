@@ -120,3 +120,32 @@ in response to their outcomes. The only protocol edits after them added the
 qualification and scratch external blocks and moved development to the CPU
 (V2-D5), both on compute grounds. They are disclosed because the protocol
 requires every look to be recorded.
+
+## V2-D14. The first development run was stopped; every stage now runs from a pinned worktree
+
+The first development run (launched at `621e2a9`, 2026-09-23 02:04 local)
+was stopped after about 15 minutes, before writing any artifact, because two
+provenance defects were found in it:
+
+1. `develop` captured the environment (commit, dirty flag, source fingerprint)
+   *after* the run, so edits made to the working tree during the run would have
+   been recorded as the code that produced the evidence.
+2. `run_jobs` spawns fresh worker processes for every call, and each re-imports
+   the package from disk. Workers started after stage code was edited during
+   the run (an optional optimizer branch, the attack's weight-scale hook) ran
+   the edited modules. The SGD path is designed to be numerically unchanged,
+   but that is a claim, not evidence, so the run was discarded as a record.
+
+Repair: the CLI captures provenance before anything runs (tracked as
+`AAA-179`), and every stage from here on runs from a separate `git worktree`
+checked out at a named commit, so no edit can reach a running stage.
+Development identities may be observed more than once, so rerunning is
+legitimate. The aborted run's log and its one completed raw archive (for
+`gru_v1_retuned`) are kept outside the repository. The rerun must reproduce
+that archive exactly (a determinism check).
+
+**Disclosed look.** Before it was stopped, the aborted run printed one result:
+`gru_v1_retuned` selected `lr=0.01; T=4; live; no clip` with a development
+score of 1.27 (27% worse than Champion 1's geometric mean). Nothing was changed
+in response. The protocol was already frozen, and the rerun computes the same
+thing.
