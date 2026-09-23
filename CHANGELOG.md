@@ -1,5 +1,28 @@
 # Research history
 
+## Independent repository review (2026-09-22)
+
+Engineering, automation and documentation consistency only. No model, target
+rule, threshold, estimand, gate, specification, seed mapping, identity,
+retained evidence or scientific claim was changed. The `aaa.1k.v1`
+fingerprint (`5ce6e019…`) and the v2.1 specification hash are unchanged.
+
+- `champion1 verify` now recomputes the live phase fingerprint instead of
+  comparing Champion 1's record with a copy of itself (`AAA-174`).
+- Dependabot no longer opens `pip` pull requests. `requirements-lock.txt` is
+  inside the phase fingerprint, and the old rule ignored only patch updates
+  (`AAA-175`).
+- Active loop documentation now says the independent review completed and
+  `aaa.loop.v1` is current, and the README lists the PR #20 review record.
+  Historical records are not relabelled (`AAA-176`).
+- Stale ledger statuses are updated with dated notes. `AAA-149` and `AAA-150`
+  are verified in hosted CI. Nine observation-noise entries now say
+  confirmation was not executed, instead of "pending", because the v1.1 batches
+  were retired unobserved (`AAA-177`).
+- The evidence policy no longer implies that CI keeps a 90-day copy of
+  formal confirmation evidence. Only development and high-replication
+  dispatches run in Actions (`AAA-178`).
+
 ## Development hardware and compute strategy documented (2026-09-22)
 
 Documentation and project governance only. No implementation, protocol,

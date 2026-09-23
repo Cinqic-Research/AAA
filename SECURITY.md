@@ -25,7 +25,10 @@ Realistic concerns are correspondingly narrow:
   covered by `tests/test_legacy_v1.py::test_a_run_writes_nothing_outside_the_requested_output_root`.
 - **Supply chain.** Runtime dependencies are NumPy and Matplotlib, pinned in
   `requirements-lock.txt`. CI installs the lock and verifies the installed set
-  against it.
+  against it. The lock is part of the `aaa.1k.v1` phase fingerprint, so
+  Dependabot is configured never to open a `pip` pull request, including a
+  security update. Dependabot alerts still report a vulnerable pin, and the
+  maintainer then regenerates the lock deliberately (`AAA-175`).
 - **GitHub Actions.** Workflows declare `permissions: contents: read`, pin
   actions to commit SHAs, and pass `workflow_dispatch` inputs through the
   environment after validating them against a character-class pattern rather
@@ -33,7 +36,9 @@ Realistic concerns are correspondingly narrow:
 
 ## Repository settings
 
-These were inspected through the GitHub API again on 2026-09-19. See `AAA-110`
+These were inspected through the GitHub API again on 2026-09-19, and read back
+unchanged on 2026-09-22 by the
+[independent review](docs/independent_review_2026-09-22.md). See `AAA-110`
 in [`docs/issue_ledger.md`](docs/issue_ledger.md).
 
 **Applied and verified on `main`:**
@@ -51,7 +56,7 @@ in [`docs/issue_ledger.md`](docs/issue_ledger.md).
 | secret scanning and push protection | enabled |
 | default workflow token permissions | read |
 | workflows may approve pull requests | no |
-| `.github/dependabot.yml` | weekly `github-actions` and `pip` updates |
+| `.github/dependabot.yml` | weekly `github-actions` updates; every `pip` update ignored, because `requirements-lock.txt` is fingerprinted (`AAA-175`) |
 
 **Deliberately not applied:**
 

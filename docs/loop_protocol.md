@@ -123,6 +123,8 @@ A parameter increase is considered only when all of the following hold:
 Any increase reports old and new counts, the absolute and relative change, the
 adaptive-state and compute change, and what mechanism the parameters buy.
 
+<a id="known-gaps-to-close-before-v1"></a>
+
 ## Pilot gaps and the rules for the next iteration
 
 These rules were chosen only in final review. They are prospective: they do
@@ -188,6 +190,13 @@ first attempt aborted before observation on an admission defect (`AAA-171`);
 the burned identities were not reused. The version remains `v0-pilot` pending
 an independent review of that work. See
 [`loop_report_0004_0006.md`](loop_report_0004_0006.md).
+
+*Update (2026-09-22):* the paragraph above records the state before review.
+That review has since completed
+([`pr20_independent_review.md`](pr20_independent_review.md)), and the current
+governance version is `aaa.loop.v1`, as the status note at the top of this
+document says. The iteration 0001--0006 records and evidence remain
+`aaa.loop.v0-pilot` and are not relabelled.
 
 Post-audit iterations run from `research/aaa_1k_loop/stages4.py`
 (diagnoses) and `outer4.py`/`outer5.py`/`outer6.py` (develop, attack,

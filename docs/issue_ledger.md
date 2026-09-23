@@ -646,6 +646,10 @@ wrong acceptance decision. `medium` — wrong or misleading measurement.
   independently archived. Git LFS or an external archive would be stronger and
   is a documented recommendation, not something claimed to be in place. See
   [`evidence_policy.md`](evidence_policy.md).
+- **Note (2026-09-22)** Since `AAA-125`, formal confirmation does not run in
+  Actions, so the 90-day retention above covers only development and
+  high-replication dispatches. Confirmation raw bytes have no CI copy
+  (`AAA-178`).
 
 ### AAA-078 — private filesystem paths in public documentation
 - **Source** Sol · **Severity** low · **Status** repaired
@@ -890,6 +894,11 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
   [`../SECURITY.md`](../SECURITY.md) rather than quietly omitted.
 - **Verification** `gh api repos/Cinqic/AAA/branches/main/protection` and
   `gh api repos/Cinqic/AAA --jq '.delete_branch_on_merge, .security_and_analysis'`.
+- **Note (2026-09-22)** The `pip` entry described above ignored only patch
+  updates, so it could still open minor, major and security pull requests
+  against `requirements-lock.txt`, a fingerprinted file. It now ignores every
+  `pip` update; see `AAA-175`. The repository settings listed above were read
+  back unchanged on 2026-09-22.
 
 ### AAA-112 — confirmation status edits could erase prior-use eligibility
 - **Source** independent Sol reproduction · **Severity** blocking · **Status** repaired
@@ -1030,7 +1039,7 @@ axis. It was abandoned on development evidence, not adopted and quietly dropped.
   is cancelled explicitly, without a fabricated consumer or outcome.
 
 ### AAA-128 — observation-noise phase needed a separate evidence boundary
-- **Source** observation-noise v1 design audit · **Severity** high · **Status** implemented; confirmation pending
+- **Source** observation-noise v1 design audit · **Severity** high · **Status** implemented; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Finding** Reusing the v2.1 record, metric, or gate namespace would make a
   noisy rerun look like a deterministic reference result and would permit
   clean latent targets to enter a predictor through the existing environment
@@ -1094,7 +1103,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   `docs/evidence/observation_noise_development_selection.json`.
 
 ### AAA-131 — observation-noise scientific gates were permanent placeholders
-- **Source** fresh observation-noise completion audit · **Severity** critical · **Status** partially repaired; confirmation pending
+- **Source** fresh observation-noise completion audit · **Severity** critical · **Status** partially repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** The runner emitted `INSUFFICIENT_EVIDENCE` for scientific
   endpoints on every role and had no machine-readable primary bound evaluator.
 - **Repair** Exact acceptance formulas, one-sided 95% bound direction,
@@ -1106,7 +1115,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   independent review have not been executed.
 
 ### AAA-132 — separate A/B analyses did not implement one joint multiplicity family
-- **Source** fresh observation-noise completion audit · **Severity** high · **Status** repaired in code; confirmation pending
+- **Source** fresh observation-noise completion audit · **Severity** high · **Status** repaired in code; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** Existing per-attempt paired statistics applied their own
   local comparison output and could not enumerate the combined A+B endpoint,
   cell and batch family.
@@ -1142,7 +1151,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   observation.
 
 ### AAA-135 — verifier accepted an archive with no checksum manifest
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** A complete synthetic attempt with `checksums.json` omitted
   returned `PASS`. Structural and arithmetic checks therefore did not establish
   complete byte coverage.
@@ -1152,7 +1161,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   rejects missing, extra, or mismatched entries.
 
 ### AAA-136 — stored NaN values bypassed verifier comparisons
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** Replacing a stored summary MAE with JSON `NaN` left
   `abs(stored - recomputed) > tolerance` false, and the verifier returned
   `PASS`.
@@ -1162,7 +1171,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   bypass as a negative fixture.
 
 ### AAA-137 — adaptation implementation used the wrong estimand
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** For heterogeneous frozen denominators 1 and 3, with online
   values 1 and 1.5, the implemented mean of per-identity ratios is 0.25 while
   the declared ratio of means is 0.375.
@@ -1190,7 +1199,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   incumbent was retained explicitly as the no-refinement control.
 
 ### AAA-139 — formal joint evaluation admitted mutable analysis identity
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** The public formal evaluator accepts a caller-selected draw
   count and hard-codes the first A/B batch IDs rather than resolving the frozen
   registry identities.
@@ -1200,7 +1209,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   confirmation freeze and registry rather than hard-coded IDs.
 
 ### AAA-140 — batch consumption was local to an output directory
-- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reproduction · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** Confirmation admission reads `planned` from the repository
   registry, but the visible `consumed` transition is written only to the
   attempt-local lifecycle. Two output roots or checkouts can therefore spend
@@ -1245,7 +1254,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   and `>` operator identical and allocates fresh unobserved A/B batch IDs.
 
 ### AAA-143 — zero-noise reference executed current code instead of a pinned checkout
-- **Source** independent Sol reference-isolation audit · **Severity** critical · **Status** repaired; confirmation pending
+- **Source** independent Sol reference-isolation audit · **Severity** critical · **Status** repaired; confirmation not executed (v1.1 A/B retired unobserved on 2026-09-19; reworded 2026-09-22 from "confirmation pending", `AAA-177`)
 - **Reproduction** The protocol recorded v2.1 file identities but no commit, and
   `_zero_noise_fixture` imported both sides from the current checkout. Shared
   drift could therefore pass as reference preservation.
@@ -1337,7 +1346,7 @@ corruption, missing scientific gates, and strict-type substitutions.
   are repeated separately in the final validation record.
 
 ### AAA-149 — hosted CI omitted the pinned reference commit
-- **Source** final-head GitHub CPU CI runs `34922456399` and `34922458676` · **Severity** high · **Status** repaired; replacement CI pending
+- **Source** final-head GitHub CPU CI runs `34922456399` and `34922458676` · **Severity** high · **Status** repaired; hosted CI verified (2026-09-22, `AAA-177`; was "replacement CI pending")
 - **Reproduction** The Python matrix failed across versions at
   `test_zero_noise_reference_runs_from_the_pinned_v21_commit`. Actions checked
   out only the PR head, so `git cat-file -e 25b6c32...^{commit}` failed and the
@@ -1348,9 +1357,17 @@ corruption, missing scientific gates, and strict-type substitutions.
 - **Regression** The fail-closed unit test remains unchanged. Replacement
   final-head GitHub checks must pass all required Python versions before this
   repair is considered hosted-CI verified.
+- **Hosted verification (2026-09-22)** Satisfied. Exact PR #11 head
+  `e463773` passed all six jobs in push run `35451372899` and pull-request run
+  `35451375484`, and integration commit `ff7199d` passed run `35451862857`
+  (recorded in [`handoff_sol.md`](handoff_sol.md) and read back through the
+  API). On `main` at `efa1fdb`, run `35775776610` passed all six jobs. Its
+  locked job reports
+  `test_zero_noise_reference_runs_from_the_pinned_v21_commit ... ok`, and all
+  701 tests passed on Python 3.10, 3.11, 3.12 and 3.13.
 
 ### AAA-150 — schedule filenames were not portable to GitHub artifact storage
-- **Source** final-head GitHub CPU CI runs `34922822759` and `34922825001` · **Severity** high · **Status** repaired locally; final hosted artifact upload pending
+- **Source** final-head GitHub CPU CI runs `34922822759` and `34922825001` · **Severity** high · **Status** repaired; hosted artifact upload verified (2026-09-22, `AAA-177`; was "repaired locally; final hosted artifact upload pending")
 - **Reproduction** Both the locked and fresh-install jobs completed their
   environment, static, test, benchmark, recomputation, and exit-code work, then
   `actions/upload-artifact` rejected schedule paths such as
@@ -1365,6 +1382,11 @@ corruption, missing scientific gates, and strict-type substitutions.
   channel, scale, lineage, episode, realization, and shift form. It checks
   determinism, uniqueness, fixed length, and exclusion of all forbidden path
   characters. Final hosted CI must also pass the real artifact-upload step.
+- **Hosted verification (2026-09-22)** Satisfied. Runs `35451372899`,
+  `35451375484` and `35451862857` each retain unexpired `ci-locked-evidence`
+  and `ci-fresh-install-evidence` artifacts. On `main` at `efa1fdb`, run
+  `35775776610` logged both uploads as successful: 42,132,387 bytes including
+  the observation-noise smoke archive, and 40,451,944 bytes.
 
 ### AAA-151 — formal execution had no output-filesystem capacity preflight
 - **Source** 2026-09-19 storage audit · **Severity** high · **Status** repaired and locally verified
@@ -1832,3 +1854,122 @@ records. Only actual defects are entered here.
   aggregates over them, such as median gains or divergence counts) are
   platform-dependent at the level of about one cell. The claims rest on the
   verdicts, which are held exact.
+
+---
+
+## Independent repository review (2026-09-22)
+
+Found by the independent end-to-end review of `main` at `efa1fdb`. Each
+entry was reproduced against that tree before it was changed; the review
+record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md).
+
+### AAA-174 — `champion1 verify` did not recompute the phase fingerprint
+- **Source** independent review 2026-09-22 · **Severity** medium · **Status** repaired
+- **Reproduction** In a throwaway copy of `efa1fdb`, appending one byte to the
+  fingerprinted `research/aaa_1k/model.py` changed the `aaa.1k.v1` fingerprint
+  to `e9e65b0c…`. `champion --verify` failed, but
+  `python -m research.aaa_1k_loop.champion1 verify` still printed
+  `champion 1: VALID` and exited 0. Changing a byte of `requirements-lock.txt`
+  gave the same result.
+- **Cause** `champion1.build_record` copies `phase_fingerprint` from Champion
+  0's record, and `verify` compares the record with that rebuilt copy. It
+  never hashed the live tree, so the check compared the record with itself.
+  `CONTRIBUTING.md` says that `champion1 verify` fails when a fingerprinted
+  file changes.
+- **Consequence** No wrong acceptance occurred. `champion --verify`,
+  `validate`, `tests.test_aaa_1k_loop` and CI all recompute the fingerprint and
+  caught the change. Champion 1's record itself is unchanged and correct.
+- **Repair** `champion1.verify` now recomputes `phase_fingerprint(root)` and
+  reports any disagreement with the recorded value. `build_record` and the
+  Champion 1 record are unchanged.
+- **Regression** `ChampionOneTests.test_champion_1_verification_recomputes_the_live_phase_fingerprint`
+  substitutes a drifted fingerprint. It errors on `efa1fdb` and passes after
+  the repair.
+- **Verification** On the review branch the same one-byte injection makes
+  `champion1 verify` print `STALE: phase_fingerprint: …` and exit 1. On the
+  unmodified tree it prints `VALID`, and the fingerprint is still `5ce6e019…`.
+
+### AAA-175 — Dependabot could open pull requests that rewrite the fingerprinted lock
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired in configuration; not observable until Dependabot next runs
+- **Reproduction** On `efa1fdb`, the `pip` entry in `.github/dependabot.yml`
+  ignored only `version-update:semver-patch`, although its comment says the
+  lock "is regenerated deliberately, not by a bot". Dependabot has already
+  rewritten the lock once: commit `1d1ccfe` (fonttools 4.64.0 → 4.65.0) is a
+  `semver-minor` bump, which that rule does not ignore. `requirements-lock.txt`
+  is one of the 32 `aaa.1k.v1` fingerprint files. In a throwaway copy, one
+  bumped pin changed the fingerprint and made `champion --verify` fail.
+  GitHub's options reference marks `ignore` as applying to version *and*
+  security updates, and `open-pull-requests-limit` as version updates only.
+  So repository-level security updates for `pip` were also constrained only by
+  the patch rule.
+- **Consequence** No bad change could reach `main`, because such a pull
+  request fails required CI. But each one would ask the maintainer to merge a
+  change to scientific identity through a bot pull request, which the
+  project's rules reserve for a recorded decision (`AAA-152`).
+- **Repair** The `pip` entry sets `open-pull-requests-limit: 0` and ignores
+  `dependency-name: "*"` with no `update-types`. `github-actions` updates are
+  unchanged. `SECURITY.md`, `docs/dependencies.md` and a dated note on
+  `AAA-110` record the policy. Dependabot alerts remain enabled. Whether to
+  also change repository-level security-update settings is left to the
+  maintainer and is not changed here.
+- **Regression** `tests/test_repository_automation.py` fails on `efa1fdb`
+  (two failures) and passes after the repair.
+- **Remaining limitation** Dependabot's actual behaviour can only be observed
+  on GitHub, the next time it runs. This entry relies on GitHub's
+  documentation.
+
+### AAA-176 — active loop documentation still described the pre-review state
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired
+- **Reproduction** On `efa1fdb`, `docs/loop_protocol.md` says in its title
+  and status note that `aaa.loop.v1` is current, and
+  `LOOP_PROTOCOL_VERSION == "aaa.loop.v1"`. Its "Status after iterations
+  0004–0006" section still said "The version remains `v0-pilot` pending an
+  independent review of that work", and the PR #20 reconciliation did not
+  catch it. The README described the protocol as "the pilot improvement loop"
+  and did not list `docs/pr20_independent_review.md`, the record that
+  established v1. The historical pilot report links to
+  `loop_protocol.md#known-gaps-to-close-before-v1`. That heading was renamed
+  in `0fbf20e`, so the link no longer resolved.
+- **Repair** A dated, additive note after the stale paragraph. The paragraph
+  itself is kept as the record of the pre-review state. The README row now
+  describes current governance, and a row lists the PR #20 review. An explicit
+  HTML anchor with the old name sits before the renamed heading, so the
+  historical report resolves without being edited.
+- **Verification** A local Markdown link and anchor check reports no broken
+  relative link or anchor in the tracked tree.
+
+### AAA-177 — ledger statuses still read "pending" after the pending event resolved
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired
+- **Reproduction** On `efa1fdb`, `AAA-149` read "replacement CI pending" and
+  `AAA-150` read "final hosted artifact upload pending". The GitHub API shows
+  the replacement runs that [`handoff_sol.md`](handoff_sol.md) cites
+  (`35451372899`, `35451375484`, `35451862857`) as successful in all six jobs,
+  with both evidence artifacts uploaded, and current `main` CI passes the same
+  steps. `AAA-128`, `-131`, `-132`, `-135`, `-136`, `-137`, `-139`, `-140` and
+  `-143` read "confirmation pending". Both declared v1.1 batches, however, are
+  `retired_unobserved` in `benchmarks/observation_noise_registry.json`, and
+  the README, limitations and handoff say formal A/B was not executed.
+- **Repair** Each status line now states the current fact and keeps its
+  earlier wording in quotation marks with the date. `AAA-149` and `AAA-150`
+  also gain a dated hosted-verification line. No observation-noise protocol,
+  registry, evidence or conclusion changed. "Not executed" is not a negative,
+  inconclusive or positive result, as [`handoff_sol.md`](handoff_sol.md)
+  already says.
+
+### AAA-178 — the evidence policy implied a 90-day CI copy of confirmation evidence
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired
+- **Reproduction** On `efa1fdb`, the "How raw evidence stays recoverable"
+  section of `docs/evidence_policy.md` said "CI additionally retains the full
+  attempt directory for 90 days". Its known limitation needed "the recorded
+  commit lost *and* the CI artifact expired". The sentence dates from
+  `a85b506` (2026-09-11). Since `2e54cc3` (2026-09-12, `AAA-125`),
+  `benchmark.yml` accepts only `development` and `high_replication` and
+  refuses any batch id, so no formal confirmation attempt has a CI artifact.
+  Routine CPU CI retains its smoke artifacts for 14 days.
+- **Consequence** The policy overstated how durable confirmation raw evidence
+  is. No evidence was lost, and `AAA-077` already records that
+  regenerability is weaker than archival.
+- **Repair** The policy now says which runs the 90-day retention covers, that
+  confirmation attempts have no CI copy, and that routine CI keeps artifacts
+  for 14 days. The known limitation is restated for each case, and `AAA-077`
+  has a dated note. No workflow retention value changed.

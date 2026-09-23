@@ -394,6 +394,21 @@ class ChampionOneTests(unittest.TestCase):
         self.assertEqual(record["promoted_by"]["outcome"], "PROMOTE")
         self.assertTrue(record["round3_evidence"]["round3_identities_design_and_configuration_unchanged"])
 
+    def test_champion_1_verification_recomputes_the_live_phase_fingerprint(self) -> None:
+        # AAA-174: the record copies Champion 0's fingerprint, so a changed
+        # fingerprinted file must be caught by recomputing it from the tree.
+        from unittest import mock
+
+        from research.aaa_1k_loop import champion1
+
+        if not (ROOT / champion1.RECORD).exists():
+            self.skipTest("Champion 1 not yet recorded")
+        drifted = {"sha256": "0" * 64, "file_count": 32}
+        with mock.patch.object(champion1, "phase_fingerprint", return_value=drifted):
+            problems = champion1.verify(ROOT)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertTrue(problems[0].startswith("phase_fingerprint:"), problems)
+
     def test_the_champion_1_world_is_always_undone(self) -> None:
         import research.aaa_1k.agents as agents_module
         import research.aaa_1k.experiments as experiments_module

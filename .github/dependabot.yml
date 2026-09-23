@@ -18,7 +18,12 @@ updates:
       prefix: "deps"
     labels: ["dependencies", "python"]
     # requirements-lock.txt is the validated environment and is regenerated
-    # deliberately, not by a bot; see docs/dependencies.md.
+    # deliberately, not by a bot; see docs/dependencies.md. It is also inside
+    # the aaa.1k.v1 phase fingerprint, so any bot edit to it breaks Champion 0
+    # and Champion 1 verification (AAA-175). Ignore every pip update. GitHub
+    # documents `ignore` as applying to both version and security updates;
+    # `open-pull-requests-limit: 0` disables version updates only. Dependabot
+    # alerts still report vulnerable pins.
+    open-pull-requests-limit: 0
     ignore:
       - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
