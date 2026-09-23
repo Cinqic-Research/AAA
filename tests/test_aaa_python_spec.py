@@ -38,7 +38,7 @@ DESCRIPTIVE = {
 }
 
 
-class Recording(dict):  # type: ignore[type-arg]
+class Recording(dict):
     """A dict that records every key path read through it."""
 
     def __init__(self, data: dict[str, Any], seen: set[str], prefix: str = "") -> None:
