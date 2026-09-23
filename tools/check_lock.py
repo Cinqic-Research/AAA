@@ -28,14 +28,24 @@ def parse(path: Path) -> dict[str, str]:
     return pins
 
 
-def main() -> int:
-    if not LOCK.exists():
-        print(f"missing lock file: {LOCK}", file=sys.stderr)
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="verify the installed environment against a lock file")
+    parser.add_argument(
+        "--lock",
+        type=Path,
+        default=LOCK,
+        help="lock to verify (default requirements-lock.txt; the optional CUDA environment uses requirements-cuda-lock.txt)",
+    )
+    lock = parser.parse_args(argv).lock
+    if not lock.exists():
+        print(f"missing lock file: {lock}", file=sys.stderr)
         return 1
-    digest = hashlib.sha256(LOCK.read_bytes()).hexdigest()
+    digest = hashlib.sha256(lock.read_bytes()).hexdigest()
     print(f"dependency lock hash: {digest}")
 
-    pins = parse(LOCK)
+    pins = parse(lock)
     problems: list[str] = []
     for name, expected in sorted(pins.items()):
         try:

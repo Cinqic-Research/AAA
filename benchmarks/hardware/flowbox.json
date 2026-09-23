@@ -1,0 +1,450 @@
+{
+  "captured_at": "2026-09-23T05:58:52+00:00",
+  "cpu": {
+    "architecture": {
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "x86_64"
+    },
+    "avx512": {
+      "provenance": "machine-verified",
+      "source": "lscpu Flags",
+      "value": false
+    },
+    "caches": {
+      "provenance": "machine-verified",
+      "source": "lscpu --caches",
+      "value": {
+        "L1d": {
+          "per_instance": "32K",
+          "total": "256K"
+        },
+        "L1i": {
+          "per_instance": "32K",
+          "total": "256K"
+        },
+        "L2": {
+          "per_instance": "512K",
+          "total": "4M"
+        },
+        "L3": {
+          "per_instance": "16M",
+          "total": "16M"
+        }
+      }
+    },
+    "family_model_stepping": {
+      "note": "AMD family 25 model 80 is Zen 3 (Cezanne)",
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "25/80/0"
+    },
+    "frequency_boost": {
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "enabled"
+    },
+    "logical_threads": {
+      "provenance": "machine-verified",
+      "source": "os.cpu_count / nproc",
+      "value": 16
+    },
+    "max_mhz": {
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "4673.8232"
+    },
+    "min_mhz": {
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "422.3340"
+    },
+    "model": {
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "AMD Ryzen 7 5700G with Radeon Graphics"
+    },
+    "numa_nodes": {
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "1"
+    },
+    "physical_cores": {
+      "provenance": "machine-verified",
+      "source": "lscpu (cores per socket x sockets)",
+      "value": 8
+    },
+    "simd_flags": {
+      "provenance": "machine-verified",
+      "source": "lscpu Flags (subset relevant to numerical kernels)",
+      "value": [
+        "sse4_2",
+        "avx",
+        "avx2",
+        "fma",
+        "f16c",
+        "bmi2",
+        "sha_ni"
+      ]
+    },
+    "threads_per_core": {
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "2"
+    },
+    "vendor": {
+      "provenance": "machine-verified",
+      "source": "lscpu",
+      "value": "AuthenticAMD"
+    }
+  },
+  "cuda_stack": {
+    "driver_library": {
+      "provenance": "machine-verified",
+      "source": "/usr/lib/x86_64-linux-gnu/libcuda.so.*",
+      "value": [
+        "libcuda.so.1",
+        "libcuda.so.595.91.07"
+      ]
+    },
+    "nvcc": {
+      "note": "no CUDA toolkit compiler is installed",
+      "provenance": "machine-verified",
+      "source": "which nvcc",
+      "value": null
+    },
+    "python_backend": {
+      "note": "CUDA runtime components come from NVIDIA's PyPI wheels pinned in requirements-cuda-lock.txt",
+      "provenance": "machine-verified",
+      "source": "cupy.cuda.runtime.runtimeGetVersion / nvrtc.getVersion",
+      "value": {
+        "cuda_runtime_in_use": "13.2",
+        "library": "cupy",
+        "nvrtc": "13.2",
+        "version": "14.2.0"
+      }
+    },
+    "system_toolkit_directories": {
+      "provenance": "machine-verified",
+      "source": "/usr/local/cuda*",
+      "value": []
+    }
+  },
+  "gpu": {
+    "board_model": {
+      "note": "the PCI subsystem vendor (Gigabyte) is machine-verified; the retail model name is not",
+      "provenance": "owner-declared",
+      "source": "docs/hardware.md",
+      "value": "Gigabyte GeForce RTX 2060 OC"
+    },
+    "compute_capability": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi compute_cap",
+      "value": "7.5"
+    },
+    "display_adapters": {
+      "note": "includes the unused integrated GPU",
+      "provenance": "machine-verified",
+      "source": "lspci -nnk",
+      "value": [
+        "NVIDIA Corporation TU106 [GeForce RTX 2060 Rev. A] [10de:1f08] (rev a1)",
+        "Advanced Micro Devices, Inc. [AMD/ATI] Cezanne [Radeon Vega Series / Radeon Vega Mobile Series] [1002:1638] (rev c8)"
+      ]
+    },
+    "display_attached": {
+      "note": "the RTX 2060 also drives the desktop display (Xorg/Cinnamon are resident on it), so a few hundred MiB of VRAM and some SM time are not available to AAA during measurements",
+      "provenance": "machine-verified",
+      "source": "nvidia-smi display_active",
+      "value": "Enabled"
+    },
+    "driver_supported_cuda": {
+      "note": "the newest CUDA runtime this driver supports; not an installed toolkit",
+      "provenance": "machine-verified",
+      "source": "nvidia-smi header",
+      "value": "13.2"
+    },
+    "max_clocks_mhz": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi clocks.max.*",
+      "value": {
+        "memory": "7001",
+        "sm": "2145"
+      }
+    },
+    "memory_total_mib": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi memory.total",
+      "value": 6144
+    },
+    "name": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi",
+      "value": "NVIDIA GeForce RTX 2060"
+    },
+    "nvidia_driver_version": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi driver_version",
+      "value": "595.91.07"
+    },
+    "pci_device": {
+      "note": "PCI IDs, no serial",
+      "provenance": "machine-verified",
+      "source": "lspci -nnk",
+      "value": "NVIDIA Corporation TU106 [GeForce RTX 2060 Rev. A] [10de:1f08] (rev a1)"
+    },
+    "pci_subsystem": {
+      "provenance": "machine-verified",
+      "source": "lspci -nnk",
+      "value": "Gigabyte Technology Co., Ltd TU106 [GeForce RTX 2060 Rev. A] [1458:3fc1]"
+    },
+    "pcie_link": {
+      "note": "read while idle; the link may train down when idle",
+      "provenance": "machine-verified",
+      "source": "nvidia-smi pcie.link.*",
+      "value": {
+        "generation_current": "3",
+        "generation_max": "3",
+        "width_current": "16",
+        "width_max": "16"
+      }
+    },
+    "power_limit_watts": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi power.limit",
+      "value": "170.00"
+    },
+    "power_max_limit_watts": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi power.max_limit",
+      "value": "200.00"
+    },
+    "resident_compute_processes": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi --query-compute-apps",
+      "value": 0
+    },
+    "vbios_version": {
+      "provenance": "machine-verified",
+      "source": "nvidia-smi vbios_version",
+      "value": "90.06.46.00.25"
+    }
+  },
+  "machine": "FLOWBOX",
+  "memory": {
+    "available_bytes_at_capture": {
+      "provenance": "machine-verified",
+      "source": "/proc/meminfo MemAvailable",
+      "value": 10794442752
+    },
+    "module_configuration": {
+      "note": "DIMM speed and timings need root-only DMI tables; recorded from docs/hardware.md",
+      "provenance": "owner-declared",
+      "source": "docs/hardware.md",
+      "value": "16 GB DDR4-3000 CL16"
+    },
+    "swap": {
+      "note": "swap file location omitted",
+      "provenance": "machine-verified",
+      "source": "/proc/swaps",
+      "value": [
+        {
+          "size_bytes": 2147479552,
+          "type": "file"
+        }
+      ]
+    },
+    "swap_total_bytes": {
+      "provenance": "machine-verified",
+      "source": "/proc/meminfo SwapTotal",
+      "value": 2147479552
+    },
+    "total_usable_bytes": {
+      "provenance": "machine-verified",
+      "source": "/proc/meminfo MemTotal",
+      "value": 16094732288
+    }
+  },
+  "platform": {
+    "firmware": {
+      "provenance": "machine-verified",
+      "source": "/sys/class/dmi/id/bios_*",
+      "value": {
+        "bios_date": "10/27/2022",
+        "bios_vendor": "American Megatrends Inc.",
+        "bios_version": "P3.10"
+      }
+    },
+    "glibc": {
+      "provenance": "machine-verified",
+      "source": "ldd --version",
+      "value": "ldd (Ubuntu GLIBC 2.39-0ubuntu8.9) 2.39"
+    },
+    "kernel": {
+      "provenance": "machine-verified",
+      "source": "uname -r",
+      "value": "7.0.0-31-generic"
+    },
+    "motherboard": {
+      "provenance": "machine-verified",
+      "source": "/sys/class/dmi/id/board_* (serial not read)",
+      "value": {
+        "board_name": "B450M/ac R2.0",
+        "board_vendor": "ASRock",
+        "board_version": null
+      }
+    },
+    "numpy": {
+      "provenance": "machine-verified",
+      "source": "numpy.__version__",
+      "value": "2.5.3"
+    },
+    "numpy_blas": {
+      "provenance": "machine-verified",
+      "source": "numpy.__config__",
+      "value": {
+        "configuration": "OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=64",
+        "name": "scipy-openblas",
+        "version": "0.3.34.106.0"
+      }
+    },
+    "operating_system": {
+      "provenance": "machine-verified",
+      "source": "/etc/os-release PRETTY_NAME",
+      "value": "Linux Mint 22.3"
+    },
+    "power_supply": {
+      "note": "a power supply is not discoverable from software; recorded from docs/hardware.md",
+      "provenance": "owner-declared",
+      "source": "docs/hardware.md",
+      "value": "650 W"
+    },
+    "python": {
+      "provenance": "machine-verified",
+      "source": "sys.version",
+      "value": "3.12.3"
+    },
+    "system_compiler": {
+      "provenance": "machine-verified",
+      "source": "gcc --version",
+      "value": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    }
+  },
+  "privacy": "no serial numbers, GPU UUID, MAC/IP address, hostname or username; home and removable-media paths are reduced to <home>/<user>",
+  "probes": [
+    "lscpu",
+    "lscpu --caches",
+    "os.cpu_count",
+    "/proc/meminfo",
+    "/proc/swaps",
+    "nvidia-smi (query and header)",
+    "lspci -nnk",
+    "nvcc --version",
+    "cupy runtime queries",
+    "lsblk -J",
+    "findmnt",
+    "shutil.disk_usage",
+    "/etc/os-release",
+    "/sys/class/dmi/id/{board,bios}_*",
+    "gcc --version",
+    "ldd --version",
+    "numpy.__config__"
+  ],
+  "provenance_legend": {
+    "machine-verified": "read from the running system by the named source",
+    "owner-declared": "stated by the owner; not verifiable from software",
+    "unavailable": "neither measured nor declared"
+  },
+  "schema": "aaa.compute.hardware_profile.v1",
+  "source_commit": "d615a5d11c780aa2fb7bce23a20d4d32ac511fb8",
+  "storage": {
+    "block_devices": {
+      "provenance": "machine-verified",
+      "source": "lsblk -J (serials not requested)",
+      "value": [
+        {
+          "model": "HGST HTS545050A7E380",
+          "name": "sda",
+          "partitions": [
+            {
+              "filesystem": "ext4",
+              "label": "Cinqic Storage",
+              "mountpoints": [
+                "/media/<user>/Cinqic Storage"
+              ],
+              "name": "sda1",
+              "size_bytes": 500106788864,
+              "usage_at_capture": {
+                "free_bytes": 414512373760,
+                "total_bytes": 491106508800,
+                "used_bytes": 51572019200
+              }
+            }
+          ],
+          "rotational": true,
+          "size_bytes": 500107862016,
+          "transport": "sata"
+        },
+        {
+          "model": "Fanxiang S500Pro 256GB",
+          "name": "nvme0n1",
+          "partitions": [
+            {
+              "filesystem": null,
+              "label": null,
+              "mountpoints": [],
+              "name": "nvme0n1p1",
+              "size_bytes": 1048576,
+              "usage_at_capture": null
+            },
+            {
+              "filesystem": "vfat",
+              "label": null,
+              "mountpoints": [
+                "/boot/efi"
+              ],
+              "name": "nvme0n1p2",
+              "size_bytes": 537919488,
+              "usage_at_capture": {
+                "free_bytes": 530415616,
+                "total_bytes": 536854528,
+                "used_bytes": 6438912
+              }
+            },
+            {
+              "filesystem": "ext4",
+              "label": null,
+              "mountpoints": [
+                "/"
+              ],
+              "name": "nvme0n1p3",
+              "size_bytes": 255520145408,
+              "usage_at_capture": {
+                "free_bytes": 16786604032,
+                "total_bytes": 250373009408,
+                "used_bytes": 220793622528
+              }
+            }
+          ],
+          "rotational": false,
+          "size_bytes": 256060514304,
+          "transport": "nvme"
+        }
+      ]
+    },
+    "home_filesystem": {
+      "note": "an encrypted (ecryptfs) home adds per-I/O overhead to the repository checkout",
+      "provenance": "machine-verified",
+      "source": "findmnt -T <home>",
+      "value": "ecryptfs"
+    },
+    "roles": {
+      "note": "device models and labels are machine-verified; the role assignment is the owner's",
+      "provenance": "machine-verified",
+      "source": "lsblk model/label + docs/hardware.md role assignment",
+      "value": {
+        "cinqic_working_storage": "HDD partition labelled 'Cinqic Storage' (larger AAA workloads, scratch)",
+        "system_and_development": "NVMe SSD root filesystem (OS, repository checkout, virtual environments)"
+      }
+    }
+  }
+}

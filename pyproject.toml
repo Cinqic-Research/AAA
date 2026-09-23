@@ -88,7 +88,7 @@ disallow_untyped_defs = false
 # Untyped third-party stubs are not worth carpeting the project in ignores
 # for; everything AAA itself defines is checked.
 [[tool.mypy.overrides]]
-module = ["matplotlib.*", "psutil.*"]
+module = ["matplotlib.*", "psutil.*", "cupy", "cupy.*"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
