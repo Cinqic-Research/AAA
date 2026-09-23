@@ -131,9 +131,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"hash: {spec_module.spec_hash()}")
         return 0
     if args.command == "fingerprint":
-        from .identity import fingerprint
+        from .identity import IdentityError, fingerprint
 
-        identity = fingerprint()
+        try:
+            identity = fingerprint()
+        except IdentityError as error:
+            print(f"refused: {error} (an installed package has no source identity to hash)", file=sys.stderr)
+            return 2
         print(identity["sha256"])
         print(f"{identity['file_count']} files, phase {PROTOCOL_VERSION}")
         return 0
