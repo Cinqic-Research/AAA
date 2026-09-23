@@ -389,6 +389,10 @@ python -m research.aaa_1k_v2 recompute --freeze docs/evidence/aaa_1k_v2/freeze.j
 python -m research.aaa_1k_v2 capacity --freeze docs/evidence/aaa_1k_v2/freeze.json --confirmation docs/evidence/aaa_1k_v2/confirmation.json --output docs/evidence/aaa_1k_v2/capacity.json
 ```
 
+This phase ran exactly that sequence without the attack stage. Development
+designated no challenger, so the freeze was built without `--attack` and fixed
+a characterization-only confirmation (V2-D17).
+
 Every stage refuses to overwrite an existing artifact. `confirm` refuses an
 uncommitted or stale freeze and a dirty tree, and spends and commits every
 confirmation block before the first cell runs, so it can only run once.
@@ -402,6 +406,20 @@ python -m research.aaa_1k_v2 recompute --freeze docs/evidence/aaa_1k_v2/freeze.j
 Reproduction standard: confirmation evidence was produced on the CPU (float64)
 on FLOWBOX (Zen 3). A rerun there must reproduce every cell bitwise; elsewhere
 the standard is verdict-level, with numerical drift reported (`AAA-173`).
+`confirm` cannot run twice. The rerun reads the committed registry, where the
+blocks are already spent by the recorded observer, and compares every value
+with the committed artifact without writing to the repository:
+
+```bash
+python tools/reproduce_aaa_1k_v2_confirmation.py --workers 8
+```
+
+The phase report and the retained-evidence guard:
+
+```bash
+python tools/write_aaa_1k_v2_report.py --check
+python -m unittest tests.test_aaa_1k_v2_evidence
+```
 Development evidence carries its own backend record.
 
 CUDA qualification (FLOWBOX, optional CUDA environment, quiet machine):

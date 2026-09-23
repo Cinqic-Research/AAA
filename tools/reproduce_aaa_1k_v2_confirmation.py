@@ -38,8 +38,9 @@ VOLATILE = {"compute_seconds", "wall_seconds", "environment"}
 
 def _walk(stored: Any, rerun: Any, path: str, out: dict[str, Any]) -> None:
     if isinstance(stored, dict) and isinstance(rerun, dict):
-        if set(stored) != set(rerun):
-            out["structure"].append(f"{path}: keys differ")
+        ignored = VOLATILE if not path else set()
+        if set(stored) - ignored != set(rerun) - ignored:
+            out["structure"].append(f"{path}: keys differ: {sorted(set(stored) ^ set(rerun))}")
         for key in set(stored) & set(rerun):
             if not path and key in VOLATILE:
                 continue
