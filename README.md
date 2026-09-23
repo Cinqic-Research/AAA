@@ -149,6 +149,7 @@ The machine and the revisable model-size planning goal are recorded in
 | [`aaa.python.v0` protocol](docs/aaa_python_protocol.md) | task families, safe subset and sandbox, splits, causal boundary, metrics, estimands, confirmation rules |
 | [`aaa.python.v0` architecture](docs/aaa_python_architecture.md) | the minimal learner, its representations, parameter and state accounting, compute |
 | [`aaa.python.v0` development report](docs/aaa_python_development_report.md) | the first development result, generated from retained evidence |
+| [Python-first transition self-review](docs/aaa_python_self_review.md) | the implementer's attempt to break this work (not independent), and what remains weak |
 | [Promotion contract](docs/promotion_contract.md) | `aaa.promotion.crossed.v1`, the prospective repair of `AAA-180` |
 | [Scaling readiness](docs/scaling_readiness.md) | current evidence, the promotion boundary, and gates for capacity experiments |
 | [Development hardware](docs/hardware.md) | FLOWBOX, when to use its CPU or GPU, the approximate 105M long-term AAA 1 planning goal, and future compute |

@@ -325,3 +325,55 @@ class CommandLineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IdentityAndProvenanceTests(unittest.TestCase):
+    def test_the_fingerprint_covers_the_phase_and_excludes_its_evidence(self) -> None:
+        from research.aaa_python import identity
+
+        record = identity.fingerprint()
+        self.assertRegex(record["sha256"], r"^[0-9a-f]{64}$")
+        files = set(record["files"])
+        for name in (
+            "research/aaa_python/generator.py",
+            "aaa/promotion/contract.py",
+            "docs/aaa_python_protocol.md",
+            "requirements-lock.txt",
+        ):
+            self.assertIn(name, files)
+        self.assertFalse(any(name.startswith("docs/evidence/") for name in files))
+
+    def test_provenance_is_complete_and_refuses_other_devices(self) -> None:
+        from research.aaa_python import identity
+
+        record = identity.provenance("cpu")
+        self.assertTrue(record["captured_before_run"])
+        self.assertEqual(record["compute"]["resolved_device"], "cpu")
+        self.assertIn(record["source"]["dirty"], (True, False))
+        self.assertRegex(record["source"]["commit"], r"^[0-9a-f]{40}$")
+        for device in ("cuda", "cuda:0", "auto"):
+            with self.assertRaises(ValueError):
+                identity.provenance(device)
+
+
+class InProcessCommandTests(unittest.TestCase):
+    def test_commands_and_refusals(self) -> None:
+        import contextlib
+        import io
+
+        from research.aaa_python import cli
+
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(cli.main(["spec-hash"]), 0)
+            self.assertEqual(cli.main(["fingerprint"]), 0)
+            self.assertEqual(cli.main(["subset"]), 0)
+            self.assertEqual(cli.main(["audit"]), 0)
+            self.assertEqual(cli.main(["golden"]), 0)
+            self.assertEqual(cli.main(["generate", "--family", "repair", "--count", "3", "--show"]), 0)
+            self.assertEqual(cli.main(["generate", "--count", "0"]), 2)
+            self.assertEqual(cli.main(["generate", "--split", "confirmation"]), 2)
+            self.assertEqual(cli.main(["golden", "--write"]), 2)
+            self.assertEqual(cli.main(["confirm"]), 2)
+            self.assertEqual(
+                cli.main(["develop", "--quick", "--device", "cuda", "--output", "x", "--records", "y"]), 2
+            )

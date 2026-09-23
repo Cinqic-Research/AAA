@@ -190,6 +190,7 @@ TRANSITION_2026_09_23 = {
     "tests/test_protected_identities.py": "protected historical identities",
     "tools/check_protected_identities.py": "protected historical identities",
     "tools/write_audit_inventory.py": "Python-first transition classification",
+    "docs/aaa_python_self_review.md": "implementer self-review of the transition (not independent)",
 }
 """Paths changed by the 2026-09-23 Python-first transition, and why."""
 
