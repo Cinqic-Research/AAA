@@ -379,13 +379,15 @@ def repair_candidate(stream: Stream, spec: Mapping[str, Any], slice_name: str) -
         target = 3
     correct = body[target]
     mutations = _mutations(correct)
-    if len(mutations) < 4:
+    family = spec["families"]["repair"]
+    n_candidates, n_visible, n_hidden = family["candidates"], family["visible_tests"], family["hidden_tests"]
+    if len(mutations) < n_candidates:
         return None
     mutations = stream.shuffled(mutations)
     buggy = mutations[0]
-    distractors = mutations[1:3]
+    distractors = mutations[1 : n_candidates - 1]
     candidates = stream.shuffled([correct, buggy, *distractors])
-    inputs = stream.shuffled(list(range(b.low - 2, b.high + 6)))[:6]
+    inputs = stream.shuffled(list(range(b.low - 2, b.high + 6)))[: n_visible + n_hidden]
     return {
         "template": template,
         "reference": "\n".join(body) + "\n",
@@ -393,8 +395,8 @@ def repair_candidate(stream: Stream, spec: Mapping[str, Any], slice_name: str) -
         "line": target + 1,
         "candidates": tuple(candidates),
         "correct": candidates.index(correct),
-        "visible_inputs": tuple(inputs[:2]),
-        "hidden_inputs": tuple(inputs[2:6]),
+        "visible_inputs": tuple(inputs[:n_visible]),
+        "hidden_inputs": tuple(inputs[n_visible : n_visible + n_hidden]),
         "body": body,
         "target": target,
     }
@@ -495,12 +497,14 @@ def _accept(d: Draft, outcomes: Sequence[Outcome], spec: Mapping[str, Any]) -> b
         )
     if d.family == "repair":
         assert d.repair is not None
+        visible = len(d.repair["visible_inputs"])
+        total = visible + len(d.repair["hidden_inputs"])
         reference = first.stdout.split()
-        if first.status != "ok" or len(reference) != 6:
+        if first.status != "ok" or len(reference) != total:
             return False
-        hidden = reference[2:]
+        hidden = reference[visible:]
         passing = [
-            k for k, o in enumerate(outcomes[1:]) if o.status == "ok" and o.stdout.split()[2:] == hidden
+            k for k, o in enumerate(outcomes[1:]) if o.status == "ok" and o.stdout.split()[visible:] == hidden
         ]
         return passing == [d.repair["correct"]]
     return True
@@ -550,10 +554,13 @@ def _finish(d: Draft, outcomes: Sequence[Outcome]) -> Task:
     reference = [int(v) for v in first.stdout.split()]
     inputs = d.repair["visible_inputs"] + d.repair["hidden_inputs"]
     tests = tuple(zip(inputs, reference, strict=True))
-    hidden = [str(v) for v in reference[2:]]
+    visible = len(d.repair["visible_inputs"])
+    hidden = [str(v) for v in reference[visible:]]
     results = tuple(
         tuple(
-            o.status == "ok" and len(o.stdout.split()) == 6 and o.stdout.split()[2 + k] == hidden[k]
+            o.status == "ok"
+            and len(o.stdout.split()) == len(reference)
+            and o.stdout.split()[visible + k] == hidden[k]
             for k in range(len(hidden))
         )
         for o in outcomes[1:]
@@ -569,8 +576,8 @@ def _finish(d: Draft, outcomes: Sequence[Outcome]) -> Task:
         d.source,
         repair_line=d.repair["line"],
         candidates=d.repair["candidates"],
-        visible_tests=tests[:2],
-        hidden_tests=tests[2:],
+        visible_tests=tests[:visible],
+        hidden_tests=tests[visible:],
         answer=d.repair["correct"],
         oracle=oracle,
         candidate_hidden_results=results,
@@ -590,6 +597,14 @@ def build(
     order = spec["splits"]["order"]
     if split not in order or family not in spec["families"]:
         raise GenerationError(f"unknown split or family: {split}/{family}")
+    size = spec["splits"]["pool_per_family"][split]
+    outside = [i for i in indices if isinstance(i, bool) or not isinstance(i, int) or not 0 <= i < size]
+    if outside:
+        # Later splits are disjoint from exactly the declared pools; an index past
+        # the pool would escape that guarantee.
+        raise GenerationError(
+            f"{split}/{family}: indices {outside[:5]} are outside the declared pool of {size}"
+        )
     excluded: set[str] = set()
     for earlier in order[: order.index(split)]:
         excluded |= pool_hashes(earlier, family)

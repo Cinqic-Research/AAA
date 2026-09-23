@@ -232,10 +232,12 @@ def run_stream(
     return records
 
 
-def adaptation_split(tasks: Sequence[Task], plan: Plan, stream: int) -> dict[str, list[Task]]:
+def adaptation_split(
+    tasks: Sequence[Task], plan: Plan, stream: int, spec: Mapping[str, Any]
+) -> dict[str, list[Task]]:
     held = tasks[plan.streams * plan.stream_length :]
     ind = [t for t in held if t.slice == "in_distribution"]
-    novel = [t for t in held if t.slice == "novel_structure"]
+    novel = [t for t in held if t.slice == spec["development"]["adaptation"]["changed_slice"]]
     width = plan.prefix + plan.branch
     prefix = ind[stream * width : stream * width + plan.prefix]
     control = ind[stream * width + plan.prefix : (stream + 1) * width]
@@ -299,7 +301,7 @@ def develop(
             if family not in plan.adaptation_families:
                 continue
             for stream in range(plan.streams):
-                split = adaptation_split(tasks["development"][family], plan, stream)
+                split = adaptation_split(tasks["development"][family], plan, stream, spec)
                 cell = {"init": init, "stream": stream}
                 shared = default.clone("adapt:prefix")
                 for record in run_stream(shared, split["prefix"], spec, feedback=True, learn=True):

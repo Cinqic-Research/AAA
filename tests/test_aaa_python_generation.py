@@ -37,6 +37,11 @@ class GeneratorTests(unittest.TestCase):
             }
             self.assertEqual(len(ids), 1000)
 
+    def test_indices_outside_a_declared_pool_are_refused(self) -> None:
+        for split, index in (("development", 400), ("probe", 60), ("train", -1), ("attack", 200)):
+            with self.assertRaises(generator.GenerationError):
+                generator.build(split, "syntax", [index])
+
     def test_confirmation_identities_are_refused(self) -> None:
         for family in FAMILIES:
             with self.assertRaises(generator.ConfirmationNotAdmitted):
