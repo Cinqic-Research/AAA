@@ -155,6 +155,14 @@ def declared_blocks() -> list[dict[str, Any]]:
     return blocks
 
 
+def all_declared_blocks() -> list[dict[str, Any]]:
+    """The plan's blocks plus the diagnostic blocks declared with the diagnostics stage."""
+
+    from .diagnostics import DIAGNOSTIC_BLOCKS
+
+    return [*declared_blocks(), *(dict(block) for block in DIAGNOSTIC_BLOCKS)]
+
+
 def block_seeds_for(
     registry: dict[str, Any], role: str, namespace: str, *, observer: str | None = None
 ) -> list[int]:

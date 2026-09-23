@@ -194,3 +194,51 @@ Consequences, as the protocol prescribes: no attack stage runs; the
 confirmation is a characterization-only run (no promotion is possible) that
 measures Champion 1 and the other candidates on fresh identities, held-out
 families and the external suite; Champion 1 remains the phase's final 1K system.
+
+## V2-D16. Diagnostics (verdicts computed by the committed rules)
+
+Run at `2fc01a5` from a pinned worktree on diagnostic identities and
+development families only (`docs/evidence/aaa_1k_v2/diagnostics.json`, sha256
+`6ee7d3f0...`). Three diagnostic blocks were registered with the stage and are
+proven disjoint (270 blocks, 2,162 seeds).
+
+* **M1/Q4.** H-M1a SUPPORTED: the ungated Elman-28 control beats Champion 1 on
+  fresh `v1_coarse_speed` streams, relative MAE -28.3% [-31.1, -25.1]. H-M1b
+  SUPPORTED: keep-bias -2 closes 65% of that gap with no extra parameter.
+  H-M1c SUPPORTED: Elman-16 (354 parameters) also beats Champion 1 (-26.0%),
+  so width is not the explanation. H-M1d CONTRADICTED: Champion 1's keep gates
+  sit at mean |z - 0.5| = 0.117, just above the 0.1 rule. H-M1e CONTRADICTED:
+  the deficit grows with speed (Elman-28's advantage is -7.9% at slow speed
+  0.06 and about -29% at 0.15), not at the sub-quantum slow speeds.
+  H-M1f SUPPORTED: keep-bias -2 costs occlusion (+3.9% [+2.6, +4.9]). The
+  deficit also appears on `long_coarse` (-34.8%) and `quantized` (-38.3%) and
+  vanishes at the finest quantum (0.0025: -2.8%). M1 is therefore a
+  coarse-observation effect of the gated operating point, not a capacity
+  effect; its only parameter-free remedy found so far trades against
+  occlusion.
+* **AAA-162.** H-162a SUPPORTED: at *fixed* speed, a least-squares window of 8
+  quantized observations has 0.49 times the error of a window of 2, so the
+  construction strongly rewards integrating history even without any regime
+  switching. H-162b SUPPORTED: switching adds 12% to the best achievable
+  error. H-162c NOT_RESOLVED: the best window is 8 in both conditions. The
+  original characterization (that the family measures hidden-regime inference
+  and that "the quantizer alone hands the advantage to the stateless arm") is
+  refuted by a model-independent test: coarse-observation integration is the
+  dominant reward, and regime inference a secondary one.
+* **AAA-172.** No frame lock and no stall in any family: the longest run of
+  applied mirrored targets is 1 step, and the longest run of reflection skips
+  is 8 steps, against predeclared thresholds of 10 and 50. The v2.1 RLS learner
+  never diverged and beat persistence on every family. Its
+  skip-after-reflection mitigation prevents the chase without stalling
+  learning on these streams.
+* **Optimizer.** H-OPT NOT_SUPPORTED: on `gru_v1_keep-2` (the best development
+  score), the best stateful variant (momentum 0.9, lr 0.003; +994 state
+  scalars) improves the score by only 0.7%, and every Adam learning rate is
+  worse than SGD. Stateful optimizers do not earn their state here.
+
+Also from development, the **TBPTT semantics** comparison (section 12.5):
+within every TBPTT candidate, learning rate dominates the score (lr 0.003:
+about 1.7 x Champion 1's error; 0.03: about 1.0 x). Horizon 1/4/16 and
+live-versus-replay change it by 1-4%: T = 1 is slightly worse, and replay is
+equal to or slightly worse than live. The live rule's stale-activation
+approximation is immaterial at these horizons, consistent with `AAA-169`.

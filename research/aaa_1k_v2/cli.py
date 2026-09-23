@@ -71,11 +71,11 @@ def command_registry(args: argparse.Namespace) -> int:
     path = ROOT / identities.REGISTRY_PATH
     registry = identities.load_registry(path)
     if args.sync:
-        registry = identities.reserve(registry, plan.declared_blocks())
+        registry = identities.reserve(registry, plan.all_declared_blocks())
         identities.write_registry(path, registry)
         print(f"registry synced: {len(registry['blocks'])} blocks")
         return 0
-    declared = {block["block_id"] for block in plan.declared_blocks()}
+    declared = {block["block_id"] for block in plan.all_declared_blocks()}
     present = {block["block_id"] for block in registry["blocks"]}
     missing, extra = sorted(declared - present), sorted(present - declared)
     print(f"registry: {len(present)} blocks; missing {len(missing)}; undeclared {len(extra)}")

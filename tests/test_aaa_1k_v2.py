@@ -384,7 +384,7 @@ class IdentityTests(unittest.TestCase):
 
     def test_committed_registry_is_the_declared_plan_and_disjoint(self) -> None:
         registry = identities.load_registry(ROOT / identities.REGISTRY_PATH)
-        declared = {b["block_id"]: b for b in plan.declared_blocks()}
+        declared = {b["block_id"]: b for b in plan.all_declared_blocks()}
         committed = {b["block_id"]: b for b in registry["blocks"]}
         self.assertEqual(set(declared), set(committed))
         for block_id, block in declared.items():
