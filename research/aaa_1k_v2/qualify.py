@@ -51,6 +51,15 @@ SIZES = (1, 8, 32, 128, 512, 1024, 4096)
 CUDA_EXTRA = (16384,)
 REPEATS = 3
 WORKLOADS = ("online", "prediction", "sweep", "evaluation", "external")
+WORKLOAD_SIZES = {
+    "online": SIZES,
+    "prediction": (32, 512, 4096),
+    "sweep": (32, 512, 4096),
+    "evaluation": (32, 128, 1024),
+    "external": (1, 128, 1024),
+}
+"""Online training gets the full size ladder; the other workloads representative sizes (the 6,000-step
+external sequences make a full ladder impractically slow on the dispatch-bound GPU path)."""
 EXECUTORS = ("cpu_seq", "cpu_par", "cuda")
 
 

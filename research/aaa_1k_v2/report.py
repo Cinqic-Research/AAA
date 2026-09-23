@@ -51,6 +51,7 @@ def compute_report(q: Mapping[str, Any], *, source: str, digest: str) -> str:
         ("internal evaluation (online/frozen twins, 1,024 trunks)", "evaluation", 1024),
         ("external benchmark batch (NARMA-10, 1,024 cells)", "external", 1024),
         ("prediction only (frozen, 4,096 cells)", "prediction", 4096),
+        ("hyperparameter search (512 cells over the lr grid)", "sweep", 512),
     ]
     lines = [
         "# FLOWBOX compute report (aaa.1k.v2)",
