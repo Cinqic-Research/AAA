@@ -1,0 +1,103 @@
+{
+  "conclusion": "every regression generator is i.i.d. tabular with multi-feature exogenous inputs; the rest are classification streams. AAA's scalar next-step core cannot take part without a task-specific input model, so the River track is rejected for aaa.1k.v2 (docs/aaa_1k_v2_external_benchmarks.md).",
+  "generators": [
+    {
+      "features": 9,
+      "generator": "Agrawal",
+      "task": "Binary classification"
+    },
+    {
+      "features": 2,
+      "generator": "AnomalySine",
+      "task": "Binary classification"
+    },
+    {
+      "features": 9,
+      "generator": "ConceptDriftStream",
+      "task": "Binary classification"
+    },
+    {
+      "features": 10,
+      "generator": "Friedman",
+      "task": "Regression"
+    },
+    {
+      "features": 10,
+      "generator": "FriedmanDrift",
+      "task": "Regression"
+    },
+    {
+      "features": 10,
+      "generator": "Hyperplane",
+      "task": "Binary classification"
+    },
+    {
+      "features": 7,
+      "generator": "LED",
+      "task": "Multi-class classification"
+    },
+    {
+      "features": 7,
+      "generator": "LEDDrift",
+      "task": "Multi-class classification"
+    },
+    {
+      "features": 2,
+      "generator": "Logical",
+      "task": "Multi-output binary classification"
+    },
+    {
+      "features": 4,
+      "generator": "Mixed",
+      "task": "Binary classification"
+    },
+    {
+      "features": 10,
+      "generator": "Mv",
+      "task": "Regression"
+    },
+    {
+      "features": 10,
+      "generator": "Planes2D",
+      "task": "Regression"
+    },
+    {
+      "features": 10,
+      "generator": "RandomRBF",
+      "task": "Multi-class classification"
+    },
+    {
+      "features": 10,
+      "generator": "RandomRBFDrift",
+      "task": "Multi-class classification"
+    },
+    {
+      "features": 10,
+      "generator": "RandomTree",
+      "task": "Multi-class classification"
+    },
+    {
+      "features": 3,
+      "generator": "SEA",
+      "task": "Binary classification"
+    },
+    {
+      "features": 3,
+      "generator": "STAGGER",
+      "task": "Binary classification"
+    },
+    {
+      "features": 2,
+      "generator": "Sine",
+      "task": "Binary classification"
+    },
+    {
+      "features": 21,
+      "generator": "Waveform",
+      "task": "Multi-class classification"
+    }
+  ],
+  "license": "BSD-3-Clause",
+  "river_version": "0.26.1",
+  "schema": "aaa.1k.v2.river_assessment.v1"
+}
