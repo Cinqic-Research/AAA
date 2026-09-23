@@ -1890,7 +1890,7 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
   unmodified tree it prints `VALID`, and the fingerprint is still `5ce6e019…`.
 
 ### AAA-175 — Dependabot could open pull requests that rewrite the fingerprinted lock
-- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired in configuration; not observable until Dependabot next runs
+- **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired in configuration; policy confirmed 2026-09-23
 - **Reproduction** On `efa1fdb`, the `pip` entry in `.github/dependabot.yml`
   ignored only `version-update:semver-patch`, although its comment says the
   lock "is regenerated deliberately, not by a bot". Dependabot has already
@@ -1917,6 +1917,22 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
 - **Remaining limitation** Dependabot's actual behaviour can only be observed
   on GitHub, the next time it runs. This entry relies on GitHub's
   documentation.
+- **Decision (2026-09-23)** The owner delegated the policy question that the
+  review left open, and the policy is kept: no `pip` pull requests of any
+  kind, Dependabot alerts on, `github-actions` updates unchanged. A bot pull
+  request against the lock can never pass the required checks, because the
+  lock is fingerprinted, so it could only be merged by an admin override,
+  which the project reserves for recovery. A lock change is a
+  scientific-identity event that needs a recorded decision (`AAA-152`). The
+  realistic exposure is small (see the threat model in `SECURITY.md`), and
+  alerts still report any vulnerable pin. When one arrives, the maintainer
+  decides whether it matters under that threat model and, if it does,
+  regenerates the lock as a deliberate, recorded identity change.
+- **Observation (2026-09-23)** The first Dependabot run after the merge
+  (`35815074694`, triggered by the configuration change) ran only the
+  `github-actions` job and opened no pull request. No `pip` version job ran,
+  as `open-pull-requests-limit: 0` intends. Suppression of security pull
+  requests remains unobserved while there are no open alerts.
 
 ### AAA-176 — active loop documentation still described the pre-review state
 - **Source** independent review 2026-09-22 · **Severity** low · **Status** repaired
