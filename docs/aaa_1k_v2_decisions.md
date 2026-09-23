@@ -1,0 +1,122 @@
+# AAA-1K v2 decision log
+
+Every decision of the `aaa.1k.v2` phase, in the order it was taken, with the
+evidence available at the time. Entries are appended, never rewritten; a later
+entry may supersede an earlier one and says so.
+
+## V2-D1. A new phase, not an edit of `aaa.1k.v1`
+
+`research/aaa_1k/`, the four shared `aaa` modules, `tests/test_aaa_1k.py`,
+`requirements-lock.txt` and the four v1 protocol documents are fingerprinted by
+`aaa.1k.v1` and cited by hash by Champion 0 and Champion 1. v2 therefore lives
+in `research/aaa_1k_v2/` and `aaa/compute/`, imports the historical generators
+and agents unchanged, and has its own fingerprint, identity namespace, protocol
+and evidence. The v1 fingerprint was `5ce6e019...f771e` before this work and
+must still be after it.
+
+## V2-D2. The CUDA backend is CuPy; the CPU backend stays NumPy
+
+Measured, not assumed; see [`aaa_1k_v2_compute_strategy.md`](aaa_1k_v2_compute_strategy.md).
+CuPy runs the same code as NumPy and matches it to about 1e-15. On the RTX 2060
+in float64, CuPy, PyTorch eager and PyTorch with CUDA Graphs saturate within
+about 10% of each other (roughly 530-590k cell-steps/s), so PyTorch's 3.5 GB of
+dependencies and second implementation buy almost nothing. CUDA is optional:
+`requirements-cuda-lock.txt` is a separate lock.
+
+## V2-D3. Batching across cells is the unit of acceleration
+
+A single 1K-parameter cell cannot use a GPU: one lockstep step costs about
+6.5 ms of CuPy dispatch whatever the batch size. The useful parallelism is
+across independent cells (initializations x streams x hyperparameters). The
+engine is therefore batched from the start, with per-cell hyperparameter
+vectors, and the same batching also speeds up the CPU path: a single process
+runs 70-95k cell-steps/s against about 3.7k for the historical per-cell code (2,920 cell-steps in 0.79 s in the parity run).
+
+## V2-D4. CPU parallelism uses small chunks
+
+Measured on FLOWBOX: eight workers with 512-cell chunks slowed each worker by a
+factor of five, because the working set overflowed the 16 MB L3 and saturated
+DRAM. 64-cell chunks gave the best throughput, about 270k cell-steps/s. BLAS
+threads are pinned to one per worker, and workers are spawned after the pin.
+
+## V2-D5. Development and confirmation run on the CPU
+
+At development's job shapes (one core type and one horizon per lockstep batch,
+about 1-2 thousand cells) the parallel CPU path is faster than the GPU, which
+overtakes it only above roughly 2,000-4,000 lockstep cells. Confirmation runs
+on the CPU because exact reproduction is established there on the Zen 3
+evidence platform. CUDA is exercised for backend parity, the compute
+qualification and attack criterion A6. This follows the brief's rule against
+forcing CUDA into workloads where the CPU is faster.
+
+## V2-D6. Champion 1 is re-implemented in batched form and proven equal
+
+The reference arm in every v2 comparison is the batched GRU with the v1
+feature set and the reach-gated target rule. `tests/test_aaa_1k_v2.py`
+requires it to match `research.aaa_1k` + `ReachGatedUnfoldAgent` within 1e-12
+per step. The qualification run found most cells bitwise identical and the rest
+differing in the last bit (batched products sum in a different order from
+OpenBLAS's matrix-vector kernel). Initial parameters are bitwise identical.
+
+## V2-D7. Six candidates, each with a written hypothesis
+
+See [`aaa_1k_v2_research_brief.md`](aaa_1k_v2_research_brief.md). `gru_v1_retuned`
+was added so that no architecture comparison is confounded by Champion 1's
+v1-selected learning rate: Champion 1 stays frozen as the reference, and its
+architecture also competes under the v2 selection rule.
+
+## V2-D8. The explicit missingness flag is paid for inside the cap
+
+Adding an input to the 16-unit GRU gives 1,042 parameters. The `v2` GRU uses 15
+units (932). The Elman and MGU candidates are sized to the largest width under
+the cap. The flag's contribution is measured by a `no_observed_flag` ablation.
+
+## V2-D9. The diagonal linear candidate learns by exact RTRL and its traces count
+
+The LRU's 240 trace scalars are adaptive state and appear in its footprint
+(1,245 total against Champion 1's 1,414 at T=4). The RTRL gradient is verified
+against finite differences of the untruncated loss.
+
+## V2-D10. External benchmarks: rule-selected, externally defined, causal
+
+NARMA-10 (Atiya & Parlos) and NARMA-20 (Rodan & Tino, tanh); NARMA-30
+excluded because its published constants conflict. Mackey-Glass tau = 17 per
+Jaeger's protocol. Twelve dysts systems drawn by a quartile rule with a
+registered seed; RK4 integration validated against dysts itself. Four Monash
+datasets selected by a written rule from the archive's table, with checksums,
+the archive's own MASE semantics (ported from its R code) and its published
+baselines. River's drift generators are tabular and multi-feature, so the River
+track is rejected, with its inspection retained as evidence. Gymnasium and
+MLPerf Tiny are out of scope for a predictor.
+
+## V2-D11. Normalization never sees scored data
+
+Synthetic tasks use calibration realizations from registered development
+identities. Monash series use their own warm-up window, and scoring starts after
+it. This avoids the full-series normalization leak the brief warns about, even
+inside the training split.
+
+## V2-D12. Identities are 64-bit and proven disjoint
+
+Closes the gap `AAA-163` described for new work: no modular reduction, and a
+fail-closed set-intersection proof against every AAA-1K seed below index
+100,000, AAA-1K and loop evidence, and the loop ledger. The initial registry
+(267 blocks) proved disjoint.
+
+## V2-D13. Disclosed pre-freeze looks
+
+Before this protocol was committed, three engineering shakedowns produced
+numbers:
+
+1. NARMA-10 and Mackey-Glass runs of Champion 1, `lru_v2` and `elman_v2` on
+   ad-hoc unregistered seeds (5, 6, 11, 12), used to check the series pipeline.
+2. A scratch-identity run of the complete development pipeline for `gru_v2` and
+   `lru_v2` (2 inits x 2 streams per family), used to check selection and the
+   screen end to end.
+3. Throughput and parity measurements on qualification-style streams.
+
+No threshold, grid value, candidate, family or criterion was chosen or changed
+in response to their outcomes. The only protocol edits after them added the
+qualification and scratch external blocks and moved development to the CPU
+(V2-D5), both on compute grounds. They are disclosed because the protocol
+requires every look to be recorded.
