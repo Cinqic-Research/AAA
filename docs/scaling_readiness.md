@@ -106,7 +106,10 @@ Use `$AAA_DATA_ROOT` on the dedicated HDD for large external and experiment
 outputs; preflight projected size and free space so exploratory work does not
 fill the NVMe. Checkpoint/resume and atomic-evidence behavior must be proved
 for the selected future workload, rather than inferred from the small current
-model. A 105M parameter-only memory estimate omits activations, optimizer and
-temporary memory; feasibility requires a measured configuration-specific
+model. At the 2026-09-23 probe, the mounted HDD had 412,369,637,376 bytes
+available and the NVMe root had 15,672,995,840 bytes available. This supports
+small next-phase diagnostics on the HDD, not an unspecified coding corpus or
+105M training run. A 105M parameter-only memory estimate omits activations,
+optimizer and temporary memory; feasibility requires a measured configuration-specific
 probe and sustained throughput estimate. Hardware not yet installed is not
 part of that probe.

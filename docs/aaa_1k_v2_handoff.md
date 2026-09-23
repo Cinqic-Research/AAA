@@ -4,6 +4,16 @@ Everything a reviewer needs to check `aaa.1k.v2` without trusting its author.
 Read the [self-review](aaa_1k_v2_self_review.md) first. It lists where the
 implementer thinks the work is weakest, and it is not independent.
 
+**2026-09-23 reviewer update:** The Q2 measurement-design question in §5 item
+2 was tested on all 120 already observed round-3 cells. The historical and
+batched paths agree exactly on every branch MAE and adaptation effect,
+including the Champion 1 replay; see the
+[pre-scale review](pre_scale_review_2026-09-23.md) and
+`python tools/check_adaptation_parity.py`. This is a diagnostic, not new
+confirmation. `AAA-180` in item 3 remains a hard blocker for future promotion.
+The list below records the handoff's original concerns at the time it was
+written.
+
 ## 1. Identity
 
 | Item | Value |

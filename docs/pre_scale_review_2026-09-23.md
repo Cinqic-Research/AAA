@@ -62,7 +62,9 @@ online/frozen MAEs and the difference-of-differences were all **0.0**.
 The original mean effect was `+0.0005120513746349793`; v2's fresh Champion 1
 effect is about `-1.8e-05` with a 95% interval crossing zero. The measured
 paths are equivalent on the historical cells. This is diagnostic
-characterization, never fresh confirmation evidence.
+characterization, never fresh confirmation evidence. The CI diagnostic gates
+same-host historical-versus-batched parity; it reports drift from stored Zen 3
+evidence without requiring cross-CPU bitwise equality.
 
 An additional direct crossed resampling of the retained v2 capability cells
 (8 initializations x 16 streams, 10,000 draws, diagnostic seed 20260923)
@@ -136,10 +138,13 @@ conditions again diverged materially across backends (up to about 0.32 and
 bitwise stable. This does not turn the CPU confirmation into GPU evidence.
 An explicit request for nonexistent `cuda:999` exited 2 with a device error;
 it did not fall back to CPU.
-GitHub's exact-head PR check state and the full FLOWBOX confirmation replay
-are recorded in the final PR, because their identity is the final Git commit
-and the replay completion may follow document authoring. The replay compares
-all retained primitives; its bitwise result is separate from the verdict.
+A full FLOWBOX CPU confirmation replay on the matching Zen 3 environment
+compared 441,374 floating values with the retained v2 artifact: zero differed,
+there were zero structural differences, and the stored `NO_CHALLENGER`
+decision was identical. The run took 1,426 seconds. This is bitwise
+reproduction on the evidence platform, not new confirmation evidence or a
+repair of `AAA-180`. GitHub's exact-head PR check state is recorded in the
+final PR because its identity is the final Git commit.
 
 The current evidence does not demonstrate Python coding, justify 105M, or
 remove `AAA-180`. The proper readiness verdict is
