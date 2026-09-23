@@ -111,7 +111,7 @@ class BoundaryTests(unittest.TestCase):
         for forbidden in ("answer", "oracle", "hidden_tests", "candidate_hidden_results", "task_id", "notes"):
             self.assertFalse(hasattr(view, forbidden), forbidden)
         with self.assertRaises(dataclasses.FrozenInstanceError):
-            view.source = "x"  # type: ignore[misc]
+            view.source = "x"
 
     def test_the_order_is_enforced(self) -> None:
         from research.aaa_python import spec
@@ -123,8 +123,9 @@ class BoundaryTests(unittest.TestCase):
             env.present(tasks[1])  # the previous task was never revealed
         with self.assertRaises(BoundaryError):
             env.reveal(view)
-        with self.assertRaises(BoundaryError):
-            env.commit(view, Action("ok", 1.5))  # malformed confidence
+        for confidence in (1.5, float("nan"), "high", None, True):
+            with self.assertRaises(BoundaryError, msg=repr(confidence)):
+                env.commit(view, Action("ok", confidence))
         env.commit(view, Action("ok", 0.5))
         env.reveal(view)
         with self.assertRaises(BoundaryError):
@@ -133,6 +134,19 @@ class BoundaryTests(unittest.TestCase):
         with self.assertRaises(BoundaryError):
             env.commit(view, Action("ok", 0.5))  # refers to the previous task
         env.commit(stale, Action("ok", 0.5))
+
+    def test_answers_must_match_the_label_type_not_only_its_value(self) -> None:
+        from research.aaa_python import spec
+
+        task = generator.build("development", "localize", [0])[0]
+        for answer in (True, 1.0, "1"):
+            env = Environment(spec.load())
+            view = env.present(task)
+            with self.assertRaises(BoundaryError, msg=repr(answer)):
+                env.commit(view, Action(answer, 0.5))
+        env = Environment(spec.load())
+        view = env.present(task)
+        env.commit(view, Action(1, 0.5))
 
 
 if __name__ == "__main__":

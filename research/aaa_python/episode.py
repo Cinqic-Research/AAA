@@ -141,9 +141,18 @@ class Environment:
             raise BoundaryError("commit does not refer to the presented task")
         if self._action is not None:
             raise BoundaryError("an action was already committed for this task")
-        if not isinstance(action, Action) or not 0.0 <= float(action.confidence) <= 1.0:
+        if not isinstance(action, Action) or isinstance(action.confidence, bool):
             raise BoundaryError("malformed action")
-        if not action.abstain and action.answer not in view.labels:
+        try:
+            confidence = float(action.confidence)
+        except (TypeError, ValueError):
+            raise BoundaryError("malformed action: confidence is not a number") from None
+        if not 0.0 <= confidence <= 1.0:  # also refuses NaN
+            raise BoundaryError("malformed action: confidence outside [0, 1]")
+        # Match type as well as value: True == 1 and 1.0 == 1 must not pass as label 1.
+        if not action.abstain and not any(
+            type(action.answer) is type(label) and action.answer == label for label in view.labels
+        ):
             raise BoundaryError(f"answer {action.answer!r} is outside the label space")
         self._action = action
         self._log("commit")

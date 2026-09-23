@@ -171,6 +171,10 @@ class FailClosedTests(unittest.TestCase):
         bool_init = copy.deepcopy(self.records)
         bool_init[0]["init"] = True
         self.assert_invalid(bool_init)
+        for field in ("init", "series", "group", "arm"):
+            unhashable = copy.deepcopy(self.records)
+            unhashable[0][field] = [unhashable[0][field]]
+            self.assert_invalid(unhashable)
 
 
 class DisagreementInjectionTests(unittest.TestCase):

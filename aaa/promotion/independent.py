@@ -43,6 +43,8 @@ def assemble(contract: Contract, records: Sequence[Mapping[str, Any]]) -> dict[t
     for record in records:
         if not isinstance(record, Mapping) or set(record) != FIELDS:
             raise PrimitiveError("a primitive record has missing or extra fields")
+        if not all(type(record[k]) in (str, int) for k in ("arm", "group", "init", "series")):
+            raise PrimitiveError("identities must be plain strings or integers")
         if record["arm"] not in arms:
             raise PrimitiveError(f"undeclared arm {record['arm']!r}")
         by_group.setdefault((record["arm"], record["group"]), []).append(

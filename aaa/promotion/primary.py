@@ -36,6 +36,9 @@ def build_grids(contract: Contract, records: Sequence[Mapping[str, Any]]) -> dic
         if not isinstance(record, Mapping) or tuple(sorted(record)) != tuple(sorted(RECORD_KEYS)):
             raise PrimitiveError(f"record {position}: fields must be exactly {RECORD_KEYS}")
         arm, group, init, series, value = (record[k] for k in RECORD_KEYS)
+        for field_name, identity in (("arm", arm), ("group", group), ("init", init), ("series", series)):
+            if isinstance(identity, bool) or not isinstance(identity, str | int):
+                raise PrimitiveError(f"record {position}: {field_name} must be a string or integer identity")
         if arm not in arms:
             raise PrimitiveError(f"record {position}: arm {arm!r} is not declared")
         if group not in declared:
