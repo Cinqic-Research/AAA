@@ -1,9 +1,9 @@
 # AAA development hardware and compute strategy
 
-This document records the machine AAA is currently developed on, what the
-current implementation actually uses of it, the model-size ceiling the project
-owner has adopted for this hardware generation, and the direction future
-compute is expected to take.
+This document records the machine AAA is currently developed on, what AAA can
+use of it, what historical work actually used, the model-size ceiling the
+project owner has adopted for this hardware generation, and the direction
+future compute is expected to take.
 
 It is a **project and planning document**. Nothing in it is a scientific
 result, a benchmark outcome, or a claim about what any model can do. Where it
@@ -18,30 +18,53 @@ Three things are deliberately kept apart throughout:
 
 | Concern | Where it is recorded |
 |---|---|
-| the machine development happens on today | this document |
-| the platform a specific experiment actually ran on | that experiment's own recorded provenance |
+| the machine development happens on today | this document and [`benchmarks/hardware/flowbox.json`](../benchmarks/hardware/flowbox.json) |
+| the platform a specific experiment actually ran on | that experiment's own recorded provenance (`aaa.compute.backend_provenance` from `aaa.1k.v2` on) |
 | what the implementation requires of any machine | [`dependencies.md`](dependencies.md) and [`reproduction.md`](reproduction.md) |
 
 ## FLOWBOX — the current development workstation
 
-**FLOWBOX** is the primary local AAA/Cinqic development workstation. Its
-current configuration:
+**FLOWBOX** is the primary local AAA/Cinqic development workstation. The table
+below was re-audited directly from the running machine on 2026-09-23 with
+`python -m aaa.compute probe`; the machine-readable record, with the source of
+every field, is [`benchmarks/hardware/flowbox.json`](../benchmarks/hardware/flowbox.json)
+(49 machine-verified fields, 3 owner-declared, none unavailable). Serial
+numbers, the GPU UUID, network identifiers, the hostname and the username are
+deliberately not recorded.
 
-| Component | Current specification |
-|---|---|
-| CPU | AMD Ryzen 7 5700G — 8 cores, 16 threads, Zen 3 |
-| GPU | Gigabyte GeForce RTX 2060 OC — NVIDIA RTX 2060, 6 GB VRAM |
-| System RAM | 16 GB DDR4-3000 CL16 |
-| Primary storage | 256 GB NVMe SSD — Linux installation and normal development environment |
-| Cinqic working storage | 500 GB HDD, ext4, dedicated to Cinqic work |
-| Operating system | Linux Mint 22.3 Cinnamon |
-| Motherboard | ASRock B450M/ac R2.0 |
-| Power supply | 650 W |
+| Component | Specification | Provenance |
+|---|---|---|
+| CPU | AMD Ryzen 7 5700G (Zen 3, family 25 model 80), 8 cores / 16 threads, 1 socket, 1 NUMA node, boost to 4.67 GHz | machine-verified (`lscpu`) |
+| CPU caches | L1d 32 KiB x 8, L1i 32 KiB x 8, L2 512 KiB x 8, L3 16 MiB shared | machine-verified (`lscpu --caches`) |
+| CPU vector ISA | SSE4.2, AVX, AVX2, FMA, F16C, BMI2, SHA; **no AVX-512** | machine-verified (`/proc/cpuinfo` flags) |
+| GPU | NVIDIA GeForce RTX 2060 (TU106 Rev. A, PCI 10de:1f08), Gigabyte subsystem (1458:3fc1), 6,144 MiB, compute capability 7.5 | machine-verified (`nvidia-smi`, `lspci -nnk`) |
+| GPU board model | Gigabyte GeForce RTX 2060 OC | owner-declared (the vendor is verified, the retail model name is not) |
+| GPU link and power | PCIe 3.0 x16; power limit 170 W (maximum 200 W) | machine-verified |
+| GPU role | also drives the desktop display: Xorg and Cinnamon keep about 0.5 GiB of VRAM resident and take some SM time during measurements | machine-verified (`display_active`) |
+| Integrated GPU | AMD Radeon Vega (Cezanne); unused by AAA | machine-verified |
+| NVIDIA driver | 595.91.07, supporting CUDA runtimes up to 13.2 | machine-verified |
+| CUDA toolkit | **none installed** (no `nvcc`, no `/usr/local/cuda*`) | machine-verified |
+| CUDA runtime used by AAA | 13.2 via NVIDIA's PyPI wheels (CUDA runtime and NVRTC 13.2.86, cuBLAS 13.4.1.3) under CuPy 14.2.0, in the optional `.venv-cuda` environment | machine-verified (CuPy runtime queries) |
+| System RAM | 15.7 GiB usable (16 GB installed) | machine-verified (`/proc/meminfo`) |
+| RAM modules | 16 GB DDR4-3000 CL16 | owner-declared (DIMM tables need root; not read) |
+| Swap | 2 GiB swap file | machine-verified |
+| Primary storage | Fanxiang S500Pro 256 GB NVMe SSD: EFI partition and the ext4 root filesystem (OS, repository checkout, virtual environments). **About 17 GB free at capture (93% used)** | machine-verified (`lsblk`, `df`) |
+| Home directory | ecryptfs-encrypted overlay on the NVMe root; every repository I/O pays the encryption layer | machine-verified (`findmnt`) |
+| Cinqic working storage | HGST HTS545050A7E380 500 GB SATA HDD, one ext4 partition labelled "Cinqic Storage", about 419 GB free at capture | machine-verified |
+| Motherboard | ASRock B450M/ac R2.0; firmware American Megatrends P3.10 (2022-10-27) | machine-verified (`/sys/class/dmi/id`) |
+| Operating system | Linux Mint 22.3 (Zena), kernel 7.0.0-31-generic, glibc 2.39 | machine-verified |
+| Python / NumPy | Python 3.12.3; NumPy 2.5.3 on scipy-openblas 0.3.34 (DYNAMIC_ARCH, Haswell kernels, 64-bit integers) | machine-verified |
+| Power supply | 650 W | owner-declared (not discoverable from software) |
 
-The motherboard and power supply are recorded because they bound what future
-upgrades are possible, not because any measurement depends on them. Cooling,
-case, networking hardware, peripherals and cosmetic components are omitted
-deliberately: they do not affect an AAA compute or reproduction claim.
+Every earlier owner-declared value in this document agrees with what the
+machine reports. The audit adds what was never recorded before: the exact
+caches and vector ISA, the GPU's compute capability, link and power limit, the
+driver, the absence of a CUDA toolkit, the encrypted home directory, the
+display load on the GPU, and how full the system drive is.
+
+The motherboard and power supply bound future upgrades; no measurement
+depends on them. Cooling, case, networking and peripherals are omitted: they
+do not affect an AAA compute or reproduction claim.
 
 ### Why the CPU in particular is recorded here
 
@@ -50,19 +73,26 @@ trajectories in this repository are not bit-stable across all CPU instruction
 sets (`AAA-173`), and the post-audit loop evidence was produced on Zen 3. The
 repository's reproduction material already depends on that fact; see
 [Hardware provenance is per experiment](#hardware-provenance-is-per-experiment)
-below.
+below. The absence of AVX-512 is part of why: AVX-512 runners (Zen 4) take
+different BLAS kernels.
 
 ### Storage roles
 
 The two drives have different jobs and different standing:
 
-- the **256 GB NVMe SSD** carries the operating system and the ordinary
-  development environment;
-- the **500 GB ext4 HDD** is dedicated to Cinqic work and is used as larger
-  local working storage for AAA runs whose retained evidence does not fit
-  comfortably on the system drive. Its filesystem behaviour under an actual
-  AAA workload was measured and retained at
+- the **256 GB NVMe SSD** carries the operating system, the repository and the
+  virtual environments. It is nearly full, so large or disposable AAA data does
+  not belong on it;
+- the **500 GB ext4 HDD** is dedicated to Cinqic work: large experiment data,
+  scratch environments (the PyTorch and dysts/River reference environments of
+  the v2 backend evaluation live there), and downloaded external datasets. Its
+  filesystem behaviour under an AAA workload was measured and retained at
   [`evidence/phase_closure_storage_profile.json`](evidence/phase_closure_storage_profile.json).
+
+No AAA code hard-codes a path to either drive. External datasets resolve from
+`$AAA_DATA_ROOT` (default `~/.cache/aaa/external`); on FLOWBOX it points at a
+directory on the HDD. Durable scientific evidence is committed to the
+repository, and the evidence policy's limitation stands.
 
 The HDD is **verified local working storage and nothing more**. It is not
 immutable, not off-site, and not an independent failure domain, so it is not a
@@ -70,38 +100,52 @@ publication-grade archive. That distinction is already load-bearing in
 [`evidence_policy.md`](evidence_policy.md) and is tracked as `AAA-077`,
 `AAA-134` and `AAA-144`; capacity does not change it.
 
-## What the current AAA implementation uses
+## What AAA uses
 
-**The current validated AAA research implementation is CPU-only.** NumPy is
-its numerical foundation. All current AAA-1K and improvement-loop evidence was
-generated and reproduced under CPU execution. No GPU is required and none is
-used; see [`dependencies.md`](dependencies.md).
+### Historical work: CPU only
 
-FLOWBOX containing an RTX 2060 does not change any of that:
+Every result produced before `aaa.1k.v2` came from CPU execution. That covers
+v1, v2.1, observation noise, `aaa.1k.v1` rounds 1-3, loop iterations
+0001-0006, Champion 0 and Champion 1. Their code never had a GPU path, and
+their evidence is **not** GPU evidence and must never be described as such. A
+benchmark attempt's `gpu` metadata field (from `nvidia-smi`) is host
+provenance, on the same footing as the CPU model; it records no GPU
+computation.
 
-- **no AAA model trains on the RTX 2060.** No CUDA, GPU array library, or
-  GPU-only dependency is present in `pyproject.toml` or
-  `requirements-lock.txt`;
-- **no existing AAA evidence was GPU-generated.** The implementation has never
-  had a GPU code path, so every retained result in this repository comes from
-  CPU execution;
-- **no CUDA reproduction standard exists**, because there is nothing to
-  reproduce on a GPU;
-- **CPU and GPU execution are not interchangeable** for this project's
-  purposes. Given that long trajectories already drift between CPU
-  microarchitectures (`AAA-173`), a future GPU implementation would be a
-  separate numerical platform requiring its own reproduction standard, not a
-  faster way to run the same numbers.
+### From `aaa.1k.v2`: CPU or CUDA, chosen explicitly
 
-A benchmark attempt records a `gpu` field in its environment metadata, from
-`nvidia-smi` when it is available. That is provenance about the host, on the
-same footing as the CPU model and BLAS build. It is not a record of GPU
-computation and the runner never dispatches work to a GPU.
+New work runs one array program on either processor through `aaa.compute`
+([`aaa_1k_v2_compute_strategy.md`](aaa_1k_v2_compute_strategy.md)):
 
-GPU support would be future engineering work: a separate phase that implements
-it, demonstrates it, and separates its numerical behaviour from the existing
-CPU evidence rather than inheriting it. None of that is designed, and listing
-it here is not a commitment to do it.
+- `--device cpu` (NumPy, always available), `--device cuda` or `cuda:<index>`
+  (CuPy on the RTX 2060), or `--device auto`, which picks by a measured
+  workload threshold. A formal or confirmatory run must name a resolved device
+  before it observes anything;
+- CPU work runs in single-threaded worker processes (`--workers`, default the 8
+  physical cores) with BLAS oversubscription prevented;
+- CUDA is optional. `requirements-lock.txt` is unchanged; the CUDA environment
+  is `requirements-cuda-lock.txt`;
+- CPU and GPU are separate numerical platforms. Paired comparisons use one
+  backend, and cross-backend agreement is measured
+  ([`aaa_1k_v2_compute_report.md`](aaa_1k_v2_compute_report.md)), never
+  assumed.
+
+### When each processor is the right one
+
+For 1K-parameter models the answer is decided by how many independent cells
+run in lockstep, not by model size. In brief, from the compute report:
+
+- a single cell or a small batch runs fastest on one CPU core;
+- up to about 2,000 cells run fastest on the 8-core CPU in 64-cell chunks
+  (225k cell-steps/s at 1,024 cells);
+- from 4,096 lockstep cells the RTX 2060 wins, narrowly for online learning
+  (274k vs 265k cell-steps/s in float64) and clearly for frozen prediction
+  (388k vs 284k). Its FP64 rate, 1/32 of FP32, caps it there;
+- hyperparameter sweeps and external benchmarks stay on the CPU: CUDA never
+  beat the 8 workers there in the measured range.
+
+Larger future models do more arithmetic per step and shift the balance toward
+the GPU; that has to be measured when they exist.
 
 ## Hardware provenance is per experiment
 

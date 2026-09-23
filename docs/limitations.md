@@ -215,3 +215,35 @@ evidence, so they are characterizations rather than confirmed claims.
 - **The v2.1 core RLS learner** uses the same own-prediction unfolding and is
   untested for the lock (`AAA-172`).
 - **M1** (the Q4 memory-family deficit) is unchanged in Champion 1.
+
+## After `aaa.1k.v2` (2026-09-23)
+
+- **No 1K challenger was found, but the search was bounded by its own
+  stability rule.** Each candidate's unclipped reference diverged at lr 0.1 on
+  the longer v2 streams, capping eligible learning rates at 0.01 (Elman 0.003).
+  Clipped configurations at lr 0.03-0.1 looked better on development and were
+  never confirmed (V2-D15). Testing them needs a new, predeclared stability rule
+  and fresh identities.
+- **Round 3's adaptation claim (Q2) did not replicate** on fresh confirmation
+  identities: -1.8e-05 [-3.9e-04, +4.3e-04]. Round 3's evidence is unchanged,
+  but "continued learning helps because the world changed" is no longer a
+  supported property of Champion 1.
+- **M1 remains.** Champion 1 is 28% worse than an ungated Elman cell on
+  `v1_coarse_speed` and similarly on the other coarse-observation families. A
+  keep-gate bias closes most of the gap but costs occlusion accuracy, and width
+  does not help (capacity `NOT_CAPACITY_LIMITED`).
+- **The error head is a weak uncertainty signal** on fresh identities (rank
+  correlation about 0.30, slope about 0.40), and its loss term does not affect
+  accuracy.
+- **External benchmarks are descriptive.** On Monash, AAA-1K models learn
+  online per series and forecast recursively, unlike the published offline
+  methods, and they are not competitive with the best of them. The
+  `aus_elec_demand` mapping to the archive's results row is by name only.
+- **CPU and CUDA agree numerically only on stable configurations.** Elman and
+  LRU cells near their stability edge diverge across backends while agreeing on
+  failure classification. Each backend is bitwise deterministic. Confirmation
+  evidence is CPU-only, with bitwise reproduction on Zen 3 and verdict-level
+  reproduction elsewhere (`AAA-173`).
+- **`AAA-180`**: the v2 confirmation's K5 omitted Monash, and its two K5
+  implementations disagree on a single-series dataset. There was no effect
+  here (no challenger), but a later phase must fix it before any promotion.

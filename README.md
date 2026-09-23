@@ -138,6 +138,37 @@ The full result is [`docs/aaa_1k_report.md`](docs/aaa_1k_report.md); read
 where the four repairs come from -- including the one that would otherwise have
 published a hidden-state advantage thirty times too large.
 
+## AAA-1K v2: the final 1K pass (`aaa.1k.v2`)
+
+A separately versioned phase in [`research/aaa_1k_v2/`](research/aaa_1k_v2/)
+that tried, under preregistered rules and with every adaptive-state scalar
+counted, to find a better system of at most 1,000 trainable parameters. It
+compared six candidates (retuned GRU, a keep-biased GRU, GRU/Elman/MGU with an
+observation flag, and an exactly trained complex-diagonal LRU) against Champion
+1 across 26 internal families, NARMA, Mackey-Glass, twelve dysts systems and
+four Monash datasets.
+
+- **No change: Champion 1 remains the final 1K system.** No candidate passed
+  the development screen. The stability rule, written in advance, capped their
+  learning rates below Champion 1's (decision V2-D15). The single confirmation
+  was therefore characterization-only, and on its fresh identities every
+  candidate is worse than Champion 1 on the stress geometric mean
+  (1.15-1.44x) and on the four held-out families (1.5-2.8x).
+- **Where Champion 1 is weak** is coarse observation. An ungated Elman cell
+  beats it by 28% on `v1_coarse_speed`. A keep-gate bias closes 65% of that gap
+  at no parameter cost but costs 3.9% on occlusion. Four times the parameters
+  does not move it (capacity verdict `NOT_CAPACITY_LIMITED`).
+- **Round 3's adaptation result does not replicate** on fresh identities.
+  Retention resolves in the good direction.
+- The error head's loss term is inert for accuracy. The fed-back error
+  *input* is what matters.
+- It beats persistence on all 15 synthetic external tasks and AR-RLS on 11. It
+  is not competitive with the best published Monash methods.
+
+Read [`docs/aaa_1k_v2_report.md`](docs/aaa_1k_v2_report.md) and the
+[self-review](docs/aaa_1k_v2_self_review.md); the
+[handoff](docs/aaa_1k_v2_handoff.md) has every reproduction command.
+
 ## The improvement loop
 
 `research/aaa_1k_loop/` pilots the process by which AAA is supposed to get
@@ -205,14 +236,26 @@ python -m pip install -e . --no-deps
 python tools/check_lock.py
 ```
 
-CPU only. NumPy and Matplotlib are the runtime dependencies. No GPU, no
-external API, no pretrained model, no paid service.
+NumPy and Matplotlib are the runtime dependencies, and everything runs on the
+CPU. No external API, no pretrained model, no paid service.
 
-That describes what the implementation *requires*, which is not the same as
-what the development workstation *contains*. FLOWBOX, the current primary
-development machine, has a discrete GPU that no AAA code uses, and the project
-carries a current planning ceiling on model size. Both are recorded in
-[`docs/hardware.md`](docs/hardware.md).
+CUDA is optional and used only where it is measured to help. The v2 compute
+layer ([`aaa/compute/`](aaa/compute/)) can run the batched learner on an NVIDIA
+GPU through CuPy, from the separate `requirements-cuda-lock.txt`:
+
+```bash
+python3 -m venv .venv-cuda && . .venv-cuda/bin/activate
+python -m pip install -r requirements-cuda-lock.txt
+python -m pip install -e . --no-deps
+python tools/check_lock.py --lock requirements-cuda-lock.txt
+python -m aaa.compute probe
+```
+
+A requested device that is unavailable is an error, never a silent fallback.
+On FLOWBOX the GPU wins only from about 4,096 lockstep cells
+([`docs/aaa_1k_v2_compute_report.md`](docs/aaa_1k_v2_compute_report.md)), so
+every formal v2 stage ran on the CPU. The machine and the model-size planning
+ceiling are recorded in [`docs/hardware.md`](docs/hardware.md).
 
 ## Commands
 
@@ -254,6 +297,15 @@ python -m research.aaa_1k_loop.recompute4 --confirmation docs/evidence/aaa1k_loo
     --freeze docs/evidence/aaa1k_loop_0006/freeze_2.json   # independent PROMOTE recomputation
 python -m research.aaa_1k_loop.stages4 reproduce attack6  # rerun a 0004-0006 stage; primitives must reappear exactly
 python -m research.aaa_1k_loop reproduce diagnose2 # rerun a stage; committed primitives must reappear exactly
+
+# AAA-1K v2
+python -m research.aaa_1k_v2 audit                # parameters and every adaptive-state scalar, per arm
+python -m research.aaa_1k_v2 fingerprint          # v2 scientific source identity
+python -m research.aaa_1k_v2 prove-fresh          # v2 seeds disjoint from every earlier seed
+python -m research.aaa_1k_v2 recompute --freeze docs/evidence/aaa_1k_v2/freeze.json \
+    --confirmation docs/evidence/aaa_1k_v2/confirmation.json
+python tools/write_aaa_1k_v2_report.py --check    # the report matches the evidence
+python -m aaa.compute probe                       # what this machine can run
 ```
 
 Formal confirmation requires a predeclared batch, a committed freeze manifest,
@@ -283,13 +335,19 @@ result, and this repository is built to report that rather than to avoid it.
 | Document | What it covers |
 |---|---|
 | [Research charter](docs/aaa_charter.md) | what AAA is, what Juniper is, and why the dot is one benchmark |
-| [Development hardware](docs/hardware.md) | FLOWBOX, the CPU-only execution boundary, the current 125M planning ceiling, and future compute |
+| [Development hardware](docs/hardware.md) | FLOWBOX, when to use its CPU or GPU, the current 125M planning ceiling, and future compute |
 | [AAA-1K architecture](docs/aaa_1k_architecture.md) | the frozen 994-parameter specification |
 | [AAA-1K literature review](docs/aaa_1k_literature_review.md) | what was adopted from the literature, and what was refused |
 | [AAA-1K decisions](docs/aaa_1k_decisions.md) | every decision, including three departures from the phase brief |
 | [AAA-1K report](docs/aaa_1k_report.md) | the measured result, with its claim boundaries |
 | [AAA-1K self-review](docs/aaa_1k_self_review.md) | the attempt to break those results, and what it found |
 | [AAA-1K handoff](docs/aaa_1k_handoff.md) | everything an independent reviewer needs |
+| [AAA-1K v2 report](docs/aaa_1k_v2_report.md) | the final 1K pass: no challenger, the descriptive comparison of every arm, external benchmarks, capacity |
+| [AAA-1K v2 compute report](docs/aaa_1k_v2_compute_report.md) | when to use the Ryzen 7 5700G and when the RTX 2060, with parity and determinism |
+| [AAA-1K v2 self-review](docs/aaa_1k_v2_self_review.md) | the implementer's attempt to break the v2 results (not independent) |
+| [AAA-1K v2 handoff](docs/aaa_1k_v2_handoff.md) | everything an independent reviewer needs for `aaa.1k.v2` |
+| [AAA-1K v2 decisions](docs/aaa_1k_v2_decisions.md) | V2-D1 to V2-D17 |
+| [AAA-1K v2 protocol](docs/aaa_1k_v2_benchmark_protocol.md), [architecture](docs/aaa_1k_v2_architecture.md), [external benchmarks](docs/aaa_1k_v2_external_benchmarks.md), [compute strategy](docs/aaa_1k_v2_compute_strategy.md), [literature](docs/aaa_1k_v2_literature_review.md), [brief](docs/aaa_1k_v2_research_brief.md) | the preregistered design |
 | [Loop protocol](docs/loop_protocol.md) | the improvement loop's current `aaa.loop.v1` governance, what enforces it, and the pilot gaps that became rules |
 | [Loop pilot report](docs/loop_pilot_report.md) | three iterations on AAA-1K, eight rejections, and an evaluation of the loop itself |
 | [Loop pilot handoff](docs/loop_pilot_handoff.md) | reproduction commands and what an independent reviewer should challenge |
@@ -307,7 +365,7 @@ result, and this repository is built to report that rather than to avoid it.
 | [Evidence policy](docs/evidence_policy.md) | what is committed, what is regenerable, and the known limitation |
 | [Experiment registry](docs/experiment_registry.md) | trial state, resume semantics, verification |
 | [Limitations](docs/limitations.md) | current evidence boundaries, unexecuted work, and known limitations |
-| [Research history](CHANGELOG.md) | v1, v2, v2.1, observation-noise v1/v1.1, and AAA-1K |
+| [Research history](CHANGELOG.md) | v1, v2, v2.1, observation-noise v1/v1.1, AAA-1K and AAA-1K v2 |
 | [Self-review](docs/self_review.md) | what was checked after the repair, and what stayed weak |
 | [Review handoff](docs/handoff_sol.md) | identity, confirmation outcomes, reproduction commands |
 

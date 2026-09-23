@@ -94,6 +94,19 @@ jobs:
             --freeze docs/evidence/aaa1k_loop_0006/freeze_2.json
           python -m research.aaa_1k_loop reproduce observe
 
+      - name: AAA-1K v2 accounting, identities and pipeline smoke
+        run: |
+          python -m aaa.compute info --device cpu > /dev/null
+          python -m research.aaa_1k_v2 audit
+          python -m research.aaa_1k_v2 fingerprint
+          python -m research.aaa_1k_v2 registry
+          python -m research.aaa_1k_v2 prove-fresh
+          python -m research.aaa_1k_v2 develop --role scratch --candidates gru_v2 --workers 2 \
+            --output "${RUNNER_TEMP}/aaa1k-v2/scratch_development.json"
+          python -m research.aaa_1k_v2 recompute --freeze docs/evidence/aaa_1k_v2/freeze.json \
+            --confirmation docs/evidence/aaa_1k_v2/confirmation.json
+          python tools/write_aaa_1k_v2_report.py --check
+
       - name: Canonical specification identity
         run: python -m aaa.cli spec-hash
 

@@ -53,6 +53,7 @@ include = ["aaa*", "research*"]
 # a repository-relative path disappears the moment AAA is installed elsewhere.
 "aaa.benchmark" = ["data/*.json"]
 "aaa.noise" = ["data/*.json"]
+"research.aaa_1k_v2.external" = ["data/*.json"]
 
 [tool.ruff]
 line-length = 110
@@ -88,7 +89,7 @@ disallow_untyped_defs = false
 # Untyped third-party stubs are not worth carpeting the project in ignores
 # for; everything AAA itself defines is checked.
 [[tool.mypy.overrides]]
-module = ["matplotlib.*", "psutil.*"]
+module = ["matplotlib.*", "psutil.*", "cupy", "cupy.*"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
