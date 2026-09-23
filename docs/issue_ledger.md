@@ -1627,7 +1627,7 @@ defects; failed candidates are *failed hypotheses*, recorded in the iteration
 records. Only actual defects are entered here.
 
 ### AAA-162 — the coarse_speed_v1 characterization attributes a gated-model limitation to the benchmark
-- **Source** loop pilot diagnosis, 2026-09-21 · **Severity** medium · **Status** open; claim flagged, no replacement confirmed
+- **Source** loop pilot diagnosis, 2026-09-21 · **Severity** medium · **Status** resolved in aaa.1k.v2 (diagnostic level); historical text unchanged
 - **Claim** `docs/limitations.md`, the round-3 report and the AAA-1K handoff
   and self-review state that `coarse_speed_v1` "genuinely tests hidden-regime
   inference" because, with the speed held fixed, "the quantizer alone hands the
@@ -1662,9 +1662,17 @@ records. Only actual defects are entered here.
 - **Outcome** open: the existing claim is contradicted on diagnostic and attack
   identities; a replacement needs a better-designed attack (see the protocol's
   known gap 4) and fresh confirmation.
+- **aaa.1k.v2 update (2026-09-23)** a model-independent test on fresh
+  diagnostic identities (V2-D16, `docs/evidence/aaa_1k_v2/diagnostics.json`)
+  settles what the family rewards: at fixed speed an 8-observation
+  least-squares window has 0.49 times the error of a 2-observation window,
+  and regime switching adds only 12%. The family mainly measures
+  coarse-observation integration; hidden-regime inference is secondary. The
+  original characterization is refuted, not replaced by a promoted claim.
+  The v2 benchmark protocol names the family accordingly.
 
 ### AAA-163 — AAA-1K seed namespaces can collide, contrary to the module's claim
-- **Source** loop pilot identity work, 2026-09-21 · **Severity** low · **Status** open; accepted, no evidence affected
+- **Source** loop pilot identity work, 2026-09-21 · **Severity** low · **Status** accepted for aaa.1k.v1; resolved by construction in aaa.1k.v2
 - **Claim** `research/aaa_1k/seeds.py`: "two different labels cannot collide
   except by a SHA-256 collision".
 - **Reproduction** Enumerating every AAA-1K namespace at indices below 100,000
@@ -1682,6 +1690,11 @@ records. Only actual defects are entered here.
   recorded in AAA-1K evidence.
 - **Regression** `IdentityLedgerTests` inject a collision and require the
   freshness proof to fail.
+- **aaa.1k.v2 update (2026-09-23)** v2 identities are 64-bit SHA-256 seeds
+  over `aaa.1k.v2:<role>:<namespace>:<index>` (`research/aaa_1k_v2/identities.py`),
+  and `python -m research.aaa_1k_v2 prove-fresh` proves every registered v2
+  seed disjoint from each other and from every AAA-1K and loop seed, failing
+  closed on any collision. `research/aaa_1k/seeds.py` is untouched.
 
 ### AAA-164 — the first claim attack's command stamped the current claim id
 - **Source** loop pilot reproduction check, 2026-09-21 · **Severity** low · **Status** repaired
@@ -1814,7 +1827,7 @@ records. Only actual defects are entered here.
   unit-tested in pieces (audit R-12).
 
 ### AAA-172 — the v2.1 core RLS learner unfolds around its own prediction too
-- **Source** AAA-170 follow-up · **Severity** unknown · **Status** open
+- **Source** AAA-170 follow-up · **Severity** low · **Status** characterized in aaa.1k.v2; no defect found on the tested streams
 - **Observation** `OnlineRLSPredictor.update` (`aaa/predictors.py`) builds
   its target with `unfold_observation(target, raw, …)`, the same
   self-reference as AAA-170. It also has `skip_after_reflected_prediction`,
@@ -1823,6 +1836,11 @@ records. Only actual defects are entered here.
 - **Next** instrument without modifying it, on long quantized and smooth
   streams, with predeclared lock and stall thresholds. The v2.1 core and
   round 3's `rls_online` baseline both use it.
+- **aaa.1k.v2 update (2026-09-23)** instrumented without modification on
+  fresh diagnostic identities (V2-D16): the longest run of applied mirrored
+  targets is 1 step and the longest run of reflection skips 8 steps, against
+  predeclared thresholds of 10 and 50. No lock, no stall, no divergence; the
+  learner beat persistence on every family. `aaa/predictors.py` is unchanged.
 
 ### AAA-173 — Champion 0's diverged cells are not bit-reproducible across CPUs
 - **Source** first CI runs of `loop-reproduction.yml` (PR #20) · **Severity** medium (reproducibility semantics) · **Status** characterized; reproduction policy made explicit
@@ -2011,3 +2029,26 @@ record is [`independent_review_2026-09-22.md`](independent_review_2026-09-22.md)
 - **Regression** the rerun of development reproduces the aborted run's one
   completed raw archive (`gru_v1_retuned`) exactly; this check is recorded with
   the development evidence.
+
+### AAA-180 — the v2 confirmation's K5 omitted Monash, and its two K5 implementations disagree on a single-series dataset
+- **Source** self-found while writing the v2 report, 2026-09-23 · **Severity** high had a challenger existed; none in this phase · **Status** open; latent, documented, not repaired (the v2 source is frozen)
+- **Reproduction** `python tools/write_aaa_1k_v2_report.py` applies the frozen
+  K1-K5 criteria to every confirmation arm twice. (1) `run_confirmation`
+  (`research/aaa_1k_v2/confirmation.py`) calls `decide` without
+  `monash_primitives`, although the frozen K5 text and `recompute` include the
+  four Monash datasets. (2) With Monash included, the two implementations
+  disagree for all six arms that have Monash cells: `decide` returns K5
+  `INCONCLUSIVE` and `recompute` returns `FAIL`. Monash `saugeen` has one
+  series, so `stats.geometric_relative` reports `INSUFFICIENT_EVIDENCE` for the
+  whole geometric mean, while `recompute`'s own bootstrap measures an interval
+  anyway.
+- **Scientific impact** none on recorded evidence: the frozen confirmation had
+  no challenger, so no K5 decision was taken (`NO_CHALLENGER`, recomputed).
+  Had a challenger reached confirmation, K5 would have been decided without
+  Monash, and the independent recompute's point check would have flagged the
+  difference, blocking promotion rather than silently passing it.
+- **Next** a future phase must (a) pass the Monash primitives to `decide`, (b)
+  predeclare how a single-series dataset enters a crossed bootstrap (resample
+  initializations only, or exclude it from interval estimation), and (c) share
+  that rule between both implementations, with a regression test that runs
+  both on one fixture containing a single-series group.

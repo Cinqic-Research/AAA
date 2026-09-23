@@ -85,6 +85,17 @@ scientific identity. It needs its own recorded decision and versioning, like
 `python -m research.aaa_1k fingerprint` before and after an edit if you are
 unsure whether a file is covered.
 
+**`aaa.1k.v2` is frozen too.** Its fingerprint (`research/aaa_1k_v2/identity.py`)
+covers `research/aaa_1k_v2/`, `aaa/compute/`, the historical code v2 executes,
+`tests/test_aaa_1k_v2.py`, `tests/test_compute.py`, the v2 brief, architecture,
+benchmark protocol and external-benchmark documents, and both locks. The
+committed freeze (`docs/evidence/aaa_1k_v2/freeze.json`) records it, and
+`tests/test_aaa_1k_v2_evidence.py` fails if any covered byte changes. The v2
+report, compute report, self-review, handoff, decision log and
+`tools/write_aaa_1k_v2_report.py` are outside the fingerprint. A later phase
+that needs different v2 code copies it into a new versioned package; it does
+not edit `research/aaa_1k_v2/`.
+
 **Every specification value must be read.** `tests/test_spec.py` fails if a
 declared leaf stops being consumed. If you add a value to the specification,
 use it.

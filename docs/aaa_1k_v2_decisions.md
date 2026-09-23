@@ -242,3 +242,42 @@ about 1.7 x Champion 1's error; 0.03: about 1.0 x). Horizon 1/4/16 and
 live-versus-replay change it by 1-4%: T = 1 is slightly worse, and replay is
 equal to or slightly worse than live. The live rule's stale-activation
 approximation is immaterial at these horizons, consistent with `AAA-169`.
+
+## V2-D17. Freeze, confirmation, recompute and capacity
+
+The freeze (`docs/evidence/aaa_1k_v2/freeze.json`, sha256 `1d9ee722...`,
+source commit `47cec71`) fixed a characterization-only confirmation: no
+challenger, Champion 1 as the capability reference, every candidate, control
+and ablation as descriptive arms, and 46 confirmation identity blocks. No
+attack stage ran, because there was nothing to attack.
+
+Confirmation ran once, from a pinned worktree at `94a0703`. The confirm
+command first committed the spending of every confirmation block (`65a3bb1`,
+observer `confirmation:1d9ee72295642a0f`), then observed. It took 23 minutes on
+the CPU with 8 workers and wrote `confirmation.json` (sha256 `30db7fbb...`,
+40 MB, kept in the repository because the recompute needs its primitives).
+Outcome `NO_CHALLENGER`; `recompute` agrees. The optional remote claim ref was
+not created: it is an outward-facing push, and the committed claim plus the
+fail-closed registry already prevent reuse in this repository.
+
+Capacity ran afterwards, from a pinned worktree at `2f96faf`, on fresh
+capacity identities (`capacity.json`, sha256 `2b00a0d6...`). Verdict
+`NOT_CAPACITY_LIMITED` by the predeclared rule.
+
+The phase report is written by `tools/write_aaa_1k_v2_report.py`. The planned
+`report.phase_report` was never written before the freeze, and adding it to
+`research/aaa_1k_v2/` afterwards would have changed the frozen v2
+fingerprint. The tool sits outside the fingerprint and computes every number
+from the committed artifacts. Its descriptive K1-K5 cross-check of all arms
+found `AAA-180`.
+
+Findings that change earlier statements:
+
+* Round 3's POSITIVE adaptation result (Q2) does **not** replicate on fresh
+  identities: -1.8e-05 [-3.9e-04, +4.3e-04]. Round 3's evidence is unchanged;
+  the claim that continued learning helps *because the world changed* is no
+  longer supported as a general property of Champion 1.
+* Retention resolves in the good direction: probe-bank error on regime A falls
+  while training on regime B (-2.0e-04 [-4.1e-04, -2.0e-05]).
+* Removing the error-head loss changes nothing (stress ratio 1.000); removing
+  the error input costs 8.6% on stress and 48% on external tasks.
