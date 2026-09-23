@@ -692,3 +692,24 @@ class ConfirmationRuleTests(unittest.TestCase):
             self.assertTrue(np.array_equal(scaled.params[name], plain.params[name] * factor), name)
         self.assertFalse(scalable_weight("W_o"))
         self.assertFalse(scalable_weight("b_z"))
+
+
+class FreezeTests(unittest.TestCase):
+    def test_every_arm_round_trips_through_the_manifest(self) -> None:
+        from research.aaa_1k_v2.freeze import arm_from_dict
+
+        arms = [CHAMPION_1, *CANDIDATE_TEMPLATES.values(), *CONTROL_TEMPLATES.values()]
+        arms += [a for arm in arms for a in ablations(arm).values()]
+        for arm in arms:
+            with self.subTest(arm=arm.name):
+                self.assertEqual(arm_from_dict(arm.to_dict()).to_dict(), arm.to_dict())
+
+    def test_recompute_agrees_on_a_synthetic_confirmation(self) -> None:
+        from research.aaa_1k_v2.recompute import geometric, relative
+
+        rng = np.random.default_rng(3)
+        a = rng.uniform(1, 2, (4, 6))
+        self.assertAlmostEqual(relative(a, a * 0.9, 1, 300, 0.95)["relative"], -0.1, places=12)
+        self.assertAlmostEqual(
+            geometric({"x": (a, a * 0.8)}, 1, 300, 0.95)["geometric_ratio"], 0.8, places=12
+        )
