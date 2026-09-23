@@ -36,6 +36,10 @@ def _rate(points: Sequence[Mapping[str, Any]], workload: str, executor: str, cel
     return None
 
 
+def _from(cells: Any) -> str:
+    return f"from {_fmt(cells)} cells" if cells else "never in the measured range"
+
+
 def compute_report(q: Mapping[str, Any], *, source: str, digest: str) -> str:
     from .qualify import crossover
 
@@ -51,12 +55,11 @@ def compute_report(q: Mapping[str, Any], *, source: str, digest: str) -> str:
         ("internal evaluation (online/frozen twins, 1,024 trunks)", "evaluation", 1024),
         ("external benchmark batch (NARMA-10, 1,024 cells)", "external", 1024),
         ("prediction only (frozen, 4,096 cells)", "prediction", 4096),
-        ("hyperparameter search (512 cells over the lr grid)", "sweep", 512),
     ]
     lines = [
         "# FLOWBOX compute report (aaa.1k.v2)",
         "",
-        f"Generated from [`{source}`](../{source}) (sha256 `{digest[:16]}...`) by",
+        f"Generated from [`{source}`]({source.removeprefix('docs/')}) (sha256 `{digest[:16]}...`) by",
         "`research/aaa_1k_v2/report.py`. Throughput is in cell-steps per second (one cell advancing one",
         "online-learning step: predict, score, update), float64, AAA-1K Champion 1 unless stated. Every point is the",
         f"best of {q['repeats']} timed runs after a warm-up run; CUDA timers synchronize the device before stopping.",
@@ -81,8 +84,7 @@ def compute_report(q: Mapping[str, Any], *, source: str, digest: str) -> str:
         a = crossover(points, workload, "cpu_seq", "cuda")
         b = crossover(points, workload, "cpu_par", "cuda")
         lines.append(
-            f"* `{workload}`: CUDA beats one CPU process from {_fmt(a) if a else 'never in the measured range'} cells, "
-            f"and the 8-worker CPU from {_fmt(b) if b else 'never in the measured range'} cells."
+            f"* `{workload}`: CUDA beats one CPU process {_from(a)}, and the 8-worker CPU {_from(b)}."
         )
     lines += [
         "",
@@ -128,10 +130,29 @@ def compute_report(q: Mapping[str, Any], *, source: str, digest: str) -> str:
                 f"{r['max_relative_mae_difference']:.2e} | {r['failed_agreement']} | {r['cpu_run_to_run_bitwise_cells']} | {r['cuda_run_to_run_bitwise_cells']} |"
             )
     worst = max(r["max_relative_mae_difference"] for fams in q["parity"].values() for r in fams.values())
+    stable = [
+        r["max_relative_mae_difference"]
+        for fams in q["parity"].values()
+        for r in fams.values()
+        if r["max_relative_mae_difference"] < 1e-9
+    ]
+    repeat_ok = all(
+        r["cpu_run_to_run_bitwise_cells"] == r["cells"] and r["cuda_run_to_run_bitwise_cells"] == r["cells"]
+        for fams in q["parity"].values()
+        for r in fams.values()
+    )
     lines += [
         "",
-        f"Largest per-cell relative MAE difference between backends: {worst:.2e}. The backends are separate numerical",
-        "platforms: agreement is measured here, and paired scientific comparisons never mix them.",
+        f"Run-to-run determinism: {'every cell bitwise identical on repeat, on both backends' if repeat_ok else 'NOT bitwise on repeat for some cells (see table)'}.",
+        "",
+        f"Cross-backend agreement: {len(stable)} of {sum(len(f) for f in q['parity'].values())} arm-family groups agree to",
+        f"better than 1e-9 relative MAE (worst of those {max(stable):.1e}); the remaining groups diverge, the largest by",
+        f"{worst:.2e}. Those are the Elman and LRU templates at learning rate 0.03 on long or wall-rich streams:",
+        "configurations development found at the edge of instability, where an online learner's trajectory is chaotic",
+        "and amplifies last-bit differences between cuBLAS/libdevice and OpenBLAS/glibc arithmetic into different",
+        "trajectories (the cross-CPU effect recorded as `AAA-173`). Failure classifications agree in every group.",
+        "Equivalence between backends is therefore *numerical* (about 1e-15) for stable configurations and only",
+        "*verdict-level* for chaotic ones; paired scientific comparisons never mix backends.",
         "",
         "## When to use the Ryzen 7 5700G and when the RTX 2060",
         "",

@@ -136,10 +136,13 @@ For 1K-parameter models the answer is decided by how many independent cells
 run in lockstep, not by model size. In brief, from the compute report:
 
 - a single cell or a small batch runs fastest on one CPU core;
-- up to a few thousand cells run fastest on the 8-core CPU in 64-cell chunks
-  (about 270k cell-steps/s);
-- only several thousand lockstep cells favour the RTX 2060 (about 530k
-  cell-steps/s in float64). Its FP64 rate, 1/32 of FP32, caps it there.
+- up to about 2,000 cells run fastest on the 8-core CPU in 64-cell chunks
+  (225k cell-steps/s at 1,024 cells);
+- from 4,096 lockstep cells the RTX 2060 wins, narrowly for online learning
+  (274k vs 265k cell-steps/s in float64) and clearly for frozen prediction
+  (388k vs 284k). Its FP64 rate, 1/32 of FP32, caps it there;
+- hyperparameter sweeps and external benchmarks stay on the CPU: CUDA never
+  beat the 8 workers there in the measured range.
 
 Larger future models do more arithmetic per step and shift the balance toward
 the GPU; that has to be measured when they exist.

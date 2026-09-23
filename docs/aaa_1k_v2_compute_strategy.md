@@ -46,10 +46,16 @@ scientific runs stay float64. FP32 is recorded as an exploratory number only.
 
 | Workload shape | Use | Why |
 |---|---|---|
-| one or a few cells, any length | CPU, single process | about 0.4 ms per step; CUDA's per-step dispatch floor is about 15 times higher |
-| tens to about 2,000 lockstep cells | CPU, 8 single-threaded workers in 64-cell chunks | cache-resident chunks scale across the 8 cores; about 270k cell-steps/s |
-| several thousand or more lockstep cells | CUDA | about 530k cell-steps/s at 4,096 or more cells |
+| one or a few cells, any length | CPU, single process | about 2,100 cell-steps/s for one cell; CUDA's per-step dispatch floor makes it about 15 times slower (146) |
+| 32 to about 2,000 lockstep cells | CPU, 8 single-threaded workers in 64-cell chunks | cache-resident chunks scale across the 8 cores; 188k at 512 cells, 225k at 1,024 |
+| 4,096 or more lockstep cells, online learning or frozen prediction | CUDA, narrowly | online 274k vs 265k on the 8-worker CPU; prediction 388k vs 284k |
+| hyperparameter sweeps and external benchmarks | CPU, 8 workers | CUDA never beat the 8-worker CPU in the measured range (external 1,024 cells: 362k vs 188k) |
 | very long sequential streams (e.g. 230k steps) | CPU | latency-bound: each step's cost is fixed overhead |
+
+The micro-benchmark ceiling of about 530k cell-steps/s quoted above was a bare
+learner loop on an idle device. The qualification numbers here include scoring,
+failure bookkeeping and the desktop's load on the same GPU, and are the ones to
+plan with.
 
 `aaa.compute.device.AUTO_CUDA_MIN_CELLS` encodes the single-process crossover
 measured in the compute report.
