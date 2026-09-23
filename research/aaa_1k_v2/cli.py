@@ -376,6 +376,56 @@ def command_recompute(args: argparse.Namespace) -> int:
     return 0 if result["agrees"] else 1
 
 
+def command_qualify(args: argparse.Namespace) -> int:
+    from .qualify import qualify
+
+    output = ROOT / args.output
+    if output.exists():
+        print(f"error: {output} exists", file=sys.stderr)
+        return 2
+    registry = identities.load_registry(ROOT / identities.REGISTRY_PATH)
+    captured = environment("cuda:0")
+    started = time.time()
+    result = qualify(registry, log=lambda m: print(m, flush=True))
+    result["environment"] = captured
+    result["wall_seconds"] = time.time() - started
+    print(f"wrote {args.output} sha256 {write(output, result)}")
+    return 0
+
+
+def command_capacity(args: argparse.Namespace) -> int:
+    from .capacity import run_capacity
+    from .freeze import arm_from_dict
+
+    output = ROOT / args.output
+    if output.exists():
+        print(f"error: {output} exists", file=sys.stderr)
+        return 2
+    confirmation = _load(args.confirmation)
+    manifest = _load(args.freeze)
+    frozen = manifest["frozen"]
+    promoted = confirmation["decision"]["outcome"] == "PROMOTE"
+    name = frozen["challenger"]["name"] if promoted else "c1_champion1"
+    arm = arm_from_dict(frozen["arms"][name]["spec"])
+    registry = identities.load_registry(ROOT / identities.REGISTRY_PATH)
+    captured = environment("cpu")
+    started = time.time()
+    result = run_capacity(registry, arm, workers=args.workers, log=lambda m: print(m, flush=True))
+    result["final_1k_system"] = name
+    result["environment"] = captured
+    result["wall_seconds"] = time.time() - started
+    digest = write(output, result)
+    path = ROOT / identities.REGISTRY_PATH
+    for block in registry["blocks"]:
+        if block["role"] == "capacity" and block["status"] == "reserved":
+            registry = identities.mark(
+                registry, block["block_id"], status="used", observed_by=f"capacity:{output.name}"
+            )
+    identities.write_registry(path, registry)
+    print(f"wrote {args.output} sha256 {digest}; verdict {result['verdict']}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="python -m research.aaa_1k_v2",
@@ -425,6 +475,15 @@ def main(argv: list[str] | None = None) -> int:
     recompute_cmd.add_argument("--confirmation", required=True)
     recompute_cmd.add_argument("--output")
     recompute_cmd.set_defaults(func=command_recompute)
+    qualify_cmd = sub.add_parser("qualify")
+    qualify_cmd.add_argument("--output", required=True)
+    qualify_cmd.set_defaults(func=command_qualify)
+    capacity_cmd = sub.add_parser("capacity")
+    capacity_cmd.add_argument("--output", required=True)
+    capacity_cmd.add_argument("--freeze", required=True)
+    capacity_cmd.add_argument("--confirmation", required=True)
+    capacity_cmd.add_argument("--workers", default="auto")
+    capacity_cmd.set_defaults(func=command_capacity)
     args = parser.parse_args(argv)
     if getattr(args, "cuda", None) == "none":
         args.cuda = None
