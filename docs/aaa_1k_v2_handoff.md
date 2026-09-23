@@ -15,6 +15,7 @@ implementer thinks the work is weakest, and it is not independent.
 | Claim commit | `65a3bb1`: every confirmation block spent by `confirmation:1d9ee72295642a0f` before observation |
 | Confirmation | `confirmation.json`, sha256 `30db7fbb...`, outcome `NO_CHALLENGER` |
 | Final 1K system | Champion 1, unchanged (`research/aaa_1k_loop/champion1.py`) |
+| Confirmation rerun | bitwise: 441,374 of 441,374 values identical, same decision (`tools/reproduce_aaa_1k_v2_confirmation.py` at `ddac4cf`) |
 | Evidence platform | FLOWBOX, AMD Ryzen 7 5700G (Zen 3), CPU float64, 8 workers ([hardware](hardware.md)) |
 
 Stage commits: development `ac905e7` → `2fc01a5`; diagnostics `2fc01a5` →

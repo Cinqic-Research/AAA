@@ -260,6 +260,11 @@ Outcome `NO_CHALLENGER`; `recompute` agrees. The optional remote claim ref was
 not created: it is an outward-facing push, and the committed claim plus the
 fail-closed registry already prevent reuse in this repository.
 
+A rerun of the whole confirmation from the committed registry
+(`tools/reproduce_aaa_1k_v2_confirmation.py`, pinned worktree at `ddac4cf`)
+reproduced all 441,374 floating-point values of the artifact bitwise, with
+identical structure and decision. That meets the Zen 3 reproduction standard.
+
 Capacity ran afterwards, from a pinned worktree at `2f96faf`, on fresh
 capacity identities (`capacity.json`, sha256 `2b00a0d6...`). Verdict
 `NOT_CAPACITY_LIMITED` by the predeclared rule.

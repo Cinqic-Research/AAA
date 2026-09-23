@@ -128,6 +128,11 @@ report calls this an out-of-domain check and claims no competitiveness.
 
 - `aaa.1k.v1` fingerprint `5ce6e019…` unchanged. Champion 0 and Champion 1
   verify. The loop's PROMOTE recompute still agrees.
+- A full rerun of the confirmation reproduced every one of its 441,374
+  floating-point values bitwise on FLOWBOX (`tools/reproduce_aaa_1k_v2_confirmation.py`).
+  The first rerun reported a spurious structural difference, caused by the
+  tool not excluding the CLI's top-level `environment` and `wall_seconds`
+  keys. That was fixed and the rerun repeated.
 - The live repository matches the v2 freeze (`freeze.verify` returns nothing;
   `tests/test_aaa_1k_v2_evidence.py`).
 - All 2,162 v2 seeds are disjoint from every AAA-1K and loop seed
