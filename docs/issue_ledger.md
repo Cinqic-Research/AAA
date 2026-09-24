@@ -2198,3 +2198,25 @@ evidence was produced, so no retained evidence carries them.
   the 250-task generation digest were unchanged by the late spec-consumption
   repairs, so no task changed.
 
+### AAA-186 — v0 recomputation compared summary floats exactly, which fails across CPython versions
+- **Source** PR #28 CI (`Python 3.10`, `Python 3.11`), 2026-09-23 · **Severity** medium (a false `FAIL`; never a false `PASS`) · **Status** repaired
+- **Reproduction** `tests.test_aaa_python_evidence.test_records_cells_truths_and_summary_recompute`
+  failed on 3.10 and 3.11 with "the summary does not recompute from the
+  stored cells", while 3.12 and 3.13 passed. The golden answer keys matched on
+  every version. Local runs under the NumPy those jobs installed (2.2.6, 2.4.6)
+  showed no difference, so NumPy was not the cause. Emulating pre-3.12
+  left-to-right float `sum()` on the retained evidence changes 15 Brier values
+  by at most 3.5e-16 relative, and no status, sign, count or interval.
+- **Root cause** CPython 3.12 changed the built-in float `sum()` to compensated
+  (Neumaier) summation. The summary's Brier and calibration values use
+  `sum()`, and `recompute` compared the whole summary byte for byte.
+- **Repair** `recompute.summary_differences` compares summary floats within a
+  relative 1e-12 and everything else exactly: structure, counts, statuses,
+  resolved signs and non-finite values. That is the verdict-exact,
+  numerics-tolerant standard of `AAA-173`. The retained evidence, the
+  summation code and the byte-exact reproduction on 3.12 are unchanged.
+- **Regression** `test_summary_floats_tolerate_final_bit_rounding_but_nothing_else`
+  (final-bit drift passes; 1e-9 drift, NaN, a flipped sign, a changed count
+  and a missing arm all fail) and `test_pre_312_float_summation_still_recomputes`,
+  which emulates the old `sum()`.
+

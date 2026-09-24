@@ -171,7 +171,7 @@ REVIEW_2026_09_23 = {
 
 TRANSITION_2026_09_23 = {
     ".github/workflows/ci.yml": "AAA-180 successor and aaa.python.v0 verification; protected identities",
-    "CHANGELOG.md": "AAA-180, AAA-182 through AAA-185",
+    "CHANGELOG.md": "AAA-180, AAA-182 through AAA-186",
     "CITATION.cff": "AAA-183",
     "CONTRIBUTING.md": "AAA-183, AAA-184",
     "README.md": "AAA-183",
@@ -182,7 +182,7 @@ TRANSITION_2026_09_23 = {
     "docs/errata.md": "AAA-180, AAA-182, AAA-183",
     "docs/evidence_policy.md": "aaa.python.v0 evidence",
     "docs/hardware.md": "AAA-183",
-    "docs/issue_ledger.md": "AAA-180 prospective repair; AAA-182 through AAA-185",
+    "docs/issue_ledger.md": "AAA-180 prospective repair; AAA-182 through AAA-186",
     "docs/limitations.md": "AAA-180; aaa.python.v0 limitations",
     "docs/reproduction.md": "aaa.python.v0 and AAA-180 successor reproduction",
     "docs/research_direction.md": "Python-first capability ladder; English as a future direction",
@@ -215,7 +215,7 @@ def inherited_findings(path: str) -> str:
             or path == "docs/promotion_contract.md"
         ):
             return "AAA-180, AAA-182 (prospective successor)"
-        return "AAA-184, AAA-185; aaa.python.v0 development only, confirmation not admitted"
+        return "AAA-184 through AAA-186; aaa.python.v0 development only, confirmation not admitted"
     if is_v2(path):
         return "AAA-179, AAA-180; AAA-162, AAA-163 and AAA-172 revisited in aaa.1k.v2"
     loop_path = (

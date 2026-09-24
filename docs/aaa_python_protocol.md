@@ -174,6 +174,12 @@ disagrees, and the unit suite runs it on every version in the CI matrix. A
 task whose semantics differed by version would have to be excluded or
 versioned by interpreter; none has been found.
 
+Derived *floats* are a separate matter. CPython 3.12 changed the built-in float
+`sum()` to compensated summation, so a summary recomputed on 3.10 or 3.11 can
+differ from one made on 3.12 in its final bits (about 1e-16 relative).
+Recomputation therefore compares summary floats within a relative 1e-12 and
+every count, status and resolved sign exactly (`AAA-186`).
+
 ## Development, attack and confirmation
 
 v0 is a development phase. Development evidence is retained with its

@@ -45,6 +45,47 @@ def load_evidence(text: str) -> dict[str, Any]:
     return payload
 
 
+FLOAT_REL_TOLERANCE = 1e-12
+
+
+def summary_differences(stored: Any, recomputed: Any, path: str = "summary") -> list[str]:
+    """Every difference between two summaries, with floats compared to a relative 1e-12.
+
+    Counts, statuses, resolved signs and structure must match exactly. Floats
+    may differ in their final bits across interpreters: CPython 3.12 changed
+    the built-in float ``sum()`` to compensated summation, which moves derived
+    values such as the Brier score by about 1e-16 relative (``AAA-186``).
+    Non-finite values never match anything.
+    """
+
+    if isinstance(stored, dict) and isinstance(recomputed, dict):
+        if set(stored) != set(recomputed):
+            return [f"{path}: keys differ"]
+        return [
+            d
+            for key in sorted(stored)
+            for d in summary_differences(stored[key], recomputed[key], f"{path}.{key}")
+        ]
+    if isinstance(stored, list) and isinstance(recomputed, list):
+        if len(stored) != len(recomputed):
+            return [f"{path}: lengths differ"]
+        return [
+            d
+            for i, (a, b) in enumerate(zip(stored, recomputed, strict=True))
+            for d in summary_differences(a, b, f"{path}[{i}]")
+        ]
+    if isinstance(stored, float) or isinstance(recomputed, float):
+        numeric = all(isinstance(v, int | float) and not isinstance(v, bool) for v in (stored, recomputed))
+        if not numeric or not (math.isfinite(stored) and math.isfinite(recomputed)):
+            return [f"{path}: {stored!r} != {recomputed!r}"]
+        if not math.isclose(stored, recomputed, rel_tol=FLOAT_REL_TOLERANCE, abs_tol=1e-15):
+            return [f"{path}: {stored!r} != {recomputed!r}"]
+        return []
+    if type(stored) is not type(recomputed) or stored != recomputed:
+        return [f"{path}: {stored!r} != {recomputed!r}"]
+    return []
+
+
 def _oracle_truth(task: generator.Task) -> Any:
     """The answer, re-derived from fresh CPython executions (independent of the generator's mapping)."""
 
@@ -113,9 +154,10 @@ def verify(evidence: Mapping[str, Any], records: Sequence[Mapping[str, Any]] | N
             "adaptation_families": tuple(evidence["plan"]["adaptation_families"]),
         }
     )
-    recomputed_summary = summarize(evidence["cells"], plan, spec)
-    if json.dumps(recomputed_summary, sort_keys=True) != json.dumps(evidence["summary"], sort_keys=True):
-        problems.append("the summary does not recompute from the stored cells")
+    recomputed_summary = json.loads(json.dumps(summarize(evidence["cells"], plan, spec)))
+    differences = summary_differences(evidence["summary"], recomputed_summary)
+    if differences:
+        problems.append(f"the summary does not recompute from the stored cells: {differences[:5]}")
     result: dict[str, Any] = {"summary_recomputed": not problems}
     if records is None:
         result.update(records_checked=False, problems=problems, verdict="FAIL" if problems else "PASS")

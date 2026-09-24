@@ -67,7 +67,11 @@ clean worktree.
   records byte for byte. `fingerprint` and `confirm` refuse there with exit 2.
 
 **Not verified locally:** CPython 3.10, 3.11 and 3.13 are not installed on
-FLOWBOX, so cross-version answer-key equality rests on the CI matrix. No CUDA
+FLOWBOX, so cross-version answer-key equality rests on the CI matrix. The
+first CI run proved the golden keys identical on all four versions. It also
+failed on 3.10 and 3.11, because recomputation compared summary floats
+exactly and CPython 3.12 changed float `sum()`. That is `AAA-186`, found by
+CI rather than by this self-review, and now repaired. No CUDA
 evidence exists or is claimed for this work. The full
 `loop-reproduction.yml` re-execution was not rerun, because no file it covers
 changed.

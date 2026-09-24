@@ -264,6 +264,42 @@ class DevelopmentRunTests(unittest.TestCase):
         summary["summary"]["families"]["syntax"]["arms"]["online"]["brier"] = 0.0
         self.assertEqual(recompute.verify(summary, None)["verdict"], "FAIL")
 
+    def test_summary_floats_tolerate_final_bit_rounding_but_nothing_else(self) -> None:
+        # CPython 3.12 changed float sum() to compensated summation (AAA-186).
+        stored = self.evidence["summary"]
+        within = copy.deepcopy(stored)
+        within["families"]["syntax"]["arms"]["online"]["brier"] *= 1 + 3e-16
+        self.assertEqual(recompute.summary_differences(stored, within), [])
+        for mutate in (
+            lambda s: s["families"]["syntax"]["arms"]["online"].__setitem__(
+                "brier", s["families"]["syntax"]["arms"]["online"]["brier"] * (1 + 1e-9)
+            ),
+            lambda s: s["families"]["syntax"]["arms"]["online"].__setitem__("brier", float("nan")),
+            lambda s: s["families"]["syntax"]["contrasts"]["online - frozen"].__setitem__(
+                "resolved_sign", "POSITIVE"
+            ),
+            lambda s: s["families"]["syntax"]["arms"]["online"].__setitem__("tasks", 1),
+            lambda s: s["families"]["syntax"]["arms"].pop("online"),
+        ):
+            changed = copy.deepcopy(stored)
+            mutate(changed)
+            self.assertNotEqual(recompute.summary_differences(stored, changed), [])
+
+    def test_pre_312_float_summation_still_recomputes(self) -> None:
+        import functools
+        import operator
+        from unittest import mock
+
+        naive = functools.partial(functools.reduce, operator.add)  # left-to-right, as before CPython 3.12
+
+        def left_to_right(values: Any, start: Any = 0) -> Any:
+            return naive(values, start)
+
+        plan = experiment.Plan.from_spec(SPEC, quick=True)
+        with mock.patch.object(experiment, "sum", left_to_right, create=True):
+            emulated = json.loads(json.dumps(experiment.summarize(self.evidence["cells"], plan, SPEC)))
+        self.assertEqual(recompute.summary_differences(self.evidence["summary"], emulated), [])
+
     def test_a_recorded_truth_that_cpython_disputes_is_refused_even_with_a_matching_digest(self) -> None:
         records = copy.deepcopy(self.records)
         target = next(r for r in records if r["family"] == "output")

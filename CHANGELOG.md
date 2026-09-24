@@ -42,6 +42,10 @@ fingerprints and 471 retained evidence and historical-report files, and
   that could never match its own checkpoint, an incomplete memory reset, and
   specification values the code never read. No evidence was produced before
   those repairs.
+- **Found by CI:** `AAA-186`, where recomputation compared summary floats
+  exactly, but CPython 3.12's compensated float `sum()` moves them by about
+  1e-16 on 3.10 and 3.11. Floats are now compared within 1e-12, and statuses,
+  signs and counts exactly.
 
 ## Pre-scale review and current direction (2026-09-23)
 
