@@ -160,21 +160,37 @@ def verify(evidence: Mapping[str, Any], records: Sequence[Mapping[str, Any]] | N
         problems.append(f"the summary does not recompute from the stored cells: {differences[:5]}")
     result: dict[str, Any] = {"summary_recomputed": not problems}
     if records is None:
-        result.update(records_checked=False, problems=problems, verdict="FAIL" if problems else "PASS")
+        result.update(
+            records_checked=False,
+            problems=problems,
+            verdict="FAIL" if problems else "SUMMARY_ONLY_NOT_VERIFIED",
+        )
         return result
     if (
         len(records) != evidence["records"]["count"]
         or records_sha256(records) != evidence["records"]["sha256"]
     ):
         problems.append("the records do not match the declared count and digest")
-    totals: dict[tuple[str, str, int, int], list[int]] = {}
+    bins = spec["statistics"]["calibration_bins"]
+    totals: dict[tuple[str, str, int, int], dict[str, Any]] = {}
     for record in records:
         key = (record["arm"], record["family"], record["init"], record["stream"])
-        row = totals.setdefault(key, [0, 0, 0, 0])
-        row[0] += 1
-        row[1] += 1 if record["correct"] else 0
-        row[2] += 1 if record["abstain"] else 0
-        row[3] += 1 if record["updated"] else 0
+        row = totals.setdefault(
+            key,
+            {
+                "n": 0,
+                "correct": 0,
+                "abstained": 0,
+                "updates": 0,
+                "brier_sum": 0.0,
+                "bins": {"n": [0] * bins, "confidence_sum": [0.0] * bins, "correct": [0] * bins},
+                "per_class": {},
+            },
+        )
+        row["n"] += 1
+        row["correct"] += int(record["correct"])
+        row["abstained"] += int(record["abstain"])
+        row["updates"] += int(record["updated"])
         expected_correct = (not record["abstain"]) and record["answer"] == record["truth"]
         if record["correct"] != expected_correct:
             problems.append(f"{record['task_id']} ({record['arm']}): stored score disagrees with its answer")
@@ -187,12 +203,29 @@ def verify(evidence: Mapping[str, Any], records: Sequence[Mapping[str, Any]] | N
             problems.append(f"{record['task_id']} ({record['arm']}): malformed confidence")
         elif not math.isfinite(confidence):
             problems.append(f"{record['task_id']}: non-finite confidence")
+        else:
+            hit = int(record["correct"])
+            row["brier_sum"] += (confidence - float(hit)) ** 2
+            index = min(int(confidence * bins), bins - 1)
+            row["bins"]["n"][index] += 1
+            row["bins"]["confidence_sum"][index] += confidence
+            row["bins"]["correct"][index] += hit
+            label = json.dumps(record["truth"])
+            counts = row["per_class"].setdefault(label, [0, 0])
+            counts[0] += 1
+            counts[1] += hit
     stored = {
-        (c["arm"], c["family"], c["init"], c["stream"]): [c["n"], c["correct"], c["abstained"], c["updates"]]
+        (c["arm"], c["family"], c["init"], c["stream"]): {
+            field: c[field]
+            for field in ("n", "correct", "abstained", "updates", "brier_sum", "bins", "per_class")
+        }
         for c in evidence["cells"]
     }
-    if stored != totals:
-        problems.append("stored cell counts differ from counts re-aggregated from the records")
+    if len(stored) != len(evidence["cells"]):
+        problems.append("duplicate stored cell identities")
+    cell_differences = summary_differences(stored, totals, "cells")
+    if cell_differences:
+        problems.append(f"stored cell primitives differ from records: {cell_differences[:5]}")
     tasks = _tasks_by_id({r["task_id"] for r in records})
     truths = {identity: _oracle_truth(task) for identity, task in sorted(tasks.items())}
     mismatched = sorted({r["task_id"] for r in records if truths[r["task_id"]] != r["truth"]})

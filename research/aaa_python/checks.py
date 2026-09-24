@@ -1,8 +1,9 @@
 """Executable safety and causal-boundary checks, shared by the CLI and the tests.
 
-``safety_checks`` proves that the validator refuses every listed escape and
-that the sandbox contains programs that get past it (exercised through the
-private child entry point, as if validation had been bypassed).
+``safety_checks`` checks that the validator refuses listed escapes and that
+the child enforces selected resource and output limits through its private
+entry point. It does not prove independent confinement of arbitrary Python
+when validation is bypassed.
 ``leakage_checks`` tries to obtain answer information before a scored action
 through every channel the boundary is meant to close.
 Each check returns ``(name, passed, detail)``; nothing here observes
@@ -86,14 +87,14 @@ def safety_checks() -> list[tuple[str, bool, str]]:
         outcome = _run_child(_request(source, "exec", spec), spec["sandbox"]["wall_timeout_seconds"])
         results.append(
             (
-                f"sandbox contains {name}",
+                f"child handles direct {name}",
                 outcome.status in allowed,
                 f"{outcome.status} {outcome.exception or ''}",
             )
         )
     probe = execute("x = 1\nprint(x)", spec)
     results.append(
-        ("sandbox applies resource limits", bool(probe.limits_applied), json.dumps(probe.limits_applied))
+        ("child applies resource limits", bool(probe.limits_applied), json.dumps(probe.limits_applied))
     )
     return results
 

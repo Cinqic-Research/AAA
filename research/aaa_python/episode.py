@@ -120,6 +120,7 @@ class Environment:
         self.events: list[tuple[int, str, int]] = []
         self._sequence = 0
         self._current: Task | None = None
+        self._view: TaskView | None = None
         self._position = -1
         self._action: Action | None = None
         self._revealed = True
@@ -134,10 +135,11 @@ class Environment:
         self._current, self._action, self._revealed = task, None, False
         self._position += 1
         self._log("present")
-        return view_of(task, self._position, self.spec)
+        self._view = view_of(task, self._position, self.spec)
+        return self._view
 
     def commit(self, view: TaskView, action: Action) -> None:
-        if self._current is None or view.task_ref != self._position:
+        if self._current is None or view is not self._view:
             raise BoundaryError("commit does not refer to the presented task")
         if self._action is not None:
             raise BoundaryError("an action was already committed for this task")
@@ -162,7 +164,7 @@ class Environment:
 
         if self._current is None or self._action is None:
             raise BoundaryError("nothing may be revealed before an action is committed")
-        if view.task_ref != self._position or self._revealed:
+        if view is not self._view or self._revealed:
             raise BoundaryError("reveal does not refer to the committed task")
         self._revealed = True
         score = correct(self._current, self._action)

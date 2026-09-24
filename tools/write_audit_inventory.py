@@ -194,6 +194,38 @@ TRANSITION_2026_09_23 = {
 }
 """Paths changed by the 2026-09-23 Python-first transition, and why."""
 
+REVIEW_2026_09_24 = {
+    "AGENTS.md": "FLOWBOX HDD-first agent entry point",
+    "CLAUDE.md": "FLOWBOX HDD-first agent entry point",
+    "CHANGELOG.md": "AAA-187 through AAA-191; storage and backup policy",
+    "CONTRIBUTING.md": "FLOWBOX HDD-first policy",
+    "README.md": "FLOWBOX HDD-first policy; AAA-191 claim scope",
+    "SECURITY.md": "AAA-191; specification and path claim scope",
+    "aaa/promotion/adjudicate.py": "AAA-189",
+    "docs/aaa_python_architecture.md": "runtime state accounting clarification",
+    "docs/agent_work_policy.md": "FLOWBOX HDD-first and scientific work policy",
+    "docs/backup_policy.md": "canonical GitHub and local/off-device backup scope",
+    "docs/dot_benchmark_archive.md": "historical phase wording",
+    "docs/errata.md": "historical charter wording",
+    "docs/evidence_policy.md": "Git bundle versus omitted raw evidence",
+    "docs/hardware.md": "FLOWBOX HDD-first policy",
+    "docs/issue_ledger.md": "AAA-187 through AAA-191",
+    "docs/pr28_independent_review_2026-09-24.md": "independent PR #28 review",
+    "docs/reproduction.md": "FLOWBOX HDD-first policy",
+    "research/aaa_python/checks.py": "AAA-191",
+    "research/aaa_python/cli.py": "AAA-191",
+    "research/aaa_python/episode.py": "AAA-190",
+    "research/aaa_python/experiment.py": "AAA-188; strict record JSON",
+    "research/aaa_python/oracle.py": "AAA-191",
+    "research/aaa_python/recompute.py": "AAA-187",
+    "research/aaa_python/subset.py": "AAA-191",
+    "tests/test_review_regressions.py": "AAA-187 through AAA-190",
+    "tests/test_storage_preflight.py": "FLOWBOX HDD-first policy",
+    "tools/backup_repository.py": "commit-addressed Git bundle and restore test",
+    "tools/storage_preflight.py": "FLOWBOX HDD mount and path gate",
+    "tools/write_audit_inventory.py": "independent review inventory semantics",
+}
+
 
 def findings(path: str) -> str:
     notes = [
@@ -201,6 +233,7 @@ def findings(path: str) -> str:
         REVIEW_2026_09_22.get(path),
         REVIEW_2026_09_23.get(path),
         TRANSITION_2026_09_23.get(path),
+        REVIEW_2026_09_24.get(path),
     ]
     relevant = [note for note in notes if note and note != "none"]
     return "; ".join(relevant) if relevant else "none"
@@ -304,6 +337,8 @@ def main() -> None:
             f"It inventories **{len(rows)} tracked regular files**; the count and path set must equal `git ls-files --cached`.",
             "Hashes are SHA-256 of the tracked worktree bytes, not Git blob IDs.",
             "Rows retain inspection classifications across documented reviews; they do not prove a fresh reread in this review or upgrade historical evidence.",
+            "`active` denotes a maintained tracked path, not a current scientific result; historical claims inside active documents retain their original dates and evidence scope.",
+            "The Verification column names an appropriate inspection method, not proof that every listed method was executed anew for this review; see the independent review record for actual coverage.",
             "",
             "| Path | Tracked SHA-256 | Purpose | Category | Verification | Related findings | Disposition |",
             "|---|---|---|---|---|---|---|",

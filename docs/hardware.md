@@ -48,8 +48,8 @@ deliberately not recorded.
 | System RAM | 15.7 GiB usable (16 GB installed) | machine-verified (`/proc/meminfo`) |
 | RAM modules | 16 GB DDR4-3000 CL16 | owner-declared (DIMM tables need root; not read) |
 | Swap | 2 GiB swap file | machine-verified |
-| Primary storage | Fanxiang S500Pro 256 GB NVMe SSD: EFI partition and the ext4 root filesystem (OS, repository checkout, virtual environments). **About 17 GB free at capture (93% used)** | machine-verified (`lsblk`, `df`) |
-| Home directory | ecryptfs-encrypted overlay on the NVMe root; every repository I/O pays the encryption layer | machine-verified (`findmnt`) |
+| System storage | Fanxiang S500Pro 256 GB NVMe SSD: EFI partition and the ext4 root filesystem (OS). **About 17 GB free at capture (93% used)**; this is historical occupancy, not the current work-storage policy | machine-verified (`lsblk`, `df`) |
+| Home directory | ecryptfs-encrypted overlay on the NVMe root; historical home-directory checkouts paid this layer, while HDD checkouts do not | machine-verified (`findmnt`) |
 | Cinqic working storage | HGST HTS545050A7E380 500 GB SATA HDD, one ext4 partition labelled "Cinqic Storage", about 419 GB free at capture | machine-verified |
 | Motherboard | ASRock B450M/ac R2.0; firmware American Megatrends P3.10 (2022-10-27) | machine-verified (`/sys/class/dmi/id`) |
 | Operating system | Linux Mint 22.3 (Zena), kernel 7.0.0-31-generic, glibc 2.39 | machine-verified |
@@ -80,21 +80,24 @@ different BLAS kernels.
 
 The two drives have different jobs and different standing:
 
-- the **256 GB NVMe SSD** carries the operating system, the repository and the
-  virtual environments. It is nearly full, so large or disposable AAA data does
-  not belong on it;
-- the **500 GB ext4 HDD** is dedicated to Cinqic work: large experiment data,
-  scratch environments (the PyTorch and dysts/River reference environments of
-  the v2 backend evaluation live there), and downloaded external datasets. Its
+- the **256 GB NVMe SSD** carries the operating system. Historical checkouts
+  and virtual environments have lived there, but new substantive Cinqic work
+  on FLOWBOX belongs on the HDD;
+- the **500 GB ext4 HDD** is dedicated to Cinqic repositories, worktrees,
+  project virtual environments, builds, experiments, checkpoints, large
+  caches, local Git backups and data roots. Its
   filesystem behaviour under an AAA workload was measured and retained at
   [`evidence/phase_closure_storage_profile.json`](evidence/phase_closure_storage_profile.json).
 
-No AAA code hard-codes a path to either drive. External datasets resolve from
-`$AAA_DATA_ROOT` (default `~/.cache/aaa/external`); on FLOWBOX it points at a
-directory on the HDD. Durable scientific evidence is committed to the
-repository, and the evidence policy's limitation stands.
+Portable scientific code does not hard-code a path to either drive. External
+datasets resolve from `$AAA_DATA_ROOT` (default `~/.cache/aaa/external`);
+FLOWBOX engineers must explicitly set it to an HDD directory. Run
+`python tools/storage_preflight.py --path "$PWD" --path "$AAA_DATA_ROOT"`
+before substantial local work. The [agent work policy](agent_work_policy.md)
+and [backup policy](backup_policy.md) define the current rules. Committed
+evidence is in Git, but the evidence policy's raw-artifact limitation stands.
 
-The HDD is **verified local working storage and nothing more**. It is not
+The HDD is **verified local working storage and a local Git backup location**. It is not
 immutable, not off-site, and not an independent failure domain, so it is not a
 publication-grade archive. That distinction is already load-bearing in
 [`evidence_policy.md`](evidence_policy.md) and is tracked as `AAA-077`,

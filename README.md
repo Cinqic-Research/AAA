@@ -65,10 +65,10 @@ Read the [research brief](docs/aaa_python_research_brief.md), the
 ```bash
 python -m research.aaa_python spec-hash        # protocol identity
 python -m research.aaa_python fingerprint      # phase source identity
-python -m research.aaa_python safety           # 68 validator/sandbox containment checks
+python -m research.aaa_python safety           # 68 validator and child resource-limit checks
 python -m research.aaa_python leakage          # 52 causal-boundary probes
 python -m research.aaa_python golden           # answer keys identical on this CPython
-python -m research.aaa_python audit            # parameters, optimizer and persistent state
+python -m research.aaa_python audit            # trainable, optimizer and serialized learned state
 python -m research.aaa_python develop --quick --output runs/py/dev.json --records runs/py/records.jsonl.gz
 python -m research.aaa_python recompute --evidence docs/evidence/aaa_python_v0/development.json \
     --records docs/evidence/aaa_python_v0/development_records.jsonl.gz
@@ -101,6 +101,13 @@ minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says
 when added capacity has earned its cost.
 
 ## Install
+
+On FLOWBOX, locate and verify the mounted `Cinqic Storage` HDD before cloning;
+clone there and keep the project venv and `$AAA_DATA_ROOT` there. After cloning,
+run `python3 tools/storage_preflight.py --path "$PWD"` before installation.
+See the [work policy](docs/agent_work_policy.md) and
+[backup policy](docs/backup_policy.md). Other machines use their own suitable
+storage roots.
 
 ```bash
 git clone https://github.com/Cinqic/AAA.git

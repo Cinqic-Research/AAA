@@ -27,6 +27,16 @@ from .contract import Contract, PrimitiveError, require_admissible
 Evaluator = Callable[[Contract, Sequence[Mapping[str, Any]]], dict[str, Any]]
 
 
+def _finite_result(value: Any) -> bool:
+    if isinstance(value, float):
+        return math.isfinite(value)
+    if isinstance(value, Mapping):
+        return all(_finite_result(item) for item in value.values())
+    if isinstance(value, list | tuple):
+        return all(_finite_result(item) for item in value)
+    return True
+
+
 def compare(contract: Contract, first: Mapping[str, Any], second: Mapping[str, Any]) -> list[str]:
     problems: list[str] = []
     if not math.isclose(
@@ -65,12 +75,20 @@ def adjudicate(
     outcome: dict[str, Any] = {"contract": contract.to_dict()}
     try:
         first = primary_evaluator(contract, records)
-    except PrimitiveError as error:
+    except (PrimitiveError, ArithmeticError, ValueError) as error:
         return {**outcome, "verdict": "INVALID_EVIDENCE", "reason": f"primary: {error}"}
+    if not _finite_result(first):
+        return {**outcome, "verdict": "DISAGREEMENT", "reason": "primary: non-finite result"}
     try:
         second = independent_evaluator(contract, records)
-    except PrimitiveError as error:
+    except (PrimitiveError, ArithmeticError, ValueError) as error:
         return {**outcome, "verdict": "INVALID_EVIDENCE", "reason": f"independent: {error}", "primary": first}
+    if not _finite_result(second):
+        return {
+            **outcome,
+            "verdict": "DISAGREEMENT",
+            "reason": "independent: non-finite result",
+        }
     problems = compare(contract, first, second)
     outcome.update(primary=first, independent=second, agreement_problems=problems)
     outcome["verdict"] = "DISAGREEMENT" if problems else first["verdict"]

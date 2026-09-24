@@ -5,7 +5,7 @@
     subset              the frozen safe subset and sandbox limits
     generate            a reproducibility digest of generated tasks
     golden              check (or, once, write) the cross-version golden answer keys
-    safety              validator refusals and sandbox containment
+    safety              validator refusals and child resource-limit checks
     leakage             causal-boundary probes
     audit               learner parameter and state accounting
     develop             a development run (never confirmation)

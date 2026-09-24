@@ -13,8 +13,9 @@ Containment, in layers:
    deleted afterwards.
 3. The child applies CPU, address-space, file-size and process-count limits
    where the platform provides them, and records which it applied.
-4. The program sees only the allowed builtins. There is no ``open``, no
-   ``__import__`` and no attribute access with which to reach one.
+4. Validated programs see only the allowed builtins. The AST validator blocks
+   attributes and reflective routes to excluded builtins; the child builtins
+   restriction alone does not contain arbitrary unvalidated Python.
 5. A hard wall-clock timeout kills the child, and output is capped.
 
 A child that dies, is killed or returns garbage is ``sandbox_failure`` (or

@@ -4,6 +4,12 @@ This document exists so that nothing inconvenient is quietly deleted. The
 historical artifacts stay where they are; this is the correction notice that
 travels with them.
 
+The frozen [`aaa.1k.v1` charter](aaa_charter.md) says that every result then
+available concerned the moving dot. That was true when its phase identity was
+frozen; it is not a current inventory. `aaa.python.v0` now has negative
+development evidence, with no admitted confirmation. The charter remains
+byte-for-byte historical because it is part of the v1 fingerprint.
+
 ## Status of previously recorded results
 
 | Evidence | Previous description | Correct description |

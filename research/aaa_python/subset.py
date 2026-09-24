@@ -9,8 +9,9 @@ allowed builtin or a function defined *earlier* in the program (so there is no
 recursion). ``for`` loops iterate only ``range`` over integer literals, so
 every program terminates within a known bound.
 
-The validator is the first containment layer. The sandboxed subprocess in
-:mod:`.oracle` is the second; it does not rely on the first.
+The validator is essential to the supported execution boundary. The
+subprocess in :mod:`.oracle` limits damage from mistakes in generated programs,
+but its restricted builtins are not an independent jail for arbitrary Python.
 """
 
 from __future__ import annotations

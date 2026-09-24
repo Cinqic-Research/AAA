@@ -1,5 +1,9 @@
 # Evidence and artifact policy
 
+The [backup policy](backup_policy.md) covers committed Git history and evidence
+through a local Git bundle and a planned private off-device copy. It does not
+change the raw-artifact caveats below.
+
 ## What lives in git
 
 | Committed | Why |
@@ -72,9 +76,10 @@ checksums without the bytes they describe. For a CI-run development or
 high-replication attempt, it would take the recorded commit being lost *and*
 the 90-day artifact expiring.
 
-Git LFS, or an external archive with content addresses recorded here, would be
-stronger. Neither is in place. This is stated as a recommendation rather than
-described as done, and it is tracked as `AAA-077` in the issue ledger.
+Git LFS, or an external archive of the omitted raw bytes with content addresses
+recorded here, would be stronger. Neither raw-artifact mechanism is in place.
+This remains a recommendation tracked as `AAA-077` in the issue ledger; a Git
+bundle cannot supply bytes that were never committed.
 
 The four historical v2.1 attempt directories committed before the Sol review
 have checksum manifests that name omitted raw and generated files. In a clean
@@ -259,4 +264,3 @@ and claimed before observation, under a successor protocol.
 SHA-256 of 471 retained files. `python tools/check_protected_identities.py`
 fails on any change. New evidence may be added; retained evidence may not
 change.
-

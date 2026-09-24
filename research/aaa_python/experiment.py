@@ -177,12 +177,21 @@ def trained_learner(
 ) -> OnlineLinear:
     learner = make_learner(spec, init, representation)
     learner.remember_initial()
+    # A plan alone does not identify the exam or the concrete training pool.
+    checkpoint_identity = {
+        "spec_sha256": spec_module.canonical_hash(spec),
+        "train_pool_sha256": spec_module.canonical_hash(
+            {family: [asdict(task) for task in tasks["train"][family]] for family in sorted(tasks["train"])}
+        ),
+    }
     path = None if checkpoints is None else checkpoints / f"init-{init}-{representation}.json"
     if path is not None and path.exists():
         saved = json.loads(path.read_text(encoding="utf-8"))
         # Compare JSON-normalized forms: a stored plan's tuples come back as lists.
         if saved.get("plan") != json.loads(json.dumps(asdict(plan))):
             raise RunError(f"{path}: checkpoint was produced by a different plan; refusing to resume")
+        if saved.get("identity") != checkpoint_identity:
+            raise RunError(f"{path}: checkpoint specification or training pool differs; refusing to resume")
         learner.load_state(saved["state"])
         if learner.state_hash() != saved["state_hash"]:
             raise RunError(f"{path}: checkpoint state does not match its recorded hash")
@@ -192,7 +201,12 @@ def trained_learner(
     )
     if path is not None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"plan": asdict(plan), "state": learner.state_dict(), "state_hash": learner.state_hash()}
+        payload = {
+            "plan": asdict(plan),
+            "identity": checkpoint_identity,
+            "state": learner.state_dict(),
+            "state_hash": learner.state_hash(),
+        }
         temporary = path.with_suffix(".tmp")
         temporary.write_text(json.dumps(payload, allow_nan=False), encoding="utf-8")
         temporary.replace(path)
@@ -492,8 +506,11 @@ def write_records(path: Path, records: Sequence[Mapping[str, Any]]) -> None:
 
 
 def read_records(path: Path) -> list[dict[str, Any]]:
+    def refuse_constant(token: str) -> Any:
+        raise RunError(f"non-standard JSON constant in records: {token}")
+
     with gzip.open(path, "rt", encoding="utf-8") as handle:
-        return [json.loads(line) for line in handle if line.strip()]
+        return [json.loads(line, parse_constant=refuse_constant) for line in handle if line.strip()]
 
 
 def pooled_calibration(records: Sequence[Mapping[str, Any]], spec: Mapping[str, Any]) -> dict[str, float]:

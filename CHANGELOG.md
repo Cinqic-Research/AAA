@@ -1,5 +1,22 @@
 # Research history
 
+## Independent PR #28 review and FLOWBOX backup policy (2026-09-24)
+
+An independent review reproduced and repaired five Python-first defects or
+claim gaps (`AAA-187` through `AAA-191`): full-record recomputation now checks
+calibration and per-class primitives, checkpoint resume binds to the exam and
+training pool, promotion adjudication fails closed on extreme numeric inputs,
+the causal boundary refuses caller-modified views, and child-process security
+claims match the tested generated-code boundary. The negative retained
+development result and protected dot-era evidence were not rewritten.
+
+FLOWBOX work is now directed to the mounted `Cinqic Storage` HDD through a
+testable preflight and canonical [work policy](docs/agent_work_policy.md).
+GitHub `main` remains canonical. A [backup policy](docs/backup_policy.md) and
+restore-tested local Git bundle tool cover committed history and evidence;
+off-device Hugging Face status is recorded separately from local verification.
+
+
 ## Python-first transition: `aaa.python.v0` and the `AAA-180` successor (2026-09-23)
 
 AAA's active research moves from the moving dot to its first deliberate

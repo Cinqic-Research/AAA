@@ -8,6 +8,14 @@ conventions below exist to keep that property.
 
 ## Before you change anything
 
+On FLOWBOX, first verify the mounted and writable `Cinqic Storage` HDD with
+`lsblk` and `findmnt`, then use an HDD checkout. From that checkout run
+`python3 tools/storage_preflight.py --path "$PWD"`; set `$AAA_DATA_ROOT` to
+an HDD directory and validate it with a second `--path`. The
+[work policy](docs/agent_work_policy.md) is authoritative for engineers and
+agents. GitHub `main` is canonical; local and Hugging Face copies follow the
+[backup policy](docs/backup_policy.md).
+
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 python -m pip install -r requirements-lock.txt

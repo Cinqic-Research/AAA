@@ -13,9 +13,10 @@ maintained on a best-effort basis; there is no commercial support commitment.
 
 AAA runs local, seeded experiments: the dot-era simulations of a
 one-dimensional world and, since `aaa.python.v0`, small generated Python
-programs executed as an external oracle. It has no network client or server,
-no authentication, no user accounts and no persistent service. It reads and
-writes JSON under a directory the caller chooses.
+programs executed as an external oracle. The research runtime has no network
+client or server, authentication, user accounts or persistent service.
+Operator backup tooling separately fetches GitHub and may copy to Hugging
+Face. Experiments read and write JSON under caller-selected roots.
 
 Realistic concerns are correspondingly narrow:
 
@@ -33,13 +34,15 @@ Realistic concerns are correspondingly narrow:
   hardened sandbox for hostile code: it relies on POSIX resource limits, has
   no network or filesystem namespace isolation, and must not be used to run
   untrusted programs. Learners run in-process and are trusted research code.
-- **Untrusted checkpoint or specification files.** Everything AAA loads is JSON
-  with a declared schema version and strict validation. No `pickle`, no dynamic
-  import of file content, and nothing loaded from a file is executed as code.
-  An unknown schema version or an out-of-range value is refused rather than
-  coerced.
-- **Path handling.** A run writes only under its requested output root. This is
-  covered by `tests/test_legacy_v1.py::test_a_run_writes_nothing_outside_the_requested_output_root`.
+- **Checkpoint or specification files.** These are project-controlled JSON,
+  not a format for hostile input. The Python specification validator checks
+  its top-level shape, phase identity, split order and selected limits; it
+  does not currently range-check every numerical setting. Checkpoints are
+  bound to their plan, specification and concrete training pool before resume.
+  No `pickle` or dynamic import of file content is used.
+- **Path handling.** The legacy v1 runner's output-root boundary is covered by
+  `tests/test_legacy_v1.py::test_a_run_writes_nothing_outside_the_requested_output_root`.
+  That test does not establish the same property for every later runner.
 - **Supply chain.** Runtime dependencies are NumPy and Matplotlib, pinned in
   `requirements-lock.txt`. CI installs the lock and verifies the installed set
   against it. The lock is part of the `aaa.1k.v1` phase fingerprint, so

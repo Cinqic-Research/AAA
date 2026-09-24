@@ -2220,3 +2220,82 @@ evidence was produced, so no retained evidence carries them.
   and a missing arm all fail) and `test_pre_312_float_summation_still_recomputes`,
   which emulates the old `sum()`.
 
+### AAA-187 — Independent recomputation accepted altered calibration primitives
+- **Source** independent PR #28 review, 2026-09-24 · **Severity** high · **Status** repaired
+- **Reproduction** On the unmodified candidate, change an `online`/`syntax`
+  cell's `brier_sum` in memory, rebuild the summary, and verify against the
+  untouched 1,100 retained action records. The verifier returned `PASS` while
+  the reported Brier score changed to `0.25231798264709543`.
+- **Root cause** Record re-aggregation compared only task count, correctness,
+  abstentions and updates. `brier_sum`, calibration bins and per-class counts
+  were trusted from stored cells even though the summary uses them.
+- **Impact** A recomputation pass overstated integrity of reported development
+  metrics. It does not by itself show that the retained evidence was altered.
+- **Repair** Reconstruct every cell primitive from original action records in
+  a separate loop and compare complete keys and values. Without records, the
+  verdict is `SUMMARY_ONLY_NOT_VERIFIED`, not `PASS`. The record reader also
+  rejects nonstandard JSON constants. Summary derivation still
+  reuses `summarize` and does not claim independent statistical implementation.
+- **Regression** `tests/test_review_regressions.py` rejects altered Brier
+  primitives and partial verification. Retained development bytes are unchanged.
+
+### AAA-188 — A checkpoint could resume against a different exam or training pool
+- **Source** independent PR #28 review · **Severity** high · **Status** repaired
+- **Reproduction** A checkpoint trained on an empty pool was accepted when
+  resumed with a one-task pool; the resumed learner had zero updates while fresh
+  training made two. Changing `init_scale` also changed the reset control's
+  initial weights after a checkpoint was accepted.
+- **Root cause** Resume checked the plan and stored state hash but not the
+  specification or concrete training pool. The stored state hash cannot attest
+  to inputs it never records.
+- **Impact** A resumed development run could use stale weights or an altered
+  reset control and then produce invalid new evidence. Existing retained runs
+  were made at a clean recorded commit and are not rewritten.
+- **Repair** Bind checkpoints to canonical specification and full training
+  task digests. Old unbound checkpoints are refused and can be retrained.
+- **Regression** `tests/test_review_regressions.py` refuses changed tasks and
+  `init_scale`; normal resume remains covered by the phase suite.
+
+### AAA-189 — Extreme finite promotion values escaped the nonpromotion contract
+- **Source** independent PR #28 review · **Severity** medium · **Status** repaired
+- **Reproduction** With a valid single-series fixture, positive finite
+  reference `1e300` and challenger `1e-300` values caused `math.log(0)` to
+  raise; a very large positive integer raised during float conversion.
+- **Root cause** Arithmetic exceptions and nonfinite derived results were not
+  caught at the adjudication boundary.
+- **Impact** Malformed or numerically unrepresentable evidence could crash a
+  prospective adjudication. No retained promotion result uses these inputs.
+- **Repair** The adjudicator returns `INVALID_EVIDENCE` for arithmetic failure
+  and `DISAGREEMENT` for nonfinite evaluator output; neither can promote.
+- **Regression** `tests/test_review_regressions.py` covers underflow, large
+  integers and overflow of a derived mean.
+
+### AAA-190 — Caller-modified view could widen a task's label space
+- **Source** independent PR #28 review · **Severity** medium · **Status** repaired
+- **Reproduction** A copied repair view with `labels=(99,)` accepted action
+  `99`, and reveal then indexed beyond the candidate results.
+- **Root cause** Commit validated against caller-supplied labels after checking
+  only the opaque task position.
+- **Impact** A caller bypassing the normal `run_task` path could break the
+  causal-boundary API. The retained run uses the genuine presented view.
+- **Repair** Commit and reveal now require the exact view object issued by
+  `present`; a copy cannot change its fields.
+- **Regression** `tests/test_review_regressions.py` covers forged commit and
+  reveal.
+
+### AAA-191 — Child-process security claims exceeded the tested boundary
+- **Source** independent PR #28 review · **Severity** medium · **Status** claim corrected
+- **Reproduction** The public executor refused reflective attribute access.
+  A direct private-child probe bypassed the validator and recovered an excluded
+  builtin through Python reflection, showing the child is not an independent
+  arbitrary-code jail.
+- **Root cause** Module prose described restricted child builtins as a
+  containment layer independent of AST validation. The public execution path
+  correctly validates first, and the project runs only generated programs.
+- **Impact** Security documentation could mislead a future engineer into
+  running untrusted code. No such execution is in the current protocol.
+- **Repair** Source and policy text now identify AST validation as essential;
+  child process limits are damage limits, not hostile-code isolation. The
+  existing safety and leakage checks retain their narrower scope.
+- **Regression** The existing public validator refusal is exercised in the
+  safety suite; direct child confinement is explicitly not claimed.

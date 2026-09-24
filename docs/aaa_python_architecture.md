@@ -50,14 +50,20 @@ through it would test the adapter rather than the question.
 | `syntax` (2 x 1,024) | 2,048 |
 | `repair` scorer (1 x 1,024) | 1,024 |
 | optimizer state | 0 (plain SGD) |
-| other persistent state | 1 (the update counter) |
+| serialized learned state beyond weights | 1 (the update counter) |
 | context memory | none; each task is scored from its own source |
 
 Two thirds of the parameters are the output head's one-hot label space. That
 is a representational cost of treating printed integers as classes, not
 capacity the task has been shown to need. The feature cache (text to vector)
-is a pure-function memo; it holds no learned state and is shared between
-clones. Checkpoints are strict JSON (`aaa.python.v0.learner_state.v1`) and
+is a pure-function memo; it holds no learned state but does occupy runtime
+memory and is shared between clones. A trained learner also retains an
+initial-weight copy of up to 153,600 scalars for the reset control. That copy
+affects `reset_each_task` and is regenerated from the seed on resume. Neither
+it nor the cache is an additional trainable parameter or serialized optimizer
+state. The audit's `non_trainable_persistent: 1` counts serialized learned
+state beyond weights, not all resident runtime memory. Checkpoints are strict
+JSON (`aaa.python.v0.learner_state.v1`) and
 restoration validates schema, configuration, shapes, finiteness and counter
 type before replacing any state. `state_hash()` covers configuration, counter
 and every weight byte.
