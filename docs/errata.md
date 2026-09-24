@@ -4,6 +4,12 @@ This document exists so that nothing inconvenient is quietly deleted. The
 historical artifacts stay where they are; this is the correction notice that
 travels with them.
 
+The frozen [`aaa.1k.v1` charter](aaa_charter.md) says that every result then
+available concerned the moving dot. That was true when its phase identity was
+frozen; it is not a current inventory. `aaa.python.v0` now has negative
+development evidence, with no admitted confirmation. The charter remains
+byte-for-byte historical because it is part of the v1 fingerprint.
+
 ## Status of previously recorded results
 
 | Evidence | Previous description | Correct description |
@@ -205,3 +211,14 @@ Details: [`loop_report_0004_0006.md`](loop_report_0004_0006.md).
 | `loop_pilot_report.md` (M2), `limitations.md`, `issue_ledger.md` `AAA-168` | M2 is "a runaway through the previous-error feedback channel"; the refined hypothesis is a learned closed-loop gain above one | **falsified** (`AAA-170`): the gain is ~0.2–0.5 at onset and crosses one only 500–3000 steps later (H24), and lr 0.01 never runs away (H27). M2 is a self-confirming target-unfolding frame lock (H32–H34). The previous-error input sustains it but does not cause it |
 | `loop_pilot_report.md` | round 3's two burst cells are "by signature" the likely product of M2 | **confirmed**: re-running round 3 with the repair changes exactly those two cells (and nothing else in 720 cells and 180 trials), improving them by 56% and 62% |
 | `aaa_1k_report.md`, `aaa_1k_architecture.md` | the champion is stable in online learning on the benchmark families | true at round 3's horizons (≤ 280 steps); at 1120 steps Champion 0 diverges in about a fifth to a third of quantized coarse cells. Champion 1 does not |
+
+## The Python-first transition (2026-09-23)
+
+Historical documents are unchanged; this notice travels with them. They are
+protected byte for byte by `tools/check_protected_identities.py`.
+
+| Where | Statement | Now |
+|---|---|---|
+| `aaa_1k_v2_handoff.md`, `pre_scale_review_2026-09-23.md`, `issue_ledger.md` `AAA-180` (original text) | `AAA-180` is open and a hard precondition for any future promotion | **repaired prospectively; the frozen `aaa.1k.v2` defect is retained and forbidden for future promotion.** The successor is `aaa.promotion.crossed.v1` ([promotion contract](promotion_contract.md)). The frozen path still reproduces the defect, and `recompute`'s silent Monash omission is recorded as `AAA-182` |
+| `pre_scale_review_2026-09-23.md` | verdict `READY_FOR_NEXT_PHASE_DESIGN` | superseded as current guidance by `PYTHON_PHASE_IN_DEVELOPMENT` ([scaling readiness](scaling_readiness.md)); the review's record of the tree it examined is unchanged |
+| `aaa_charter.md` (fingerprinted by `aaa.1k.v1`), `benchmark_protocol.md`, the AAA-1K and loop reports and handoffs | the moving dot, AAA-1K or v2.1 described as the active or current research | historical: AAA's current specialization is Python ([research direction](research_direction.md)); the dot era is benchmark and evidence lineage ([archive](dot_benchmark_archive.md)). The charter's principles and claim discipline still apply to every phase |

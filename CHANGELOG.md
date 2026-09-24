@@ -1,5 +1,69 @@
 # Research history
 
+## Independent PR #28 review and FLOWBOX backup policy (2026-09-24)
+
+An independent review reproduced and repaired five Python-first defects or
+claim gaps (`AAA-187` through `AAA-191`): full-record recomputation now checks
+calibration and per-class primitives, checkpoint resume binds to the exam and
+training pool, promotion adjudication fails closed on extreme numeric inputs,
+the causal boundary refuses caller-modified views, and child-process security
+claims match the tested generated-code boundary. The negative retained
+development result and protected dot-era evidence were not rewritten.
+
+FLOWBOX work is now directed to the mounted `Cinqic Storage` HDD through a
+testable preflight and canonical [work policy](docs/agent_work_policy.md).
+GitHub `main` remains canonical. A [backup policy](docs/backup_policy.md) and
+restore-tested local Git bundle tool cover committed history and evidence;
+off-device Hugging Face status is recorded separately from local verification.
+
+
+## Python-first transition: `aaa.python.v0` and the `AAA-180` successor (2026-09-23)
+
+AAA's active research moves from the moving dot to its first deliberate
+specialization, **Coding, beginning with Python**. The dot-era work is not
+changed: `benchmarks/protected_identities.json` records the v2.1
+specification hash (`f8e1090b…`), the observation-noise v1.1 protocol hash
+(`546e2434…`), the `aaa.1k.v1` (`5ce6e019…`) and `aaa.1k.v2` (`e5b11bdb…`)
+fingerprints and 471 retained evidence and historical-report files, and
+`tools/check_protected_identities.py` fails CI if any of them moves.
+
+- **`aaa.python.v0`** (`research/aaa_python/`): a frozen, AST-validated safe
+  subset of Python executed by CPython in an isolated, resource-limited
+  subprocess; five task families (syntax, outcome, output, localize, repair);
+  version-independent deterministic generation with oracle-derived answers,
+  disjoint train / development / probe / attack pools and refused
+  confirmation identities; a causal present / commit / reveal boundary; one
+  minimal online learner (153,600 parameters) with frozen, feedback-disabled
+  and memory-disabled controls, four representations and four baselines; a
+  paired-shift adaptation design, a retention probe bank, crossed statistics,
+  cross-version golden answer keys, and independent recomputation.
+- **First development result: negative.** The learner beats chance but not
+  the majority baseline, loses to surface heuristics on syntax and
+  localization, and shows no resolved online benefit, adaptation or forgetting
+  ([report](docs/aaa_python_development_report.md)). Formal confirmation is
+  not executed and cannot be: v0 declares no candidate or criteria.
+- **`AAA-180` repaired prospectively** by `aaa.promotion.crossed.v1`: an
+  explicit single-series estimand (conditional on the observed series),
+  structurally independent primary and recomputation implementations that
+  must agree, and fail-closed verdicts for omitted groups and disagreement.
+  The frozen `aaa.1k.v2` defect is retained and forbidden for future
+  promotion. `AAA-182` records the recomputation's silent Monash omission.
+- **Documentation** now leads with the research problem and the Python
+  specialization. [`docs/dot_benchmark_archive.md`](docs/dot_benchmark_archive.md)
+  maps the whole dot-era lineage. The research direction carries the 24-rung
+  capability ladder and records English as a future direction only. The
+  charter is unchanged, because it is fingerprinted by `aaa.1k.v1`.
+- **Found and repaired during construction:** an AST representation that
+  handed the syntax answer to the learner (`AAA-184`), construction cues in
+  the fault generator, a lookup baseline keyed across families, a resume path
+  that could never match its own checkpoint, an incomplete memory reset, and
+  specification values the code never read. No evidence was produced before
+  those repairs.
+- **Found by CI:** `AAA-186`, where recomputation compared summary floats
+  exactly, but CPython 3.12's compensated float `sum()` moves them by about
+  1e-16 on 3.10 and 3.11. Floats are now compared within 1e-12, and statuses,
+  signs and counts exactly.
+
 ## Pre-scale review and current direction (2026-09-23)
 
 - Recorded Coding, beginning with Python, as AAA's first deliberate

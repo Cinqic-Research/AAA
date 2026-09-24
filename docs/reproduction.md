@@ -3,6 +3,12 @@
 Every command below is run from a clean checkout. No private filesystem path is
 required.
 
+On FLOWBOX, discover and verify the `Cinqic Storage` mount before cloning,
+clone onto that HDD, set `$AAA_DATA_ROOT` to an HDD directory, then run
+`python3 tools/storage_preflight.py --path "$PWD" --path "$AAA_DATA_ROOT"`.
+The [work policy](agent_work_policy.md) gives the host-specific rule. CI and
+other hosts use their own storage roots.
+
 ```bash
 git clone https://github.com/Cinqic/AAA.git
 cd AAA
@@ -30,6 +36,49 @@ python tools/check_exit_codes.py
 ```
 
 Set `MPLBACKEND=Agg` in a headless environment.
+
+## `aaa.python.v0` (current phase)
+
+```bash
+python -m research.aaa_python spec-hash         # packaged protocol identity
+python -m research.aaa_python fingerprint       # phase source identity (checkout only)
+python -m research.aaa_python generate --count 50   # generation digest; identical on every run
+python -m research.aaa_python golden            # cross-version answer keys (CI runs 3.10-3.13)
+python -m research.aaa_python safety            # 68 validator and child resource-limit checks
+python -m research.aaa_python leakage           # 52 causal-boundary probes
+python -m research.aaa_python audit             # parameters, optimizer state, persistent state
+python -m research.aaa_python recompute \
+    --evidence docs/evidence/aaa_python_v0/development.json \
+    --records docs/evidence/aaa_python_v0/development_records.jsonl.gz   # re-executes 1,100 programs
+python tools/write_aaa_python_report.py --check
+python -m research.aaa_python confirm           # refuses, exit 2: v0 admits no confirmation
+```
+
+To regenerate the development evidence exactly, run it from a clean worktree
+at the recorded commit, so no edit can reach the running stage (`AAA-179`):
+
+```bash
+git worktree add --detach "$AAA_DATA_ROOT/worktree-py" 03423d79442366fc5ef0aba09aaf3c0077798433
+cd "$AAA_DATA_ROOT/worktree-py"
+python -m research.aaa_python develop \
+    --output "$AAA_DATA_ROOT/py/development.json" \
+    --records "$AAA_DATA_ROOT/py/development_records.jsonl.gz" \
+    --checkpoints "$AAA_DATA_ROOT/py/checkpoints"
+```
+
+The record digest must equal the retained one
+(`fe489b73...`). A fresh run and a checkpoint-resumed run both reproduce it
+byte for byte on FLOWBOX (CPython 3.12.3). The run takes about a minute. On
+FLOWBOX, set `$AAA_DATA_ROOT` to the HDD before this or any substantial run so
+the resumable states stay off the NVMe.
+
+## Promotion successor and `AAA-180`
+
+```bash
+python -m aaa.promotion selftest                # fixture agreement, fail-closed omission, forbidden v2 path
+python tools/check_promotion_successor.py      # AAA-180 retained in frozen v2; successor agrees on its K5 groups
+python tools/check_protected_identities.py     # no historical identity or evidence byte has moved
+```
 
 ## Current AAA-1K loop and Champion 1
 

@@ -19,7 +19,7 @@ jobs:
   locked:
     name: Locked environment
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     env:
       MPLBACKEND: Agg
     steps:
@@ -58,6 +58,47 @@ jobs:
           python -m coverage report
           python -m coverage xml
 
+      # ---- Protected history: nothing retained may move -------------------
+      - name: Protected historical identities and evidence bytes
+        run: python tools/check_protected_identities.py
+
+      # ---- Current phase: aaa.python.v0 and the promotion successor -------
+      - name: Promotion contract successor (AAA-180)
+        run: |
+          python -m aaa.promotion selftest
+          python tools/check_promotion_successor.py
+
+      - name: aaa.python.v0 identity, safety, leakage and cross-version keys
+        run: |
+          python -m research.aaa_python spec-hash
+          python -m research.aaa_python fingerprint
+          python -m research.aaa_python audit
+          python -m research.aaa_python golden
+          python -m research.aaa_python safety
+          python -m research.aaa_python leakage
+          python -m research.aaa_python generate --count 20
+          set +e
+          python -m research.aaa_python confirm; code=$?
+          set -e
+          test "$code" -eq 2
+
+      - name: aaa.python.v0 development smoke and independent recomputation
+        run: |
+          python -m research.aaa_python develop --quick \
+            --output "${RUNNER_TEMP}/aaa-python/dev.json" \
+            --records "${RUNNER_TEMP}/aaa-python/records.jsonl.gz" \
+            --checkpoints "${RUNNER_TEMP}/aaa-python/checkpoints"
+          python -m research.aaa_python recompute \
+            --evidence "${RUNNER_TEMP}/aaa-python/dev.json" \
+            --records "${RUNNER_TEMP}/aaa-python/records.jsonl.gz"
+          python -m research.aaa_python recompute \
+            --evidence docs/evidence/aaa_python_v0/development.json \
+            --records docs/evidence/aaa_python_v0/development_records.jsonl.gz
+          python tools/write_aaa_python_report.py --check
+
+      # ---- Dot-era benchmark integrity (retained evidence, recomputation) --
+      # Full re-execution of loop iterations 0004-0006 runs in
+      # loop-reproduction.yml (weekly, on demand, and on relevant paths).
       - name: AAA-1K architecture and gradient verification
         run: |
           python -m research.aaa_1k parameter-audit
@@ -145,6 +186,8 @@ jobs:
             ${{ runner.temp }}/aaa-runs
             ${{ runner.temp }}/aaa-noise-runs
             ${{ runner.temp }}/aaa1k
+            ${{ runner.temp }}/aaa-python/dev.json
+            ${{ runner.temp }}/aaa-python/records.jsonl.gz
             coverage.xml
             lock-hash.txt
           retention-days: 14
@@ -155,7 +198,7 @@ jobs:
   versions:
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -171,14 +214,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e '.[dev]'
+      # Includes the aaa.python.v0 golden answer-key test, so the benchmark's
+      # answers are proved identical on every supported interpreter.
       - run: python -m unittest discover -s tests -t .
+      - run: python -m research.aaa_python golden
 
   # A fresh install from a built wheel, run from a directory that is not the
   # repository, so a repository-relative resource path cannot pass by accident.
   fresh-install:
     name: Fresh install
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       MPLBACKEND: Agg
     steps:
@@ -215,6 +261,23 @@ jobs:
             --attempt-label installed-noise --output-root "${RUNNER_TEMP}/elsewhere/noise-runs"
           aaa observation-noise-recompute \
             "${RUNNER_TEMP}/elsewhere/noise-runs/observation-noise-v1_1/installed-noise"
+          python -c "
+          import research.aaa_python.oracle as oracle, research.aaa_python.cli as cli
+          assert 'site-packages' in str(oracle.CHILD), oracle.CHILD
+          assert oracle.CHILD.is_file() and cli.golden_path().is_file()
+          print('installed sandbox child:', oracle.CHILD)
+          "
+          python -m aaa.promotion selftest
+          python -m research.aaa_python spec-hash
+          python -m research.aaa_python golden
+          python -m research.aaa_python safety
+          python -m research.aaa_python leakage
+          python -m research.aaa_python develop --quick \
+            --output "${RUNNER_TEMP}/elsewhere/py/dev.json" \
+            --records "${RUNNER_TEMP}/elsewhere/py/records.jsonl.gz"
+          python -m research.aaa_python recompute \
+            --evidence "${RUNNER_TEMP}/elsewhere/py/dev.json" \
+            --records "${RUNNER_TEMP}/elsewhere/py/records.jsonl.gz"
 
       - name: Retain fresh-install failure evidence
         if: always()
@@ -224,5 +287,6 @@ jobs:
           path: |
             ${{ runner.temp }}/elsewhere/runs
             ${{ runner.temp }}/elsewhere/noise-runs
+            ${{ runner.temp }}/elsewhere/py
           retention-days: 14
           if-no-files-found: warn

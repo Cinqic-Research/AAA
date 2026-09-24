@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Cinqic" }]
-keywords = ["online-learning", "adaptation", "benchmark", "reproducibility"]
+keywords = ["online-learning", "adaptation", "python", "causal-evaluation", "benchmark", "reproducibility"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
@@ -54,6 +54,9 @@ include = ["aaa*", "research*"]
 "aaa.benchmark" = ["data/*.json"]
 "aaa.noise" = ["data/*.json"]
 "research.aaa_1k_v2.external" = ["data/*.json"]
+# aaa.python.v0: the protocol and the cross-version golden answer keys. The
+# sandbox child (_sandbox_child.py) ships as an ordinary module file.
+"research.aaa_python" = ["data/*.json"]
 
 [tool.ruff]
 line-length = 110

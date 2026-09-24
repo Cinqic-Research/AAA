@@ -11,18 +11,38 @@ maintained on a best-effort basis; there is no commercial support commitment.
 
 ## Threat model
 
-AAA runs local, seeded simulations of a one-dimensional world. It has no
-network client or server, no authentication, no user accounts and no persistent
-service. It reads and writes JSON under a directory the caller chooses.
+AAA runs local, seeded experiments: the dot-era simulations of a
+one-dimensional world and, since `aaa.python.v0`, small generated Python
+programs executed as an external oracle. The research runtime has no network
+client or server, authentication, user accounts or persistent service.
+Operator backup tooling separately fetches GitHub and may copy to Hugging
+Face. Experiments read and write JSON under caller-selected roots.
 
 Realistic concerns are correspondingly narrow:
 
-- **Untrusted checkpoint or specification files.** Everything AAA loads is JSON
-  with a declared schema version and strict validation. No `pickle`, no `eval`,
-  no dynamic import of file content. An unknown schema version or an
-  out-of-range value is refused rather than coerced.
-- **Path handling.** A run writes only under its requested output root. This is
-  covered by `tests/test_legacy_v1.py::test_a_run_writes_nothing_outside_the_requested_output_root`.
+- **Executing Python programs (`aaa.python.v0`).** AAA executes only programs
+  its own deterministic generator produces, never code from the network, a
+  corpus, a user or a learner. Each program must pass an allow-list AST
+  validator first (no imports, attribute access, `eval`/`exec`/`open`/`getattr`
+  or any unlisted builtin, `while`, recursion, `**` or `/`; bounded literals and
+  loops). It then runs in a separate `python -I -S` process with an empty
+  environment, a fresh temporary working directory, only the allowed builtins,
+  CPU, address-space, file-size and process-count limits where the platform
+  provides them, a wall-clock timeout and an output cap. Syntax checks only
+  compile. `python -m research.aaa_python safety` exercises 68 escape and
+  containment cases. This is defence in depth for generated code, not a
+  hardened sandbox for hostile code: it relies on POSIX resource limits, has
+  no network or filesystem namespace isolation, and must not be used to run
+  untrusted programs. Learners run in-process and are trusted research code.
+- **Checkpoint or specification files.** These are project-controlled JSON,
+  not a format for hostile input. The Python specification validator checks
+  its top-level shape, phase identity, split order and selected limits; it
+  does not currently range-check every numerical setting. Checkpoints are
+  bound to their plan, specification and concrete training pool before resume.
+  No `pickle` or dynamic import of file content is used.
+- **Path handling.** The legacy v1 runner's output-root boundary is covered by
+  `tests/test_legacy_v1.py::test_a_run_writes_nothing_outside_the_requested_output_root`.
+  That test does not establish the same property for every later runner.
 - **Supply chain.** Runtime dependencies are NumPy and Matplotlib, pinned in
   `requirements-lock.txt`. CI installs the lock and verifies the installed set
   against it. The lock is part of the `aaa.1k.v1` phase fingerprint, so

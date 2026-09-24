@@ -36,7 +36,29 @@ def is_v2(path: str) -> bool:
     return path.startswith(V2_PATHS)
 
 
+PYTHON_PATHS = (
+    "research/aaa_python/",
+    "aaa/promotion/",
+    "docs/aaa_python_",
+    "docs/evidence/aaa_python_v0/",
+    "docs/promotion_contract.md",
+    "tests/test_aaa_python",
+    "tests/test_promotion.py",
+    "tools/write_aaa_python_report.py",
+    "tools/check_promotion_successor.py",
+)
+"""Paths added by the Python-first transition: aaa.python.v0 and the AAA-180 successor."""
+
+
 def purpose(path: str) -> str:
+    if path.startswith("research/aaa_python/"):
+        return "active aaa.python.v0 research implementation or packaged protocol data"
+    if path.startswith("aaa/promotion/"):
+        return "active versioned promotion contract (aaa.promotion.crossed.v1, AAA-180 successor)"
+    if path.startswith("docs/evidence/aaa_python_v0/"):
+        return "current retained aaa.python.v0 development evidence"
+    if path == "benchmarks/protected_identities.json":
+        return "active expectation of protected historical identities and evidence bytes"
     if path.startswith("research/aaa_1k_v2/"):
         return "active AAA-1K v2 research implementation (frozen by the v2 fingerprint)"
     if path.startswith("aaa/compute/"):
@@ -75,6 +97,7 @@ def purpose(path: str) -> str:
 def category(path: str) -> str:
     if path in {
         "docs/evidence/phase_closure_validation.json",
+        "docs/aaa_python_development_report.md",
         "docs/final_audit.md",
         "docs/handoff_sol.md",
         "docs/sol_review.md",
@@ -89,7 +112,7 @@ def category(path: str) -> str:
         return "superseded evidence"
     if path == "docs/evidence/aaa_1k_evaluation_round3.json":
         return "current evidence"
-    if path.startswith("docs/evidence/aaa_1k_v2/"):
+    if path.startswith(("docs/evidence/aaa_1k_v2/", "docs/evidence/aaa_python_v0/")):
         return "current evidence"
     if path.startswith("results/benchmark_v2_1/") or path.startswith("docs/evidence/"):
         return "retained evidence"
@@ -106,6 +129,8 @@ def verification(path: str) -> str:
         return "read; parser or CI validation as applicable"
     if suffix == ".png":
         return "opened at original resolution; historical labeling checked"
+    if suffix == ".gz":
+        return "decompressed; strict JSON lines; digest and recomputation checked"
     if suffix in {".md", ".txt"} or Path(path).name in {"LICENSE", ".gitignore"}:
         return "read; references and claims audited"
     return "read as bytes; retained provenance checked"
@@ -144,17 +169,86 @@ REVIEW_2026_09_23 = {
 }
 
 
+TRANSITION_2026_09_23 = {
+    ".github/workflows/ci.yml": "AAA-180 successor and aaa.python.v0 verification; protected identities",
+    "CHANGELOG.md": "AAA-180, AAA-182 through AAA-186",
+    "CITATION.cff": "AAA-183",
+    "CONTRIBUTING.md": "AAA-183, AAA-184",
+    "README.md": "AAA-183",
+    "SECURITY.md": "AAA-183",
+    "pyproject.toml": "aaa.python.v0 package data",
+    "benchmarks/protected_identities.json": "protected historical identities",
+    "docs/dot_benchmark_archive.md": "AAA-183",
+    "docs/errata.md": "AAA-180, AAA-182, AAA-183",
+    "docs/evidence_policy.md": "aaa.python.v0 evidence",
+    "docs/hardware.md": "AAA-183",
+    "docs/issue_ledger.md": "AAA-180 prospective repair; AAA-182 through AAA-186",
+    "docs/limitations.md": "AAA-180; aaa.python.v0 limitations",
+    "docs/reproduction.md": "aaa.python.v0 and AAA-180 successor reproduction",
+    "docs/research_direction.md": "Python-first capability ladder; English as a future direction",
+    "docs/scaling_readiness.md": "AAA-180 prospective repair; PYTHON_PHASE_IN_DEVELOPMENT",
+    "tests/test_protected_identities.py": "protected historical identities",
+    "tools/check_protected_identities.py": "protected historical identities",
+    "tools/write_audit_inventory.py": "Python-first transition classification",
+    "docs/aaa_python_self_review.md": "implementer self-review of the transition (not independent)",
+}
+"""Paths changed by the 2026-09-23 Python-first transition, and why."""
+
+REVIEW_2026_09_24 = {
+    "AGENTS.md": "FLOWBOX HDD-first agent entry point",
+    "CLAUDE.md": "FLOWBOX HDD-first agent entry point",
+    "CHANGELOG.md": "AAA-187 through AAA-191; storage and backup policy",
+    "CONTRIBUTING.md": "FLOWBOX HDD-first policy",
+    "README.md": "FLOWBOX HDD-first policy; AAA-191 claim scope",
+    "SECURITY.md": "AAA-191; specification and path claim scope",
+    "aaa/promotion/adjudicate.py": "AAA-189",
+    "docs/aaa_python_architecture.md": "runtime state accounting clarification",
+    "docs/agent_work_policy.md": "FLOWBOX HDD-first and scientific work policy",
+    "docs/backup_policy.md": "canonical GitHub and local/off-device backup scope",
+    "docs/dot_benchmark_archive.md": "historical phase wording",
+    "docs/errata.md": "historical charter wording",
+    "docs/evidence_policy.md": "Git bundle versus omitted raw evidence",
+    "docs/hardware.md": "FLOWBOX HDD-first policy",
+    "docs/issue_ledger.md": "AAA-187 through AAA-191",
+    "docs/pr28_independent_review_2026-09-24.md": "independent PR #28 review",
+    "docs/reproduction.md": "FLOWBOX HDD-first policy",
+    "research/aaa_python/checks.py": "AAA-191",
+    "research/aaa_python/cli.py": "AAA-191",
+    "research/aaa_python/episode.py": "AAA-190",
+    "research/aaa_python/experiment.py": "AAA-188; strict record JSON",
+    "research/aaa_python/oracle.py": "AAA-191",
+    "research/aaa_python/recompute.py": "AAA-187",
+    "research/aaa_python/subset.py": "AAA-191",
+    "tests/test_review_regressions.py": "AAA-187 through AAA-190",
+    "tests/test_storage_preflight.py": "FLOWBOX HDD-first policy",
+    "tools/backup_repository.py": "commit-addressed Git bundle and restore test",
+    "tools/storage_preflight.py": "FLOWBOX HDD mount and path gate",
+    "tools/write_audit_inventory.py": "independent review inventory semantics",
+}
+
+
 def findings(path: str) -> str:
     notes = [
         inherited_findings(path),
         REVIEW_2026_09_22.get(path),
         REVIEW_2026_09_23.get(path),
+        TRANSITION_2026_09_23.get(path),
+        REVIEW_2026_09_24.get(path),
     ]
     relevant = [note for note in notes if note and note != "none"]
     return "; ".join(relevant) if relevant else "none"
 
 
 def inherited_findings(path: str) -> str:
+    if path.startswith(PYTHON_PATHS):
+        if (
+            path.startswith(
+                ("aaa/promotion/", "tests/test_promotion.py", "tools/check_promotion_successor.py")
+            )
+            or path == "docs/promotion_contract.md"
+        ):
+            return "AAA-180, AAA-182 (prospective successor)"
+        return "AAA-184 through AAA-186; aaa.python.v0 development only, confirmation not admitted"
     if is_v2(path):
         return "AAA-179, AAA-180; AAA-162, AAA-163 and AAA-172 revisited in aaa.1k.v2"
     loop_path = (
@@ -217,6 +311,9 @@ def inherited_findings(path: str) -> str:
 
 
 def main() -> None:
+    import sys
+
+    check = "--check" in sys.argv[1:]
     paths = [line for line in git("ls-files", "--cached").splitlines() if line]
     rows = []
     for name in paths:
@@ -240,6 +337,8 @@ def main() -> None:
             f"It inventories **{len(rows)} tracked regular files**; the count and path set must equal `git ls-files --cached`.",
             "Hashes are SHA-256 of the tracked worktree bytes, not Git blob IDs.",
             "Rows retain inspection classifications across documented reviews; they do not prove a fresh reread in this review or upgrade historical evidence.",
+            "`active` denotes a maintained tracked path, not a current scientific result; historical claims inside active documents retain their original dates and evidence scope.",
+            "The Verification column names an appropriate inspection method, not proof that every listed method was executed anew for this review; see the independent review record for actual coverage.",
             "",
             "| Path | Tracked SHA-256 | Purpose | Category | Verification | Related findings | Disposition |",
             "|---|---|---|---|---|---|---|",
@@ -247,6 +346,12 @@ def main() -> None:
             "",
         ]
     )
+    if check:
+        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.exists() else ""
+        if current != text:
+            raise SystemExit(f"{OUTPUT.relative_to(ROOT)} does not match the tracked tree; regenerate it")
+        print(f"{OUTPUT.relative_to(ROOT)} matches all {len(rows)} tracked files")
+        return
     OUTPUT.write_text(text, encoding="utf-8")
     print(f"wrote {OUTPUT.relative_to(ROOT)} with {len(rows)} rows")
 

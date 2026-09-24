@@ -1,29 +1,216 @@
 # AAA — Accurate Autonomous Adaptation
 
-An experimental research project asking one deliberately small question:
+AAA is a research programme asking whether an artificial system can
+**autonomously learn, predict, reason from feedback, adapt, retain useful
+knowledge, detect when that knowledge is inadequate, and improve its future
+behaviour**, measured tightly enough that the answer can be *no*.
 
-> Can an autonomous system observe an environment, learn to predict what
-> happens next, detect when its existing knowledge is no longer adequate, adapt
-> from subsequent evidence, and improve its future predictions?
+- **AAA** is the research programme.
+- **Juniper** is the persistent artificial agent that successful AAA research is
+  ultimately meant to produce. Nothing in this repository is Juniper yet.
+- **Autonomy** is the long-term objective. Today, "autonomous" means only that
+  the observe / predict / score / update loop runs unattended after launch.
+- **Coding, beginning with Python**, is AAA's first deliberate specialization
+  and its current primary research domain
+  ([research direction](docs/research_direction.md)).
 
-The environment is one moving dot on a line. The learner has three parameters.
-Neither is an accident: the point of this version is not a capable system, it
-is a **measuring instrument you can check**.
+AAA makes no claim to general intelligence, understanding, consciousness or
+independent goal formation. It is not a code-completion model, a chatbot, a
+benchmark leaderboard entry or a Transformer project by default, and model
+size is not treated as progress.
 
-AAA is the research programme, not the dot. The long-term objective is a
-persistent agent called Juniper; the dot is one benchmark family, and the
-current learners are the smallest things that can be measured honestly on it.
-See [the research charter](docs/aaa_charter.md) before assuming the benchmark
-is the project. AAA's current first deliberate specialization is
-[Coding, beginning with Python](docs/research_direction.md); this is a new
-research direction, not a demonstrated capability or the permanent scope of
-the programme.
+## Current phase: `aaa.python.v0`
 
-AAA makes no claim to general intelligence, physical understanding, or
-independent goal formation. "Autonomous" here means the observe / predict /
-score / update loop runs unattended after launch, and nothing more.
+[`research/aaa_python/`](research/aaa_python/) is the smallest credible
+foundation for asking:
 
-## Why the benchmark looks the way it does
+> Can an adaptive system acquire and retain useful Python knowledge from
+> programs and execution feedback, and use that knowledge to improve on fresh
+> programs without evaluator leakage?
+
+- **A safe, deterministic environment.** Programs come from a frozen, AST-validated
+  subset of Python (no imports, attributes, `while`, `eval`/`exec`/`open`,
+  recursion, `**` or `/`). CPython executes them in an isolated,
+  resource-limited subprocess. The interpreter is the external ground truth
+  and never a baseline.
+- **Five separately reported capabilities.** Syntax validity; execution
+  outcome and exception class; printed output; failing-line localization; and
+  selection of the one repair that passes hidden tests.
+- **A causal boundary.** The learner sees a view built field by field. Feedback
+  (tracebacks, output, the chosen repair's test results) arrives only after a
+  committed action, and 52 leakage probes try to get around that.
+- **Separated identities.** Train, development, probe and attack pools are
+  disjoint by identity and by source hash, with literals and whole program
+  structures held out. Confirmation identities are reserved and refused.
+- **A minimal learner, and baselines that can beat it.** One online linear
+  learner (153,600 parameters, no optimizer state) with frozen,
+  feedback-disabled and memory-disabled controls, four representations, and
+  chance, majority, exact-match lookup and heuristic baselines.
+- **Causal adaptation and retention designs**, crossed initialization x
+  stream statistics, and independent recomputation that re-executes every
+  scored program.
+
+**First result: no.** On retained development evidence, the minimal learner
+beats chance but not the majority baseline, loses clearly to surface
+heuristics on syntax and localization, and shows no resolved benefit from
+online updating, no resolved adaptation and no resolved forgetting. That is
+the [development report](docs/aaa_python_development_report.md), kept exactly
+as measured. **Formal confirmation is not executed**: v0 declares no
+candidate or promotion criteria, and `confirm` refuses.
+
+Read the [research brief](docs/aaa_python_research_brief.md), the
+[protocol](docs/aaa_python_protocol.md) and the
+[architecture](docs/aaa_python_architecture.md).
+
+```bash
+python -m research.aaa_python spec-hash        # protocol identity
+python -m research.aaa_python fingerprint      # phase source identity
+python -m research.aaa_python safety           # 68 validator and child resource-limit checks
+python -m research.aaa_python leakage          # 52 causal-boundary probes
+python -m research.aaa_python golden           # answer keys identical on this CPython
+python -m research.aaa_python audit            # trainable, optimizer and serialized learned state
+python -m research.aaa_python develop --quick --output runs/py/dev.json --records runs/py/records.jsonl.gz
+python -m research.aaa_python recompute --evidence docs/evidence/aaa_python_v0/development.json \
+    --records docs/evidence/aaa_python_v0/development_records.jsonl.gz
+python tools/write_aaa_python_report.py --check
+```
+
+## Promotion decisions: `aaa.promotion.crossed.v1`
+
+Before any future phase can promote a candidate, its decision path must be
+correct. [`aaa/promotion/`](aaa/promotion/) is the prospective successor to the
+`aaa.1k.v2` K5 path, whose frozen defect (`AAA-180`) is retained and forbidden
+for promotion. It adds an explicit estimand for groups with one observed
+series (conditional on that series), two structurally independent
+implementations that must agree, and fail-closed verdicts for missing groups
+or disagreement ([promotion contract](docs/promotion_contract.md)).
+
+```bash
+python -m aaa.promotion selftest
+python tools/check_promotion_successor.py
+```
+
+## Where AAA goes next, and what it will not assume
+
+The [research direction](docs/research_direction.md) lays out a 24-rung Python
+capability ladder whose rungs must be earned in order. English and natural
+language are a recorded *future* direction, not a current objective. Other
+programming languages can follow once Python gives a reason. About **105M
+parameters** is a revisable long-term planning goal for AAA 1, not a target,
+minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says
+when added capacity has earned its cost.
+
+## Install
+
+On FLOWBOX, locate and verify the mounted `Cinqic Storage` HDD before cloning;
+clone there and keep the project venv and `$AAA_DATA_ROOT` there. After cloning,
+run `python3 tools/storage_preflight.py --path "$PWD"` before installation.
+See the [work policy](docs/agent_work_policy.md) and
+[backup policy](docs/backup_policy.md). Other machines use their own suitable
+storage roots.
+
+```bash
+git clone https://github.com/Cinqic/AAA.git
+cd AAA
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-lock.txt
+python -m pip install -e . --no-deps
+python tools/check_lock.py
+```
+
+NumPy and Matplotlib are the runtime dependencies, and everything runs on the
+CPU. No external API, no pretrained model, no paid service, and no downloaded
+code corpus: `aaa.python.v0` generates its programs. Large or disposable output
+belongs under `$AAA_DATA_ROOT` ([hardware](docs/hardware.md)), not in the
+checkout.
+
+CUDA is optional and used only where it is measured to help. The v2 compute
+layer ([`aaa/compute/`](aaa/compute/)) can run the batched learner on an NVIDIA
+GPU through CuPy, from the separate `requirements-cuda-lock.txt`:
+
+```bash
+python3 -m venv .venv-cuda && . .venv-cuda/bin/activate
+python -m pip install -r requirements-cuda-lock.txt
+python -m pip install -e . --no-deps
+python tools/check_lock.py --lock requirements-cuda-lock.txt
+python -m aaa.compute probe
+```
+
+A requested device that is unavailable is an error, never a silent fallback.
+On FLOWBOX the GPU wins only from about 4,096 lockstep cells
+([`docs/aaa_1k_v2_compute_report.md`](docs/aaa_1k_v2_compute_report.md)), so
+every formal v2 stage ran on the CPU. `aaa.python.v0` accepts only `--device cpu`.
+The machine and the revisable model-size planning goal are recorded in
+[`docs/hardware.md`](docs/hardware.md).
+
+## Documentation
+
+**Current research**
+
+| Document | What it covers |
+|---|---|
+| [Current research direction](docs/research_direction.md) | Python-first coding scope, the 24-rung capability ladder, English as a future direction, causal evaluation and self-improvement boundaries |
+| [`aaa.python.v0` research brief](docs/aaa_python_research_brief.md) | why Python first, the question v0 asks, and what it does not claim |
+| [`aaa.python.v0` protocol](docs/aaa_python_protocol.md) | task families, safe subset and sandbox, splits, causal boundary, metrics, estimands, confirmation rules |
+| [`aaa.python.v0` architecture](docs/aaa_python_architecture.md) | the minimal learner, its representations, parameter and state accounting, compute |
+| [`aaa.python.v0` development report](docs/aaa_python_development_report.md) | the first development result, generated from retained evidence |
+| [Python-first transition self-review](docs/aaa_python_self_review.md) | the implementer's attempt to break this work (not independent), and what remains weak |
+| [Promotion contract](docs/promotion_contract.md) | `aaa.promotion.crossed.v1`, the prospective repair of `AAA-180` |
+| [Scaling readiness](docs/scaling_readiness.md) | current evidence, the promotion boundary, and gates for capacity experiments |
+| [Development hardware](docs/hardware.md) | FLOWBOX, when to use its CPU or GPU, the approximate 105M long-term AAA 1 planning goal, and future compute |
+| [Research charter](docs/aaa_charter.md) | what AAA, Juniper and autonomy mean, and the claim discipline every phase inherits (written in the dot era and frozen by the `aaa.1k.v1` fingerprint; its direction is current through the research-direction document) |
+| [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |
+| [Limitations](docs/limitations.md) | current evidence boundaries, unexecuted work, and known limitations |
+| [Evidence policy](docs/evidence_policy.md), [reproduction](docs/reproduction.md) | what is committed and regenerable; exact commands from a clean checkout |
+
+**Dot-era benchmarks and evidence** ([archive](docs/dot_benchmark_archive.md))
+
+| Document | What it covers |
+|---|---|
+| [Dot-era archive](docs/dot_benchmark_archive.md) | every dot-era phase, where it lives, its status, what it established and failed, and how to verify it |
+| [AAA-1K architecture](docs/aaa_1k_architecture.md) | the frozen 994-parameter specification |
+| [AAA-1K literature review](docs/aaa_1k_literature_review.md) | what was adopted from the literature, and what was refused |
+| [AAA-1K decisions](docs/aaa_1k_decisions.md) | every decision, including three departures from the phase brief |
+| [AAA-1K report](docs/aaa_1k_report.md) | the measured result, with its claim boundaries |
+| [AAA-1K self-review](docs/aaa_1k_self_review.md) | the attempt to break those results, and what it found |
+| [AAA-1K handoff](docs/aaa_1k_handoff.md) | everything an independent reviewer needs |
+| [AAA-1K v2 report](docs/aaa_1k_v2_report.md) | the final 1K pass: no challenger, the descriptive comparison of every arm, external benchmarks, capacity |
+| [AAA-1K v2 compute report](docs/aaa_1k_v2_compute_report.md) | when to use the Ryzen 7 5700G and when the RTX 2060, with parity and determinism |
+| [AAA-1K v2 self-review](docs/aaa_1k_v2_self_review.md) | the implementer's attempt to break the v2 results (not independent) |
+| [AAA-1K v2 handoff](docs/aaa_1k_v2_handoff.md) | everything an independent reviewer needs for `aaa.1k.v2` |
+| [AAA-1K v2 decisions](docs/aaa_1k_v2_decisions.md) | V2-D1 to V2-D17 |
+| [AAA-1K v2 protocol](docs/aaa_1k_v2_benchmark_protocol.md), [architecture](docs/aaa_1k_v2_architecture.md), [external benchmarks](docs/aaa_1k_v2_external_benchmarks.md), [compute strategy](docs/aaa_1k_v2_compute_strategy.md), [literature](docs/aaa_1k_v2_literature_review.md), [brief](docs/aaa_1k_v2_research_brief.md) | the preregistered design |
+| [Loop protocol](docs/loop_protocol.md) | the improvement loop's current `aaa.loop.v1` governance, what enforces it, and the pilot gaps that became rules |
+| [Loop pilot report](docs/loop_pilot_report.md) | three iterations on AAA-1K, eight rejections, and an evaluation of the loop itself |
+| [Loop pilot handoff](docs/loop_pilot_handoff.md) | reproduction commands and what an independent reviewer should challenge |
+| [Loop iterations 0004–0006](docs/loop_report_0004_0006.md) | the audit response: TBPTT semantics, M2's mechanism, the first real confirmation, Champion 1 |
+| [Loop 0004–0006 handoff](docs/loop_0004_0006_handoff.md) | reproduction commands and what an independent reviewer should challenge |
+| [PR #20 independent review](docs/pr20_independent_review.md) | the review of iterations 0004–0006 and Champion 1 that established `aaa.loop.v1` |
+| [Independent review, 2026-09-22](docs/independent_review_2026-09-22.md) | end-to-end repository review: verification performed, findings `AAA-174`–`AAA-178`, and settings recommendations |
+| [Benchmark protocol](docs/benchmark_protocol.md) | the v2.1 protocol, gates, statistics and confirmation discipline |
+| [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
+| [Errata](docs/errata.md) | which earlier claims were affected, and why |
+| [Candidate selection](docs/candidate_selection.md) | why this candidate, with the full table including what lost |
+| [Diagnosis](docs/diagnosis.md) | controlled ablations on the legacy learner |
+| [Experiment registry](docs/experiment_registry.md) | trial state, resume semantics, verification |
+| [Research history](CHANGELOG.md) | v1, v2, v2.1, observation-noise v1/v1.1, AAA-1K, AAA-1K v2, and the Python-first transition |
+| [Self-review](docs/self_review.md) | what was checked after the repair, and what stayed weak |
+| [Review handoff](docs/handoff_sol.md) | identity, confirmation outcomes, reproduction commands |
+
+---
+
+## Research history: the dot-era benchmarks
+
+From 2026-09-09 to 2026-09-23 AAA's research centred on one moving dot on a
+line. That work built the scientific machinery the Python phase uses, and it
+remains in place as historical evidence, reproducibility targets and
+regression benchmarks. The [dot-era archive](docs/dot_benchmark_archive.md)
+maps every version, its status and how to verify it. What follows is the
+original account of that work, kept for discoverability.
+
+### Why the benchmark looks the way it does
 
 A previous version of this benchmark reported that all required gates passed.
 Three independent reviews then found that several of those gates could not have
@@ -48,7 +235,8 @@ changed. The probes are committed at
 and each defect is tracked in
 [`docs/issue_ledger.md`](docs/issue_ledger.md).
 
-The current protocol is built so that it can say **no**:
+The v2.1 protocol was built so that it can say **no**, and every later phase,
+including `aaa.python.v0`, inherits that vocabulary:
 
 | Status | Meaning |
 |---|---|
@@ -68,7 +256,7 @@ mechanism, repaired in the candidate, and the failed attempts are committed
 alongside everything else. No threshold was touched. See `AAA-120` in
 [`docs/issue_ledger.md`](docs/issue_ledger.md).
 
-## What is implemented
+### What the dot benchmark implements
 
 - A seeded, bounded CPU simulator: constant velocity, reflection at the
   boundaries, unannounced speed changes, and a damped harmonic oscillator whose
@@ -103,9 +291,9 @@ alongside everything else. No threshold was touched. See `AAA-120` in
   retired unobserved. Development evidence is not a confirmation result. See
   [`benchmarks/observation_noise_candidate_ledger.json`](benchmarks/observation_noise_candidate_ledger.json).
 
-## AAA-1K: a 994-parameter recurrent core
+### AAA-1K: a 994-parameter recurrent core
 
-The current research phase, isolated in [`research/aaa_1k/`](research/aaa_1k/).
+A dot-era research phase, isolated in [`research/aaa_1k/`](research/aaa_1k/).
 A hand-written NumPy GRU -- 3 inputs, 16 hidden units, 2 outputs, 994 trainable
 parameters and no optimizer state -- that learns online by truncated BPTT,
 keeps a persistent hidden state, is fed its own previous prediction error, and
@@ -144,7 +332,7 @@ The full result is [`docs/aaa_1k_report.md`](docs/aaa_1k_report.md); read
 where the four repairs come from -- including the one that would otherwise have
 published a hidden-state advantage thirty times too large.
 
-## AAA-1K v2: the final 1K pass (`aaa.1k.v2`)
+### AAA-1K v2: the final 1K pass (`aaa.1k.v2`)
 
 A separately versioned phase in [`research/aaa_1k_v2/`](research/aaa_1k_v2/)
 that tried, under preregistered rules and with every adaptive-state scalar
@@ -175,7 +363,7 @@ Read [`docs/aaa_1k_v2_report.md`](docs/aaa_1k_v2_report.md) and the
 [self-review](docs/aaa_1k_v2_self_review.md); the
 [handoff](docs/aaa_1k_v2_handoff.md) has every reproduction command.
 
-## The improvement loop
+### The improvement loop
 
 `research/aaa_1k_loop/` pilots the process by which AAA is supposed to get
 better: observe a measured weakness, classify it, diagnose it, state competing
@@ -204,7 +392,7 @@ improve). This was the loop's first real run through its outer path. Read
 Independent review of that complete cycle established `aaa.loop.v1` for
 future work. The version change does not relabel the retained v0 artifacts.
 
-## The learner
+### The v2.1 learner
 
 Feature vector, from the last four observed positions only:
 
@@ -229,44 +417,10 @@ reported. The previous covariance-form learner lost positive semidefiniteness
 after 323 updates on a slow constant-velocity stream and overflowed at 6,642 on
 a stationary one.
 
-## Install
+### Dot-era commands
 
 ```bash
-git clone https://github.com/Cinqic/AAA.git
-cd AAA
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements-lock.txt
-python -m pip install -e . --no-deps
-python tools/check_lock.py
-```
-
-NumPy and Matplotlib are the runtime dependencies, and everything runs on the
-CPU. No external API, no pretrained model, no paid service.
-
-CUDA is optional and used only where it is measured to help. The v2 compute
-layer ([`aaa/compute/`](aaa/compute/)) can run the batched learner on an NVIDIA
-GPU through CuPy, from the separate `requirements-cuda-lock.txt`:
-
-```bash
-python3 -m venv .venv-cuda && . .venv-cuda/bin/activate
-python -m pip install -r requirements-cuda-lock.txt
-python -m pip install -e . --no-deps
-python tools/check_lock.py --lock requirements-cuda-lock.txt
-python -m aaa.compute probe
-```
-
-A requested device that is unavailable is an error, never a silent fallback.
-On FLOWBOX the GPU wins only from about 4,096 lockstep cells
-([`docs/aaa_1k_v2_compute_report.md`](docs/aaa_1k_v2_compute_report.md)), so
-every formal v2 stage ran on the CPU. The machine and the model-size planning
-ceiling are recorded in [`docs/hardware.md`](docs/hardware.md).
-
-## Commands
-
-```bash
-python -m unittest discover -s tests -t .        # the test suite
+python tools/check_protected_identities.py       # every protected dot-era identity and evidence byte
 python -m aaa.cli spec-hash                      # canonical specification identity
 python -m aaa.cli observation-noise-protocol-hash # separate noise protocol identity
 python -m aaa.cli observation-noise-fingerprint    # scientific source identity
@@ -314,14 +468,14 @@ python tools/write_aaa_1k_v2_report.py --check    # the report matches the evide
 python -m aaa.compute probe                       # what this machine can run
 ```
 
-Formal confirmation requires a predeclared batch, a committed freeze manifest,
-the selected candidate ledger entry, the exact lock, and a matching
+Observation-noise formal confirmation (never executed) requires a predeclared
+batch, a committed freeze manifest, the selected candidate ledger entry, the exact lock, and a matching
 non-self-referential scientific fingerprint; see
 [`docs/reproduction.md`](docs/reproduction.md). The confirmation evaluator
 reconstructs the complete primary A+B claim family and applies one Holm
 adjustment without trusting stored conclusions.
 
-## Interpreting a result
+### Interpreting a result
 
 These are five different claims, and none of them implies another:
 
@@ -336,48 +490,7 @@ deterministic, noiseless world — with the public boundary map it is *exact* at
 bounce transitions. A learned model losing to it is a valid and informative
 result, and this repository is built to report that rather than to avoid it.
 
-## Documentation
-
-| Document | What it covers |
-|---|---|
-| [Research charter](docs/aaa_charter.md) | what AAA is, what Juniper is, and why the dot is one benchmark |
-| [Current research direction](docs/research_direction.md) | Python-first coding scope, causal evaluation, capability ladder, and self-improvement boundaries |
-| [Scaling readiness](docs/scaling_readiness.md) | current evidence, open promotion blocker, and gates for capacity experiments |
-| [Development hardware](docs/hardware.md) | FLOWBOX, when to use its CPU or GPU, the approximate 105M long-term AAA 1 planning goal, and future compute |
-| [AAA-1K architecture](docs/aaa_1k_architecture.md) | the frozen 994-parameter specification |
-| [AAA-1K literature review](docs/aaa_1k_literature_review.md) | what was adopted from the literature, and what was refused |
-| [AAA-1K decisions](docs/aaa_1k_decisions.md) | every decision, including three departures from the phase brief |
-| [AAA-1K report](docs/aaa_1k_report.md) | the measured result, with its claim boundaries |
-| [AAA-1K self-review](docs/aaa_1k_self_review.md) | the attempt to break those results, and what it found |
-| [AAA-1K handoff](docs/aaa_1k_handoff.md) | everything an independent reviewer needs |
-| [AAA-1K v2 report](docs/aaa_1k_v2_report.md) | the final 1K pass: no challenger, the descriptive comparison of every arm, external benchmarks, capacity |
-| [AAA-1K v2 compute report](docs/aaa_1k_v2_compute_report.md) | when to use the Ryzen 7 5700G and when the RTX 2060, with parity and determinism |
-| [AAA-1K v2 self-review](docs/aaa_1k_v2_self_review.md) | the implementer's attempt to break the v2 results (not independent) |
-| [AAA-1K v2 handoff](docs/aaa_1k_v2_handoff.md) | everything an independent reviewer needs for `aaa.1k.v2` |
-| [AAA-1K v2 decisions](docs/aaa_1k_v2_decisions.md) | V2-D1 to V2-D17 |
-| [AAA-1K v2 protocol](docs/aaa_1k_v2_benchmark_protocol.md), [architecture](docs/aaa_1k_v2_architecture.md), [external benchmarks](docs/aaa_1k_v2_external_benchmarks.md), [compute strategy](docs/aaa_1k_v2_compute_strategy.md), [literature](docs/aaa_1k_v2_literature_review.md), [brief](docs/aaa_1k_v2_research_brief.md) | the preregistered design |
-| [Loop protocol](docs/loop_protocol.md) | the improvement loop's current `aaa.loop.v1` governance, what enforces it, and the pilot gaps that became rules |
-| [Loop pilot report](docs/loop_pilot_report.md) | three iterations on AAA-1K, eight rejections, and an evaluation of the loop itself |
-| [Loop pilot handoff](docs/loop_pilot_handoff.md) | reproduction commands and what an independent reviewer should challenge |
-| [Loop iterations 0004–0006](docs/loop_report_0004_0006.md) | the audit response: TBPTT semantics, M2's mechanism, the first real confirmation, Champion 1 |
-| [Loop 0004–0006 handoff](docs/loop_0004_0006_handoff.md) | reproduction commands and what an independent reviewer should challenge |
-| [PR #20 independent review](docs/pr20_independent_review.md) | the review of iterations 0004–0006 and Champion 1 that established `aaa.loop.v1` |
-| [Independent review, 2026-09-22](docs/independent_review_2026-09-22.md) | end-to-end repository review: verification performed, findings `AAA-174`–`AAA-178`, and settings recommendations |
-| [Benchmark protocol](docs/benchmark_protocol.md) | the active v2.1 protocol, gates, statistics and confirmation discipline |
-| [Observation-noise protocol](docs/observation_noise_protocol.md) | the separately versioned sensor study, causal boundary, schedules, replication and limits |
-| [Issue ledger](docs/issue_ledger.md) | every defect: reproduction, root cause, repair, regression test, status |
-| [Errata](docs/errata.md) | which earlier claims were affected, and why |
-| [Candidate selection](docs/candidate_selection.md) | why this candidate, with the full table including what lost |
-| [Diagnosis](docs/diagnosis.md) | controlled ablations on the legacy learner |
-| [Reproduction](docs/reproduction.md) | exact commands from a clean checkout |
-| [Evidence policy](docs/evidence_policy.md) | what is committed, what is regenerable, and the known limitation |
-| [Experiment registry](docs/experiment_registry.md) | trial state, resume semantics, verification |
-| [Limitations](docs/limitations.md) | current evidence boundaries, unexecuted work, and known limitations |
-| [Research history](CHANGELOG.md) | v1, v2, v2.1, observation-noise v1/v1.1, AAA-1K and AAA-1K v2 |
-| [Self-review](docs/self_review.md) | what was checked after the repair, and what stayed weak |
-| [Review handoff](docs/handoff_sol.md) | identity, confirmation outcomes, reproduction commands |
-
-## Historical evidence
+### Historical evidence
 
 [`results/final/`](results/final/) is the v1 snapshot, preserved unchanged. Its
 result was unfavourable — the original learner did not convincingly improve,

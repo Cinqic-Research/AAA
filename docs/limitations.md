@@ -3,6 +3,49 @@
 Stated plainly, because a benchmark that cannot say what it does not show is
 not measuring much.
 
+## Current phase: `aaa.python.v0`
+
+- **No Python capability is demonstrated.** On retained development evidence
+  the minimal learner beats chance, beats its memory-disabled control in four
+  families and never beats the majority baseline. Surface heuristics beat it
+  on syntax and localization. Online updating is not resolved better than the
+  frozen twin in any family and is resolved worse on `output`
+  ([report](aaa_python_development_report.md)).
+- **Adaptation and retention are unresolved**, not absent. Three
+  initializations x four streams give wide intervals.
+- **The environment is small by design.** A frozen subset (no imports,
+  attributes, `while`, strings beyond short literals, recursion, `**` or `/`),
+  generated programs of at most 40 lines, and five task families. Nothing here
+  speaks to real code, libraries, repositories or free-form generation.
+- **Tasks were designed by the same implementer as the learner.** Two
+  construction cues were found and removed during development (a fixed fault
+  variable name, and a single risky line per program). Others may remain; the
+  heuristic baselines exist to expose them, and they still do on syntax and
+  localization.
+- **Syntax validity is largely a surface property**, and a lint heuristic
+  scores 0.97. That family measures whether a learner can match an easy
+  deterministic rule, not deep knowledge.
+- **The repair family is solvable by tool use** (running the two visible
+  tests), which v0 deliberately withholds. A tool-using baseline is the next
+  rung.
+- **The boundary is against accidental leakage**, not a sandbox against an
+  in-process learner written to subvert Python. Programs, not learners, are
+  sandboxed.
+- **Sandbox limits depend on the platform.** CPU, address-space, file-size and
+  process-count limits are applied and recorded where `resource` provides
+  them. Elsewhere they are recorded as absent, never claimed.
+- **Cross-version equality** of answer keys is tested on the golden sample of
+  100 tasks on each CI interpreter. The full pools are regenerated and
+  compared only on the interpreter that runs them.
+- **Formal confirmation is NOT EXECUTED**, and cannot be: v0 declares no
+  candidate, criteria or confirmation identities.
+
+## Dot-era limitations
+
+The rest of this document describes the moving-dot benchmark family, which is
+retained as evidence and as regression and mechanistic benchmarks
+([archive](dot_benchmark_archive.md)).
+
 ## The environment
 
 One dimension. One moving dot. Deterministic, noiseless, fully observed
@@ -252,5 +295,7 @@ evidence, so they are characterizations rather than confirmed claims.
   reproduction elsewhere (`AAA-173`).
 - **`AAA-180`**: the v2 confirmation's K5 omitted Monash, and its two K5
   implementations disagree on a single-series dataset. There was no effect
-  here (no challenger). A versioned successor must repair and test this before
-  any future promotion; frozen v2 K5 cannot be reused as a promotion path.
+  here (no challenger). *Repaired prospectively (2026-09-23): the frozen
+  aaa.1k.v2 defect is retained and forbidden for future promotion, and the
+  versioned successor `aaa.promotion.crossed.v1` is tested
+  ([promotion contract](promotion_contract.md)).*
