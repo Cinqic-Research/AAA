@@ -1,0 +1,400 @@
+{
+  "protocol": "aaa.python.v1",
+  "status": "development",
+  "generator_version": "aaa.python.gen.v1",
+  "predecessor": {
+    "protocol": "aaa.python.v0",
+    "spec_sha256": "d7fffa5e7f659e851d6ba1b093570992625f9b11cd5e336f7dbb5ff9d8f17021",
+    "relationship": "successor; v0 source, specification and evidence are unchanged history"
+  },
+  "question": "Is the Python learner limited by representation, output formulation, optimization, task construction or trainable capacity, and does roughly ten times Champion 1's trainable capacity buy a reproducible, material capability on fresh Python tasks?",
+  "interpreter": {
+    "implementation": "CPython",
+    "supported": [
+      "3.10",
+      "3.11",
+      "3.12",
+      "3.13"
+    ],
+    "answer_keys": "canonical across supported versions; tests/test_aaa_python_oracle.py compares every version with the packaged golden keys"
+  },
+  "subset": {
+    "statements": [
+      "Assign",
+      "AugAssign",
+      "Expr",
+      "If",
+      "For",
+      "FunctionDef",
+      "Return",
+      "Pass"
+    ],
+    "expressions": [
+      "Constant",
+      "Name",
+      "BinOp",
+      "UnaryOp",
+      "Compare",
+      "BoolOp",
+      "Call",
+      "List",
+      "Subscript",
+      "IfExp"
+    ],
+    "operators": [
+      "Add",
+      "Sub",
+      "Mult",
+      "FloorDiv",
+      "Mod",
+      "USub",
+      "Not",
+      "And",
+      "Or",
+      "Eq",
+      "NotEq",
+      "Lt",
+      "LtE",
+      "Gt",
+      "GtE"
+    ],
+    "builtins": [
+      "print",
+      "range",
+      "len",
+      "abs",
+      "min",
+      "max",
+      "int",
+      "str",
+      "bool",
+      "sum"
+    ],
+    "reserved_names": [
+      "abs",
+      "aiter",
+      "all",
+      "anext",
+      "any",
+      "ascii",
+      "bin",
+      "bool",
+      "breakpoint",
+      "bytearray",
+      "bytes",
+      "callable",
+      "chr",
+      "classmethod",
+      "compile",
+      "complex",
+      "copyright",
+      "credits",
+      "delattr",
+      "dict",
+      "dir",
+      "divmod",
+      "enumerate",
+      "eval",
+      "exec",
+      "exit",
+      "filter",
+      "float",
+      "format",
+      "frozenset",
+      "getattr",
+      "globals",
+      "hasattr",
+      "hash",
+      "help",
+      "hex",
+      "id",
+      "input",
+      "int",
+      "isinstance",
+      "issubclass",
+      "iter",
+      "len",
+      "license",
+      "list",
+      "locals",
+      "map",
+      "max",
+      "memoryview",
+      "min",
+      "next",
+      "object",
+      "oct",
+      "open",
+      "ord",
+      "pow",
+      "print",
+      "property",
+      "quit",
+      "range",
+      "repr",
+      "reversed",
+      "round",
+      "set",
+      "setattr",
+      "slice",
+      "sorted",
+      "staticmethod",
+      "str",
+      "sum",
+      "super",
+      "tuple",
+      "type",
+      "vars",
+      "zip"
+    ],
+    "identifier_pattern": "^[a-z][a-z0-9]{0,11}$",
+    "forbidden_examples": [
+      "import and from-import",
+      "attribute access of any kind (blocks dunder reflection)",
+      "eval, exec, compile, open, input, globals, locals, getattr and every builtin not listed",
+      "while loops",
+      "lambda, comprehensions, generators",
+      "try, with, raise, class, del, global, nonlocal, async",
+      "f-strings",
+      "exponentiation and true division",
+      "recursion or calls to functions defined later"
+    ],
+    "limits": {
+      "max_source_bytes": 2000,
+      "max_lines": 40,
+      "max_ast_nodes": 400,
+      "max_int_literal": 999,
+      "max_string_literal": 16,
+      "max_list_literal": 10,
+      "max_range_bound": 50,
+      "max_loop_depth": 2
+    }
+  },
+  "sandbox": {
+    "isolation": "a separate CPython process started with -I -S, an empty environment, a fresh temporary working directory, restricted builtins, and the AST validator applied first",
+    "wall_timeout_seconds": 5.0,
+    "cpu_seconds": 2,
+    "address_space_bytes": 536870912,
+    "max_stdout_chars": 4096,
+    "parallel_workers": 8
+  },
+  "families": {
+    "syntax": {
+      "labels": [
+        "valid",
+        "invalid"
+      ],
+      "rung": "1 syntax validity",
+      "feedback": [
+        "compile_status",
+        "syntax_error_line"
+      ]
+    },
+    "outcome": {
+      "labels": [
+        "ok",
+        "ZeroDivisionError",
+        "NameError",
+        "TypeError",
+        "IndexError",
+        "ValueError"
+      ],
+      "rung": "5-6 execution success and exception class",
+      "feedback": [
+        "status",
+        "exception",
+        "error_line",
+        "stdout"
+      ]
+    },
+    "output": {
+      "labels": "integers from -50 to 50",
+      "min": -50,
+      "max": 50,
+      "rung": "2-4 semantics, state tracking, output prediction",
+      "feedback": [
+        "stdout"
+      ]
+    },
+    "localize": {
+      "labels": "line numbers from 1 to 40",
+      "max_line": 40,
+      "rung": "10 bug localization",
+      "feedback": [
+        "exception",
+        "error_line"
+      ]
+    },
+    "repair": {
+      "labels": "candidate index",
+      "candidates": 4,
+      "visible_tests": 2,
+      "hidden_tests": 4,
+      "rung": "11 candidate repair selection",
+      "feedback": [
+        "chosen_candidate_hidden_results"
+      ]
+    }
+  },
+  "templates": {
+    "in_distribution": [
+      "straight_line",
+      "conditional",
+      "loop_accumulate",
+      "function_call"
+    ],
+    "novel_structure": [
+      "nested_loop",
+      "list_walk"
+    ],
+    "literals": {
+      "in_distribution": [
+        0,
+        9
+      ],
+      "novel_literals": [
+        10,
+        19
+      ]
+    },
+    "names": {
+      "in_distribution": {
+        "variables": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "n",
+          "m",
+          "x",
+          "y",
+          "val",
+          "acc",
+          "res",
+          "total"
+        ],
+        "function": "f",
+        "parameter": "p",
+        "loops": [
+          "i",
+          "j"
+        ],
+        "local": "q",
+        "undefined": [
+          "q",
+          "w",
+          "k2",
+          "tmp9"
+        ]
+      },
+      "novel_names": {
+        "variables": [
+          "u",
+          "v",
+          "z",
+          "k",
+          "p2",
+          "cnt",
+          "tot",
+          "hold",
+          "prev",
+          "cur",
+          "item",
+          "sval"
+        ],
+        "function": "g",
+        "parameter": "r",
+        "loops": [
+          "t",
+          "s"
+        ],
+        "local": "h",
+        "undefined": [
+          "ghost",
+          "nope",
+          "w9",
+          "zz"
+        ]
+      }
+    },
+    "repair": {
+      "in_distribution": [
+        "affine",
+        "piecewise"
+      ],
+      "novel_structure": [
+        "loop_sum"
+      ],
+      "construction": "symmetric: every candidate is one mutation away from a hidden base line that is not shown, so edit-distance position does not identify the correct candidate (AAA-192)"
+    }
+  },
+  "slices": {
+    "train_and_probe": "in_distribution",
+    "cycle": [
+      "in_distribution",
+      "in_distribution",
+      "novel_literals",
+      "novel_names",
+      "novel_structure",
+      "novel_composition"
+    ],
+    "meaning": {
+      "in_distribution": "training templates, literals and names (interpolation, not memorization: exact duplicates of earlier splits are excluded)",
+      "novel_literals": "training templates and names with constants from a disjoint range",
+      "novel_names": "training templates and literals with every identifier drawn from a disjoint name set",
+      "novel_structure": "templates never used for training",
+      "novel_composition": "two training templates composed into one program with a cross-template dependency"
+    }
+  },
+  "splits": {
+    "order": [
+      "train",
+      "development",
+      "probe",
+      "attack",
+      "confirmation"
+    ],
+    "pool_per_family": {
+      "train": 2400,
+      "development": 3600,
+      "probe": 100,
+      "attack": 600,
+      "confirmation": 1200
+    },
+    "confirmation": "generated only under a committed freeze whose phase fingerprint matches the running source (see freeze.py)",
+    "disjointness": "a split's items exclude every normalized source hash in the declared pools of all earlier v1 splits and in the aaa.python.v0 train, development and probe pools",
+    "development_layout": {
+      "tune": [
+        0,
+        400
+      ],
+      "evaluate": [
+        400,
+        1600
+      ],
+      "adapt": [
+        1600,
+        3600
+      ],
+      "meaning": "index ranges [start, stop): tune selects hyperparameters and training budgets only; evaluate holds the development evaluation streams; adapt holds distribution-switch and plasticity blocks. No task is used in two roles."
+    }
+  },
+  "tools": {
+    "repair": {
+      "run_visible_tests": "before acting, an agent granted the tool may execute any candidate on the task's visible tests; hidden tests are never run by a tool"
+    },
+    "policy": "running the task's own program is the oracle for syntax, outcome, output and localize, so no pre-action tool exists for those families"
+  },
+  "statistics": {
+    "unit": "initialization x stream cell; tasks within a stream are never resampled as independent units",
+    "method": "crossed (pigeonhole) percentile bootstrap over initializations and streams",
+    "draws": 4000,
+    "confidence": 0.95,
+    "bootstrap_seed": 20260924,
+    "calibration_bins": 10
+  },
+  "promotion": {
+    "contract": "aaa.promotion.crossed.v1",
+    "status": "not frozen: the decision contracts are declared in the phase freeze before any confirmation identity is generated"
+  }
+}

@@ -57,6 +57,8 @@ include = ["aaa*", "research*"]
 # aaa.python.v0: the protocol and the cross-version golden answer keys. The
 # sandbox child (_sandbox_child.py) ships as an ordinary module file.
 "research.aaa_python" = ["data/*.json"]
+# aaa.python.v1: the successor protocol specification.
+"research.aaa_python_v1" = ["data/*.json"]
 
 [tool.ruff]
 line-length = 110
