@@ -5,8 +5,9 @@ implementer's `docs/aaa_python_self_review.md`. It began at 2026-09-24
 05:47:35 UTC from canonical `main`
 `f56caaf0c0c5e38882c1464f24e7a62441df1f32` and PR head
 `da1903285d665cb3d9c185ebe711dd6344357166`. The initial PR tree had
-740 tracked regular files; the staged review candidate has 749. The final
-reviewed candidate is the PR head after
+740 tracked regular files; the staged review candidate has 749. The reviewed
+implementation commit is `7c33171578ee97459d7b6d0a34a247f44854b4b0`.
+The final reviewed candidate is the PR head after
 the remediation and review-record commits; its exact SHA and hosted CI result
 are recorded in the PR discussion because a committed document cannot name
 its own commit SHA. The associated `docs/final_audit.md` inventories that
@@ -112,9 +113,23 @@ An installed wheel built with the locked backend passed package-data and
 sandbox-child inspection, golden, safety, leakage, promotion, a 2,328-record
 quick development run and independent recomputation from an unrelated HDD
 directory containing spaces. Installed-package fingerprint and confirmation
-both correctly refused with exit status 2. Clean-clone and exact-head hosted
-CI results must be added to the PR discussion and task completion record
+both correctly refused with exit status 2. Exact-head hosted CI results must
+be added to the PR discussion and task completion record
 after they run.
+
+At the recorded source commit
+`03423d79442366fc5ef0aba09aaf3c0077798433`, a separate clean HDD
+worktree reproduced the retained phase fingerprint
+`16bcc5b666de749a956606a1583b2e6d64e4bff65a9f8b8b23da2be0772e92b8`
+and exactly matched retained records, cells, summary, parameters, plan and
+specification hash. The clean final-implementation clone at `7c331715…`
+independently reproduced the same record digest, cells and summary, then
+resumed from its own checkpoints with exact agreement. Its 71 focused
+promotion, Python evidence/learning, storage and independent-regression tests
+passed; Ruff, mypy, lock, protected identities, inventory and retained report
+checks also passed. The current verifier's pass alone would not establish
+recorded-source provenance; these two clean reruns supply that separate
+evidence.
 
 Scientific scope remains unchanged: Python is the current specialization,
 not a demonstrated general coding capability; the first v0 development
@@ -131,9 +146,9 @@ checks recorded after this document is committed. Hugging Face write
 authorization is a separate operational backup blocker, not a scientific
 pass or fail.
 
-The local review record was frozen at 2026-09-24 06:24 UTC, about 36 minutes
+The local review record was finalized at 2026-09-24 06:33 UTC, about 45 minutes
 after start. Preflight and live-state establishment took roughly 3 minutes;
 independent probes and repository coverage roughly 11 minutes; remediation,
-policy and backup roughly 12 minutes; local validation and record preparation
-roughly 10 minutes. Hosted CI, merge and post-merge backup follow as separate
+policy and backup roughly 12 minutes; local validation, clean reruns and record
+preparation roughly 19 minutes. Hosted CI, merge and post-merge backup follow as separate
 phases in the PR/task completion record.
