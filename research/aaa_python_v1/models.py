@@ -188,10 +188,12 @@ class CoreModel:
 
     # ------------------------------------------------------------------ forward
     def _dense_tool(self, tool: np.ndarray | None) -> np.ndarray | None:
-        if self.config.tool_inputs == 0:
+        """Tool evidence for this input; absent evidence (every non-repair family) contributes nothing."""
+
+        if self.config.tool_inputs == 0 or tool is None:
             return None
-        if tool is None or tool.shape != (self.config.tool_inputs,):
-            raise ValueError("this model requires tool inputs of the declared width")
+        if tool.shape != (self.config.tool_inputs,):
+            raise ValueError("tool inputs must have the declared width")
         return tool
 
     def core(self, x: Sparse, tool: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray | None]:

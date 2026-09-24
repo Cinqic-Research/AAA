@@ -297,6 +297,21 @@ class ModelTests(unittest.TestCase):
             ]
             self.assertLess(abs(count - budget) / budget, 0.15)
 
+    def test_tool_model_accepts_families_without_tool_evidence(self) -> None:
+        model = CoreModel(ModelConfig("e1", 32, 4, tool_inputs=2, seed=1))
+        plain = CoreModel(ModelConfig("e1", 32, 4, seed=1))
+        plain.params = {
+            k: (v if k != "core.W" else model.params["core.W"][:, :32]) for k, v in model.params.items()
+        }
+        for family in ("syntax", "outcome"):
+            task = _train(family, 1)[0]
+            view = view_of(task, 0, SPEC)
+            _, p_tool = model.distribution(view, model.encoder.encode(view))
+            _, p_plain = plain.distribution(view, plain.encoder.encode(view))
+            self.assertTrue(np.allclose(p_tool, p_plain))
+        with self.assertRaises(ValueError):
+            model.core(model.encoder.encode(view_of(_train("syntax", 1)[0], 0, SPEC)).program, np.zeros(3))
+
     def test_frozen_agent_never_updates(self) -> None:
         task = _train("outcome", 1)[0]
         agent = CoreAgent(CoreModel(ModelConfig("e0", 32, 0)))

@@ -90,7 +90,8 @@ D = 256; the full 2,400-program training pool per family; per-arm tuning of
 learning rate {0.03, 0.1, 0.3} x epochs {1, 3, 8} on the development *tune*
 range with its own initializations; evaluation on 10 initializations x 30
 streams x 40 tasks of the *evaluate* range, frozen and online; crossed
-bootstrap intervals (4,000 draws); Holm across each stage's primary contrasts.
+bootstrap intervals (4,000 draws); Holm across the five families of each
+primary contrast.
 Development results guide engineering. They are never confirmation.
 
 1. **Encoders at matched capacity.** `e0`, `e1`, `e2` behind (a) the linear
@@ -114,7 +115,9 @@ Development results guide engineering. They are never confirmation.
    gradient clipping at norm 1.
 5. **Tool.** Repair with and without the visible-test tool inputs at the
    selected core sizes, against the `visible_tests` baseline.
-6. **Adaptation and retention** (drift design) at 1K and 10K.
+6. **Adaptation and retention** (drift design) at 1K and 10K: 10 initializations x
+   15 streams, branches of 20 tasks (the adapt range holds 300 `novel_structure`
+   tasks per family), probe bank of 100.
 7. **Plasticity** at 1K and 10K ([plasticity protocol](aaa_python_v1_protocol.md#plasticity)).
 
 ## Capacity decision rule (declared before any capacity arm ran)

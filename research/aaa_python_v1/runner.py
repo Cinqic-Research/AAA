@@ -31,7 +31,11 @@ def tool_vector(results: Sequence[Sequence[bool]]) -> np.ndarray:
 def run_task(agent: Agent, env: ToolEnvironment, task: Task, *, learn: bool = True) -> dict[str, Any]:
     agent.begin_task()
     view = env.present(task)
-    if getattr(agent, "uses_tool", False) and task.family == "repair":
+    if (
+        getattr(agent, "uses_tool", False)
+        and task.family == "repair"
+        and not getattr(agent, "training", False)
+    ):
         results = env.run_visible_tests(view)
         store = agent.tool_results  # type: ignore[attr-defined]
         store.clear()

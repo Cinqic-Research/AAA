@@ -72,7 +72,7 @@ DESIGN: dict[str, Any] = {
     "evaluate": {"initializations": 10, "streams": 30, "stream_length": 40},
     "adapt": {
         "initializations": 10,
-        "streams": 16,
+        "streams": 15,
         "branch": 20,
         "changed_slice": "novel_structure",
         "control_slice": "in_distribution",
@@ -167,7 +167,11 @@ def _score(agent: Agent, env: ToolEnvironment, task: Task, learn: bool) -> tuple
 
     agent.begin_task()
     view = env.present(task)
-    if getattr(agent, "uses_tool", False) and task.family == "repair":
+    if (
+        getattr(agent, "uses_tool", False)
+        and task.family == "repair"
+        and not getattr(agent, "training", False)
+    ):
         from .runner import tool_vector
 
         results = env.run_visible_tests(view)
@@ -321,6 +325,31 @@ def baseline_job(name: str, init: int) -> dict[str, Any]:
             c, _ = frozen_pass(agent, stream)
             correct += c
         result["families"][family] = {"frozen": {"bits": bits(correct)}}
+    return result
+
+
+def v0_instrument_job(init: int) -> dict[str, Any]:
+    """v0's unmodified ``OnlineLinear`` at v0's declared budget, scored frozen on v1's streams (an anchor)."""
+
+    from research.aaa_python import spec as v0_spec
+    from research.aaa_python.experiment import make_learner
+    from research.aaa_python.experiment import train as v0_train
+
+    v0 = v0_spec.load()
+    learner = make_learner(v0, init, v0["learner"]["default_representation"])
+    tasks = train_tasks(v0["splits"]["pool_per_family"]["train"])
+    v0_train(
+        learner, tasks, v0["learner"]["train_epochs"], derive_seed("aaa.python.v0", "train-order", init), v0
+    )
+    learner.update_enabled = False
+    result: dict[str, Any] = {"arm": "v0_instrument", "init": init, "families": {}}
+    for family in FAMILIES:
+        correct: list[bool] = []
+        for stream in eval_streams(family):
+            c, _ = frozen_pass(learner, stream)
+            correct += c
+        result["families"][family] = {"frozen": {"bits": bits(correct)}}
+    result["parameters"] = learner.parameter_count()
     return result
 
 
