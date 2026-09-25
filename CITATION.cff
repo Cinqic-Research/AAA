@@ -4,7 +4,7 @@ message: "If you refer to this work, please cite it as below."
 type: software
 authors:
   - name: "Cinqic"
-repository-code: "https://github.com/Cinqic/AAA"
+repository-code: "https://github.com/Cinqic-Research/AAA"
 license: Apache-2.0
 version: "0.2.0"
 abstract: >-

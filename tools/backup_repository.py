@@ -12,7 +12,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-SOURCE = "https://github.com/Cinqic/AAA"
+SOURCE = "https://github.com/Cinqic-Research/AAA"
 SCHEMA = "aaa.git-backup.v1"
 
 
@@ -83,7 +83,7 @@ def create(repo: Path, output_root: Path) -> tuple[Path, Path]:
     record = {
         "schema": SCHEMA,
         "source": SOURCE,
-        "canonical": "GitHub Cinqic/AAA main; backups never write back automatically",
+        "canonical": "GitHub Cinqic-Research/AAA main; backups never write back automatically",
         "canonical_main": local_main,
         "canonical_tree": git(repo, "rev-parse", "refs/remotes/origin/main^{tree}"),
         "created_utc": datetime.now(timezone.utc).isoformat(),

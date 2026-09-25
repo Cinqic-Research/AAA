@@ -2299,3 +2299,178 @@ evidence was produced, so no retained evidence carries them.
   existing safety and leakage checks retain their narrower scope.
 - **Regression** The existing public validator refusal is exercised in the
   safety suite; direct child confinement is explicitly not claimed.
+
+## Evidence-gated pre-scale phase (`aaa.python.v1`, 2026-09-24)
+
+Found while auditing the repository before designing the ~10K candidate.
+Every entry was reproduced before any repair. v0 source, specification,
+golden keys and retained evidence are unchanged except where an entry says a
+verification *tool* was repaired; benchmark defects in v0 are retained as
+history and repaired prospectively in `aaa.python.gen.v1`.
+
+### AAA-192 — v0 repair candidates reveal the answer by edit-distance geometry
+- **Source** self, confirmed independently by an audit subagent · **Severity** high · **Status** repaired prospectively (v1); v0 retained
+- **Reproduction** In `aaa.python.v0`, every repair candidate is the correct line
+  or a single-token mutation of it (`research/aaa_python/generator.py`,
+  `repair_candidate`). The candidate at minimum total token edit distance from
+  the others is correct 0.923 (train) and 0.900 (development) of the time
+  without executing anything; v0's heuristic scored 0.37 and its learner 0.24
+  (`docs/evidence/aaa_python_v1/diagnostics/probe_repair.log`).
+- **Root cause** Distractors were generated around the correct line, so it is
+  the medoid of the candidate set.
+- **Impact** v0's repair family measured a shortcut a learner could exploit;
+  v0's learner did not, so no v0 number overstates capability, but the family
+  was not measuring repair selection.
+- **Repair** `gen.v1` draws all four candidates as single mutations of a hidden
+  base line under a symmetric mutation relation. A first v1 draft reused v0's
+  asymmetric mutations (deltas +1/-1/+2, one-way `*`->`+`), which would have
+  left the correct line identifiable around the base; the committed relation
+  is tested symmetric. v1 development: medoid 0.322 (chance among the three
+  non-current candidates 0.333); a fitted edit-type prior 0.423.
+- **Regression** `tests/test_aaa_python_v1.py` (symmetry, shared hidden base);
+  the `medoid` baseline runs in every v1 evaluation as a permanent attack.
+
+### AAA-193 — v0 baselines were weaker than their names
+- **Source** audit subagent, reproduced · **Severity** medium · **Status** repaired prospectively (v1); v0 retained
+- **Reproduction** `research/aaa_python/learners.py` `Heuristic.act` has no
+  `outcome` branch and returns the majority label, so v0's "beats the heuristic
+  in none" for `outcome` compared against majority. A fitted rule (risky
+  constructs present -> training-majority label) scores 0.765 on v0
+  development against the learner's 0.563. v0's `majority` on repair learns
+  only from its own choices, always index 0.
+- **Impact** v0 under-reported how easily simple rules beat the learner.
+- **Repair** v1 adds fitted stupid `rules`, `medoid` and the `visible_tests`
+  tool baseline, and a repair majority that explores uniformly in training.
+
+### AAA-194 — Half of v0 localization programs were trivially localizable
+- **Source** audit subagent, reproduced · **Severity** medium · **Status** repaired prospectively (v1); v0 retained
+- **Reproduction** v0 adds a second (decoy) fault with probability one half.
+  A localization program must fail, so with one fault "the only risky line" is
+  correct 97-99% of the time.
+- **Repair** Every v1 `localize` program carries two value-dependent faults;
+  "first risky line" falls to 0.63 on v1 development.
+- **Regression** `tests/test_aaa_python_v1.py::test_localize_programs_always_have_two_faults`.
+
+### AAA-195 — v0 recomputation accepted evidence that departed from the declared design
+- **Source** audit subagent · **Severity** high · **Status** repaired
+- **Reproduction** At `cb4170e`, removing every record and cell of
+  initialization 2, or re-deriving the summary with `plan.draws = 50`, gave
+  `recompute` verdict `PASS` (reproduced with rebuilt, internally consistent
+  tampered files). The plan was read from the evidence and never compared
+  with the specification; the cell set was never compared with the design.
+- **Impact** A development result could have been re-summarized under a
+  searched bootstrap budget or a subset of initializations and still verify.
+  The retained v0 evidence was produced at a clean commit and is unaffected.
+- **Repair** `recompute` requires the stored plan to equal the packaged plan
+  (full or quick) and the cells to be exactly the declared grid with declared
+  counts. A new `--rerun` re-executes the plan from source and requires the
+  identical records digest and trained-state hashes; this is the only check
+  that sees a learner answer replaced by the truth (a consistent record). The
+  retained v0 evidence passes, including `--rerun`. Malformed input is a
+  refusal (exit 2), not a traceback.
+- **Regression** `tests/test_aaa_python_v0_repairs.py`.
+
+### AAA-196 — v0's resolved online effect rests on five tasks; the design under-covers
+- **Source** audit subagent, reproduced in part · **Severity** medium · **Status** open (claim scope)
+- **Reproduction** v0's only resolved online-versus-frozen sign ("online is
+  worse on `output`", -0.020 [-0.030, -0.010]) comes from 7 online-wrong /
+  frozen-right actions on 5 distinct tasks, against 1 action the other way
+  (verified from the retained records). The audit's null simulation of the
+  3 x 4 crossed percentile bootstrap covered 0.84-0.90 instead of 0.95, and
+  about 75 intervals were reported without multiplicity control.
+- **Impact** The sign is correctly computed but practically fragile; it must
+  not be read as evidence that online learning harms output prediction.
+- **Disposition** v0's report is generated from frozen evidence and is not
+  rewritten. v1 uses 10 x 30 cells, Holm adjustment per contrast and a
+  `DEGENERATE` status for contrasts whose arms never disagree.
+
+### AAA-197 — v0's learner was under-trained, confounding its negative result
+- **Source** audit subagent; reproduced by the implementer · **Severity** high (claim impact) · **Status** open for v0 (true for its budget); remedied in v1
+- **Reproduction** Same features, same rate, only more passes over the same
+  600 training programs per family: syntax 0.533 / 0.816 / 0.893 and outcome
+  0.641 / 0.677 / 0.677 at 2 / 6 / 20 epochs; output and localization do not
+  move (`docs/evidence/aaa_python_v1/diagnostics/epochs_diag.log`).
+- **Impact** "Surface heuristics beat the learner on syntax" is true of v0's
+  declared two-epoch budget, and says little about the learner class. The
+  pre-scale bottleneck for syntax was partly optimization budget.
+- **Disposition** v1 tunes every arm's budget on a separate tuning range with
+  separate initializations before evaluation.
+
+### AAA-198 — A v0 checkpoint could resume under changed learner code
+- **Source** audit subagent · **Severity** medium · **Status** repaired
+- **Reproduction** The checkpoint identity covered the specification and the
+  training pool only; with a changed learning rule, `develop --checkpoints`
+  resumed from the old state silently.
+- **Repair** The identity also binds a digest of every Python source file of
+  the v0 package; a mismatch refuses.
+- **Regression** `tests/test_aaa_python_v0_repairs.py::CheckpointCodeBindingTests`.
+
+### AAA-199 — v0 learner state omits some configuration; its feature cache is writable
+- **Source** audit subagent · **Severity** low · **Status** open in v0 (latent); not present in v1
+- **Reproduction** `OnlineLinear.config()` omits `init_scale`, so two learners
+  differing only in it share a `state_hash`; the remembered initial state for
+  the reset control is not hashed; cached feature arrays are shared by clones
+  and writable, so an in-place edit in one arm would change another's inputs.
+- **Impact** None on retained evidence: no code path writes to a cached
+  vector and `init_scale` is fixed by the specification. Repairing v0's
+  config would change every recorded v0 trained-state hash and break the
+  bit-exact reproduction of v0's evidence, so v0 keeps it.
+- **v1** `ModelConfig` covers every hyperparameter; encodings are read-only;
+  `state_hash` covers parameters and optimizer state (tests).
+
+### AAA-200 — `NeuralAgent.branch` downgrades a Champion 1 agent outside its context
+- **Source** dot-era claim-map subagent; reproduced · **Severity** low (latent) · **Status** open (frozen source)
+- **Reproduction** `research/aaa_1k/agents.py` `branch()` constructs the base
+  `NeuralAgent`. `ReachGatedUnfoldAgent(...).branch(...)` returns a
+  `NeuralAgent` (Champion 0's unfolding rule) outside `champion_1_world()` and
+  a `ReachGatedUnfoldAgent` inside it (verified at runtime).
+- **Impact** None on retained evidence: every Champion 1 run executes inside
+  `champion_1_world()`, which replaces the module-level class. A future reuse
+  outside that context would silently compare Champion 0 branches.
+- **Disposition** The v1 phase fingerprint covers `research/aaa_1k/`, so the
+  source is not edited. Future work must branch Champion 1 only inside the
+  context or through a successor with `type(self)` construction.
+
+### AAA-201 — The v2 report says the error head under-predicts error; it over-predicts
+- **Source** dot-era claim-map subagent; reproduced · **Severity** low · **Status** open (protected report); erratum
+- **Reproduction** `docs/aaa_1k_v2_report.md` (generated by
+  `tools/write_aaa_1k_v2_report.py`) says the head "under-predicts their
+  scale". The retained primitives define bias as `mean(estimate - realized)`;
+  it is positive in 2,771 of 3,328 Champion 1 cells (median +0.00083), and a
+  calibration slope of 0.38 means the estimates vary more than realized error
+  tracks them.
+- **Impact** Interpretive prose only; no number or decision changes.
+- **Disposition** The report is a protected identity; the correction is in
+  [errata](errata.md).
+
+### AAA-202 — Loop 0006 confirmation source drifted after its freeze, undetected
+- **Source** dot-era claim-map subagent; reproduced · **Severity** low · **Status** open
+- **Reproduction** `freeze.confirmation_source_fingerprint(".")` at `cb4170e`
+  differs from the value in `docs/evidence/aaa1k_loop_0006/freeze_2.json`
+  (`83f363b3...`) in 20 files changed by later review and formatting commits.
+  `recompute4` still reproduces `PROMOTE` from the retained primitives.
+- **Impact** The decision is unaffected; re-*executing* the loop confirmation
+  must use the recorded freeze commit, and nothing warns when HEAD is used.
+
+### AAA-203 — Current tooling and guidance pointed at a repository that no longer resolves
+- **Source** self · **Severity** medium · **Status** repaired
+- **Reproduction** The canonical repository moved to `Cinqic-Research/AAA`;
+  `git ls-remote https://github.com/Cinqic/AAA.git` returns "Repository not
+  found". `tools/backup_repository.py` fetched from that URL, so a backup of
+  canonical `main` could not run; README, CONTRIBUTING-facing links,
+  `pyproject.toml`, `CITATION.cff`, `SECURITY.md`, `docs/reproduction.md` and
+  the work and backup policies named it.
+- **Repair** Current tooling and guidance name `Cinqic-Research/AAA`. Protected
+  historical reviews keep their original links.
+
+### AAA-204 — v1 pipeline defects found by a smoke run before any observation
+- **Source** self · **Severity** low · **Status** repaired
+- **Reproduction** Before any v1 development identity was observed: a
+  tool-input model raised on families without tool evidence; the
+  visible-test baseline ran the sandboxed tool on every training task it never
+  uses; the adaptation design declared 320 `novel_structure` tasks per family
+  where the adapt range holds 300; Holm pooled all primary contrasts although
+  the declared capacity rule adjusts across the five families of each.
+- **Repair** Absent tool evidence contributes zero (regression test); tools
+  run only when used; 15 x 20 branches; Holm per contrast. All fixed before
+  observation and recorded in the committed brief.

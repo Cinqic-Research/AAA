@@ -2,7 +2,7 @@
 
 | Role | Location | Meaning |
 |---|---|---|
-| Canonical | GitHub `Cinqic/AAA` `main` | Only ordinary reviewed GitHub merges advance the canonical repository. |
+| Canonical | GitHub `Cinqic-Research/AAA` `main` | Only ordinary reviewed GitHub merges advance the canonical repository. |
 | Local working and backup | FLOWBOX `Cinqic Storage` ext4 HDD | Checkouts, experiment data and commit-addressed Git bundles. Two directories on one HDD are one failure domain. |
 | Off-device backup | Private Hugging Face Bucket, when write access is authorized | Secondary copy of the exact Git bundle and manifest. It never changes GitHub automatically. |
 

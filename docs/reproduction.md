@@ -10,7 +10,7 @@ The [work policy](agent_work_policy.md) gives the host-specific rule. CI and
 other hosts use their own storage roots.
 
 ```bash
-git clone https://github.com/Cinqic/AAA.git
+git clone https://github.com/Cinqic-Research/AAA.git
 cd AAA
 python3 -m venv .venv
 . .venv/bin/activate

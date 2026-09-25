@@ -38,9 +38,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Cinqic/AAA"
-Source = "https://github.com/Cinqic/AAA"
-Issues = "https://github.com/Cinqic/AAA/issues"
+Homepage = "https://github.com/Cinqic-Research/AAA"
+Source = "https://github.com/Cinqic-Research/AAA"
+Issues = "https://github.com/Cinqic-Research/AAA/issues"
 
 [project.scripts]
 aaa = "aaa.cli:main"

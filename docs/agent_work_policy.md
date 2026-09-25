@@ -1,6 +1,6 @@
 # AAA work, evidence and backup policy
 
-GitHub [`Cinqic/AAA` `main`](https://github.com/Cinqic/AAA) is canonical. The
+GitHub [`Cinqic-Research/AAA` `main`](https://github.com/Cinqic-Research/AAA) is canonical. The
 Cinqic HDD is the FLOWBOX working disk and a local backup location. Hugging
 Face is a secondary off-device backup, never a source of automatic changes to
 GitHub. Recover from a backup only to a known canonical commit or by an

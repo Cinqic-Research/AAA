@@ -110,7 +110,7 @@ See the [work policy](docs/agent_work_policy.md) and
 storage roots.
 
 ```bash
-git clone https://github.com/Cinqic/AAA.git
+git clone https://github.com/Cinqic-Research/AAA.git
 cd AAA
 python3 -m venv .venv
 . .venv/bin/activate
