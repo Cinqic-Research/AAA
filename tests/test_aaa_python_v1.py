@@ -479,3 +479,22 @@ class CliExitTests(unittest.TestCase):
 
         with mock.patch.object(freeze, "load_manifest", side_effect=freeze.FreezeError("none")):
             self.assertEqual(cli.main(["confirm", "--output", "/nonexistent/x.json"]), 2)
+
+
+class StagePlanTests(unittest.TestCase):
+    def test_later_stages_read_selections_from_stage_documents(self) -> None:
+        from research.aaa_python_v1 import cli
+
+        arms = {f"h16@{e}": {} for e in ("e0", "e1", "e2")}
+        summary = {
+            "arms": {
+                name: {f: {"frozen": {"mean": 0.5 + 0.1 * (name == "h16@e2")}} for f in FAMILIES}
+                for name in arms
+            }
+        }
+        previous = {"encoders": {"stage": {"summary": summary}}}
+        plan_arms, primary, _, _, selections = cli.plan("heads", previous)
+        self.assertEqual(selections["encoder"], "e2")
+        self.assertEqual(len(plan_arms), 4)
+        self.assertTrue(all(a.encoder == "e2" for a in plan_arms))
+        self.assertEqual(len(primary), 2)

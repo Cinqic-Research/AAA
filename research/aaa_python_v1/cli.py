@@ -65,10 +65,10 @@ def plan(
             ["uniform", "majority", "lookup", "v0_heuristic", "rules", "medoid", "visible_tests"],
             {},
         )
-    encoder = stages.select_encoder(_selected(previous, "encoders")["summary"])
+    encoder = stages.select_encoder(_selected(previous, "encoders")["stage"]["summary"])
     if stage == "heads":
         return stages.head_arms(encoder), stages.head_primary(encoder), [], [], {"encoder": encoder}
-    output, localize = stages.select_heads(_selected(previous, "heads")["summary"], encoder)
+    output, localize = stages.select_heads(_selected(previous, "heads")["stage"]["summary"], encoder)
     selections = {"encoder": encoder, "output_head": output, "localize_head": localize}
     if stage == "capacity":
         return (
@@ -128,7 +128,7 @@ def run_life_stage(stage: str, previous: dict[str, Any], workers: int) -> dict[s
     from .plasticity import PLASTICITY, life_job, summarize_plasticity
     from .summarize import summarize_adapt
 
-    encoder = stages.select_encoder(_selected(previous, "encoders")["summary"])
+    encoder = stages.select_encoder(_selected(previous, "encoders")["stage"]["summary"])
     capacity = _selected(previous, "capacity")["stage"]
     arms = stages.adapt_or_plasticity_arms(capacity, encoder)
     selected = {a.name: {"learning_rate": a.learning_rate, "epochs": a.epochs} for a in arms}
