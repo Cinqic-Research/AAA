@@ -392,14 +392,69 @@ def adapt_job(arm: ArmSpec, learning_rate: float, epochs: int, init: int) -> dic
 
 
 # ------------------------------------------------------------------- orchestration
+def _job_key(function: Callable[..., Any], job: tuple[Any, ...]) -> str | None:
+    """A resumption key bound to the running source; ``None`` disables resumption.
+
+    Enabled only when ``AAA_DATA_ROOT`` is set. The key covers the phase
+    fingerprint, the specification, the design and the job's arguments, so a
+    result produced by different code or a different design is never reused.
+    """
+
+    if not os.environ.get("AAA_DATA_ROOT"):
+        return None
+    from .identity import fingerprint
+
+    global _FINGERPRINT
+    if _FINGERPRINT is None:
+        _FINGERPRINT = fingerprint()["sha256"]
+    arguments = [a.to_json() if isinstance(a, ArmSpec) else a for a in job]
+    return digest([_FINGERPRINT, spec_module.spec_hash(), DESIGN, function.__name__, arguments])
+
+
+_FINGERPRINT: str | None = None
+
+
+def _resume_path(key: str) -> Any:
+    from pathlib import Path
+
+    return Path(os.environ["AAA_DATA_ROOT"]) / "resume" / "aaa_python_v1" / f"{key}.json"
+
+
 def _map(
     function: Callable[..., dict[str, Any]], jobs: Sequence[tuple[Any, ...]], workers: int
 ) -> list[dict[str, Any]]:
+    """Run jobs in order; finished jobs of an interrupted run are reused when their key matches."""
+
+    keys = [_job_key(function, job) for job in jobs]
+    results: list[dict[str, Any] | None] = [None] * len(jobs)
+    for i, key in enumerate(keys):
+        if key is not None and _resume_path(key).is_file():
+            stored = json.loads(_resume_path(key).read_text(encoding="utf-8"))
+            if stored.get("key") == key:
+                results[i] = stored["result"]
+    pending = [i for i, r in enumerate(results) if r is None]
+
+    def keep(i: int, result: dict[str, Any]) -> None:
+        results[i] = result
+        key = keys[i]
+        if key is not None:
+            path = _resume_path(key)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+            temporary.write_text(
+                json.dumps({"key": key, "result": result}, allow_nan=False), encoding="utf-8"
+            )
+            temporary.replace(path)
+
     if workers <= 1:
-        return [function(*job) for job in jobs]
-    with ProcessPoolExecutor(max_workers=workers) as pool:
-        futures = [pool.submit(function, *job) for job in jobs]
-        return [future.result() for future in futures]
+        for i in pending:
+            keep(i, function(*jobs[i]))
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(function, *jobs[i]): i for i in pending}
+            for future, i in futures.items():
+                keep(i, future.result())
+    return [r for r in results if r is not None]
 
 
 def warm_pools() -> None:
