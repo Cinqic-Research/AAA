@@ -106,6 +106,7 @@ jobs:
             python -m research.aaa_python_v1 summarize --evidence "$evidence"
             python -m research.aaa_python_v1 recompute --evidence "$evidence"
           done
+          python tools/check_aaa_python_v1_decisions.py
           python tools/write_aaa_python_v1_report.py --check
 
       # ---- Dot-era benchmark integrity (retained evidence, recomputation) --

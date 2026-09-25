@@ -3,7 +3,7 @@
 Stated plainly, because a benchmark that cannot say what it does not show is
 not measuring much.
 
-## Current phase: `aaa.python.v0`
+## Historical first Python phase: `aaa.python.v0`
 
 - **No Python capability is demonstrated.** On retained development evidence
   the minimal learner beats chance, beats its memory-disabled control in four
@@ -305,7 +305,8 @@ evidence, so they are characterizations rather than confirmed claims.
 - **One model family.** Capacity was varied as the width of one shared `tanh`
   layer over fixed hashed encoders. Other ~10K architectures (recurrent,
   sparse, graph, trainable encoders) were not tested; "10K is not justified"
-  means *this family* at *these tasks* gains nothing from 4K to 10K.
+  means *this family* at *these tasks* did not establish enough added gain
+  from 4K to 10K to justify the larger size.
 - **One-hot output head.** The declared head rule kept the 101-way output
   head (the ordinal Gaussian head failed), so about a third of every size's
   parameters sit in that head; 1K buys only a 2-unit core. A better output

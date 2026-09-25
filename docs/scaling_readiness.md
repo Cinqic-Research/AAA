@@ -1,7 +1,8 @@
 # Scaling readiness
 
 **Current verdict (2026-09-25, `aaa.python.v1`): `SCALE_NOT_JUSTIFIED` for ~10K.
-Capacity up to ~4K is justified on fresh evidence; beyond ~4K it is not. The
+Capacity through ~4K improves this tested family on fresh evidence; an added
+gain from ~4K to ~10K is unresolved and has not earned its cost. The
 larger measured levers are representation, output formulation and tool use.**
 
 The question was whether about ten times Champion 1's trainable capacity
@@ -20,9 +21,9 @@ brief](aaa_python_v1_research_brief.md)):
 | Optimization not the main blocker | budgets tuned per arm; a 64-epoch extension changes little; optimizer arms one at a time |
 | Capacity improves the weakness | 10K over 1K: confirmation `PROMOTE` (0.785) |
 | **Would ~4K do the same?** | **yes**: 4K over 1K `PROMOTE` (0.798); 10K over 4K `INCONCLUSIVE` (0.983 [0.942, 1.025]); no family where 10K earns its size over 4K, in development, attack or confirmation |
-| Adaptation, retention, plasticity | 4K adapts at least as well as 10K; 10K is markedly *worse* than 4K at learning a conflicting mapping (fresh-learner gap -0.122) |
+| Adaptation, retention, plasticity | development diagnostics only: 4K adapts at least as well as 10K; the post-hoc comparison finds 10K *worse* than 4K at learning a conflicting mapping (fresh-learner gap -0.122) |
 | Compute | not a constraint (CPU, minutes per stage) and not evidence |
-| Independent recomputation | every stage and the confirmation recompute independently; re-adjudication reproduces every verdict |
+| Independent recomputation | every stage and the confirmation recount their measured primitives; a post-freeze decision audit additionally checks the stored Holm, capacity and contract verdicts against those primitives |
 | Independent review | **not yet**: the implementer's self-review is not independent |
 
 The pre-registered requirement for `SCALE_JUSTIFIED` (freeze hypothesis

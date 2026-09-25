@@ -2477,3 +2477,57 @@ history and repaired prospectively in `aaa.python.gen.v1`.
   run only when used; 15 x 20 branches; Holm per contrast. All fixed before
   observation and recorded in the committed brief. `fingerprint` now refuses
   with exit 2 outside a checkout (regression test).
+
+### AAA-205 — V1 recomputation did not verify stored scientific decisions
+- **Source** independent Codex GPT-6 review of PR #29 · **Severity** high · **Status**
+  repaired by a post-freeze audit gate; the frozen recompute source is retained.
+- **Reproduction** At PR head `f351d575`, changing only
+  `confirmation.json`'s `scale_over_4k.verdict` to `PROMOTE`, its
+  `capacity_verdict.verdict` to `SCALE_JUSTIFIED_PENDING_ADAPTATION_AND_PLASTICITY`,
+  or a stored Holm field still yielded `PASS` from
+  `research.aaa_python_v1.recompute.verify_document`. The separate `summarize`
+  command catches the Holm change but does not check capacity or adjudication
+  fields. This is a verification gap, not evidence that the retained verdicts
+  are numerically wrong.
+- **Repair** `tools/check_aaa_python_v1_decisions.py` first runs the existing
+  primitive recount, then regenerates the full summary, capacity rule and all
+  four frozen promotion contracts from retained correctness bits. CI runs it;
+  mutation regression tests reject each altered decision field. The tool and
+  tests are outside the committed v1 fingerprint, which remains unchanged.
+  The frozen source and spent confirmation identities were not rewritten.
+
+### AAA-206 — Newly retained Python evidence was outside the protected-file manifest
+- **Source** independent Codex GPT-6 review of PR #29 · **Severity** medium ·
+  **Status** repaired.
+- **Reproduction** The manifest expected 471 files and the protected-file
+  selector found 493 tracked paths. The 22 unrecorded paths were newly added
+  Python evidence and diagnostics, including the v1 freeze and confirmation;
+  altering those bytes would not have failed the protected identity check.
+- **Repair** Added only those 22 current hashes to
+  `benchmarks/protected_identities.json`, preserving all four prior scientific
+  identities and every existing expected hash. The check now covers 493 files.
+
+### AAA-207 — V1 attribution and repair-choice wording exceeded the tested design
+- **Source** independent Codex GPT-6 review of PR #29 · **Severity** medium ·
+  **Status** narrowed in current-facing text; frozen source retained.
+- **Reproduction** The encoder confirmation compares eight epochs for `e1`
+  with 32 for `e2`, though both have 6,662 trainable parameters. The repair
+  generator always includes one candidate identical to the visible buggy
+  line, which can be discarded without execution. The statistics module's
+  Holm description refers to widened intervals, while its code adjusts
+  bootstrap tail probabilities and retains 95% intervals.
+- **Repair** Current-facing claims and errata describe the separately tuned
+  pipelines, fixed structural prior and visible one-in-three eligible-choice
+shortcut. No scientific generator or analysis source changed after the
+  confirmation freeze.
+
+### AAA-208 — V1 literature review conflated related mechanisms
+- **Source** independent Codex GPT-6 review of PR #29 · **Severity** low ·
+  **Status** clarified by dated erratum.
+- **Reproduction** Shaw et al. study pairwise relative attention rather than
+  absolute boundary indices; ByT5 is a byte-level Transformer, not a byte
+  recurrent network; Lyle et al. show plasticity loss without saturated units;
+  Kumar et al. test L2 toward initialization, not the plain L2 arm tested here.
+- **Repair** The erratum scopes each citation and distinguishes the tested AAA
+  interventions from those in the cited papers. The pre-development review is
+  retained as written for chronology.

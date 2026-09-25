@@ -232,3 +232,38 @@ protected byte for byte by `tools/check_protected_identities.py`.
 | `aaa_python_development_report.md` | online updating is "resolved worse than frozen in `output`" | correctly computed but fragile: 7 actions on 5 distinct tasks against 1 (`AAA-196`) |
 | `aaa_python_development_report.md` (`repair`), `aaa_python_protocol.md` | the repair family measures candidate repair selection | its correct candidate was the edit-distance medoid of the candidates (`AAA-192`); a non-executing rule scores 0.90. v0's learner did not exploit it |
 | `aaa_python_development_report.md` (`outcome`) | the learner "beats the heuristic in none" | v0's `outcome` heuristic was the majority baseline (`AAA-193`); a fitted fault-pattern rule scores 0.765 against the learner's 0.563 |
+## PR #29 independent audit, 2026-09-25
+
+The frozen `aaa.python.v1` architecture document says no comparison changes
+two variables at once. Its encoder contrast holds trainable parameters and
+heads fixed, but the development selection chose eight epochs for `e1` and
+32 for `e2`; the confirmation compares those separately tuned pipelines.
+The `e2` advantage is also visible at matched eight epochs in development,
+but the confirmation does not isolate encoder design from training budget or
+fixed preprocessing and domain knowledge. The architecture document is part
+of the committed phase fingerprint and is retained unchanged.
+
+The repair generator places the visible buggy line among four candidates,
+and the unique correct candidate is a different line. Excluding the unchanged
+candidate raises the eligible random baseline from one in four to one in
+three. This is a visible task construction cue, not hidden oracle leakage;
+the `e2` edit features and rule baselines can use it. The generator remains
+unchanged so the retained confirmation continues to describe the tested task.
+
+The `aaa.python.v1` statistics module describes Holm as widening intervals.
+The executable method adjusts empirical bootstrap tail probabilities across
+the five families for each primary contrast; displayed intervals remain 95%.
+These tail probabilities are bootstrap approximations, not exact randomization
+tests. The original module remains unchanged under the phase fingerprint.
+
+The pre-development [literature review](aaa_python_v1_literature_review.md)
+also needs source-scoped interpretation. [Shaw et al.](https://arxiv.org/abs/1803.02155)
+study pairwise relative positions in attention; v1's line indices from the
+start and end are absolute boundary features, so their sufficiency is an AAA
+hypothesis. [ByT5](https://arxiv.org/abs/2105.13626) is a byte-level
+Transformer, not evidence for a small byte GRU. [Lyle et al.](https://arxiv.org/abs/2303.01486)
+show plasticity loss can occur without saturated units; saturation is one
+diagnostic, not a necessary precursor. [Kumar et al.](https://arxiv.org/abs/2308.11958)
+propose regularization toward initial parameters and contrast it with plain
+L2 toward zero. V1 tested plain L2 as its own optimization arm, not L2 Init.
+The pre-development document remains intact as a dated design record.

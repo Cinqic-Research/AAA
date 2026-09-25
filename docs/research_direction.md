@@ -1,11 +1,11 @@
 # Current research direction: Coding, beginning with Python
 
-Decision date: 2026-09-23. Updated 2026-09-23 when `aaa.python.v0` began.
+Decision date: 2026-09-23. Updated 2026-09-25 for the `aaa.python.v1` result.
 This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
 charter, whose principles still apply, and outside the `aaa.1k.v2`
 protocol. It claims no capability.
 
-- **AAA** (Accurate Autonomous Adaptation) is the research programme.
+- **AAA** (Accurate Autonomous Adaptation) is the research program.
 - **Juniper** is the persistent artificial agent that successful AAA research
   is intended to produce.
 - **Autonomy** is the long-term objective.
@@ -48,7 +48,7 @@ rungs it depends on have measured baselines.
 | 6 | Exception classification | family `outcome` |
 | 7 | Function-level reasoning | partly: `output` function templates, `repair` |
 | 8 | Function completion | roadmap |
-| 9 | Test-conditioned behaviour | partly: `repair` shows two visible tests |
+| 9 | Test-conditioned behavior | partly: `repair` shows two visible tests |
 | 10 | Bug localization | family `localize` |
 | 11 | Candidate repair selection | family `repair` |
 | 12 | Free-form repair, when earned | roadmap |
@@ -68,7 +68,7 @@ rungs it depends on have measured baselines.
 `aaa.python.v1` re-measures rungs 1-11 and 14-19 on a repaired exam with
 declared generalization slices; its [development report](aaa_python_v1_development_report.md)
 has the numbers. "Measured" means an instrument exists. It does not mean the capability exists.
-The first development result is negative on nearly every rung it measures
+The v0 development result is negative on nearly every rung it measures
 ([report](aaa_python_development_report.md)).
 
 ## Evaluation rules
@@ -122,7 +122,7 @@ extracted only when a second domain actually needs the same code.
   additional capability supporting communication, instruction following,
   explanation, knowledge exchange, reasoning interfaces and interaction with
   people. It is **not** a current objective. No English training, general text
-  corpus or conversational behaviour is introduced, and the first Python phase
+  corpus or conversational behavior is introduced, and the first Python phase
   requires no English competence. Choices that would make a later expansion
   impossible are avoided where that costs nothing; for example, the byte-level
   representation can represent any text. Evidence from the Python work decides
