@@ -25,7 +25,7 @@ from . import spec as spec_module
 from .experiment import DESIGN, ArmSpec, run_adapt, run_stage, v0_instrument_job
 from .summarize import summarize
 
-STAGES = ("encoders", "heads", "capacity", "optimization", "tool", "adapt", "plasticity", "attack")
+STAGES = ("encoders", "heads", "capacity", "budget", "optimization", "tool", "adapt", "plasticity", "attack")
 
 
 def write_json(path: Path, payload: Any) -> None:
@@ -79,6 +79,16 @@ def plan(
             selections,
         )
     capacity = _selected(previous, "capacity")["stage"]
+    if stage == "budget":
+        if not stages.budget_trigger(capacity, encoder):
+            raise SystemExit("the declared budget-extension trigger did not fire; the diagnostic is not run")
+        return (
+            stages.budget_arms(capacity, encoder),
+            stages.budget_primary(capacity, encoder),
+            [],
+            [],
+            selections,
+        )
     if stage == "optimization":
         return stages.optimization_arms(capacity, encoder), stages.optimization_primary(), [], [], selections
     if stage == "tool":

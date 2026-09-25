@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "docs/evidence/aaa_python_v1"
 REPORT = ROOT / "docs/aaa_python_v1_development_report.md"
 FAMILIES = ("syntax", "outcome", "output", "localize", "repair")
-STAGES = ("encoders", "heads", "capacity", "optimization", "tool", "adapt", "plasticity")
+STAGES = ("encoders", "heads", "capacity", "budget", "optimization", "tool", "adapt", "plasticity", "attack")
 
 
 def load(stage: str) -> dict[str, Any] | None:
@@ -176,6 +176,7 @@ def render() -> str:
             f" {verdict['earns_over_4k'] or 'none'}; harmed: {verdict['harmed'] or 'none'}.",
         ]
     for name, title in (
+        ("budget", "3b. Declared budget-extension diagnostic (64 epochs)"),
         ("optimization", "4. Optimization, one change at a time"),
         ("tool", "5. The visible-test tool (repair)"),
     ):
@@ -235,6 +236,18 @@ def render() -> str:
                     f"| `{arm}` | {epoch} | {c['after_mean']:.3f} | {fmt(c['saturated_fraction'])} | {fmt(c['dormant_fraction'])} | "
                     f"{fmt(c['effective_rank'])} | {fmt(c['mean_gradient_norm_recent'])} | {fmt(c['core_weight_norm'])} |"
                 )
+    attack = load("attack")
+    if attack:
+        st = attack["stage"]
+        lines += [
+            "",
+            "## 8. Attack pool (used once, development budgets, no re-tuning; 10 x 15 cells of 40 tasks)",
+            "",
+        ]
+        lines += arm_table(st, list(st["summary"]["arms"])) + [""] + contrast_table(st)
+        lines += ["", "Frozen accuracy by slice:", ""] + slice_table(
+            st, [a for a in st["arms"] if a.startswith(("h16", "1k", "10k"))]
+        )
     lines += [
         "",
         "## Reproduce",

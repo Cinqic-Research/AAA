@@ -221,3 +221,34 @@ def tool_primary() -> list[tuple[str, str, str]]:
 def adapt_or_plasticity_arms(capacity: Mapping[str, Any], encoder: str) -> list[ArmSpec]:
     sizes = selected_sizes(capacity, encoder)
     return [_fixed(sizes[tag], tag) for tag in ("1k", "10k")]
+
+
+def budget_trigger(capacity: Mapping[str, Any], encoder: str) -> bool:
+    """The declared rule: any capacity size at 32 epochs with a 16-to-32 tune gain above 0.01."""
+
+    for name, arm in capacity["arms"].items():
+        if not name.endswith(f"@{encoder}") or arm["epochs"] != 32:
+            continue
+        table = {(r["learning_rate"], r["epochs"]): r["mean_tune_accuracy"] for r in arm["tuning"]}
+        lr = arm["learning_rate"]
+        if (lr, 16) in table and table[(lr, 32)] - table[(lr, 16)] > 0.01:
+            return True
+    return False
+
+
+def budget_arms(capacity: Mapping[str, Any], encoder: str) -> list[ArmSpec]:
+    sizes = selected_sizes(capacity, encoder)
+    arms = []
+    for tag in ("1k", "10k"):
+        arms.append(_fixed(sizes[tag], f"{tag}:ep{sizes[tag]['epochs']}"))
+        arms.append(_fixed(sizes[tag], f"{tag}:ep64", epochs=64))
+    return arms
+
+
+def budget_primary(capacity: Mapping[str, Any], encoder: str) -> list[tuple[str, str, str]]:
+    sizes = selected_sizes(capacity, encoder)
+    return [
+        ("10k:ep64", "1k:ep64", "frozen"),
+        ("1k:ep64", f"1k:ep{sizes['1k']['epochs']}", "frozen"),
+        ("10k:ep64", f"10k:ep{sizes['10k']['epochs']}", "frozen"),
+    ]
