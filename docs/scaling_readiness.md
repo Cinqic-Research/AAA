@@ -1,6 +1,49 @@
 # Scaling readiness
 
-**Current verdict (2026-09-23, Python-first transition):
+**Current verdict (2026-09-25, `aaa.python.v1`): `SCALE_NOT_JUSTIFIED` for ~10K.
+Capacity up to ~4K is justified on fresh evidence; beyond ~4K it is not. The
+larger measured levers are representation, output formulation and tool use.**
+
+The question was whether about ten times Champion 1's trainable capacity
+(10,046 against 994) solves a persistent Python-learning limitation that
+representation, formulation, optimization or tools cannot. The evidence chain
+([development report](aaa_python_v1_development_report.md), [research
+brief](aaa_python_v1_research_brief.md)):
+
+| Link | Status |
+|---|---|
+| A real failure on fresh tasks | yes: the ~1K learner is weakest on repair and outcome |
+| The benchmark is not broken | repaired first (`AAA-192`..`AAA-194`); stupid-rule and medoid attacks run in every evaluation |
+| Leakage excluded | encoders never parse `syntax`, never evaluate; the tool sees only visible tests; mutation-tested |
+| Strong baselines fair | fitted rules, the visible-test tool and the unmodified v0 instrument run on every stream |
+| Parameter-neutral fixes tried first | `e2` over `e1` at identical capacity: confirmation `PROMOTE` (error ratio 0.750); pointer head +0.267 localization with fewer parameters; the tool +0.32 to +0.46 repair; clipping recovers half of 1K's repair deficit |
+| Optimization not the main blocker | budgets tuned per arm; a 64-epoch extension changes little; optimizer arms one at a time |
+| Capacity improves the weakness | 10K over 1K: confirmation `PROMOTE` (0.785) |
+| **Would ~4K do the same?** | **yes**: 4K over 1K `PROMOTE` (0.798); 10K over 4K `INCONCLUSIVE` (0.983 [0.942, 1.025]); no family where 10K earns its size over 4K, in development, attack or confirmation |
+| Adaptation, retention, plasticity | 4K adapts at least as well as 10K; 10K is markedly *worse* than 4K at learning a conflicting mapping (fresh-learner gap -0.122) |
+| Compute | not a constraint (CPU, minutes per stage) and not evidence |
+| Independent recomputation | every stage and the confirmation recompute independently; re-adjudication reproduces every verdict |
+| Independent review | **not yet**: the implementer's self-review is not independent |
+
+The pre-registered requirement for `SCALE_JUSTIFIED` (freeze hypothesis
+`scale_justified_requires`) was C2 **and** C3 `PROMOTE`; C3 did not. The
+declared per-family rule gives `MIXED` on development, attack and
+confirmation evidence, with the smaller size preferred.
+
+**What this licenses.** A ~4K member of the v1 family (`e2` encoder, one-hot
+output, pointer localization, 4,158 trainable parameters) is the evidence-
+supported candidate for the next experimental reference, subject to
+independent review. Nothing is promoted by this document, and no Python
+capability beyond the measured families is claimed; strong simple rules still
+beat every learner on syntax and outcome, and the visible-test tool alone
+solves 95% of repair.
+
+The previous verdict, `PYTHON_PHASE_IN_DEVELOPMENT` (2026-09-23), described
+the tree before `aaa.python.v1`; its text follows unchanged as history.
+
+---
+
+**Previous verdict (2026-09-23, Python-first transition):
 `PYTHON_PHASE_IN_DEVELOPMENT`.** `aaa.python.v0` exists as a safe, causal,
 recomputable development environment with a minimal learner, and its first
 development result is negative. The `AAA-180` promotion precondition is
@@ -9,10 +52,6 @@ satisfied in code by a tested prospective successor
 is admitted, no candidate or promotion criteria are declared, and nothing
 supports a capacity increase yet. This verdict does not assert that a larger
 model is needed, that 105M is feasible, or that any Python capability exists.
-
-The previous verdict, `READY_FOR_NEXT_PHASE_DESIGN`, is recorded in
-[the pre-scale review](pre_scale_review_2026-09-23.md). It described the tree
-before the Python phase and the `AAA-180` successor existed.
 
 ## Evidence boundary
 

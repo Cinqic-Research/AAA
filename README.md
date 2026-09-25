@@ -19,7 +19,33 @@ independent goal formation. It is not a code-completion model, a chatbot, a
 benchmark leaderboard entry or a Transformer project by default, and model
 size is not treated as progress.
 
-## Current phase: `aaa.python.v0`
+## Current phase: `aaa.python.v1`, the evidence-gated pre-scale phase
+
+[`research/aaa_python_v1/`](research/aaa_python_v1/) asks whether about ten
+times Champion 1's trainable capacity (10,046 against 994 parameters) solves a
+diagnosed Python-learning limitation that representation, output formulation,
+optimization or tools cannot. It is a successor to `aaa.python.v0` (below),
+which is unchanged. Result, confirmed on fresh identities under a committed
+freeze with `aaa.promotion.crossed.v1`:
+
+- **Representation first.** A structural encoder (`e2`: alpha-renamed tokens,
+  parser-free line structure, static def-use) beats the lexical one at
+  identical trainable capacity: error ratio 0.750 [0.650, 0.853], `PROMOTE`.
+  A per-line pointer head lifts localization from 0.35 to 0.62 with fewer
+  parameters; running the visible tests as a tool lifts repair by 0.32-0.46.
+- **Capacity helps up to about 4K and no further.** 10K over 1K `PROMOTE`
+  (0.785); 4K over 1K `PROMOTE` (0.798); **10K over 4K `INCONCLUSIVE`**
+  (0.983 [0.942, 1.025]). 4K adapts after a distribution switch at least as
+  well as 10K, and 10K learns a conflicting mapping markedly worse than 4K.
+- **Verdict: `SCALE_NOT_JUSTIFIED` for ~10K**; ~4K is the evidence-supported
+  candidate for the next reference, pending independent review
+  ([scaling readiness](docs/scaling_readiness.md),
+  [development report](docs/aaa_python_v1_development_report.md),
+  [handoff](docs/aaa_python_v1_handoff.md)).
+- Simple fitted rules still match or beat every learner on syntax and
+  outcome, and the visible-test tool alone solves 95% of repair.
+
+## The first Python phase: `aaa.python.v0`
 
 [`research/aaa_python/`](research/aaa_python/) is the smallest credible
 foundation for asking:
@@ -152,6 +178,10 @@ The machine and the revisable model-size planning goal are recorded in
 | Document | What it covers |
 |---|---|
 | [Current research direction](docs/research_direction.md) | Python-first coding scope, the 24-rung capability ladder, English as a future direction, causal evaluation and self-improvement boundaries |
+| [`aaa.python.v1` research brief](docs/aaa_python_v1_research_brief.md) | the pre-scale question, hypotheses, declared rules and amendments |
+| [`aaa.python.v1` protocol](docs/aaa_python_v1_protocol.md) and [architecture](docs/aaa_python_v1_architecture.md) | the successor exam, encoders, learner family and exact accounting |
+| [`aaa.python.v1` development report](docs/aaa_python_v1_development_report.md) | every stage and the confirmation, generated from retained evidence |
+| [`aaa.python.v1` literature review](docs/aaa_python_v1_literature_review.md), [compute report](docs/aaa_python_v1_compute_report.md), [self-review](docs/aaa_python_v1_self_review.md), [handoff](docs/aaa_python_v1_handoff.md) | mechanisms considered, CPU/CUDA decision, what was attacked, what a reviewer should check |
 | [`aaa.python.v0` research brief](docs/aaa_python_research_brief.md) | why Python first, the question v0 asks, and what it does not claim |
 | [`aaa.python.v0` protocol](docs/aaa_python_protocol.md) | task families, safe subset and sandbox, splits, causal boundary, metrics, estimands, confirmation rules |
 | [`aaa.python.v0` architecture](docs/aaa_python_architecture.md) | the minimal learner, its representations, parameter and state accounting, compute |

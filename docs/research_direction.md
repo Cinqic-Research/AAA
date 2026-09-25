@@ -53,7 +53,7 @@ rungs it depends on have measured baselines.
 | 11 | Candidate repair selection | family `repair` |
 | 12 | Free-form repair, when earned | roadmap |
 | 13 | Behaviour-preserving refactoring | roadmap |
-| 14 | Tool / execution use (for example, running visible tests before choosing) | roadmap; the natural next baseline for `repair` |
+| 14 | Tool / execution use (for example, running visible tests before choosing) | measured in `aaa.python.v1`: a logged pre-action tool for `repair`; the tool alone scores 0.95 and a 4K or 10K learner using it matches it |
 | 15 | Learning from interpreter feedback | measured: online versus frozen on every family |
 | 16 | Learning from test feedback | measured: bandit feedback on the chosen repair |
 | 17 | Retention across task sequences | measured: never-trained probe bank |
@@ -65,7 +65,9 @@ rungs it depends on have measured baselines.
 | 23 | Long-horizon coding work | roadmap |
 | 24 | Calibrated uncertainty and explicit recognition of insufficient evidence | measured as Brier and calibration error; abstention exists in the interface, is not yet rewarded |
 
-"Measured" means an instrument exists. It does not mean the capability exists.
+`aaa.python.v1` re-measures rungs 1-11 and 14-19 on a repaired exam with
+declared generalization slices; its [development report](aaa_python_v1_development_report.md)
+has the numbers. "Measured" means an instrument exists. It does not mean the capability exists.
 The first development result is negative on nearly every rung it measures
 ([report](aaa_python_development_report.md)).
 

@@ -299,3 +299,44 @@ evidence, so they are characterizations rather than confirmed claims.
   aaa.1k.v2 defect is retained and forbidden for future promotion, and the
   versioned successor `aaa.promotion.crossed.v1` is tested
   ([promotion contract](promotion_contract.md)).*
+
+## `aaa.python.v1` (evidence-gated pre-scale phase, 2026-09-24/25)
+
+- **One model family.** Capacity was varied as the width of one shared `tanh`
+  layer over fixed hashed encoders. Other ~10K architectures (recurrent,
+  sparse, graph, trainable encoders) were not tested; "10K is not justified"
+  means *this family* at *these tasks* gains nothing from 4K to 10K.
+- **One-hot output head.** The declared head rule kept the 101-way output
+  head (the ordinal Gaussian head failed), so about a third of every size's
+  parameters sit in that head; 1K buys only a 2-unit core. A better output
+  formulation could change where capacity starts to matter.
+- **Training budget.** Most arms selected the largest tuned budget (32
+  epochs). The declared 64-epoch extension moved 10K by at most +0.016 and 1K
+  by about 0; 4K was not extended, so the 10K-over-4K null could narrow by up
+  to that amount.
+- **Generated tasks.** Five families of small programs in a frozen safe
+  subset. Nothing here measures repositories, libraries, free-form repair or
+  natural-language code tasks; external benchmarks were reviewed and rejected
+  for this phase as beyond the learner.
+- **Strong simple rules.** Fitted stupid rules still beat every learner on
+  syntax and outcome (confirmation: 0.956 against 0.948; 0.709 against 0.683);
+  the visible-test tool alone solves 95% of repair. The learners beat the
+  rules on localization and, without the tool, on repair.
+- **Adaptation and plasticity are development evidence.** They were not part
+  of the confirmation. The 4K comparison is a labelled post-hoc diagnostic.
+  The plasticity probe (a conflicting permuted mapping) mixes loss of
+  plasticity with interference from what was learned; the declared ratio
+  estimand did not detect the fresh-learner gap, which is reported beside it.
+- **Forgetting** on the never-trained probe bank is resolved at both sizes
+  after adapting to new structure; no retention intervention was tested.
+- **Within-pool duplicates.** Exact duplicates are excluded across splits but
+  not within one; the confirmation pool has 1,194-1,200 unique programs per
+  family.
+- **Self-review only.** The same author designed, ran and reviewed this phase
+  with subagent assistance, which is not independent review. The encoder `e2`
+  was designed after reading v0's failures, so its advantage is confirmed on
+  fresh identities but its design is not blind to the task family.
+- **Encoder cost is hidden in design, not parameters.** `e2` has no trainable
+  parameters, but its static def-use and line features encode human
+  knowledge of Python; the matched-capacity comparison controls parameters,
+  not prior knowledge.

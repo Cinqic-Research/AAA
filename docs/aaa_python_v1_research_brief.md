@@ -1,5 +1,17 @@
 # `aaa.python.v1` research brief: the evidence-gated pre-scale phase
 
+> **Outcome (added 2026-09-25, after confirmation; the text below is the
+> pre-observation design, unchanged apart from the dated amendments).**
+> Confirmation under the committed freeze: `e2` over `e1` at identical
+> capacity `PROMOTE`; 10K over 1K `PROMOTE`; 4K over 1K `PROMOTE`; 10K over
+> 4K `INCONCLUSIVE`. H1 supported (syntax, localization, repair); H2 supported
+> for localization (pointer), refuted for output (the ordinal head failed); H3
+> supported (capacity helps from 1K); H4 **supported** (4K captures the gain);
+> H5 supported at 10K and 4K, barely at 1K (development); H6: no gradual loss,
+> but experienced learners, 10K most, learn a conflicting mapping worse than
+> fresh ones; H7 supported at 4K and 10K. Verdict: `SCALE_NOT_JUSTIFIED` for
+> ~10K; see [scaling readiness](scaling_readiness.md).
+
 Status: **development**. Written and committed before any v1 learner observed
 a v1 development identity. Nothing here is a capability claim.
 
