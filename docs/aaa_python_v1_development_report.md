@@ -11,6 +11,7 @@ primary contrast. `DEGENERATE` means the two arms never disagreed on any task.
 
 - `docs/evidence/aaa_python_v1/stage_encoders.json` sha256 `8c231984456159eb...`, commit `59465dd5992f` (dirty: False), phase fingerprint `4f0174628f54...`, 1981 s
 - `docs/evidence/aaa_python_v1/stage_heads.json` sha256 `608122c4a3f41499...`, commit `f043d299676b` (dirty: False), phase fingerprint `b7b1c2d13537...`, 584 s
+- `docs/evidence/aaa_python_v1/stage_capacity.json` sha256 `8bd0013f896dcb57...`, commit `e85b18f0cb3c` (dirty: False), phase fingerprint `b7b1c2d13537...`, 1109 s
 
 ## 1. Encoders at matched capacity (one-hot heads)
 
@@ -146,6 +147,99 @@ Frozen accuracy by slice:
 | repair: h16@e2:onehot/pointer - h16@e2:onehot/onehot [frozen] | +0.003 [-0.039, +0.041] | INCONCLUSIVE | 1.0000 | 2912 |
 | syntax: h16@e2:gauss/onehot - h16@e2:onehot/onehot [frozen] | -0.172 [-0.233, -0.116] | NEGATIVE | 0.0013 | 3064 |
 | syntax: h16@e2:onehot/pointer - h16@e2:onehot/onehot [frozen] | +0.016 [-0.003, +0.035] | INCONCLUSIVE | 0.3780 | 829 |
+
+## 3. Capacity (encoder `e2`, output `onehot`, localize `pointer`)
+
+| Arm | Core width | Trainable | Rate | Epochs |
+|---|---:|---:|---:|---:|
+| `10k@e2` | 27 | 10046 | 0.03 | 32 |
+| `10k@e2:n600` | 27 | 10046 | 0.1 | 32 |
+| `1k@e2` | 2 | 846 | 0.03 | 32 |
+| `1k@e2:n600` | 2 | 846 | 0.1 | 32 |
+| `20k@e2` | 54 | 19982 | 0.1 | 32 |
+| `2k@e2` | 5 | 1950 | 0.03 | 32 |
+| `4k@e2` | 11 | 4158 | 0.1 | 32 |
+
+Frozen evaluation accuracy:
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `10k@e2` | 10046 | 0.921 [0.903, 0.938] | 0.672 [0.652, 0.694] | 0.200 [0.180, 0.226] | 0.623 [0.595, 0.648] | 0.638 [0.613, 0.662] |
+| `10k@e2:n600` | 10046 | 0.919 [0.899, 0.938] | 0.655 [0.631, 0.678] | 0.169 [0.149, 0.190] | 0.582 [0.558, 0.603] | 0.595 [0.566, 0.624] |
+| `1k@e2` | 846 | 0.888 [0.860, 0.915] | 0.639 [0.618, 0.660] | 0.177 [0.159, 0.199] | 0.610 [0.583, 0.638] | 0.463 [0.419, 0.510] |
+| `1k@e2:n600` | 846 | 0.870 [0.851, 0.889] | 0.618 [0.593, 0.643] | 0.171 [0.152, 0.192] | 0.593 [0.566, 0.619] | 0.437 [0.374, 0.500] |
+| `20k@e2` | 19982 | 0.932 [0.911, 0.950] | 0.658 [0.630, 0.684] | 0.182 [0.162, 0.205] | 0.622 [0.597, 0.646] | 0.640 [0.619, 0.663] |
+| `2k@e2` | 1950 | 0.922 [0.901, 0.941] | 0.659 [0.639, 0.680] | 0.178 [0.160, 0.201] | 0.619 [0.592, 0.644] | 0.573 [0.545, 0.602] |
+| `4k@e2` | 4158 | 0.935 [0.919, 0.949] | 0.672 [0.652, 0.693] | 0.187 [0.167, 0.212] | 0.619 [0.591, 0.645] | 0.633 [0.600, 0.663] |
+
+Online evaluation accuracy:
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `10k@e2` | 10046 | 0.907 [0.889, 0.924] | 0.669 [0.647, 0.692] | 0.202 [0.181, 0.227] | 0.625 [0.599, 0.649] | 0.642 [0.614, 0.669] |
+| `10k@e2:n600` | 10046 | 0.867 [0.846, 0.889] | 0.645 [0.624, 0.666] | 0.161 [0.142, 0.181] | 0.566 [0.542, 0.589] | 0.592 [0.565, 0.619] |
+| `1k@e2` | 846 | 0.879 [0.852, 0.906] | 0.638 [0.616, 0.658] | 0.170 [0.151, 0.193] | 0.609 [0.581, 0.636] | 0.462 [0.419, 0.508] |
+| `1k@e2:n600` | 846 | 0.837 [0.815, 0.859] | 0.609 [0.586, 0.631] | 0.166 [0.147, 0.185] | 0.587 [0.560, 0.613] | 0.440 [0.378, 0.503] |
+| `20k@e2` | 19982 | 0.904 [0.886, 0.922] | 0.670 [0.647, 0.693] | 0.173 [0.152, 0.199] | 0.612 [0.591, 0.633] | 0.641 [0.618, 0.664] |
+| `2k@e2` | 1950 | 0.906 [0.885, 0.925] | 0.654 [0.634, 0.676] | 0.177 [0.158, 0.200] | 0.622 [0.596, 0.646] | 0.570 [0.542, 0.599] |
+| `4k@e2` | 4158 | 0.914 [0.897, 0.931] | 0.670 [0.648, 0.690] | 0.180 [0.159, 0.205] | 0.614 [0.585, 0.640] | 0.638 [0.611, 0.665] |
+
+Contrasts:
+
+| Contrast | Difference [95%] | Sign | Holm p | Disagreements |
+|---|---|---|---:|---:|
+| localize: 10k@e2 - 10k@e2 [online-frozen] | +0.002 [-0.007, +0.011] | INCONCLUSIVE |  | 960 |
+| localize: 10k@e2 - 10k@e2:n600 [frozen] | +0.041 [+0.018, +0.063] | POSITIVE |  | 3625 |
+| localize: 10k@e2 - 1k@e2 [frozen] | +0.012 [-0.010, +0.032] | INCONCLUSIVE | 0.2385 | 3285 |
+| localize: 10k@e2 - 1k@e2 [online] | +0.015 [-0.009, +0.038] | INCONCLUSIVE |  | 3416 |
+| localize: 10k@e2 - 4k@e2 [frozen] | +0.004 [-0.014, +0.020] | INCONCLUSIVE | 1.0000 | 2619 |
+| localize: 1k@e2 - 1k@e2 [online-frozen] | -0.001 [-0.006, +0.004] | INCONCLUSIVE |  | 267 |
+| localize: 1k@e2 - 1k@e2:n600 [frozen] | +0.018 [-0.001, +0.037] | INCONCLUSIVE |  | 2187 |
+| localize: 20k@e2 - 10k@e2 [frozen] | -0.001 [-0.017, +0.017] | INCONCLUSIVE |  | 2414 |
+| localize: 2k@e2 - 1k@e2 [frozen] | +0.009 [-0.011, +0.028] | INCONCLUSIVE |  | 2537 |
+| localize: 4k@e2 - 2k@e2 [frozen] | +0.000 [-0.019, +0.018] | INCONCLUSIVE |  | 2721 |
+| outcome: 10k@e2 - 10k@e2 [online-frozen] | -0.003 [-0.013, +0.008] | INCONCLUSIVE |  | 1118 |
+| outcome: 10k@e2 - 10k@e2:n600 [frozen] | +0.017 [-0.003, +0.037] | INCONCLUSIVE |  | 2338 |
+| outcome: 10k@e2 - 1k@e2 [frozen] | +0.033 [+0.013, +0.053] | POSITIVE | 0.0060 | 2714 |
+| outcome: 10k@e2 - 1k@e2 [online] | +0.032 [+0.009, +0.054] | POSITIVE |  | 2706 |
+| outcome: 10k@e2 - 4k@e2 [frozen] | +0.000 [-0.014, +0.014] | INCONCLUSIVE | 1.0000 | 1750 |
+| outcome: 1k@e2 - 1k@e2 [online-frozen] | -0.001 [-0.008, +0.006] | INCONCLUSIVE |  | 596 |
+| outcome: 1k@e2 - 1k@e2:n600 [frozen] | +0.021 [+0.001, +0.044] | POSITIVE |  | 1627 |
+| outcome: 20k@e2 - 10k@e2 [frozen] | -0.015 [-0.034, +0.003] | INCONCLUSIVE |  | 1674 |
+| outcome: 2k@e2 - 1k@e2 [frozen] | +0.020 [+0.001, +0.037] | POSITIVE |  | 2144 |
+| outcome: 4k@e2 - 2k@e2 [frozen] | +0.013 [+0.001, +0.026] | POSITIVE |  | 1920 |
+| output: 10k@e2 - 10k@e2 [online-frozen] | +0.002 [-0.007, +0.010] | INCONCLUSIVE |  | 787 |
+| output: 10k@e2 - 10k@e2:n600 [frozen] | +0.031 [+0.014, +0.050] | POSITIVE |  | 1596 |
+| output: 10k@e2 - 1k@e2 [frozen] | +0.023 [+0.006, +0.039] | POSITIVE | 0.0450 | 1871 |
+| output: 10k@e2 - 1k@e2 [online] | +0.032 [+0.015, +0.049] | POSITIVE |  | 1967 |
+| output: 10k@e2 - 4k@e2 [frozen] | +0.013 [-0.000, +0.026] | INCONCLUSIVE | 0.2550 | 1307 |
+| output: 1k@e2 - 1k@e2 [online-frozen] | -0.007 [-0.015, +0.001] | INCONCLUSIVE |  | 535 |
+| output: 1k@e2 - 1k@e2:n600 [frozen] | +0.006 [-0.006, +0.019] | INCONCLUSIVE |  | 945 |
+| output: 20k@e2 - 10k@e2 [frozen] | -0.018 [-0.033, -0.004] | NEGATIVE |  | 1333 |
+| output: 2k@e2 - 1k@e2 [frozen] | +0.000 [-0.012, +0.012] | INCONCLUSIVE |  | 1270 |
+| output: 4k@e2 - 2k@e2 [frozen] | +0.010 [-0.006, +0.025] | INCONCLUSIVE |  | 1520 |
+| repair: 10k@e2 - 10k@e2 [online-frozen] | +0.004 [-0.004, +0.013] | INCONCLUSIVE |  | 676 |
+| repair: 10k@e2 - 10k@e2:n600 [frozen] | +0.043 [+0.013, +0.074] | POSITIVE |  | 3421 |
+| repair: 10k@e2 - 1k@e2 [frozen] | +0.175 [+0.126, +0.222] | POSITIVE | 0.0013 | 5134 |
+| repair: 10k@e2 - 1k@e2 [online] | +0.180 [+0.135, +0.224] | POSITIVE |  | 5153 |
+| repair: 10k@e2 - 4k@e2 [frozen] | +0.005 [-0.023, +0.035] | INCONCLUSIVE | 1.0000 | 2895 |
+| repair: 1k@e2 - 1k@e2 [online-frozen] | -0.001 [-0.006, +0.003] | INCONCLUSIVE |  | 157 |
+| repair: 1k@e2 - 1k@e2:n600 [frozen] | +0.026 [-0.017, +0.076] | INCONCLUSIVE |  | 3936 |
+| repair: 20k@e2 - 10k@e2 [frozen] | +0.002 [-0.020, +0.025] | INCONCLUSIVE |  | 2580 |
+| repair: 2k@e2 - 1k@e2 [frozen] | +0.110 [+0.057, +0.162] | POSITIVE |  | 5127 |
+| repair: 4k@e2 - 2k@e2 [frozen] | +0.060 [+0.015, +0.098] | POSITIVE |  | 3922 |
+| syntax: 10k@e2 - 10k@e2 [online-frozen] | -0.014 [-0.026, -0.001] | NEGATIVE |  | 747 |
+| syntax: 10k@e2 - 10k@e2:n600 [frozen] | +0.001 [-0.015, +0.017] | INCONCLUSIVE |  | 878 |
+| syntax: 10k@e2 - 1k@e2 [frozen] | +0.033 [+0.002, +0.067] | POSITIVE | 0.0690 | 1286 |
+| syntax: 10k@e2 - 1k@e2 [online] | +0.028 [+0.000, +0.056] | POSITIVE |  | 1454 |
+| syntax: 10k@e2 - 4k@e2 [frozen] | -0.014 [-0.032, +0.005] | INCONCLUSIVE | 0.6160 | 705 |
+| syntax: 1k@e2 - 1k@e2 [online-frozen] | -0.009 [-0.023, +0.007] | INCONCLUSIVE |  | 929 |
+| syntax: 1k@e2 - 1k@e2:n600 [frozen] | +0.017 [-0.007, +0.042] | INCONCLUSIVE |  | 1487 |
+| syntax: 20k@e2 - 10k@e2 [frozen] | +0.011 [-0.004, +0.025] | INCONCLUSIVE |  | 576 |
+| syntax: 2k@e2 - 1k@e2 [frozen] | +0.034 [+0.014, +0.054] | POSITIVE |  | 1100 |
+| syntax: 4k@e2 - 2k@e2 [frozen] | +0.013 [-0.004, +0.028] | INCONCLUSIVE |  | 711 |
+
+**Declared 1K-versus-10K rule, development: `MIXED`.** Materially improved families: ['outcome', 'repair']; families where 10K earns its size over 4K: none; harmed: none.
 
 ## Reproduce
 
