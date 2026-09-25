@@ -244,10 +244,13 @@ def render() -> str:
             "## 8. Attack pool (used once, development budgets, no re-tuning; 10 x 15 cells of 40 tasks)",
             "",
         ]
-        lines += arm_table(st, list(st["summary"]["arms"])) + [""] + contrast_table(st)
-        lines += ["", "Frozen accuracy by slice:", ""] + slice_table(
-            st, [a for a in st["arms"] if a.startswith(("h16", "1k", "10k"))]
-        )
+        lines += [*arm_table(st, list(st["summary"]["arms"])), "", *contrast_table(st)]
+        lines += [
+            "",
+            "Frozen accuracy by slice:",
+            "",
+            *slice_table(st, [a for a in st["arms"] if a.startswith(("h16", "1k", "10k"))]),
+        ]
     lines += [
         "",
         "## Reproduce",
