@@ -18,7 +18,7 @@ Paired contrasts:
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from concurrent.futures import ProcessPoolExecutor
 from typing import Any
 
@@ -33,7 +33,7 @@ from .summarize import summarize_adapt
 FAMILIES = ("syntax", "outcome", "output", "localize", "repair")
 
 
-def _did(rows: list[Mapping[str, Any]], arm: str, family: str) -> np.ndarray:
+def _did(rows: Sequence[Mapping[str, Any]], arm: str, family: str) -> np.ndarray:
     mine = sorted((r for r in rows if r["arm"] == arm), key=lambda r: r["init"])
     streams = DESIGN["adapt"]["streams"]
     out = np.empty((len(mine), streams))
