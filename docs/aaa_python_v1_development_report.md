@@ -9,6 +9,113 @@ primary contrast. `DEGENERATE` means the two arms never disagreed on any task.
 
 ## Evidence files
 
+- `docs/evidence/aaa_python_v1/stage_encoders.json` sha256 `8c231984456159eb...`, commit `59465dd5992f` (dirty: False), phase fingerprint `4f0174628f54...`, 1981 s
+
+## 1. Encoders at matched capacity (one-hot heads)
+
+| Arm | Core width | Trainable | Rate | Epochs |
+|---|---:|---:|---:|---:|
+| `h16@e0` | 16 | 6662 | 0.1 | 32 |
+| `h16@e1` | 16 | 6662 | 0.1 | 8 |
+| `h16@e2` | 16 | 6662 | 0.1 | 32 |
+| `h16@e2-alpha` | 16 | 6662 | 0.1 | 32 |
+| `h16@e2-flow` | 16 | 6662 | 0.1 | 32 |
+| `h16@e2-line` | 16 | 6662 | 0.1 | 32 |
+| `lin@e0` | 0 | 38550 | 0.1 | 32 |
+| `lin@e1` | 0 | 38550 | 0.1 | 32 |
+| `lin@e2` | 0 | 38550 | 0.3 | 32 |
+
+Frozen evaluation accuracy:
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `h16@e0` | 6662 | 0.874 [0.857, 0.889] | 0.649 [0.628, 0.670] | 0.148 [0.131, 0.165] | 0.194 [0.181, 0.208] | 0.504 [0.476, 0.532] |
+| `h16@e1` | 6662 | 0.810 [0.781, 0.832] | 0.652 [0.630, 0.676] | 0.167 [0.149, 0.186] | 0.188 [0.176, 0.200] | 0.499 [0.467, 0.531] |
+| `h16@e2` | 6662 | 0.918 [0.898, 0.937] | 0.659 [0.637, 0.683] | 0.179 [0.156, 0.204] | 0.348 [0.322, 0.375] | 0.628 [0.598, 0.660] |
+| `h16@e2-alpha` | 6662 | 0.904 [0.886, 0.920] | 0.669 [0.648, 0.690] | 0.173 [0.156, 0.193] | 0.244 [0.228, 0.260] | 0.612 [0.582, 0.640] |
+| `h16@e2-flow` | 6662 | 0.941 [0.926, 0.955] | 0.649 [0.626, 0.673] | 0.177 [0.158, 0.201] | 0.345 [0.323, 0.365] | 0.640 [0.612, 0.668] |
+| `h16@e2-line` | 6662 | 0.868 [0.845, 0.890] | 0.657 [0.637, 0.679] | 0.189 [0.167, 0.213] | 0.349 [0.327, 0.371] | 0.633 [0.612, 0.654] |
+| `lin@e0` | 38550 | 0.887 [0.872, 0.902] | 0.637 [0.614, 0.660] | 0.193 [0.172, 0.218] | 0.201 [0.186, 0.217] | 0.436 [0.408, 0.462] |
+| `lin@e1` | 38550 | 0.851 [0.832, 0.870] | 0.662 [0.638, 0.686] | 0.208 [0.190, 0.227] | 0.216 [0.199, 0.236] | 0.485 [0.459, 0.511] |
+| `lin@e2` | 38550 | 0.954 [0.942, 0.965] | 0.665 [0.641, 0.690] | 0.205 [0.182, 0.231] | 0.389 [0.365, 0.413] | 0.584 [0.555, 0.612] |
+
+Baselines and the unmodified v0 instrument on the same streams:
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `uniform` |  | 0.498 [0.483, 0.514] | 0.163 [0.153, 0.173] | 0.008 [0.006, 0.011] | 0.114 [0.103, 0.124] | 0.247 [0.234, 0.260] |
+| `majority` |  | 0.548 [0.517, 0.579] | 0.621 [0.592, 0.650] | 0.177 [0.158, 0.199] | 0.171 [0.152, 0.193] | 0.234 [0.217, 0.249] |
+| `lookup` |  | 0.548 [0.517, 0.579] | 0.621 [0.592, 0.650] | 0.177 [0.158, 0.199] | 0.171 [0.152, 0.193] | 0.249 [0.227, 0.270] |
+| `v0_heuristic` |  | 0.960 [0.953, 0.967] | 0.621 [0.592, 0.650] | 0.103 [0.087, 0.121] | 0.601 [0.573, 0.630] | 0.305 [0.273, 0.334] |
+| `rules` |  | 0.960 [0.953, 0.967] | 0.699 [0.676, 0.721] | 0.160 [0.139, 0.182] | 0.608 [0.580, 0.637] | 0.423 [0.399, 0.448] |
+| `medoid` |  | 0.960 [0.953, 0.967] | 0.699 [0.676, 0.721] | 0.160 [0.139, 0.182] | 0.608 [0.580, 0.637] | 0.320 [0.297, 0.343] |
+| `visible_tests` |  | 0.960 [0.953, 0.967] | 0.699 [0.676, 0.721] | 0.160 [0.139, 0.182] | 0.608 [0.580, 0.637] | 0.945 [0.930, 0.959] |
+| `v0_instrument` |  | 0.607 [0.573, 0.646] | 0.629 [0.601, 0.658] | 0.174 [0.154, 0.194] | 0.167 [0.144, 0.190] | 0.483 [0.454, 0.514] |
+
+Contrasts:
+
+| Contrast | Difference [95%] | Sign | Holm p | Disagreements |
+|---|---|---|---:|---:|
+| localize: h16@e1 - h16@e0 [frozen] | -0.006 [-0.021, +0.009] | INCONCLUSIVE | 1.0000 | 3127 |
+| localize: h16@e1 - h16@e1 [online-frozen] | -0.000 [-0.017, +0.016] | INCONCLUSIVE |  | 1893 |
+| localize: h16@e2 - h16@e1 [frozen] | +0.160 [+0.129, +0.194] | POSITIVE | 0.0013 | 4576 |
+| localize: h16@e2 - h16@e2 [online-frozen] | -0.001 [-0.021, +0.018] | INCONCLUSIVE |  | 2401 |
+| localize: h16@e2 - h16@e2-alpha [frozen] | +0.104 [+0.079, +0.130] | POSITIVE |  | 3664 |
+| localize: h16@e2 - h16@e2-flow [frozen] | +0.003 [-0.015, +0.022] | INCONCLUSIVE |  | 2626 |
+| localize: h16@e2 - h16@e2-line [frozen] | -0.001 [-0.018, +0.016] | INCONCLUSIVE |  | 2288 |
+| localize: h16@e2 - lin@e2 [frozen] | -0.041 [-0.060, -0.022] | NEGATIVE |  | 2768 |
+| localize: lin@e2 - lin@e1 [frozen] | +0.173 [+0.144, +0.201] | POSITIVE | 0.0013 | 3938 |
+| outcome: h16@e1 - h16@e0 [frozen] | +0.003 [-0.015, +0.021] | INCONCLUSIVE | 1.0000 | 2781 |
+| outcome: h16@e1 - h16@e1 [online-frozen] | +0.005 [-0.011, +0.022] | INCONCLUSIVE |  | 1499 |
+| outcome: h16@e2 - h16@e1 [frozen] | +0.007 [-0.018, +0.030] | INCONCLUSIVE | 0.5665 | 2924 |
+| outcome: h16@e2 - h16@e2 [online-frozen] | +0.004 [-0.013, +0.021] | INCONCLUSIVE |  | 1638 |
+| outcome: h16@e2 - h16@e2-alpha [frozen] | -0.009 [-0.030, +0.008] | INCONCLUSIVE |  | 2530 |
+| outcome: h16@e2 - h16@e2-flow [frozen] | +0.010 [-0.002, +0.024] | INCONCLUSIVE |  | 1751 |
+| outcome: h16@e2 - h16@e2-line [frozen] | +0.002 [-0.013, +0.016] | INCONCLUSIVE |  | 1660 |
+| outcome: h16@e2 - lin@e2 [frozen] | -0.006 [-0.024, +0.012] | INCONCLUSIVE |  | 1994 |
+| outcome: lin@e2 - lin@e1 [frozen] | +0.003 [-0.019, +0.027] | INCONCLUSIVE | 1.0000 | 2015 |
+| output: h16@e1 - h16@e0 [frozen] | +0.019 [+0.006, +0.033] | POSITIVE | 0.0240 | 1929 |
+| output: h16@e1 - h16@e1 [online-frozen] | +0.001 [-0.010, +0.011] | INCONCLUSIVE |  | 976 |
+| output: h16@e2 - h16@e1 [frozen] | +0.013 [-0.011, +0.035] | INCONCLUSIVE | 0.5650 | 2096 |
+| output: h16@e2 - h16@e2 [online-frozen] | -0.005 [-0.019, +0.011] | INCONCLUSIVE |  | 1283 |
+| output: h16@e2 - h16@e2-alpha [frozen] | +0.006 [-0.015, +0.026] | INCONCLUSIVE |  | 1675 |
+| output: h16@e2 - h16@e2-flow [frozen] | +0.002 [-0.016, +0.017] | INCONCLUSIVE |  | 1222 |
+| output: h16@e2 - h16@e2-line [frozen] | -0.009 [-0.023, +0.004] | INCONCLUSIVE |  | 1185 |
+| output: h16@e2 - lin@e2 [frozen] | -0.026 [-0.048, -0.006] | NEGATIVE |  | 1487 |
+| output: lin@e2 - lin@e1 [frozen] | -0.003 [-0.018, +0.013] | INCONCLUSIVE | 1.0000 | 1364 |
+| repair: h16@e1 - h16@e0 [frozen] | -0.005 [-0.040, +0.037] | INCONCLUSIVE | 1.0000 | 4447 |
+| repair: h16@e1 - h16@e1 [online-frozen] | -0.000 [-0.014, +0.015] | INCONCLUSIVE |  | 1739 |
+| repair: h16@e2 - h16@e1 [frozen] | +0.130 [+0.083, +0.170] | POSITIVE | 0.0013 | 4301 |
+| repair: h16@e2 - h16@e2 [online-frozen] | +0.006 [-0.006, +0.018] | INCONCLUSIVE |  | 1250 |
+| repair: h16@e2 - h16@e2-alpha [frozen] | +0.016 [-0.014, +0.046] | INCONCLUSIVE |  | 3266 |
+| repair: h16@e2 - h16@e2-flow [frozen] | -0.012 [-0.032, +0.010] | INCONCLUSIVE |  | 2399 |
+| repair: h16@e2 - h16@e2-line [frozen] | -0.004 [-0.029, +0.022] | INCONCLUSIVE |  | 2678 |
+| repair: h16@e2 - lin@e2 [frozen] | +0.045 [+0.009, +0.083] | POSITIVE |  | 3377 |
+| repair: lin@e2 - lin@e1 [frozen] | +0.099 [+0.076, +0.121] | POSITIVE | 0.0013 | 3068 |
+| syntax: h16@e1 - h16@e0 [frozen] | -0.063 [-0.091, -0.040] | NEGATIVE | 0.0013 | 1672 |
+| syntax: h16@e1 - h16@e1 [online-frozen] | -0.033 [-0.054, -0.008] | NEGATIVE |  | 1660 |
+| syntax: h16@e2 - h16@e1 [frozen] | +0.108 [+0.078, +0.141] | POSITIVE | 0.0013 | 2602 |
+| syntax: h16@e2 - h16@e2 [online-frozen] | -0.002 [-0.019, +0.015] | INCONCLUSIVE |  | 889 |
+| syntax: h16@e2 - h16@e2-alpha [frozen] | +0.014 [-0.010, +0.037] | INCONCLUSIVE |  | 1610 |
+| syntax: h16@e2 - h16@e2-flow [frozen] | -0.023 [-0.044, -0.005] | NEGATIVE |  | 673 |
+| syntax: h16@e2 - h16@e2-line [frozen] | +0.050 [+0.024, +0.073] | POSITIVE |  | 1621 |
+| syntax: h16@e2 - lin@e2 [frozen] | -0.036 [-0.054, -0.019] | NEGATIVE |  | 720 |
+| syntax: lin@e2 - lin@e1 [frozen] | +0.103 [+0.082, +0.123] | POSITIVE | 0.0013 | 2000 |
+
+Frozen accuracy by slice:
+
+| Arm | Family | in_distribution | novel_literals | novel_names | novel_structure | novel_composition |
+|---|---|---:|---:|---:|---:|---:|
+| `h16@e1` | syntax | 0.920 | 0.863 | 0.613 | 0.678 | 0.867 |
+| `h16@e1` | outcome | 0.710 | 0.696 | 0.681 | 0.441 | 0.675 |
+| `h16@e1` | output | 0.222 | 0.119 | 0.162 | 0.058 | 0.217 |
+| `h16@e1` | localize | 0.202 | 0.228 | 0.190 | 0.204 | 0.101 |
+| `h16@e1` | repair | 0.576 | 0.559 | 0.447 | 0.234 | 0.600 |
+| `h16@e2` | syntax | 0.974 | 0.978 | 0.982 | 0.847 | 0.754 |
+| `h16@e2` | outcome | 0.741 | 0.728 | 0.713 | 0.436 | 0.598 |
+| `h16@e2` | output | 0.238 | 0.123 | 0.253 | 0.059 | 0.165 |
+| `h16@e2` | localize | 0.409 | 0.387 | 0.391 | 0.339 | 0.151 |
+| `h16@e2` | repair | 0.675 | 0.642 | 0.710 | 0.374 | 0.695 |
 
 ## Reproduce
 
