@@ -30,10 +30,18 @@ def _modes(mode: str) -> tuple[str, str]:
     raise ValueError(f"unknown contrast mode {mode!r}")
 
 
-def _slices() -> list[str]:
+def _slices(split: str = "development") -> list[str]:
+    if split == "attack":
+        count = DESIGN["attack"]["streams"] * DESIGN["attack"]["stream_length"]
+        return [generator.slice_of("attack", index) for index in range(count)]
     start, _ = layout("evaluate")
     count = DESIGN["evaluate"]["streams"] * DESIGN["evaluate"]["stream_length"]
     return [generator.slice_of("development", index) for index in range(start, start + count)]
+
+
+def _shape(split: str) -> tuple[int, int, int]:
+    key = "attack" if split == "attack" else "evaluate"
+    return DESIGN[key]["initializations"], DESIGN[key]["streams"], DESIGN[key]["stream_length"]
 
 
 def primitives(stage: Mapping[str, Any]) -> dict[tuple[str, str, str], dict[int, list[bool]]]:
@@ -54,17 +62,20 @@ def primitives(stage: Mapping[str, Any]) -> dict[tuple[str, str, str], dict[int,
 
 
 def nll(stage: Mapping[str, Any]) -> dict[tuple[str, str, str], float]:
+    """Mean per-task log-loss of each learner arm, from per-stream sums."""
+
+    length = DESIGN["evaluate"]["stream_length"]
     sums: dict[tuple[str, str, str], list[float]] = {}
     for row in stage.get("evaluations", []):
         for family, modes in row["families"].items():
             for mode, payload in modes.items():
-                if "nll" in payload:
-                    sums.setdefault((row["arm"], family, mode), []).extend(payload["nll"])
-    return {key: float(np.mean(v)) for key, v in sums.items()}
+                if "nll_per_stream" in payload:
+                    sums.setdefault((row["arm"], family, mode), []).extend(payload["nll_per_stream"])
+    return {key: float(np.sum(v)) / (len(v) * length) for key, v in sums.items()}
 
 
-def grid_of(per_init: Mapping[int, Sequence[bool]]) -> np.ndarray:
-    streams, length = DESIGN["evaluate"]["streams"], DESIGN["evaluate"]["stream_length"]
+def grid_of(per_init: Mapping[int, Sequence[bool]], split: str = "development") -> np.ndarray:
+    _, streams, length = _shape(split)
     inits = sorted(per_init)
     grid = np.empty((len(inits), streams))
     for r, init in enumerate(inits):
@@ -76,20 +87,24 @@ def grid_of(per_init: Mapping[int, Sequence[bool]]) -> np.ndarray:
 
 
 def summarize(
-    stage: Mapping[str, Any], primary: Sequence[Contrast], secondary: Sequence[Contrast] = ()
+    stage: Mapping[str, Any],
+    primary: Sequence[Contrast],
+    secondary: Sequence[Contrast] = (),
+    *,
+    split: str = "development",
 ) -> dict[str, Any]:
     st = DESIGN["statistics"]
     prims = primitives(stage)
     losses = nll(stage)
-    slices = _slices()
-    expected_inits = set(range(DESIGN["evaluate"]["initializations"]))
+    slices = _slices(split)
+    expected_inits = set(range(_shape(split)[0]))
     arms: dict[str, dict[str, Any]] = {}
     for (arm, family, mode), per_init in sorted(prims.items()):
         if set(per_init) != expected_inits:
             raise ValueError(
                 f"{arm}/{family}/{mode}: initializations {sorted(per_init)} are not the declared set"
             )
-        grid = grid_of(per_init)
+        grid = grid_of(per_init, split)
         by_slice: dict[str, list[int]] = {}
         for values in per_init.values():
             for s, v in zip(slices, values, strict=True):
@@ -111,7 +126,7 @@ def summarize(
             if a is None or b is None:
                 raise ValueError(f"declared contrast {left} - {right} ({mode}) is missing {family}")
             name = f"{family}: {left} - {right} [{mode}]"
-            diff = grid_of(a) - grid_of(b)
+            diff = grid_of(a, split) - grid_of(b, split)
             disagreements = sum(int(x != y) for i in a for x, y in zip(a[i], b[i], strict=True))
             result = crossed(diff, seed=st["seed"], draws=st["draws"], confidence=st["confidence"])
             result["disagreements"] = disagreements

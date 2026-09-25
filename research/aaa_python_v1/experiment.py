@@ -80,6 +80,7 @@ DESIGN: dict[str, Any] = {
         "range": [1600, 3400],
         "probe_bank": 100,
     },
+    "attack": {"initializations": 10, "streams": 15, "stream_length": 40},
     "statistics": {"draws": 4000, "confidence": 0.95, "seed": 20260924, "holm_alpha": 0.05},
 }
 
@@ -150,6 +151,16 @@ def eval_streams(family: str) -> list[list[Task]]:
     n, length = DESIGN["evaluate"]["streams"], DESIGN["evaluate"]["stream_length"]
     if len(tasks) < n * length:
         raise RunError("the evaluate range is too small for the declared streams")
+    return [tasks[s * length : (s + 1) * length] for s in range(n)]
+
+
+def attack_streams(family: str) -> list[list[Task]]:
+    """The attack pool, used once after development selections and before the freeze."""
+
+    n, length = DESIGN["attack"]["streams"], DESIGN["attack"]["stream_length"]
+    tasks = list(generator.pool("attack", family))
+    if len(tasks) < n * length:
+        raise RunError("the attack pool is too small for the declared streams")
     return [tasks[s * length : (s + 1) * length] for s in range(n)]
 
 
@@ -309,6 +320,13 @@ def select(arm: ArmSpec, rows: Sequence[Mapping[str, Any]]) -> tuple[float, int,
     return float(best["learning_rate"]), int(best["epochs"]), summary
 
 
+def _stream_sums(values: Sequence[float]) -> list[float]:
+    """Log-loss summed per evaluation stream (all a reported number needs; keeps evidence compact)."""
+
+    length = DESIGN["evaluate"]["stream_length"]
+    return [round(float(sum(values[i : i + length])), 9) for i in range(0, len(values), length)]
+
+
 def evaluate_job(arm: ArmSpec, learning_rate: float, epochs: int, init: int) -> dict[str, Any]:
     agent = trained_agent(arm, init, learning_rate, epochs)
     result: dict[str, Any] = {
@@ -327,8 +345,8 @@ def evaluate_job(arm: ArmSpec, learning_rate: float, epochs: int, init: int) -> 
             online_c += c
             online_n += n
         result["families"][family] = {
-            "frozen": {"bits": bits(frozen_c), "nll": [round(v, 6) for v in frozen_n]},
-            "online": {"bits": bits(online_c), "nll": [round(v, 6) for v in online_n]},
+            "frozen": {"bits": bits(frozen_c), "nll_per_stream": _stream_sums(frozen_n)},
+            "online": {"bits": bits(online_c), "nll_per_stream": _stream_sums(online_n)},
         }
     diag = agent.model.diagnostics.gradient_norms
     result["training"] = {
@@ -336,6 +354,39 @@ def evaluate_job(arm: ArmSpec, learning_rate: float, epochs: int, init: int) -> 
         "clipped": agent.model.diagnostics.clipped,
         "mean_gradient_norm_last_1000": float(np.mean(diag[-1000:])) if diag else 0.0,
     }
+    return result
+
+
+def attack_job(arm: ArmSpec, learning_rate: float, epochs: int, init: int) -> dict[str, Any]:
+    agent = trained_agent(arm, init, learning_rate, epochs)
+    result: dict[str, Any] = {
+        "arm": arm.name,
+        "init": init,
+        "state_hash": agent.model.state_hash(),
+        "families": {},
+    }
+    for family in FAMILIES:
+        correct: list[bool] = []
+        for stream in attack_streams(family):
+            c, _ = frozen_pass(agent.clone(), stream)
+            correct += c
+        result["families"][family] = {"frozen": {"bits": bits(correct)}}
+    return result
+
+
+def attack_baseline_job(name: str, init: int) -> dict[str, Any]:
+    spec = spec_module.load()
+    agent = BASELINES[name](derive_seed(PROTOCOL_VERSION, "baseline", name, init) % 2**63)
+    if hasattr(agent, "training"):
+        train(agent, train_tasks(DESIGN["train_per_family"]), 1, init, spec)
+        agent.training = False
+    result: dict[str, Any] = {"arm": name, "init": init, "families": {}}
+    for family in FAMILIES:
+        correct: list[bool] = []
+        for stream in attack_streams(family):
+            c, _ = frozen_pass(agent, stream)
+            correct += c
+        result["families"][family] = {"frozen": {"bits": bits(correct)}}
     return result
 
 
@@ -484,13 +535,26 @@ def _map(
     return [r for r in results if r is not None]
 
 
-def warm_pools() -> None:
+def warm_pools(*, attack: bool = False) -> None:
     """Build (or load from the content-addressed cache) every pool a stage reads, once."""
 
     for family in FAMILIES:
         generator.pool("train", family)
         generator.pool("development", family)
         generator.pool("probe", family)
+        if attack:
+            generator.pool("attack", family)
+
+
+def run_attack(arms: Sequence[ArmSpec], baselines: Sequence[str], *, workers: int) -> dict[str, Any]:
+    warm_pools(attack=True)
+    inits = range(DESIGN["attack"]["initializations"])
+    return {
+        "evaluations": _map(
+            attack_job, [(a, a.learning_rate, a.epochs, i) for a in arms for i in inits], workers
+        ),
+        "baselines": _map(attack_baseline_job, [(b, i) for b in baselines for i in inits], workers),
+    }
 
 
 def run_stage(

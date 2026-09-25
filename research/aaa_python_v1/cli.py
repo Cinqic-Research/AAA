@@ -25,7 +25,7 @@ from . import spec as spec_module
 from .experiment import DESIGN, ArmSpec, run_adapt, run_stage, v0_instrument_job
 from .summarize import summarize
 
-STAGES = ("encoders", "heads", "capacity", "optimization", "tool", "adapt", "plasticity")
+STAGES = ("encoders", "heads", "capacity", "optimization", "tool", "adapt", "plasticity", "attack")
 
 
 def write_json(path: Path, payload: Any) -> None:
@@ -86,6 +86,40 @@ def plan(
     raise SystemExit(f"stage {stage} is run by its own command")
 
 
+def run_attack_stage(previous: dict[str, Any], workers: int) -> dict[str, Any]:
+    """The selected arms, with their development budgets and no re-tuning, on the attack pool."""
+
+    from .experiment import run_attack
+    from .summarize import summarize
+
+    encoder_stage = _selected(previous, "encoders")["stage"]
+    encoder = stages.select_encoder(encoder_stage["summary"])
+    capacity = _selected(previous, "capacity")["stage"]
+    arms = [stages._fixed(encoder_stage["arms"][n], n) for n in ("h16@e1", "h16@e2")]
+    arms += [
+        stages._fixed(capacity["arms"][f"{t}@{encoder}"], f"{t}@{encoder}")
+        for t in ("1k", "4k", "10k", "20k")
+    ]
+    evidence: dict[str, Any] = {
+        "stage": "attack",
+        "arms": {a.name: {**a.to_json(), "parameters": a.parameters()} for a in arms},
+    }
+    evidence.update(
+        run_attack(
+            arms, ["majority", "lookup", "v0_heuristic", "rules", "medoid", "visible_tests"], workers=workers
+        )
+    )
+    primary = [
+        ("h16@e2", "h16@e1", "frozen"),
+        (f"10k@{encoder}", f"1k@{encoder}", "frozen"),
+        (f"10k@{encoder}", f"4k@{encoder}", "frozen"),
+    ]
+    evidence["primary"] = [list(c) for c in primary]
+    evidence["secondary"] = []
+    evidence["summary"] = summarize(evidence, primary, split="attack")
+    return evidence
+
+
 def run_life_stage(stage: str, previous: dict[str, Any], workers: int) -> dict[str, Any]:
     """The adaptation and plasticity stages: the tuned 1K and 10K arms of the capacity stage."""
 
@@ -126,6 +160,21 @@ def cmd_develop(args: argparse.Namespace) -> int:
         return 2
     previous = {p.stem.split("_", 1)[-1] if "_" in p.stem else p.stem: read_json(p) for p in args.previous}
     started = time.time()
+    if args.stage == "attack":
+        evidence = run_attack_stage(previous, args.workers)
+        document = {
+            "schema": "aaa.python.v1.development_stage.v1",
+            "protocol": PROTOCOL_VERSION,
+            "status": "attack evidence: used once, after development selections, before the freeze",
+            "spec_sha256": spec_module.spec_hash(),
+            "design": DESIGN,
+            "provenance": record,
+            "wall_seconds": time.time() - started,
+            "stage": evidence,
+        }
+        write_json(args.output, document)
+        print(f"wrote {args.output} ({document['wall_seconds']:.0f} s)")
+        return 0
     if args.stage in ("adapt", "plasticity"):
         evidence = run_life_stage(args.stage, previous, args.workers)
         document = {
@@ -174,9 +223,19 @@ def cmd_develop(args: argparse.Namespace) -> int:
 def cmd_summarize(args: argparse.Namespace) -> int:
     document = read_json(args.evidence)
     stage = document["stage"]
-    primary = [tuple(c) for c in stage["primary"]]
-    secondary = [tuple(c) for c in stage["secondary"]]
-    fresh = summarize(stage, primary, secondary)
+    if stage["stage"] == "adapt":
+        from .summarize import summarize_adapt
+
+        fresh = summarize_adapt(stage["rows"])
+    elif stage["stage"] == "plasticity":
+        from .plasticity import summarize_plasticity
+
+        fresh = summarize_plasticity(stage["rows"])
+    else:
+        primary = [tuple(c) for c in stage["primary"]]
+        secondary = [tuple(c) for c in stage["secondary"]]
+        split = "attack" if stage["stage"] == "attack" else "development"
+        fresh = summarize(stage, primary, secondary, split=split)
     same = json.dumps(fresh, sort_keys=True) == json.dumps(stage["summary"], sort_keys=True)
     print("summary reproduced from primitives" if same else "SUMMARY DIFFERS from its primitives")
     return 0 if same else 1

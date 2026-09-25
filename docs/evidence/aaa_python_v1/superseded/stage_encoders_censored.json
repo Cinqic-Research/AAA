@@ -1,0 +1,5035 @@
+{
+ "arms": {
+  "h16@e0": {
+   "channels": [
+    "alpha",
+    "line",
+    "flow"
+   ],
+   "clip": 0.0,
+   "encoder": "e0",
+   "epochs": 8,
+   "hidden": 16,
+   "learning_rate": 0.1,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "h16@e0",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 6663,
+    "core": 4112,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e0:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 680,
+     "outcome": 102,
+     "output": 1717,
+     "repair": 17,
+     "syntax": 34
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "core.W": 4096,
+     "core.b": 16,
+     "localize.W": 640,
+     "localize.b": 40,
+     "outcome.W": 96,
+     "outcome.b": 6,
+     "output.W": 1616,
+     "output.b": 101,
+     "repair.W": 16,
+     "repair.b": 1,
+     "syntax.W": 32,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 6662,
+    "replay_memory": 0,
+    "trainable_parameters": 6662,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.396
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.42525
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.48275
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.409
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.46375
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.485
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.36075
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.41075000000000006
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.44825
+    }
+   ],
+   "weight_decay": 0.0
+  },
+  "h16@e1": {
+   "channels": [
+    "alpha",
+    "line",
+    "flow"
+   ],
+   "clip": 0.0,
+   "encoder": "e1",
+   "epochs": 8,
+   "hidden": 16,
+   "learning_rate": 0.1,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "h16@e1",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 6663,
+    "core": 4112,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e1:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 680,
+     "outcome": 102,
+     "output": 1717,
+     "repair": 17,
+     "syntax": 34
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "core.W": 4096,
+     "core.b": 16,
+     "localize.W": 640,
+     "localize.b": 40,
+     "outcome.W": 96,
+     "outcome.b": 6,
+     "output.W": 1616,
+     "output.b": 101,
+     "repair.W": 16,
+     "repair.b": 1,
+     "syntax.W": 32,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 6662,
+    "replay_memory": 0,
+    "trainable_parameters": 6662,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.4005
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.43300000000000005
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.463
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.40274999999999994
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.45425
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.48475
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.373
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.4205
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.4492499999999999
+    }
+   ],
+   "weight_decay": 0.0
+  },
+  "h16@e2": {
+   "channels": [
+    "alpha",
+    "line",
+    "flow"
+   ],
+   "clip": 0.0,
+   "encoder": "e2",
+   "epochs": 8,
+   "hidden": 16,
+   "learning_rate": 0.1,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "h16@e2",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 6663,
+    "core": 4112,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e2:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 680,
+     "outcome": 102,
+     "output": 1717,
+     "repair": 17,
+     "syntax": 34
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "core.W": 4096,
+     "core.b": 16,
+     "localize.W": 640,
+     "localize.b": 40,
+     "outcome.W": 96,
+     "outcome.b": 6,
+     "output.W": 1616,
+     "output.b": 101,
+     "repair.W": 16,
+     "repair.b": 1,
+     "syntax.W": 32,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 6662,
+    "replay_memory": 0,
+    "trainable_parameters": 6662,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.43674999999999997
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.49175
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.54075
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.47
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.5215000000000001
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.5527500000000001
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.41300000000000003
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.48274999999999996
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.48124999999999996
+    }
+   ],
+   "weight_decay": 0.0
+  },
+  "h16@e2-alpha": {
+   "channels": [
+    "line",
+    "flow"
+   ],
+   "clip": 0.0,
+   "encoder": "e2",
+   "epochs": 8,
+   "hidden": 16,
+   "learning_rate": 0.1,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "h16@e2-alpha",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 6663,
+    "core": 4112,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e2-line+flow:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 680,
+     "outcome": 102,
+     "output": 1717,
+     "repair": 17,
+     "syntax": 34
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "core.W": 4096,
+     "core.b": 16,
+     "localize.W": 640,
+     "localize.b": 40,
+     "outcome.W": 96,
+     "outcome.b": 6,
+     "output.W": 1616,
+     "output.b": 101,
+     "repair.W": 16,
+     "repair.b": 1,
+     "syntax.W": 32,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 6662,
+    "replay_memory": 0,
+    "trainable_parameters": 6662,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.43725
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.47724999999999995
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.5062500000000001
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.44425000000000003
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.49574999999999997
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.5102500000000001
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.39725
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.48775
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.4684999999999999
+    }
+   ],
+   "weight_decay": 0.0
+  },
+  "h16@e2-flow": {
+   "channels": [
+    "alpha",
+    "line"
+   ],
+   "clip": 0.0,
+   "encoder": "e2",
+   "epochs": 8,
+   "hidden": 16,
+   "learning_rate": 0.1,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "h16@e2-flow",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 6663,
+    "core": 4112,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e2-alpha+line:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 680,
+     "outcome": 102,
+     "output": 1717,
+     "repair": 17,
+     "syntax": 34
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "core.W": 4096,
+     "core.b": 16,
+     "localize.W": 640,
+     "localize.b": 40,
+     "outcome.W": 96,
+     "outcome.b": 6,
+     "output.W": 1616,
+     "output.b": 101,
+     "repair.W": 16,
+     "repair.b": 1,
+     "syntax.W": 32,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 6662,
+    "replay_memory": 0,
+    "trainable_parameters": 6662,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.43700000000000006
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.48125
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.5382500000000001
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.4605
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.51375
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.5437500000000001
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.403
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.46825
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.47375
+    }
+   ],
+   "weight_decay": 0.0
+  },
+  "h16@e2-line": {
+   "channels": [
+    "alpha",
+    "flow"
+   ],
+   "clip": 0.0,
+   "encoder": "e2",
+   "epochs": 8,
+   "hidden": 16,
+   "learning_rate": 0.1,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "h16@e2-line",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 6663,
+    "core": 4112,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e2-alpha+flow:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 680,
+     "outcome": 102,
+     "output": 1717,
+     "repair": 17,
+     "syntax": 34
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "core.W": 4096,
+     "core.b": 16,
+     "localize.W": 640,
+     "localize.b": 40,
+     "outcome.W": 96,
+     "outcome.b": 6,
+     "output.W": 1616,
+     "output.b": 101,
+     "repair.W": 16,
+     "repair.b": 1,
+     "syntax.W": 32,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 6662,
+    "replay_memory": 0,
+    "trainable_parameters": 6662,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.4255
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.48075
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.5242499999999999
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.44275000000000003
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.48899999999999993
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.532
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.37725
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.44575000000000004
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.4755
+    }
+   ],
+   "weight_decay": 0.0
+  },
+  "lin@e0": {
+   "channels": [
+    "alpha",
+    "line",
+    "flow"
+   ],
+   "clip": 0.0,
+   "encoder": "e0",
+   "epochs": 8,
+   "hidden": 0,
+   "learning_rate": 0.3,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "lin@e0",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 38551,
+    "core": 0,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e0:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 10280,
+     "outcome": 1542,
+     "output": 25957,
+     "repair": 257,
+     "syntax": 514
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "localize.W": 10240,
+     "localize.b": 40,
+     "outcome.W": 1536,
+     "outcome.b": 6,
+     "output.W": 25856,
+     "output.b": 101,
+     "repair.W": 256,
+     "repair.b": 1,
+     "syntax.W": 512,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 38550,
+    "replay_memory": 0,
+    "trainable_parameters": 38550,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.38675000000000004
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.42725
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.44925000000000004
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.40275000000000005
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.44100000000000006
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.46950000000000003
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.42874999999999996
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.45975
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.4764999999999999
+    }
+   ],
+   "weight_decay": 0.0
+  },
+  "lin@e1": {
+   "channels": [
+    "alpha",
+    "line",
+    "flow"
+   ],
+   "clip": 0.0,
+   "encoder": "e1",
+   "epochs": 8,
+   "hidden": 0,
+   "learning_rate": 0.3,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "lin@e1",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 38551,
+    "core": 0,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e1:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 10280,
+     "outcome": 1542,
+     "output": 25957,
+     "repair": 257,
+     "syntax": 514
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "localize.W": 10240,
+     "localize.b": 40,
+     "outcome.W": 1536,
+     "outcome.b": 6,
+     "output.W": 25856,
+     "output.b": 101,
+     "repair.W": 256,
+     "repair.b": 1,
+     "syntax.W": 512,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 38550,
+    "replay_memory": 0,
+    "trainable_parameters": 38550,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.39975000000000005
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.44825000000000004
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.46625000000000005
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.4325
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.466
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.483
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.45424999999999993
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.47325
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.48375
+    }
+   ],
+   "weight_decay": 0.0
+  },
+  "lin@e2": {
+   "channels": [
+    "alpha",
+    "line",
+    "flow"
+   ],
+   "clip": 0.0,
+   "encoder": "e2",
+   "epochs": 8,
+   "hidden": 0,
+   "learning_rate": 0.3,
+   "localize_head": "onehot",
+   "momentum": 0.0,
+   "name": "lin@e2",
+   "output_head": "onehot",
+   "parameters": {
+    "adaptive_state_total": 38551,
+    "core": 0,
+    "encoder": {
+     "adaptive_state": 0,
+     "identity": "aaa.python.v1.encoders.v1:e2:D256",
+     "trainable_parameters": 0
+    },
+    "heads": {
+     "localize": 10280,
+     "outcome": 1542,
+     "output": 25957,
+     "repair": 257,
+     "syntax": 514
+    },
+    "optimizer_state": 0,
+    "per_block": {
+     "localize.W": 10240,
+     "localize.b": 40,
+     "outcome.W": 1536,
+     "outcome.b": 6,
+     "output.W": 25856,
+     "output.b": 101,
+     "repair.W": 256,
+     "repair.b": 1,
+     "syntax.W": 512,
+     "syntax.b": 2
+    },
+    "persistent_recurrent_state": 0,
+    "remembered_initial_state_for_reset_control": 38550,
+    "replay_memory": 0,
+    "trainable_parameters": 38550,
+    "update_counter": 1
+   },
+   "tool": false,
+   "train_per_family": 2400,
+   "tuning": [
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.42525
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.5015
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.03,
+     "mean_tune_accuracy": 0.5415000000000001
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.48175
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.54125
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.1,
+     "mean_tune_accuracy": 0.552
+    },
+    {
+     "epochs": 1,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.52275
+    },
+    {
+     "epochs": 3,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.5422499999999999
+    },
+    {
+     "epochs": 8,
+     "initializations": 2,
+     "learning_rate": 0.3,
+     "mean_tune_accuracy": 0.5595000000000001
+    }
+   ],
+   "weight_decay": 0.0
+  }
+ },
+ "design": {
+  "adapt": {
+   "branch": 20,
+   "changed_slice": "novel_structure",
+   "control_slice": "in_distribution",
+   "initializations": 10,
+   "probe_bank": 100,
+   "range": [
+    1600,
+    3400
+   ],
+   "streams": 15
+  },
+  "dimensions": 256,
+  "evaluate": {
+   "initializations": 10,
+   "stream_length": 40,
+   "streams": 30
+  },
+  "init_scale": 1.0,
+  "statistics": {
+   "confidence": 0.95,
+   "draws": 4000,
+   "holm_alpha": 0.05,
+   "seed": 20260924
+  },
+  "train_per_family": 2400,
+  "tune": {
+   "criterion": "mean over families of frozen accuracy on the tune range; ties -> fewer epochs, then lower rate",
+   "epochs": [
+    1,
+    3,
+    8
+   ],
+   "initializations": [
+    1000,
+    1001
+   ],
+   "learning_rates": [
+    0.03,
+    0.1,
+    0.3
+   ]
+  }
+ },
+ "primary": [
+  [
+   "h16@e2",
+   "h16@e1",
+   "frozen"
+  ],
+  [
+   "h16@e1",
+   "h16@e0",
+   "frozen"
+  ],
+  [
+   "lin@e2",
+   "lin@e1",
+   "frozen"
+  ]
+ ],
+ "provenance": {
+  "captured_at_unix": 1790307354.5992324,
+  "captured_before_run": true,
+  "compute": {
+   "array_library": "numpy",
+   "array_library_version": "2.5.3",
+   "base_lock_sha256": "2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6",
+   "cpu_model": "AMD Ryzen 7 5700G with Radeon Graphics",
+   "cuda": null,
+   "cuda_lock_sha256": "aa12fceae9b2ae72e1a4e6215b2f4f1d3981b2f61dfa591ec66dd43342ceb9f6",
+   "deterministic_settings": {
+    "cupy_cub_accelerators": null,
+    "note": "no atomics or nondeterministic reductions are used by AAA's array programs; run-to-run determinism on each backend is tested, cross-backend equality is not assumed"
+   },
+   "dtype": "float64",
+   "machine_profile_sha256": "cd15c6f9526d44e0f09f36370d357d34a66470c320d91315f790a0affd6ede56",
+   "numpy_blas": {
+    "name": "scipy-openblas",
+    "openblas_configuration": "OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=64",
+    "version": "0.3.34.106.0"
+   },
+   "numpy_version": "2.5.3",
+   "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+   "processor": "CPU",
+   "python": "3.12.3",
+   "requested_device": "cpu",
+   "resolved_device": "cpu",
+   "schema": "aaa.compute.provenance.v1"
+  },
+  "generator_version": "aaa.python.gen.v1",
+  "interpreter": {
+   "build": [
+    "main",
+    "Aug 31 2026 10:18:26"
+   ],
+   "cache_tag": "cpython-312",
+   "compiler": "GCC 13.3.0",
+   "implementation": "cpython",
+   "machine": "x86_64",
+   "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+   "version": "3.12.3",
+   "version_info": [
+    3,
+    12,
+    3
+   ]
+  },
+  "protocol": "aaa.python.v1",
+  "source": {
+   "commit": "77dbb49977bd56683937bcde5daf2536ebd46d2f",
+   "dirty": false,
+   "phase_fingerprint": "00687c0d60bd6ef0062e9fab2267e727bf0541356a57ef08a2bfc65fd6371517"
+  },
+  "spec_sha256": "992aa2b0cc765f2c73b82092dcb1779622370f3b0e1e13a808c666598f46ea5a"
+ },
+ "raw_bytes": 19977549,
+ "raw_location": "not committed (evidence policy); gzip on the FLOWBOX HDD at AAA/10k/runs/superseded/stage_encoders_censored.json.gz",
+ "raw_sha256": "fc211bfb31836bb0fd19ded14fe380eb30daf7d4b913997bd26b81d3eabb1350",
+ "schema": "aaa.python.v1.superseded_stage.v1",
+ "secondary": [
+  [
+   "h16@e2",
+   "h16@e2-alpha",
+   "frozen"
+  ],
+  [
+   "h16@e2",
+   "h16@e2-line",
+   "frozen"
+  ],
+  [
+   "h16@e2",
+   "h16@e2-flow",
+   "frozen"
+  ],
+  [
+   "h16@e2",
+   "lin@e2",
+   "frozen"
+  ],
+  [
+   "h16@e2",
+   "h16@e2",
+   "online-frozen"
+  ],
+  [
+   "h16@e1",
+   "h16@e1",
+   "online-frozen"
+  ]
+ ],
+ "selections": {},
+ "status": "SUPERSEDED: the training-budget grid {1, 3, 8} was censored (every arm selected 8 while still improving); see the brief's amendment. Retained as observed; not used for any selection.",
+ "summary": {
+  "arms": {
+   "h16@e0": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.20525,
+       "novel_composition": 0.1075,
+       "novel_literals": 0.211,
+       "novel_names": 0.189,
+       "novel_structure": 0.206
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.1745,
+      "mean": 0.18733333333333335,
+      "mean_nll": 2.1565833493333333,
+      "streams": 30,
+      "upper": 0.20125,
+      "variance_components": {
+       "initialization": 1.40644955300126e-05,
+       "residual": 0.00346602809706258,
+       "stream": 0.000385265006385696
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.21275,
+       "novel_composition": 0.103,
+       "novel_literals": 0.206,
+       "novel_names": 0.1745,
+       "novel_structure": 0.235
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.17300000000000001,
+      "mean": 0.19066666666666668,
+      "mean_nll": 2.13132824175,
+      "streams": 30,
+      "upper": 0.20933333333333334,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.00271507024265645,
+       "stream": 0.0019314814814814813
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.68775,
+       "novel_composition": 0.673,
+       "novel_literals": 0.69,
+       "novel_names": 0.666,
+       "novel_structure": 0.415
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6134979166666666,
+      "mean": 0.6365833333333333,
+      "mean_nll": 0.9831080066666666,
+      "streams": 30,
+      "upper": 0.6597541666666668,
+      "variance_components": {
+       "initialization": 7.279693486590119e-05,
+       "residual": 0.0020218789910600252,
+       "stream": 0.003560089399744569
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.68625,
+       "novel_composition": 0.673,
+       "novel_literals": 0.703,
+       "novel_names": 0.641,
+       "novel_structure": 0.456
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6176666666666667,
+      "mean": 0.6409166666666667,
+      "mean_nll": 0.9108959071666667,
+      "streams": 30,
+      "upper": 0.66391875,
+      "variance_components": {
+       "initialization": 2.9454022988506633e-05,
+       "residual": 0.0016416107918263091,
+       "stream": 0.0036321679438058737
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.207,
+       "novel_composition": 0.202,
+       "novel_literals": 0.1245,
+       "novel_names": 0.1545,
+       "novel_structure": 0.035
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.13583333333333333,
+      "mean": 0.155,
+      "mean_nll": 3.770782260916667,
+      "streams": 30,
+      "upper": 0.1765041666666667,
+      "variance_components": {
+       "initialization": 0.0003074712643678163,
+       "residual": 0.0016554916985951473,
+       "stream": 0.002058588761174968
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.2065,
+       "novel_composition": 0.197,
+       "novel_literals": 0.122,
+       "novel_names": 0.1455,
+       "novel_structure": 0.0565
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.13525,
+      "mean": 0.15566666666666668,
+      "mean_nll": 3.78429958875,
+      "streams": 30,
+      "upper": 0.17850208333333334,
+      "variance_components": {
+       "initialization": 7.56226053639846e-05,
+       "residual": 0.0012396551724137932,
+       "stream": 0.0033682471264367825
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.52075,
+       "novel_composition": 0.5335,
+       "novel_literals": 0.506,
+       "novel_names": 0.4515,
+       "novel_structure": 0.2515
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.44058125000000004,
+      "mean": 0.46399999999999997,
+      "mean_nll": 1.2146163065833333,
+      "streams": 30,
+      "upper": 0.48658541666666666,
+      "variance_components": {
+       "initialization": 0.000645865261813537,
+       "residual": 0.00367404214559387,
+       "stream": 0.001399233716475096
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.51575,
+       "novel_composition": 0.5405,
+       "novel_literals": 0.5095,
+       "novel_names": 0.4625,
+       "novel_structure": 0.2985
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.45175000000000004,
+      "mean": 0.47375,
+      "mean_nll": 1.2141943918333333,
+      "streams": 30,
+      "upper": 0.49566666666666664,
+      "variance_components": {
+       "initialization": 0.00019513090676883803,
+       "residual": 0.0036287116858237547,
+       "stream": 0.0023534003831417617
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.96075,
+       "novel_composition": 0.891,
+       "novel_literals": 0.906,
+       "novel_names": 0.605,
+       "novel_structure": 0.7845
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.8171624999999999,
+      "mean": 0.8513333333333333,
+      "mean_nll": 0.9977883978333334,
+      "streams": 30,
+      "upper": 0.8814166666666667,
+      "variance_components": {
+       "initialization": 0.0024626436781609216,
+       "residual": 0.0011308748403575993,
+       "stream": 0.0011040389527458493
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.891,
+       "novel_composition": 0.758,
+       "novel_literals": 0.8555,
+       "novel_names": 0.593,
+       "novel_structure": 0.752
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.77175,
+      "mean": 0.7900833333333334,
+      "mean_nll": 1.2088253725833333,
+      "streams": 30,
+      "upper": 0.8085020833333333,
+      "variance_components": {
+       "initialization": 3.5057471264367414e-05,
+       "residual": 0.0021540628991060023,
+       "stream": 0.0019572158365261834
+      }
+     }
+    }
+   },
+   "h16@e1": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.2015,
+       "novel_composition": 0.101,
+       "novel_literals": 0.228,
+       "novel_names": 0.1895,
+       "novel_structure": 0.2045
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.17550000000000002,
+      "mean": 0.18766666666666668,
+      "mean_nll": 2.1646494623333337,
+      "streams": 30,
+      "upper": 0.20041666666666666,
+      "variance_components": {
+       "initialization": 2.9693486590038338e-05,
+       "residual": 0.0029462324393358876,
+       "stream": 0.00027302043422733124
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.20675,
+       "novel_composition": 0.1045,
+       "novel_literals": 0.2075,
+       "novel_names": 0.1885,
+       "novel_structure": 0.2095
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.17233333333333334,
+      "mean": 0.18725,
+      "mean_nll": 2.1533037469166665,
+      "streams": 30,
+      "upper": 0.20258333333333337,
+      "variance_components": {
+       "initialization": 2.322796934865895e-05,
+       "residual": 0.0026182072158365266,
+       "stream": 0.0008844508301404854
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.71,
+       "novel_composition": 0.6755,
+       "novel_literals": 0.696,
+       "novel_names": 0.681,
+       "novel_structure": 0.441
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6304979166666667,
+      "mean": 0.65225,
+      "mean_nll": 0.9481608579999999,
+      "streams": 30,
+      "upper": 0.6757520833333333,
+      "variance_components": {
+       "initialization": 0.0001649584929757354,
+       "residual": 0.002273698914431673,
+       "stream": 0.002830970625798213
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.71625,
+       "novel_composition": 0.677,
+       "novel_literals": 0.71,
+       "novel_names": 0.6515,
+       "novel_structure": 0.473
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6359166666666667,
+      "mean": 0.6573333333333334,
+      "mean_nll": 0.9088833565,
+      "streams": 30,
+      "upper": 0.67891875,
+      "variance_components": {
+       "initialization": 5.378352490421576e-05,
+       "residual": 0.0019411238825031926,
+       "stream": 0.0031127554278416346
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.222,
+       "novel_composition": 0.217,
+       "novel_literals": 0.1195,
+       "novel_names": 0.1615,
+       "novel_structure": 0.058
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.14908125000000003,
+      "mean": 0.16666666666666666,
+      "mean_nll": 3.7371580993333335,
+      "streams": 30,
+      "upper": 0.18566875000000002,
+      "variance_components": {
+       "initialization": 9.596104725415012e-05,
+       "residual": 0.0020239463601532566,
+       "stream": 0.0018641283524904219
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.22025,
+       "novel_composition": 0.2095,
+       "novel_literals": 0.122,
+       "novel_names": 0.155,
+       "novel_structure": 0.077
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.14958333333333335,
+      "mean": 0.16733333333333333,
+      "mean_nll": 3.7648716949166663,
+      "streams": 30,
+      "upper": 0.18758333333333332,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.0016983077905491698,
+       "stream": 0.0026469508301404836
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.57625,
+       "novel_composition": 0.6,
+       "novel_literals": 0.559,
+       "novel_names": 0.447,
+       "novel_structure": 0.2345
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.46733125,
+      "mean": 0.49883333333333335,
+      "mean_nll": 1.2022271490833334,
+      "streams": 30,
+      "upper": 0.5310020833333333,
+      "variance_components": {
+       "initialization": 0.001638793103448276,
+       "residual": 0.004170466155810983,
+       "stream": 0.002332407407407408
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.565,
+       "novel_composition": 0.601,
+       "novel_literals": 0.5565,
+       "novel_names": 0.456,
+       "novel_structure": 0.249
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.4689166666666667,
+      "mean": 0.49875,
+      "mean_nll": 1.2064148395833334,
+      "streams": 30,
+      "upper": 0.53,
+      "variance_components": {
+       "initialization": 0.0014857439335887617,
+       "residual": 0.004512172733077905,
+       "stream": 0.001965054278416347
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.92025,
+       "novel_composition": 0.8665,
+       "novel_literals": 0.8625,
+       "novel_names": 0.613,
+       "novel_structure": 0.678
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.78125,
+      "mean": 0.8100833333333333,
+      "mean_nll": 0.8596145110833333,
+      "streams": 30,
+      "upper": 0.8322520833333333,
+      "variance_components": {
+       "initialization": 0.0010844348659003837,
+       "residual": 0.0015755188378033206,
+       "stream": 0.0017672254150702428
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.86175,
+       "novel_composition": 0.758,
+       "novel_literals": 0.8485,
+       "novel_names": 0.6335,
+       "novel_structure": 0.698
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.7589166666666667,
+      "mean": 0.7769166666666666,
+      "mean_nll": 0.88329383325,
+      "streams": 30,
+      "upper": 0.7949166666666666,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.0017955699233716475,
+       "stream": 0.0022819444444444454
+      }
+     }
+    }
+   },
+   "h16@e2": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.379,
+       "novel_composition": 0.135,
+       "novel_literals": 0.3615,
+       "novel_names": 0.38,
+       "novel_structure": 0.349
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.30733333333333335,
+      "mean": 0.33058333333333334,
+      "mean_nll": 1.91922272725,
+      "streams": 30,
+      "upper": 0.35300000000000004,
+      "variance_components": {
+       "initialization": 0.0006084929757343537,
+       "residual": 0.003972294061302681,
+       "stream": 0.0013034961685823754
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.377,
+       "novel_composition": 0.1375,
+       "novel_literals": 0.3355,
+       "novel_names": 0.3625,
+       "novel_structure": 0.3495
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.3050833333333334,
+      "mean": 0.32316666666666666,
+      "mean_nll": 1.9271189589166666,
+      "streams": 30,
+      "upper": 0.3416666666666666,
+      "variance_components": {
+       "initialization": 2.1040868454661502e-05,
+       "residual": 0.003219699872286079,
+       "stream": 0.0017348978288633451
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.721,
+       "novel_composition": 0.6615,
+       "novel_literals": 0.7025,
+       "novel_names": 0.705,
+       "novel_structure": 0.4005
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6287458333333333,
+      "mean": 0.6519166666666666,
+      "mean_nll": 0.9723091621666666,
+      "streams": 30,
+      "upper": 0.67575,
+      "variance_components": {
+       "initialization": 0.000309355044699873,
+       "residual": 0.0023584690293742016,
+       "stream": 0.002757120051085568
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.73425,
+       "novel_composition": 0.651,
+       "novel_literals": 0.7115,
+       "novel_names": 0.6635,
+       "novel_structure": 0.4515
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6356666666666666,
+      "mean": 0.6576666666666667,
+      "mean_nll": 0.9026347156666668,
+      "streams": 30,
+      "upper": 0.6795854166666666,
+      "variance_components": {
+       "initialization": 3.30779054916992e-05,
+       "residual": 0.0019326628352490426,
+       "stream": 0.0031916187739463612
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.2445,
+       "novel_composition": 0.179,
+       "novel_literals": 0.126,
+       "novel_names": 0.249,
+       "novel_structure": 0.062
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.16224791666666666,
+      "mean": 0.18416666666666667,
+      "mean_nll": 3.6323479050833334,
+      "streams": 30,
+      "upper": 0.2083354166666667,
+      "variance_components": {
+       "initialization": 0.00039093231162196654,
+       "residual": 0.0014711047254150704,
+       "stream": 0.002993550446998724
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.24275,
+       "novel_composition": 0.1985,
+       "novel_literals": 0.128,
+       "novel_names": 0.2235,
+       "novel_structure": 0.0705
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.16266666666666665,
+      "mean": 0.18433333333333335,
+      "mean_nll": 3.6339468502499996,
+      "streams": 30,
+      "upper": 0.2092520833333333,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.0014628352490421456,
+       "stream": 0.004253256704980842
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.62725,
+       "novel_composition": 0.6395,
+       "novel_literals": 0.6,
+       "novel_names": 0.641,
+       "novel_structure": 0.3715
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5449145833333333,
+      "mean": 0.5844166666666666,
+      "mean_nll": 1.083280216,
+      "streams": 30,
+      "upper": 0.6215854166666666,
+      "variance_components": {
+       "initialization": 0.002928480204342275,
+       "residual": 0.003701380906768838,
+       "stream": 0.0024280012771392074
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.64375,
+       "novel_composition": 0.6395,
+       "novel_literals": 0.615,
+       "novel_names": 0.6495,
+       "novel_structure": 0.399
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5712479166666667,
+      "mean": 0.5984166666666667,
+      "mean_nll": 1.0832884238333333,
+      "streams": 30,
+      "upper": 0.6265020833333333,
+      "variance_components": {
+       "initialization": 0.0010346743295019134,
+       "residual": 0.0038044460408684544,
+       "stream": 0.00285079821200511
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.96725,
+       "novel_composition": 0.784,
+       "novel_literals": 0.9805,
+       "novel_names": 0.981,
+       "novel_structure": 0.871
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.9083333333333333,
+      "mean": 0.9251666666666667,
+      "mean_nll": 0.20334748466666663,
+      "streams": 30,
+      "upper": 0.9415854166666667,
+      "variance_components": {
+       "initialization": 0.00036661877394636005,
+       "residual": 0.00061625159642401,
+       "stream": 0.0009370530012771372
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.92275,
+       "novel_composition": 0.8035,
+       "novel_literals": 0.941,
+       "novel_names": 0.957,
+       "novel_structure": 0.8765
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.8850833333333332,
+      "mean": 0.9039166666666667,
+      "mean_nll": 0.28458046375,
+      "streams": 30,
+      "upper": 0.9210833333333333,
+      "variance_components": {
+       "initialization": 0.00014691890166028198,
+       "residual": 0.001481553320561941,
+       "stream": 0.0017357598978288646
+      }
+     }
+    }
+   },
+   "h16@e2-alpha": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.24675,
+       "novel_composition": 0.1115,
+       "novel_literals": 0.279,
+       "novel_names": 0.2,
+       "novel_structure": 0.249
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.20633333333333334,
+      "mean": 0.22216666666666668,
+      "mean_nll": 2.128249181333333,
+      "streams": 30,
+      "upper": 0.23966666666666664,
+      "variance_components": {
+       "initialization": 1.3505747126436815e-05,
+       "residual": 0.004017049808429119,
+       "stream": 0.0010011973180076628
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.245,
+       "novel_composition": 0.12,
+       "novel_literals": 0.263,
+       "novel_names": 0.191,
+       "novel_structure": 0.258
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.20208333333333334,
+      "mean": 0.22033333333333333,
+      "mean_nll": 2.1226942745833335,
+      "streams": 30,
+      "upper": 0.2385020833333334,
+      "variance_components": {
+       "initialization": 0.00012013090676883824,
+       "residual": 0.002693295019157088,
+       "stream": 0.0015240900383141766
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.718,
+       "novel_composition": 0.677,
+       "novel_literals": 0.713,
+       "novel_names": 0.6835,
+       "novel_structure": 0.448
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.63833125,
+      "mean": 0.6595833333333333,
+      "mean_nll": 0.9086424919999999,
+      "streams": 30,
+      "upper": 0.6810854166666667,
+      "variance_components": {
+       "initialization": 0.00011224457215836537,
+       "residual": 0.002527338761174968,
+       "stream": 0.002610664112388251
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.71875,
+       "novel_composition": 0.659,
+       "novel_literals": 0.7075,
+       "novel_names": 0.6555,
+       "novel_structure": 0.472
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6334145833333334,
+      "mean": 0.6552500000000001,
+      "mean_nll": 0.8750942963333334,
+      "streams": 30,
+      "upper": 0.6762520833333333,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.001980595466155811,
+       "stream": 0.0032568326947637295
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.2215,
+       "novel_composition": 0.2165,
+       "novel_literals": 0.1225,
+       "novel_names": 0.214,
+       "novel_structure": 0.067
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.1585,
+      "mean": 0.17716666666666667,
+      "mean_nll": 3.6485020012500002,
+      "streams": 30,
+      "upper": 0.19758333333333333,
+      "variance_components": {
+       "initialization": 0.00016926883780332073,
+       "residual": 0.0016913793103448275,
+       "stream": 0.0021324712643678166
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.20925,
+       "novel_composition": 0.202,
+       "novel_literals": 0.124,
+       "novel_names": 0.197,
+       "novel_structure": 0.0695
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.14958333333333335,
+      "mean": 0.16849999999999998,
+      "mean_nll": 3.673661462583333,
+      "streams": 30,
+      "upper": 0.19075,
+      "variance_components": {
+       "initialization": 1.2452107279695074e-06,
+       "residual": 0.0013876436781609198,
+       "stream": 0.0031106321839080462
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.64575,
+       "novel_composition": 0.682,
+       "novel_literals": 0.6255,
+       "novel_names": 0.556,
+       "novel_structure": 0.397
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5589166666666667,
+      "mean": 0.592,
+      "mean_nll": 1.0453254919166666,
+      "streams": 30,
+      "upper": 0.6240020833333334,
+      "variance_components": {
+       "initialization": 0.0016427681992337163,
+       "residual": 0.0039030651340996167,
+       "stream": 0.002953400383141762
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.632,
+       "novel_composition": 0.6625,
+       "novel_literals": 0.631,
+       "novel_names": 0.5495,
+       "novel_structure": 0.4285
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5594166666666667,
+      "mean": 0.58925,
+      "mean_nll": 1.05958541625,
+      "streams": 30,
+      "upper": 0.6186666666666667,
+      "variance_components": {
+       "initialization": 0.001029102809706256,
+       "residual": 0.0051567768199233715,
+       "stream": 0.002543007662835249
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.97775,
+       "novel_composition": 0.9295,
+       "novel_literals": 0.96,
+       "novel_names": 0.793,
+       "novel_structure": 0.8235
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.8940812500000002,
+      "mean": 0.91025,
+      "mean_nll": 0.31690565691666667,
+      "streams": 30,
+      "upper": 0.9244166666666667,
+      "variance_components": {
+       "initialization": 0.00018401979565772685,
+       "residual": 0.001007415389527458,
+       "stream": 0.0010713920817369093
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.93075,
+       "novel_composition": 0.8265,
+       "novel_literals": 0.949,
+       "novel_names": 0.7885,
+       "novel_structure": 0.8415
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.8594979166666668,
+      "mean": 0.8778333333333334,
+      "mean_nll": 0.42121255774999994,
+      "streams": 30,
+      "upper": 0.8954187499999999,
+      "variance_components": {
+       "initialization": 0.00011848659003831372,
+       "residual": 0.001395402298850575,
+       "stream": 0.0019081896551724161
+      }
+     }
+    }
+   },
+   "h16@e2-flow": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.352,
+       "novel_composition": 0.097,
+       "novel_literals": 0.3555,
+       "novel_names": 0.352,
+       "novel_structure": 0.3525
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.29016458333333334,
+      "mean": 0.3101666666666667,
+      "mean_nll": 1.9337278893333332,
+      "streams": 30,
+      "upper": 0.33075208333333334,
+      "variance_components": {
+       "initialization": 0.0005139687100894004,
+       "residual": 0.003931864623243933,
+       "stream": 0.0006149744572158364
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.3565,
+       "novel_composition": 0.1245,
+       "novel_literals": 0.3195,
+       "novel_names": 0.3335,
+       "novel_structure": 0.3715
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.2919145833333333,
+      "mean": 0.31033333333333335,
+      "mean_nll": 1.930163069166667,
+      "streams": 30,
+      "upper": 0.3305854166666667,
+      "variance_components": {
+       "initialization": 5.201149425287322e-05,
+       "residual": 0.0032276181353767565,
+       "stream": 0.0019702266922094506
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.72875,
+       "novel_composition": 0.602,
+       "novel_literals": 0.6835,
+       "novel_names": 0.7115,
+       "novel_structure": 0.3925
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6169145833333334,
+      "mean": 0.6411666666666668,
+      "mean_nll": 1.0011258274166666,
+      "streams": 30,
+      "upper": 0.6650020833333334,
+      "variance_components": {
+       "initialization": 0.000420865261813537,
+       "residual": 0.002624968071519796,
+       "stream": 0.002614112388250319
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.7235,
+       "novel_composition": 0.616,
+       "novel_literals": 0.699,
+       "novel_names": 0.6625,
+       "novel_structure": 0.426
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6199979166666667,
+      "mean": 0.64175,
+      "mean_nll": 0.9319606324999999,
+      "streams": 30,
+      "upper": 0.6631666666666667,
+      "variance_components": {
+       "initialization": 2.602171136653894e-05,
+       "residual": 0.0020918023627075357,
+       "stream": 0.0031344189016602824
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.23675,
+       "novel_composition": 0.177,
+       "novel_literals": 0.1235,
+       "novel_names": 0.2535,
+       "novel_structure": 0.0325
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.1569125,
+      "mean": 0.17666666666666667,
+      "mean_nll": 3.6863992952499998,
+      "streams": 30,
+      "upper": 0.19949999999999998,
+      "variance_components": {
+       "initialization": 0.00020557151979565773,
+       "residual": 0.0015828544061302686,
+       "stream": 0.002652203065134099
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.2365,
+       "novel_composition": 0.182,
+       "novel_literals": 0.133,
+       "novel_names": 0.217,
+       "novel_structure": 0.055
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15683333333333332,
+      "mean": 0.17666666666666667,
+      "mean_nll": 3.6777782568333337,
+      "streams": 30,
+      "upper": 0.19992083333333335,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.0013995849297573435,
+       "stream": 0.003470530012771393
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.66,
+       "novel_composition": 0.6555,
+       "novel_literals": 0.608,
+       "novel_names": 0.6585,
+       "novel_structure": 0.336
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5623312500000001,
+      "mean": 0.5963333333333334,
+      "mean_nll": 1.0593037735000002,
+      "streams": 30,
+      "upper": 0.6274187499999999,
+      "variance_components": {
+       "initialization": 0.0019646072796934842,
+       "residual": 0.003859003831417624,
+       "stream": 0.0019885536398467425
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.65975,
+       "novel_composition": 0.6525,
+       "novel_literals": 0.608,
+       "novel_names": 0.6565,
+       "novel_structure": 0.3765
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.57733125,
+      "mean": 0.6021666666666667,
+      "mean_nll": 1.0645792425833334,
+      "streams": 30,
+      "upper": 0.62666875,
+      "variance_components": {
+       "initialization": 0.00046143039591315196,
+       "residual": 0.004352458492975734,
+       "stream": 0.002720242656449551
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.973,
+       "novel_composition": 0.8175,
+       "novel_literals": 0.9825,
+       "novel_names": 0.983,
+       "novel_structure": 0.8955
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.9205812500000001,
+      "mean": 0.9374166666666668,
+      "mean_nll": 0.16904939891666668,
+      "streams": 30,
+      "upper": 0.9538333333333333,
+      "variance_components": {
+       "initialization": 0.00034621647509578785,
+       "residual": 0.0008146631545338436,
+       "stream": 0.0009907247765006389
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.92175,
+       "novel_composition": 0.7965,
+       "novel_literals": 0.9465,
+       "novel_names": 0.9535,
+       "novel_structure": 0.8895
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.88575,
+      "mean": 0.9049166666666666,
+      "mean_nll": 0.28163339174999996,
+      "streams": 30,
+      "upper": 0.9235854166666666,
+      "variance_components": {
+       "initialization": 0.00016427203065134122,
+       "residual": 0.001314663154533844,
+       "stream": 0.0019687420178799474
+      }
+     }
+    }
+   },
+   "h16@e2-line": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.38925,
+       "novel_composition": 0.143,
+       "novel_literals": 0.38,
+       "novel_names": 0.383,
+       "novel_structure": 0.346
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.3135833333333333,
+      "mean": 0.3384166666666667,
+      "mean_nll": 1.920724347,
+      "streams": 30,
+      "upper": 0.36258333333333337,
+      "variance_components": {
+       "initialization": 0.0009055236270753506,
+       "residual": 0.0038085967432950193,
+       "stream": 0.0009986590038314174
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.38875,
+       "novel_composition": 0.1465,
+       "novel_literals": 0.3515,
+       "novel_names": 0.374,
+       "novel_structure": 0.361
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.3145833333333333,
+      "mean": 0.33508333333333334,
+      "mean_nll": 1.920293407083333,
+      "streams": 30,
+      "upper": 0.3580020833333334,
+      "variance_components": {
+       "initialization": 0.00025116538952745887,
+       "residual": 0.0034763809067688374,
+       "stream": 0.002027139208173691
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.7225,
+       "novel_composition": 0.6695,
+       "novel_literals": 0.706,
+       "novel_names": 0.7,
+       "novel_structure": 0.405
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6337458333333333,
+      "mean": 0.6542499999999999,
+      "mean_nll": 0.9509796441666666,
+      "streams": 30,
+      "upper": 0.6746687499999999,
+      "variance_components": {
+       "initialization": 1.069604086845357e-05,
+       "residual": 0.002634905810983397,
+       "stream": 0.002709418901660279
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.72525,
+       "novel_composition": 0.662,
+       "novel_literals": 0.708,
+       "novel_names": 0.661,
+       "novel_structure": 0.449
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6332479166666667,
+      "mean": 0.6550833333333332,
+      "mean_nll": 0.8992815058333334,
+      "streams": 30,
+      "upper": 0.6770854166666667,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.0022739543422733077,
+       "stream": 0.003411606002554275
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.243,
+       "novel_composition": 0.198,
+       "novel_literals": 0.122,
+       "novel_names": 0.25,
+       "novel_structure": 0.08
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.16808125000000002,
+      "mean": 0.18933333333333333,
+      "mean_nll": 3.6279611299166667,
+      "streams": 30,
+      "upper": 0.2138354166666667,
+      "variance_components": {
+       "initialization": 0.0002153416347381866,
+       "residual": 0.001557343550446999,
+       "stream": 0.0032787196679438064
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.23975,
+       "novel_composition": 0.201,
+       "novel_literals": 0.131,
+       "novel_names": 0.229,
+       "novel_structure": 0.0785
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.16533124999999999,
+      "mean": 0.1865,
+      "mean_nll": 3.610463854833333,
+      "streams": 30,
+      "upper": 0.21125208333333334,
+      "variance_components": {
+       "initialization": 2.289272030651317e-05,
+       "residual": 0.0014048850574712645,
+       "stream": 0.004022701149425287
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.63075,
+       "novel_composition": 0.6545,
+       "novel_literals": 0.607,
+       "novel_names": 0.666,
+       "novel_structure": 0.3795
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5645000000000001,
+      "mean": 0.59475,
+      "mean_nll": 1.0858218760833334,
+      "streams": 30,
+      "upper": 0.6243333333333334,
+      "variance_components": {
+       "initialization": 0.0011903575989782888,
+       "residual": 0.003446910919540229,
+       "stream": 0.0029666666666666665
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.6345,
+       "novel_composition": 0.6635,
+       "novel_literals": 0.6265,
+       "novel_names": 0.655,
+       "novel_structure": 0.38
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5719166666666666,
+      "mean": 0.599,
+      "mean_nll": 1.0859628035,
+      "streams": 30,
+      "upper": 0.6245020833333332,
+      "variance_components": {
+       "initialization": 0.0005360791826309068,
+       "residual": 0.003888920817369093,
+       "stream": 0.003253176883780331
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.8995,
+       "novel_composition": 0.748,
+       "novel_literals": 0.8695,
+       "novel_names": 0.9205,
+       "novel_structure": 0.711
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.80849375,
+      "mean": 0.8413333333333334,
+      "mean_nll": 0.50098481075,
+      "streams": 30,
+      "upper": 0.8720854166666666,
+      "variance_components": {
+       "initialization": 0.0021837484035759913,
+       "residual": 0.0019051404853128993,
+       "stream": 0.00201109514687101
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.8545,
+       "novel_composition": 0.7455,
+       "novel_literals": 0.8635,
+       "novel_names": 0.909,
+       "novel_structure": 0.74
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.8071645833333334,
+      "mean": 0.8278333333333334,
+      "mean_nll": 0.5547104734166667,
+      "streams": 30,
+      "upper": 0.8484166666666668,
+      "variance_components": {
+       "initialization": 1.0536398467432886e-06,
+       "residual": 0.0018535759897828866,
+       "stream": 0.002683061941251599
+      }
+     }
+    }
+   },
+   "lin@e0": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.207,
+       "novel_composition": 0.0995,
+       "novel_literals": 0.2295,
+       "novel_names": 0.166,
+       "novel_structure": 0.2325
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.17583333333333334,
+      "mean": 0.19025,
+      "mean_nll": 2.1241595219166665,
+      "streams": 30,
+      "upper": 0.20466666666666664,
+      "variance_components": {
+       "initialization": 0.00014830779054916912,
+       "residual": 0.0028426644316730527,
+       "stream": 0.00045984993614303984
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.21425,
+       "novel_composition": 0.1125,
+       "novel_literals": 0.215,
+       "novel_names": 0.177,
+       "novel_structure": 0.257
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.17775000000000002,
+      "mean": 0.19833333333333333,
+      "mean_nll": 2.0860413445833332,
+      "streams": 30,
+      "upper": 0.22000208333333335,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.0012033844189016604,
+       "stream": 0.0032104086845466165
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6895,
+       "novel_composition": 0.6785,
+       "novel_literals": 0.6875,
+       "novel_names": 0.6845,
+       "novel_structure": 0.3955
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6140833333333333,
+      "mean": 0.6375,
+      "mean_nll": 0.9372780606666665,
+      "streams": 30,
+      "upper": 0.6611666666666667,
+      "variance_components": {
+       "initialization": 8.588761174968127e-05,
+       "residual": 0.0013863346104725416,
+       "stream": 0.0038376596424010215
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.70475,
+       "novel_composition": 0.679,
+       "novel_literals": 0.692,
+       "novel_names": 0.6615,
+       "novel_structure": 0.4095
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.61825,
+      "mean": 0.6419166666666666,
+      "mean_nll": 0.8938779295833333,
+      "streams": 30,
+      "upper": 0.666,
+      "variance_components": {
+       "initialization": 1.850255427841613e-05,
+       "residual": 0.0007877474457215838,
+       "stream": 0.0042516922094508304
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.2165,
+       "novel_composition": 0.2255,
+       "novel_literals": 0.1235,
+       "novel_names": 0.2285,
+       "novel_structure": 0.0695
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15833333333333333,
+      "mean": 0.18,
+      "mean_nll": 3.4287911473333335,
+      "streams": 30,
+      "upper": 0.20367083333333333,
+      "variance_components": {
+       "initialization": 0.0004018997445721581,
+       "residual": 0.001280970625798212,
+       "stream": 0.0027145753512132836
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.21275,
+       "novel_composition": 0.222,
+       "novel_literals": 0.1315,
+       "novel_names": 0.225,
+       "novel_structure": 0.0695
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15725,
+      "mean": 0.17891666666666667,
+      "mean_nll": 3.4322117187500005,
+      "streams": 30,
+      "upper": 0.2025041666666667,
+      "variance_components": {
+       "initialization": 3.528097062579824e-05,
+       "residual": 0.0007195801404853128,
+       "stream": 0.0039485951468710085
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.434,
+       "novel_composition": 0.4425,
+       "novel_literals": 0.459,
+       "novel_names": 0.4465,
+       "novel_structure": 0.1875
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.37341458333333327,
+      "mean": 0.40058333333333335,
+      "mean_nll": 1.3334872750000002,
+      "streams": 30,
+      "upper": 0.4277520833333333,
+      "variance_components": {
+       "initialization": 0.0002451947637292463,
+       "residual": 0.0024684626436781605,
+       "stream": 0.004556034482758618
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.4265,
+       "novel_composition": 0.4545,
+       "novel_literals": 0.463,
+       "novel_names": 0.4575,
+       "novel_structure": 0.2005
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.37958125,
+      "mean": 0.40475000000000005,
+      "mean_nll": 1.3333300075833334,
+      "streams": 30,
+      "upper": 0.42991875000000007,
+      "variance_components": {
+       "initialization": 0.00012182311621966807,
+       "residual": 0.0025909083652618133,
+       "stream": 0.003991491060025545
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.98725,
+       "novel_composition": 0.948,
+       "novel_literals": 0.9225,
+       "novel_names": 0.6195,
+       "novel_structure": 0.8295
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.8624166666666667,
+      "mean": 0.8823333333333333,
+      "mean_nll": 0.57067932325,
+      "streams": 30,
+      "upper": 0.9001666666666667,
+      "variance_components": {
+       "initialization": 0.0004079022988505717,
+       "residual": 0.0004286717752234996,
+       "stream": 0.0015364144316730546
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.972,
+       "novel_composition": 0.8705,
+       "novel_literals": 0.911,
+       "novel_names": 0.627,
+       "novel_structure": 0.805
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.8452479166666667,
+      "mean": 0.8595833333333334,
+      "mean_nll": 0.5834298727499999,
+      "streams": 30,
+      "upper": 0.87425,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.00020613825031928496,
+       "stream": 0.001628991060025545
+      }
+     }
+    }
+   },
+   "lin@e1": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.207,
+       "novel_composition": 0.118,
+       "novel_literals": 0.2635,
+       "novel_names": 0.19,
+       "novel_structure": 0.2325
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.18891458333333333,
+      "mean": 0.20299999999999999,
+      "mean_nll": 2.1297839509166665,
+      "streams": 30,
+      "upper": 0.2185,
+      "variance_components": {
+       "initialization": 2.7905491698595164e-05,
+       "residual": 0.0026961685823754795,
+       "stream": 0.0008960727969348654
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.20725,
+       "novel_composition": 0.119,
+       "novel_literals": 0.244,
+       "novel_names": 0.19,
+       "novel_structure": 0.231
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.18224791666666668,
+      "mean": 0.19975000000000004,
+      "mean_nll": 2.1039902379999997,
+      "streams": 30,
+      "upper": 0.21841875000000002,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.0012535839719029374,
+       "stream": 0.0022359993614303963
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.70025,
+       "novel_composition": 0.6805,
+       "novel_literals": 0.7085,
+       "novel_names": 0.7165,
+       "novel_structure": 0.446
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.63425,
+      "mean": 0.6586666666666667,
+      "mean_nll": 0.8909848648333333,
+      "streams": 30,
+      "upper": 0.6835875,
+      "variance_components": {
+       "initialization": 0.0001925127713920838,
+       "residual": 0.0012625798212005108,
+       "stream": 0.0039369891443167306
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.7095,
+       "novel_composition": 0.6885,
+       "novel_literals": 0.728,
+       "novel_names": 0.6735,
+       "novel_structure": 0.4715
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.63975,
+      "mean": 0.6634166666666667,
+      "mean_nll": 0.8547812348333333,
+      "streams": 30,
+      "upper": 0.688,
+      "variance_components": {
+       "initialization": 2.9885057471263763e-05,
+       "residual": 0.0006934945721583655,
+       "stream": 0.004396376117496809
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.23225,
+       "novel_composition": 0.2425,
+       "novel_literals": 0.1345,
+       "novel_names": 0.261,
+       "novel_structure": 0.0805
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.17808333333333332,
+      "mean": 0.19716666666666663,
+      "mean_nll": 3.3848077256666667,
+      "streams": 30,
+      "upper": 0.21733750000000004,
+      "variance_components": {
+       "initialization": 0.0002127554278416347,
+       "residual": 0.0011599297573435508,
+       "stream": 0.0022787196679438064
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.24375,
+       "novel_composition": 0.235,
+       "novel_literals": 0.136,
+       "novel_names": 0.239,
+       "novel_structure": 0.075
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.17466666666666666,
+      "mean": 0.19541666666666666,
+      "mean_nll": 3.3916501255000004,
+      "streams": 30,
+      "upper": 0.21866875000000005,
+      "variance_components": {
+       "initialization": 5.004789272030676e-05,
+       "residual": 0.0005691650702426566,
+       "stream": 0.0036401021711366536
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.52825,
+       "novel_composition": 0.553,
+       "novel_literals": 0.4795,
+       "novel_names": 0.4765,
+       "novel_structure": 0.273
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.4431645833333333,
+      "mean": 0.4730833333333333,
+      "mean_nll": 1.2261515200833333,
+      "streams": 30,
+      "upper": 0.50191875,
+      "variance_components": {
+       "initialization": 0.00020822158365261774,
+       "residual": 0.0020035839719029372,
+       "stream": 0.005704246487867175
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.52625,
+       "novel_composition": 0.5655,
+       "novel_literals": 0.4855,
+       "novel_names": 0.4815,
+       "novel_structure": 0.281
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.4486645833333334,
+      "mean": 0.4776666666666667,
+      "mean_nll": 1.22656824875,
+      "streams": 30,
+      "upper": 0.50625,
+      "variance_components": {
+       "initialization": 0.00011724137931034404,
+       "residual": 0.002055906768837803,
+       "stream": 0.00565170817369093
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.92975,
+       "novel_composition": 0.875,
+       "novel_literals": 0.8905,
+       "novel_names": 0.64,
+       "novel_structure": 0.715
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.80483125,
+      "mean": 0.83,
+      "mean_nll": 0.5404276429166667,
+      "streams": 30,
+      "upper": 0.852,
+      "variance_components": {
+       "initialization": 0.000675287356321837,
+       "residual": 0.0009636015325670496,
+       "stream": 0.0023260536398467427
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.91225,
+       "novel_composition": 0.8675,
+       "novel_literals": 0.8915,
+       "novel_names": 0.634,
+       "novel_structure": 0.706
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.8052479166666666,
+      "mean": 0.8205833333333333,
+      "mean_nll": 0.543359193,
+      "streams": 30,
+      "upper": 0.83591875,
+      "variance_components": {
+       "initialization": 4.038952745849114e-06,
+       "residual": 0.0003651740102171135,
+       "stream": 0.001933604725415069
+      }
+     }
+    }
+   },
+   "lin@e2": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.407,
+       "novel_composition": 0.16,
+       "novel_literals": 0.4015,
+       "novel_names": 0.4325,
+       "novel_structure": 0.394
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.34124791666666665,
+      "mean": 0.367,
+      "mean_nll": 1.7271204470833332,
+      "streams": 30,
+      "upper": 0.3923354166666667,
+      "variance_components": {
+       "initialization": 0.0008407567049808428,
+       "residual": 0.0029171136653895276,
+       "stream": 0.001958030012771391
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.3955,
+       "novel_composition": 0.183,
+       "novel_literals": 0.3685,
+       "novel_names": 0.4095,
+       "novel_structure": 0.431
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.34116250000000004,
+      "mean": 0.36383333333333334,
+      "mean_nll": 1.7070789775,
+      "streams": 30,
+      "upper": 0.3863354166666667,
+      "variance_components": {
+       "initialization": 0.0001777298850574707,
+       "residual": 0.0011597701149425289,
+       "stream": 0.0033071839080459783
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.7235,
+       "novel_composition": 0.6855,
+       "novel_literals": 0.679,
+       "novel_names": 0.7115,
+       "novel_structure": 0.391
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6275833333333333,
+      "mean": 0.6523333333333333,
+      "mean_nll": 0.9221960671666666,
+      "streams": 30,
+      "upper": 0.6775041666666667,
+      "variance_components": {
+       "initialization": 0.00016663473818646172,
+       "residual": 0.0013704022988505742,
+       "stream": 0.00421508620689655
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.7355,
+       "novel_composition": 0.686,
+       "novel_literals": 0.6725,
+       "novel_names": 0.67,
+       "novel_structure": 0.412
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6274979166666667,
+      "mean": 0.6519166666666666,
+      "mean_nll": 0.8882900080833334,
+      "streams": 30,
+      "upper": 0.6755854166666667,
+      "variance_components": {
+       "initialization": 4.438058748403903e-06,
+       "residual": 0.0007004230523627074,
+       "stream": 0.004500510855683272
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.24475,
+       "novel_composition": 0.221,
+       "novel_literals": 0.1365,
+       "novel_names": 0.2625,
+       "novel_structure": 0.0665
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.17583125000000002,
+      "mean": 0.19599999999999998,
+      "mean_nll": 3.404145511666667,
+      "streams": 30,
+      "upper": 0.22,
+      "variance_components": {
+       "initialization": 0.0001149584929757344,
+       "residual": 0.001031800766283525,
+       "stream": 0.0035539750957854417
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.261,
+       "novel_composition": 0.2305,
+       "novel_literals": 0.149,
+       "novel_names": 0.2505,
+       "novel_structure": 0.072
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.18283333333333338,
+      "mean": 0.20400000000000001,
+      "mean_nll": 3.3962412945,
+      "streams": 30,
+      "upper": 0.2275,
+      "variance_components": {
+       "initialization": 2.442528735632193e-05,
+       "residual": 0.0007061302681992338,
+       "stream": 0.004055938697318007
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.585,
+       "novel_composition": 0.595,
+       "novel_literals": 0.6045,
+       "novel_names": 0.6045,
+       "novel_structure": 0.482
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5466666666666666,
+      "mean": 0.5760000000000001,
+      "mean_nll": 1.1313517415833334,
+      "streams": 30,
+      "upper": 0.6056666666666666,
+      "variance_components": {
+       "initialization": 0.00010927522349936344,
+       "residual": 0.00185507662835249,
+       "stream": 0.006113888888888888
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.58575,
+       "novel_composition": 0.5955,
+       "novel_literals": 0.615,
+       "novel_names": 0.6095,
+       "novel_structure": 0.483
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5495833333333333,
+      "mean": 0.5790833333333333,
+      "mean_nll": 1.1316362654999998,
+      "streams": 30,
+      "upper": 0.6088333333333332,
+      "variance_components": {
+       "initialization": 2.1998722860791605e-05,
+       "residual": 0.002022677203065134,
+       "stream": 0.006335871647509576
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.9755,
+       "novel_composition": 0.799,
+       "novel_literals": 0.987,
+       "novel_names": 0.981,
+       "novel_structure": 0.937
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.9265812500000001,
+      "mean": 0.9425,
+      "mean_nll": 0.18408346091666666,
+      "streams": 30,
+      "upper": 0.9578354166666667,
+      "variance_components": {
+       "initialization": 0.0002539750957854404,
+       "residual": 0.0003020434227330779,
+       "stream": 0.0011310025542784143
+      }
+     },
+     "online": {
+      "by_slice": {
+       "in_distribution": 0.97425,
+       "novel_composition": 0.83,
+       "novel_literals": 0.974,
+       "novel_names": 0.968,
+       "novel_structure": 0.9385
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.9298333333333333,
+      "mean": 0.9431666666666666,
+      "mean_nll": 0.18642373941666668,
+      "streams": 30,
+      "upper": 0.95625,
+      "variance_components": {
+       "initialization": 1.515006385696048e-05,
+       "residual": 0.00011401660280970614,
+       "stream": 0.0012769316730523602
+      }
+     }
+    }
+   },
+   "lookup": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.205,
+       "novel_composition": 0.065,
+       "novel_literals": 0.14,
+       "novel_names": 0.16,
+       "novel_structure": 0.25
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15166666666666667,
+      "mean": 0.17083333333333334,
+      "streams": 30,
+      "upper": 0.19333333333333333,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 9.1500119963225e-34,
+       "stream": 0.0035811781609195402
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6825,
+       "novel_composition": 0.675,
+       "novel_literals": 0.62,
+       "novel_names": 0.635,
+       "novel_structure": 0.43
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5916666666666667,
+      "mean": 0.6208333333333333,
+      "streams": 30,
+      "upper": 0.65,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 1.133420840834787e-32,
+       "stream": 0.006813936781609195
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.2225,
+       "novel_composition": 0.205,
+       "novel_literals": 0.1,
+       "novel_names": 0.22,
+       "novel_structure": 0.095
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15833333333333333,
+      "mean": 0.1775,
+      "streams": 30,
+      "upper": 0.19916666666666666,
+      "variance_components": {
+       "initialization": 7.979204009696288e-34,
+       "residual": 1.7414538960742822e-33,
+       "stream": 0.003377155172413794
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.2315,
+       "novel_composition": 0.273,
+       "novel_literals": 0.2745,
+       "novel_names": 0.247,
+       "novel_structure": 0.2375
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.22716458333333336,
+      "mean": 0.24916666666666668,
+      "streams": 30,
+      "upper": 0.27041875000000004,
+      "variance_components": {
+       "initialization": 0.000587356321839079,
+       "residual": 0.004277458492975735,
+       "stream": 0.0008482598978288628
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.5425,
+       "novel_composition": 0.49,
+       "novel_literals": 0.58,
+       "novel_names": 0.58,
+       "novel_structure": 0.555
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5166666666666667,
+      "mean": 0.5483333333333333,
+      "streams": 30,
+      "upper": 0.5791666666666667,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 8.972914989942065e-33,
+       "stream": 0.008057471264367812
+      }
+     }
+    }
+   },
+   "majority": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.205,
+       "novel_composition": 0.065,
+       "novel_literals": 0.14,
+       "novel_names": 0.16,
+       "novel_structure": 0.25
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15166666666666667,
+      "mean": 0.17083333333333334,
+      "streams": 30,
+      "upper": 0.19333333333333333,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 9.1500119963225e-34,
+       "stream": 0.0035811781609195402
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6825,
+       "novel_composition": 0.675,
+       "novel_literals": 0.62,
+       "novel_names": 0.635,
+       "novel_structure": 0.43
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5916666666666667,
+      "mean": 0.6208333333333333,
+      "streams": 30,
+      "upper": 0.65,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 1.133420840834787e-32,
+       "stream": 0.006813936781609195
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.2225,
+       "novel_composition": 0.205,
+       "novel_literals": 0.1,
+       "novel_names": 0.22,
+       "novel_structure": 0.095
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15833333333333333,
+      "mean": 0.1775,
+      "streams": 30,
+      "upper": 0.19916666666666666,
+      "variance_components": {
+       "initialization": 7.979204009696288e-34,
+       "residual": 1.7414538960742822e-33,
+       "stream": 0.003377155172413794
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.2285,
+       "novel_composition": 0.247,
+       "novel_literals": 0.242,
+       "novel_names": 0.233,
+       "novel_structure": 0.227
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.2167479166666667,
+      "mean": 0.2343333333333333,
+      "streams": 30,
+      "upper": 0.24866875000000005,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.004670370370370371,
+       "stream": 0.0007566411238825034
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.5425,
+       "novel_composition": 0.49,
+       "novel_literals": 0.58,
+       "novel_names": 0.58,
+       "novel_structure": 0.555
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5166666666666667,
+      "mean": 0.5483333333333333,
+      "streams": 30,
+      "upper": 0.5791666666666667,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 8.972914989942065e-33,
+       "stream": 0.008057471264367812
+      }
+     }
+    }
+   },
+   "medoid": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6,
+       "novel_composition": 0.6,
+       "novel_literals": 0.615,
+       "novel_names": 0.605,
+       "novel_structure": 0.625
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.58,
+      "mean": 0.6075,
+      "streams": 30,
+      "upper": 0.6366666666666667,
+      "variance_components": {
+       "initialization": 1.297137184510923e-32,
+       "residual": 2.172389944933342e-32,
+       "stream": 0.006773706896551724
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.7325,
+       "novel_composition": 0.69,
+       "novel_literals": 0.765,
+       "novel_names": 0.735,
+       "novel_structure": 0.54
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6758333333333333,
+      "mean": 0.6991666666666666,
+      "streams": 30,
+      "upper": 0.7208541666666667,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 1.133420840834787e-32,
+       "stream": 0.004374281609195397
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.166,
+       "novel_composition": 0.205,
+       "novel_literals": 0.14,
+       "novel_names": 0.1865,
+       "novel_structure": 0.095
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.13933333333333334,
+      "mean": 0.15975,
+      "streams": 30,
+      "upper": 0.1825,
+      "variance_components": {
+       "initialization": 1.5644955300126364e-06,
+       "residual": 0.00021718550446998724,
+       "stream": 0.0037689495530012786
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.3225,
+       "novel_composition": 0.33,
+       "novel_literals": 0.32,
+       "novel_names": 0.265,
+       "novel_structure": 0.36
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.2966666666666667,
+      "mean": 0.32,
+      "streams": 30,
+      "upper": 0.3425,
+      "variance_components": {
+       "initialization": 3.254649428369337e-33,
+       "residual": 5.0767808495724835e-33,
+       "stream": 0.004499999999999998
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.96,
+       "novel_composition": 0.975,
+       "novel_literals": 0.955,
+       "novel_names": 0.985,
+       "novel_structure": 0.925
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.9533333333333334,
+      "mean": 0.96,
+      "streams": 30,
+      "upper": 0.9666666666666665,
+      "variance_components": {
+       "initialization": 5.350690886107558e-32,
+       "residual": 3.8252953378174064e-32,
+       "stream": 0.00032758620689655
+      }
+     }
+    }
+   },
+   "rules": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6,
+       "novel_composition": 0.6,
+       "novel_literals": 0.615,
+       "novel_names": 0.605,
+       "novel_structure": 0.625
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.58,
+      "mean": 0.6075,
+      "streams": 30,
+      "upper": 0.6366666666666667,
+      "variance_components": {
+       "initialization": 1.297137184510923e-32,
+       "residual": 2.172389944933342e-32,
+       "stream": 0.006773706896551724
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.7325,
+       "novel_composition": 0.69,
+       "novel_literals": 0.765,
+       "novel_names": 0.735,
+       "novel_structure": 0.54
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6758333333333333,
+      "mean": 0.6991666666666666,
+      "streams": 30,
+      "upper": 0.7208541666666667,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 1.133420840834787e-32,
+       "stream": 0.004374281609195397
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.166,
+       "novel_composition": 0.205,
+       "novel_literals": 0.14,
+       "novel_names": 0.1865,
+       "novel_structure": 0.095
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.13933333333333334,
+      "mean": 0.15975,
+      "streams": 30,
+      "upper": 0.1825,
+      "variance_components": {
+       "initialization": 1.5644955300126364e-06,
+       "residual": 0.00021718550446998724,
+       "stream": 0.0037689495530012786
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.43125,
+       "novel_composition": 0.468,
+       "novel_literals": 0.4325,
+       "novel_names": 0.4485,
+       "novel_structure": 0.325
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.3985833333333333,
+      "mean": 0.42274999999999996,
+      "streams": 30,
+      "upper": 0.4476666666666667,
+      "variance_components": {
+       "initialization": 0.00010822158365261843,
+       "residual": 0.0030128432311621964,
+       "stream": 0.003677745849297574
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.96,
+       "novel_composition": 0.975,
+       "novel_literals": 0.955,
+       "novel_names": 0.985,
+       "novel_structure": 0.925
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.9533333333333334,
+      "mean": 0.96,
+      "streams": 30,
+      "upper": 0.9666666666666665,
+      "variance_components": {
+       "initialization": 5.350690886107558e-32,
+       "residual": 3.8252953378174064e-32,
+       "stream": 0.00032758620689655
+      }
+     }
+    }
+   },
+   "uniform": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.11325,
+       "novel_composition": 0.0775,
+       "novel_literals": 0.1225,
+       "novel_names": 0.12,
+       "novel_structure": 0.137
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.10316666666666667,
+      "mean": 0.11391666666666665,
+      "streams": 30,
+      "upper": 0.12441666666666668,
+      "variance_components": {
+       "initialization": 2.8591954022988722e-05,
+       "residual": 0.002818398786717752,
+       "stream": 0.0
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.162,
+       "novel_composition": 0.1635,
+       "novel_literals": 0.171,
+       "novel_names": 0.155,
+       "novel_structure": 0.1645
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15258125,
+      "mean": 0.163,
+      "streams": 30,
+      "upper": 0.1730833333333333,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.0033135057471264367,
+       "stream": 3.8649425287356264e-05
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.0085,
+       "novel_composition": 0.009,
+       "novel_literals": 0.0055,
+       "novel_names": 0.009,
+       "novel_structure": 0.0095
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.005833333333333334,
+      "mean": 0.008333333333333333,
+      "streams": 30,
+      "upper": 0.011083333333333334,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.00019987228607918264,
+       "stream": 3.863346104725408e-06
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.24,
+       "novel_composition": 0.2635,
+       "novel_literals": 0.251,
+       "novel_names": 0.237,
+       "novel_structure": 0.251
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.23400000000000007,
+      "mean": 0.24708333333333332,
+      "streams": 30,
+      "upper": 0.25991666666666663,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 0.004312460089399745,
+       "stream": 0.0002679278416347383
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.49475,
+       "novel_composition": 0.509,
+       "novel_literals": 0.485,
+       "novel_names": 0.4945,
+       "novel_structure": 0.512
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.48324999999999996,
+      "mean": 0.49833333333333335,
+      "streams": 30,
+      "upper": 0.5138354166666668,
+      "variance_components": {
+       "initialization": 3.060344827586304e-05,
+       "residual": 0.00655874840357599,
+       "stream": 0.0
+      }
+     }
+    }
+   },
+   "v0_heuristic": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6,
+       "novel_composition": 0.59,
+       "novel_literals": 0.615,
+       "novel_names": 0.595,
+       "novel_structure": 0.605
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5733333333333334,
+      "mean": 0.6008333333333333,
+      "streams": 30,
+      "upper": 0.63,
+      "variance_components": {
+       "initialization": 1.2924145976741114e-32,
+       "residual": 2.3140675500376904e-32,
+       "stream": 0.006701867816091953
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6825,
+       "novel_composition": 0.675,
+       "novel_literals": 0.62,
+       "novel_names": 0.635,
+       "novel_structure": 0.43
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5916666666666667,
+      "mean": 0.6208333333333333,
+      "streams": 30,
+      "upper": 0.65,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 1.133420840834787e-32,
+       "stream": 0.006813936781609195
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.1175,
+       "novel_composition": 0.095,
+       "novel_literals": 0.095,
+       "novel_names": 0.125,
+       "novel_structure": 0.07
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.08666666666666667,
+      "mean": 0.10333333333333333,
+      "streams": 30,
+      "upper": 0.12083333333333333,
+      "variance_components": {
+       "initialization": 1.8152443153994638e-34,
+       "residual": 9.740335350923952e-34,
+       "stream": 0.002402298850574713
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.3,
+       "novel_composition": 0.31,
+       "novel_literals": 0.34,
+       "novel_names": 0.29,
+       "novel_structure": 0.29
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.2733333333333333,
+      "mean": 0.305,
+      "streams": 30,
+      "upper": 0.3341875000000001,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 2.951616773007258e-33,
+       "stream": 0.007646551724137929
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.96,
+       "novel_composition": 0.975,
+       "novel_literals": 0.955,
+       "novel_names": 0.985,
+       "novel_structure": 0.925
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.9533333333333334,
+      "mean": 0.96,
+      "streams": 30,
+      "upper": 0.9666666666666665,
+      "variance_components": {
+       "initialization": 5.350690886107558e-32,
+       "residual": 3.8252953378174064e-32,
+       "stream": 0.00032758620689655
+      }
+     }
+    }
+   },
+   "v0_instrument": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.17975,
+       "novel_composition": 0.0885,
+       "novel_literals": 0.2015,
+       "novel_names": 0.187,
+       "novel_structure": 0.1675
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.14383333333333334,
+      "mean": 0.16733333333333333,
+      "streams": 30,
+      "upper": 0.1895854166666667,
+      "variance_components": {
+       "initialization": 0.0011021232439335884,
+       "residual": 0.0029863026819923373,
+       "stream": 0.000282375478927203
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6915,
+       "novel_composition": 0.675,
+       "novel_literals": 0.6285,
+       "novel_names": 0.6475,
+       "novel_structure": 0.44
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6009979166666668,
+      "mean": 0.629,
+      "streams": 30,
+      "upper": 0.6575020833333333,
+      "variance_components": {
+       "initialization": 2.8113026819923534e-05,
+       "residual": 0.0002158684546615581,
+       "stream": 0.006135568326947638
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.214,
+       "novel_composition": 0.1995,
+       "novel_literals": 0.1205,
+       "novel_names": 0.2195,
+       "novel_structure": 0.0765
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.15441458333333336,
+      "mean": 0.17400000000000002,
+      "streams": 30,
+      "upper": 0.19441666666666668,
+      "variance_components": {
+       "initialization": 0.00032578224776500637,
+       "residual": 0.0010033844189016603,
+       "stream": 0.002092161558109835
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.5055,
+       "novel_composition": 0.5495,
+       "novel_literals": 0.5205,
+       "novel_names": 0.462,
+       "novel_structure": 0.357
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.45399999999999996,
+      "mean": 0.48333333333333334,
+      "streams": 30,
+      "upper": 0.5135833333333333,
+      "variance_components": {
+       "initialization": 0.00033759578544061294,
+       "residual": 0.0025897190293742017,
+       "stream": 0.005573068326947634
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.608,
+       "novel_composition": 0.5535,
+       "novel_literals": 0.6635,
+       "novel_names": 0.6205,
+       "novel_structure": 0.587
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.5725812499999999,
+      "mean": 0.60675,
+      "streams": 30,
+      "upper": 0.6455020833333334,
+      "variance_components": {
+       "initialization": 0.0027730204342273296,
+       "residual": 0.006496655491698595,
+       "stream": 0.0005542784163473822
+      }
+     }
+    }
+   },
+   "visible_tests": {
+    "localize": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.6,
+       "novel_composition": 0.6,
+       "novel_literals": 0.615,
+       "novel_names": 0.605,
+       "novel_structure": 0.625
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.58,
+      "mean": 0.6075,
+      "streams": 30,
+      "upper": 0.6366666666666667,
+      "variance_components": {
+       "initialization": 1.297137184510923e-32,
+       "residual": 2.172389944933342e-32,
+       "stream": 0.006773706896551724
+      }
+     }
+    },
+    "outcome": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.7325,
+       "novel_composition": 0.69,
+       "novel_literals": 0.765,
+       "novel_names": 0.735,
+       "novel_structure": 0.54
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.6758333333333333,
+      "mean": 0.6991666666666666,
+      "streams": 30,
+      "upper": 0.7208541666666667,
+      "variance_components": {
+       "initialization": 0.0,
+       "residual": 1.133420840834787e-32,
+       "stream": 0.004374281609195397
+      }
+     }
+    },
+    "output": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.166,
+       "novel_composition": 0.205,
+       "novel_literals": 0.14,
+       "novel_names": 0.1865,
+       "novel_structure": 0.095
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.13933333333333334,
+      "mean": 0.15975,
+      "streams": 30,
+      "upper": 0.1825,
+      "variance_components": {
+       "initialization": 1.5644955300126364e-06,
+       "residual": 0.00021718550446998724,
+       "stream": 0.0037689495530012786
+      }
+     }
+    },
+    "repair": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.9275,
+       "novel_composition": 0.955,
+       "novel_literals": 0.93,
+       "novel_names": 0.93,
+       "novel_structure": 1.0
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.93,
+      "mean": 0.945,
+      "streams": 30,
+      "upper": 0.9591666666666666,
+      "variance_components": {
+       "initialization": 1.3223243143072515e-32,
+       "residual": 1.4167760510434838e-32,
+       "stream": 0.0015689655172413772
+      }
+     }
+    },
+    "syntax": {
+     "frozen": {
+      "by_slice": {
+       "in_distribution": 0.96,
+       "novel_composition": 0.975,
+       "novel_literals": 0.955,
+       "novel_names": 0.985,
+       "novel_structure": 0.925
+      },
+      "confidence": 0.95,
+      "initializations": 10,
+      "interval_status": "MEASURED",
+      "lower": 0.9533333333333334,
+      "mean": 0.96,
+      "streams": 30,
+      "upper": 0.9666666666666665,
+      "variance_components": {
+       "initialization": 5.350690886107558e-32,
+       "residual": 3.8252953378174064e-32,
+       "stream": 0.00032758620689655
+      }
+     }
+    }
+   }
+  },
+  "contrasts": {
+   "localize: h16@e1 - h16@e0 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1890,
+    "holm": {
+     "holm_adjusted_p": 0.966,
+     "mean": 0.00033333333333333435,
+     "p_value": 0.966,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.012416666666666663,
+    "mean": 0.00033333333333333435,
+    "primary": true,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.012252083333333346,
+    "variance_components": {
+     "initialization": 3.893678160919541e-05,
+     "residual": 0.003573563218390805,
+     "stream": 0.00012399425287356312
+    }
+   },
+   "localize: h16@e1 - h16@e1 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1893,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.0165,
+    "mean": -0.0004166666666666667,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.016002083333333344,
+    "variance_components": {
+     "initialization": 0.00010683269476372916,
+     "residual": 0.0027128432311621974,
+     "stream": 0.0010278895274584935
+    }
+   },
+   "localize: h16@e2 - h16@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 3709,
+    "holm": {
+     "holm_adjusted_p": 0.00125,
+     "mean": 0.14291666666666666,
+     "p_value": 0.00025,
+     "resolved_after_holm": true
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.11599999999999999,
+    "mean": 0.14291666666666666,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.16991875000000004,
+    "variance_components": {
+     "initialization": 0.0006606481481481486,
+     "residual": 0.005084490740740741,
+     "stream": 0.002183397190293743
+    }
+   },
+   "localize: h16@e2 - h16@e2 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 2415,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.02658541666666666,
+    "mean": -0.007416666666666669,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.011837500000000016,
+    "variance_components": {
+     "initialization": 0.00033264687100893975,
+     "residual": 0.004397677203065134,
+     "stream": 0.0006488026819923373
+    }
+   },
+   "localize: h16@e2 - h16@e2-alpha [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 3403,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.08441666666666665,
+    "mean": 0.10841666666666666,
+    "primary": false,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.13233750000000002,
+    "variance_components": {
+     "initialization": 0.0005821998722860787,
+     "residual": 0.005772198275862069,
+     "stream": 0.0011423850574712648
+    }
+   },
+   "localize: h16@e2 - h16@e2-flow [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 2189,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.002831250000000006,
+    "mean": 0.020416666666666666,
+    "primary": false,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.03733333333333333,
+    "variance_components": {
+     "initialization": 0.00026481481481481473,
+     "residual": 0.0038113425925925927,
+     "stream": 0.0005499361430395913
+    }
+   },
+   "localize: h16@e2 - h16@e2-line [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1694,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.020333333333333328,
+    "mean": -0.007833333333333333,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.0037520833333333408,
+    "variance_components": {
+     "initialization": 6.286717752234996e-05,
+     "residual": 0.0034899106002554275,
+     "stream": 0.0
+    }
+   },
+   "localize: h16@e2 - lin@e2 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 2593,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.0515,
+    "mean": -0.03641666666666667,
+    "primary": false,
+    "resolved_sign": "NEGATIVE",
+    "streams": 30,
+    "upper": -0.0225,
+    "variance_components": {
+     "initialization": 0.0,
+     "residual": 0.005078775542784163,
+     "stream": 0.0004967273307790551
+    }
+   },
+   "localize: lin@e2 - lin@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 3522,
+    "holm": {
+     "holm_adjusted_p": 0.00125,
+     "mean": 0.16399999999999998,
+     "p_value": 0.00025,
+     "resolved_after_holm": true
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.13349999999999998,
+    "mean": 0.16399999999999998,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.19391875,
+    "variance_components": {
+     "initialization": 0.0009840197956577268,
+     "residual": 0.004006257982120051,
+     "stream": 0.002970322477650064
+    }
+   },
+   "outcome: h16@e1 - h16@e0 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1724,
+    "holm": {
+     "holm_adjusted_p": 0.1325,
+     "mean": 0.01566666666666667,
+     "p_value": 0.0315,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.001333333333333339,
+    "mean": 0.01566666666666667,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.03000208333333334,
+    "variance_components": {
+     "initialization": 9.280012771392078e-05,
+     "residual": 0.0028724776500638574,
+     "stream": 0.0007023786717752237
+    }
+   },
+   "outcome: h16@e1 - h16@e1 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1499,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.01100208333333332,
+    "mean": 0.005083333333333335,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.02208541666666667,
+    "variance_components": {
+     "initialization": 9.241698595146879e-05,
+     "residual": 0.0019980922733077913,
+     "stream": 0.0013508301404853127
+    }
+   },
+   "outcome: h16@e2 - h16@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 2090,
+    "holm": {
+     "holm_adjusted_p": 0.969,
+     "mean": -0.0003333333333333338,
+     "p_value": 0.969,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.01916666666666667,
+    "mean": -0.0003333333333333338,
+    "primary": true,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.018083333333333323,
+    "variance_components": {
+     "initialization": 0.00032327586206896535,
+     "residual": 0.004024872286079183,
+     "stream": 0.0007517081736909323
+    }
+   },
+   "outcome: h16@e2 - h16@e2 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1679,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.007668749999999988,
+    "mean": 0.005750000000000005,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.01975,
+    "variance_components": {
+     "initialization": 8.569604086845455e-05,
+     "residual": 0.002685831736909323,
+     "stream": 0.0005844987228607917
+    }
+   },
+   "outcome: h16@e2 - h16@e2-alpha [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1922,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.023833333333333345,
+    "mean": -0.007666666666666672,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.00841666666666666,
+    "variance_components": {
+     "initialization": 0.0002044859514687101,
+     "residual": 0.0038043103448275866,
+     "stream": 0.00044281609195402324
+    }
+   },
+   "outcome: h16@e2 - h16@e2-flow [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1227,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 8.125000000000164e-05,
+    "mean": 0.01075,
+    "primary": false,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.02183333333333334,
+    "variance_components": {
+     "initialization": 9.048531289910615e-05,
+     "residual": 0.002657894316730524,
+     "stream": 0.0
+    }
+   },
+   "outcome: h16@e2 - h16@e2-line [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1172,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.01558333333333333,
+    "mean": -0.0023333333333333353,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.011833333333333336,
+    "variance_components": {
+     "initialization": 0.0002890166028097061,
+     "residual": 0.0022776500638569605,
+     "stream": 9.677522349936136e-05
+    }
+   },
+   "outcome: h16@e2 - lin@e2 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1535,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.017249999999999995,
+    "mean": -0.0004166666666666674,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.015335416666666676,
+    "variance_components": {
+     "initialization": 0.00026342592592592574,
+     "residual": 0.002765046296296296,
+     "stream": 0.0006299968071519798
+    }
+   },
+   "outcome: lin@e2 - lin@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1566,
+    "holm": {
+     "holm_adjusted_p": 0.969,
+     "mean": -0.006333333333333332,
+     "p_value": 0.4845,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.024666666666666656,
+    "mean": -0.006333333333333332,
+    "primary": true,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.013252083333333341,
+    "variance_components": {
+     "initialization": 0.0,
+     "residual": 0.0018915708812260537,
+     "stream": 0.002442624521072796
+    }
+   },
+   "output: h16@e1 - h16@e0 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1386,
+    "holm": {
+     "holm_adjusted_p": 0.1325,
+     "mean": 0.011666666666666664,
+     "p_value": 0.0335,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.0008291666666666816,
+    "mean": 0.011666666666666664,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.022749999999999996,
+    "variance_components": {
+     "initialization": 6.396871008939971e-05,
+     "residual": 0.0025577905491698597,
+     "stream": 5.470945083014046e-05
+    }
+   },
+   "output: h16@e1 - h16@e1 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 976,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.009666666666666665,
+    "mean": 0.0006666666666666673,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.0115,
+    "variance_components": {
+     "initialization": 9.797254150702427e-05,
+     "residual": 0.0017774904214559388,
+     "stream": 0.0001877394636015326
+    }
+   },
+   "output: h16@e2 - h16@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1616,
+    "holm": {
+     "holm_adjusted_p": 0.08,
+     "mean": 0.0175,
+     "p_value": 0.04,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.0011645833333333404,
+    "mean": 0.0175,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.03300208333333335,
+    "variance_components": {
+     "initialization": 0.00017084929757343542,
+     "residual": 0.0027171136653895275,
+     "stream": 0.0007054438058748402
+    }
+   },
+   "output: h16@e2 - h16@e2 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1160,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.014252083333333327,
+    "mean": 0.0001666666666666663,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.015587500000000015,
+    "variance_components": {
+     "initialization": 0.00030684865900383135,
+     "residual": 0.0018352809706257984,
+     "stream": 0.00045135696040868426
+    }
+   },
+   "output: h16@e2 - h16@e2-alpha [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1460,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.009252083333333333,
+    "mean": 0.006999999999999998,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.021752083333333342,
+    "variance_components": {
+     "initialization": 0.0002487707535121328,
+     "residual": 0.0026303959131545344,
+     "stream": 0.0005013569604086845
+    }
+   },
+   "output: h16@e2 - h16@e2-flow [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 914,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.0039166666666666655,
+    "mean": 0.0075,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.018333333333333333,
+    "variance_components": {
+     "initialization": 0.00016631545338441895,
+     "residual": 0.0019040549169859514,
+     "stream": 0.0
+    }
+   },
+   "output: h16@e2 - h16@e2-line [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 786,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.016,
+    "mean": -0.005166666666666666,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.004918750000000008,
+    "variance_components": {
+     "initialization": 0.00014637611749680716,
+     "residual": 0.0016031609195402302,
+     "stream": 2.3706896551724123e-05
+    }
+   },
+   "output: h16@e2 - lin@e2 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1128,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.0275,
+    "mean": -0.011833333333333333,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.002083333333333333,
+    "variance_components": {
+     "initialization": 0.00036198914431673045,
+     "residual": 0.001972733077905492,
+     "stream": 0.0001695083014048532
+    }
+   },
+   "output: lin@e2 - lin@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1006,
+    "holm": {
+     "holm_adjusted_p": 0.969,
+     "mean": -0.0011666666666666672,
+     "p_value": 0.8465,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.012168749999999994,
+    "mean": -0.0011666666666666672,
+    "primary": true,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.0105,
+    "variance_components": {
+     "initialization": 2.5063856960408605e-06,
+     "residual": 0.0014349936143039593,
+     "stream": 0.0006158684546615581
+    }
+   },
+   "repair: h16@e1 - h16@e0 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 4348,
+    "holm": {
+     "holm_adjusted_p": 0.1325,
+     "mean": 0.034833333333333334,
+     "p_value": 0.05,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 1.0103029524089896e-17,
+    "mean": 0.034833333333333334,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.07091875,
+    "variance_components": {
+     "initialization": 0.002499106002554278,
+     "residual": 0.008155523627075351,
+     "stream": 0.00073786717752235
+    }
+   },
+   "repair: h16@e1 - h16@e1 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1739,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.014333333333333333,
+    "mean": -8.333333333333452e-05,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.015083333333333332,
+    "variance_components": {
+     "initialization": 0.00021673052362707537,
+     "residual": 0.0035510935504469987,
+     "stream": 0.00017354725415070251
+    }
+   },
+   "repair: h16@e2 - h16@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 4063,
+    "holm": {
+     "holm_adjusted_p": 0.0045000000000000005,
+     "mean": 0.08558333333333333,
+     "p_value": 0.0015,
+     "resolved_after_holm": true
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.033666666666666664,
+    "mean": 0.08558333333333333,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.13458541666666668,
+    "variance_components": {
+     "initialization": 0.006067672413793104,
+     "residual": 0.008206170178799488,
+     "stream": 0.0006598499361430397
+    }
+   },
+   "repair: h16@e2 - h16@e2 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1564,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.0052499999999999995,
+    "mean": 0.014,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.0395,
+    "variance_components": {
+     "initialization": 0.0009117656449552998,
+     "residual": 0.002822030651340996,
+     "stream": 0.0004999521072796933
+    }
+   },
+   "repair: h16@e2 - h16@e2-alpha [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 3769,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.04733541666666666,
+    "mean": -0.007583333333333334,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.03166875000000001,
+    "variance_components": {
+     "initialization": 0.0036609833971902933,
+     "residual": 0.0077281369731800765,
+     "stream": 3.1704980842911686e-05
+    }
+   },
+   "repair: h16@e2 - h16@e2-flow [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 2665,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.03116874999999999,
+    "mean": -0.011916666666666667,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.0077499999999999965,
+    "variance_components": {
+     "initialization": 0.0006323435504469987,
+     "residual": 0.00452992496807152,
+     "stream": 1.8422733077905292e-05
+    }
+   },
+   "repair: h16@e2 - h16@e2-line [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 2782,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.03316874999999999,
+    "mean": -0.010333333333333333,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.014002083333333347,
+    "variance_components": {
+     "initialization": 0.0011776819923371648,
+     "residual": 0.004999169859514687,
+     "stream": 0.0
+    }
+   },
+   "repair: h16@e2 - lin@e2 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 3439,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.02983333333333333,
+    "mean": 0.008416666666666666,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.04266875000000001,
+    "variance_components": {
+     "initialization": 0.0023544061302681993,
+     "residual": 0.005416195721583653,
+     "stream": 0.00191117496807152
+    }
+   },
+   "repair: lin@e2 - lin@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 3343,
+    "holm": {
+     "holm_adjusted_p": 0.00125,
+     "mean": 0.10291666666666667,
+     "p_value": 0.00025,
+     "resolved_after_holm": true
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.07983125,
+    "mean": 0.10291666666666667,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.12591875000000002,
+    "variance_components": {
+     "initialization": 7.923052362707545e-05,
+     "residual": 0.003304797254150702,
+     "stream": 0.00310705619412516
+    }
+   },
+   "syntax: h16@e1 - h16@e0 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1663,
+    "holm": {
+     "holm_adjusted_p": 0.1325,
+     "mean": -0.04125,
+     "p_value": 0.0265,
+     "resolved_after_holm": false
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.07175208333333331,
+    "mean": -0.04125,
+    "primary": true,
+    "resolved_sign": "NEGATIVE",
+    "streams": 30,
+    "upper": -0.004414583333333325,
+    "variance_components": {
+     "initialization": 0.002690357598978289,
+     "residual": 0.0021793183269476378,
+     "stream": 0.0010504948914431672
+    }
+   },
+   "syntax: h16@e1 - h16@e1 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1660,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.053585416666666656,
+    "mean": -0.03316666666666667,
+    "primary": false,
+    "resolved_sign": "NEGATIVE",
+    "streams": 30,
+    "upper": -0.007997916666666651,
+    "variance_components": {
+     "initialization": 0.0009604565772669222,
+     "residual": 0.0022918582375478927,
+     "stream": 0.0009151819923371649
+    }
+   },
+   "syntax: h16@e2 - h16@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 2497,
+    "holm": {
+     "holm_adjusted_p": 0.00125,
+     "mean": 0.1150833333333333,
+     "p_value": 0.00025,
+     "resolved_after_holm": true
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.09158333333333334,
+    "mean": 0.1150833333333333,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.14025208333333336,
+    "variance_components": {
+     "initialization": 0.0008651819923371649,
+     "residual": 0.0021762531928480205,
+     "stream": 0.0018856002554278415
+    }
+   },
+   "syntax: h16@e2 - h16@e2 [online-frozen]": {
+    "confidence": 0.95,
+    "disagreements": 973,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.03408333333333333,
+    "mean": -0.02125,
+    "primary": false,
+    "resolved_sign": "NEGATIVE",
+    "streams": 30,
+    "upper": -0.007831249999999994,
+    "variance_components": {
+     "initialization": 0.00022838441890166023,
+     "residual": 0.0014829581736909322,
+     "stream": 0.0003192688378033206
+    }
+   },
+   "syntax: h16@e2 - h16@e2-alpha [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1459,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.00475208333333334,
+    "mean": 0.014916666666666656,
+    "primary": false,
+    "resolved_sign": "INCONCLUSIVE",
+    "streams": 30,
+    "upper": 0.034418750000000005,
+    "variance_components": {
+     "initialization": 0.0005542305236270755,
+     "residual": 0.0016390565134099607,
+     "stream": 0.0010358716475095781
+    }
+   },
+   "syntax: h16@e2 - h16@e2-flow [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 459,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.024333333333333325,
+    "mean": -0.012249999999999995,
+    "primary": false,
+    "resolved_sign": "NEGATIVE",
+    "streams": 30,
+    "upper": -0.001416666666666663,
+    "variance_components": {
+     "initialization": 0.00029129948914431643,
+     "residual": 0.0008677282886334607,
+     "stream": 0.0
+    }
+   },
+   "syntax: h16@e2 - h16@e2-line [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 1806,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.05699583333333335,
+    "mean": 0.08383333333333333,
+    "primary": false,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.11333750000000001,
+    "variance_components": {
+     "initialization": 0.0019459610472541509,
+     "residual": 0.0022933908045977016,
+     "stream": 0.0006653735632183907
+    }
+   },
+   "syntax: h16@e2 - lin@e2 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 634,
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": -0.03291874999999999,
+    "mean": -0.017333333333333333,
+    "primary": false,
+    "resolved_sign": "NEGATIVE",
+    "streams": 30,
+    "upper": -0.0017479166666666602,
+    "variance_components": {
+     "initialization": 0.0005371807151979563,
+     "residual": 0.000865134099616858,
+     "stream": 0.00014621647509578553
+    }
+   },
+   "syntax: lin@e2 - lin@e1 [frozen]": {
+    "confidence": 0.95,
+    "disagreements": 2188,
+    "holm": {
+     "holm_adjusted_p": 0.00125,
+     "mean": 0.1125,
+     "p_value": 0.00025,
+     "resolved_after_holm": true
+    },
+    "initializations": 10,
+    "interval_status": "MEASURED",
+    "lower": 0.09041458333333335,
+    "mean": 0.1125,
+    "primary": true,
+    "resolved_sign": "POSITIVE",
+    "streams": 30,
+    "upper": 0.13449999999999998,
+    "variance_components": {
+     "initialization": 0.000338809067688378,
+     "residual": 0.0011690613026819918,
+     "stream": 0.0025460249042145583
+    }
+   }
+  }
+ },
+ "wall_seconds": 807.9573128223419
+}
