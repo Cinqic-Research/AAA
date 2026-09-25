@@ -25,7 +25,18 @@ from . import spec as spec_module
 from .experiment import DESIGN, ArmSpec, run_adapt, run_stage, v0_instrument_job
 from .summarize import summarize
 
-STAGES = ("encoders", "heads", "capacity", "budget", "optimization", "tool", "adapt", "plasticity", "attack")
+STAGES = (
+    "encoders",
+    "heads",
+    "capacity",
+    "budget",
+    "optimization",
+    "tool",
+    "adapt",
+    "plasticity",
+    "attack",
+    "posthoc",
+)
 
 
 def write_json(path: Path, payload: Any) -> None:
@@ -176,6 +187,23 @@ def cmd_develop(args: argparse.Namespace) -> int:
             "schema": "aaa.python.v1.development_stage.v1",
             "protocol": PROTOCOL_VERSION,
             "status": "attack evidence: used once, after development selections, before the freeze",
+            "spec_sha256": spec_module.spec_hash(),
+            "design": DESIGN,
+            "provenance": record,
+            "wall_seconds": time.time() - started,
+            "stage": evidence,
+        }
+        write_json(args.output, document)
+        print(f"wrote {args.output} ({document['wall_seconds']:.0f} s)")
+        return 0
+    if args.stage == "posthoc":
+        from .posthoc import run_posthoc
+
+        evidence = run_posthoc(previous, args.workers)
+        document = {
+            "schema": "aaa.python.v1.development_stage.v1",
+            "protocol": PROTOCOL_VERSION,
+            "status": "POST-HOC DIAGNOSTIC: added after observing the adaptation and plasticity stages; part of no declared verdict",
             "spec_sha256": spec_module.spec_hash(),
             "design": DESIGN,
             "provenance": record,
