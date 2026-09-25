@@ -10,6 +10,7 @@ primary contrast. `DEGENERATE` means the two arms never disagreed on any task.
 ## Evidence files
 
 - `docs/evidence/aaa_python_v1/stage_encoders.json` sha256 `8c231984456159eb...`, commit `59465dd5992f` (dirty: False), phase fingerprint `4f0174628f54...`, 1981 s
+- `docs/evidence/aaa_python_v1/stage_heads.json` sha256 `608122c4a3f41499...`, commit `f043d299676b` (dirty: False), phase fingerprint `b7b1c2d13537...`, 584 s
 
 ## 1. Encoders at matched capacity (one-hot heads)
 
@@ -116,6 +117,35 @@ Frozen accuracy by slice:
 | `h16@e2` | output | 0.238 | 0.123 | 0.253 | 0.059 | 0.165 |
 | `h16@e2` | localize | 0.409 | 0.387 | 0.391 | 0.339 | 0.151 |
 | `h16@e2` | repair | 0.675 | 0.642 | 0.710 | 0.374 | 0.695 |
+
+## 2. Heads (encoder `e2`, 16-unit core)
+
+| Arm | Core width | Trainable | Rate | Epochs |
+|---|---:|---:|---:|---:|
+| `h16@e2:gauss/onehot` | 16 | 4979 | 0.03 | 2 |
+| `h16@e2:gauss/pointer` | 16 | 4315 | 0.1 | 32 |
+| `h16@e2:onehot/onehot` | 16 | 6662 | 0.1 | 32 |
+| `h16@e2:onehot/pointer` | 16 | 5998 | 0.1 | 32 |
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `h16@e2:gauss/onehot` | 4979 | 0.746 [0.690, 0.798] | 0.637 [0.611, 0.663] | 0.008 [0.002, 0.016] | 0.250 [0.222, 0.273] | 0.442 [0.394, 0.489] |
+| `h16@e2:gauss/pointer` | 4315 | 0.714 [0.574, 0.854] | 0.584 [0.464, 0.661] | 0.003 [0.001, 0.005] | 0.409 [0.286, 0.538] | 0.434 [0.313, 0.558] |
+| `h16@e2:onehot/onehot` | 6662 | 0.918 [0.898, 0.937] | 0.659 [0.637, 0.683] | 0.179 [0.156, 0.204] | 0.348 [0.322, 0.375] | 0.628 [0.598, 0.660] |
+| `h16@e2:onehot/pointer` | 5998 | 0.934 [0.918, 0.950] | 0.668 [0.646, 0.690] | 0.182 [0.160, 0.206] | 0.615 [0.589, 0.639] | 0.632 [0.595, 0.668] |
+
+| Contrast | Difference [95%] | Sign | Holm p | Disagreements |
+|---|---|---|---:|---:|
+| localize: h16@e2:gauss/onehot - h16@e2:onehot/onehot [frozen] | -0.098 [-0.132, -0.067] | NEGATIVE | 0.0013 | 4336 |
+| localize: h16@e2:onehot/pointer - h16@e2:onehot/onehot [frozen] | +0.267 [+0.233, +0.302] | POSITIVE | 0.0013 | 6044 |
+| outcome: h16@e2:gauss/onehot - h16@e2:onehot/onehot [frozen] | -0.022 [-0.043, +0.000] | INCONCLUSIVE | 0.0525 | 3024 |
+| outcome: h16@e2:onehot/pointer - h16@e2:onehot/onehot [frozen] | +0.009 [-0.004, +0.022] | INCONCLUSIVE | 0.4890 | 1740 |
+| output: h16@e2:gauss/onehot - h16@e2:onehot/onehot [frozen] | -0.171 [-0.198, -0.145] | NEGATIVE | 0.0013 | 2215 |
+| output: h16@e2:onehot/pointer - h16@e2:onehot/onehot [frozen] | +0.002 [-0.011, +0.018] | INCONCLUSIVE | 1.0000 | 1207 |
+| repair: h16@e2:gauss/onehot - h16@e2:onehot/onehot [frozen] | -0.186 [-0.235, -0.138] | NEGATIVE | 0.0013 | 4791 |
+| repair: h16@e2:onehot/pointer - h16@e2:onehot/onehot [frozen] | +0.003 [-0.039, +0.041] | INCONCLUSIVE | 1.0000 | 2912 |
+| syntax: h16@e2:gauss/onehot - h16@e2:onehot/onehot [frozen] | -0.172 [-0.233, -0.116] | NEGATIVE | 0.0013 | 3064 |
+| syntax: h16@e2:onehot/pointer - h16@e2:onehot/onehot [frozen] | +0.016 [-0.003, +0.035] | INCONCLUSIVE | 0.3780 | 829 |
 
 ## Reproduce
 
