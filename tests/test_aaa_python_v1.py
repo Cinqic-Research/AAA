@@ -417,3 +417,44 @@ class TuningCheckpointTests(unittest.TestCase):
                 accuracy[family] = sum(correct) / len(correct)
         self.assertEqual([c["epochs"] for c in run["checkpoints"]], [1, 2, 3])
         self.assertEqual(run["checkpoints"][1]["accuracy"], accuracy)
+
+
+class RecomputeTests(unittest.TestCase):
+    def _document(self) -> dict:
+        from research.aaa_python_v1 import experiment, summarize
+
+        design = experiment.DESIGN["evaluate"]
+        n = design["streams"] * design["stream_length"]
+        rng = np.random.default_rng(11)
+        rows = []
+        for arm, rate in (("a", 0.6), ("b", 0.5)):
+            for init in range(design["initializations"]):
+                fams = {}
+                for family in FAMILIES:
+                    fams[family] = {
+                        mode: {"bits": experiment.bits(rng.random(n) < rate)} for mode in ("frozen", "online")
+                    }
+                rows.append({"arm": arm, "init": init, "families": fams})
+        stage = {"stage": "synthetic", "evaluations": rows, "arms": {}}
+        primary = [("a", "b", "frozen")]
+        stage["primary"], stage["secondary"] = [list(c) for c in primary], []
+        stage["summary"] = summarize.summarize(stage, primary)
+        return {"stage": stage}
+
+    def test_untouched_evidence_passes_and_tampering_fails(self) -> None:
+        from research.aaa_python_v1 import experiment, recompute
+
+        document = self._document()
+        self.assertEqual(recompute.verify_stage(document)["verdict"], "PASS")
+        tampered = copy.deepcopy(document)
+        tampered["stage"]["summary"]["arms"]["a"]["syntax"]["frozen"]["mean"] += 0.01
+        self.assertEqual(recompute.verify_stage(tampered)["verdict"], "FAIL")
+        flipped = copy.deepcopy(document)
+        payload = flipped["stage"]["evaluations"][0]["families"]["output"]["frozen"]
+        values = experiment.unbits(payload["bits"])
+        values[0] = not values[0]
+        payload["bits"] = experiment.bits(values)
+        self.assertEqual(recompute.verify_stage(flipped)["verdict"], "FAIL")
+        dropped = copy.deepcopy(document)
+        dropped["stage"]["evaluations"] = [r for r in dropped["stage"]["evaluations"] if r["init"] != 3]
+        self.assertEqual(recompute.verify_stage(dropped)["verdict"], "FAIL")

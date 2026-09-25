@@ -268,6 +268,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     develop.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     summ = sub.add_parser("summarize")
     summ.add_argument("--evidence", type=Path, required=True)
+    rec = sub.add_parser("recompute")
+    rec.add_argument("--evidence", type=Path, required=True)
+    rec.add_argument(
+        "--rerun", action="store_true", help="re-train initialization 0 of every arm and compare"
+    )
     args = parser.parse_args(argv)
     try:
         if args.command == "spec-hash":
@@ -283,6 +288,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             return cmd_audit(args)
         if args.command == "develop":
             return cmd_develop(args)
+        if args.command == "recompute":
+            from .recompute import verify_stage
+
+            result = verify_stage(read_json(args.evidence), rerun=args.rerun)
+            print(json.dumps(result, indent=1))
+            return 0 if result["verdict"] == "PASS" else 1
         return cmd_summarize(args)
     except (OSError, ValueError, KeyError) as error:
         print(f"refused: {error}", file=sys.stderr)

@@ -104,6 +104,7 @@ jobs:
           shopt -s nullglob
           for evidence in docs/evidence/aaa_python_v1/stage_*.json docs/evidence/aaa_python_v1/confirmation*.json; do
             python -m research.aaa_python_v1 summarize --evidence "$evidence"
+            python -m research.aaa_python_v1 recompute --evidence "$evidence"
           done
           python tools/write_aaa_python_v1_report.py --check
 
