@@ -31,17 +31,23 @@ def _modes(mode: str) -> tuple[str, str]:
 
 
 def _slices(split: str = "development") -> list[str]:
-    if split == "attack":
-        count = DESIGN["attack"]["streams"] * DESIGN["attack"]["stream_length"]
-        return [generator.slice_of("attack", index) for index in range(count)]
+    if split in ("attack", "confirmation"):
+        count = DESIGN[split]["streams"] * DESIGN[split]["stream_length"]
+        return [generator.slice_of(split, index) for index in range(count)]
     start, _ = layout("evaluate")
     count = DESIGN["evaluate"]["streams"] * DESIGN["evaluate"]["stream_length"]
     return [generator.slice_of("development", index) for index in range(start, start + count)]
 
 
 def _shape(split: str) -> tuple[int, int, int]:
-    key = "attack" if split == "attack" else "evaluate"
+    key = split if split in ("attack", "confirmation") else "evaluate"
     return DESIGN[key]["initializations"], DESIGN[key]["streams"], DESIGN[key]["stream_length"]
+
+
+def expected_inits(split: str) -> set[int]:
+    key = split if split in ("attack", "confirmation") else "evaluate"
+    offset = DESIGN[key].get("init_offset", 0)
+    return set(range(offset, offset + DESIGN[key]["initializations"]))
 
 
 def primitives(stage: Mapping[str, Any]) -> dict[tuple[str, str, str], dict[int, list[bool]]]:
@@ -97,10 +103,10 @@ def summarize(
     prims = primitives(stage)
     losses = nll(stage)
     slices = _slices(split)
-    expected_inits = set(range(_shape(split)[0]))
+    declared_inits = expected_inits(split)
     arms: dict[str, dict[str, Any]] = {}
     for (arm, family, mode), per_init in sorted(prims.items()):
-        if set(per_init) != expected_inits:
+        if set(per_init) != declared_inits:
             raise ValueError(
                 f"{arm}/{family}/{mode}: initializations {sorted(per_init)} are not the declared set"
             )

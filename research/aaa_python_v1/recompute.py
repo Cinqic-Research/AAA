@@ -61,8 +61,9 @@ def _sign(lower: float, upper: float) -> str:
 
 def verify_stage(document: Mapping[str, Any], *, rerun: bool = False) -> dict[str, Any]:
     stage = document["stage"]
-    split = "attack" if stage["stage"] == "attack" else "evaluate"
+    split = stage["stage"] if stage["stage"] in ("attack", "confirmation") else "evaluate"
     shape = DESIGN[split]
+    offset = shape.get("init_offset", 0)
     streams, length = shape["streams"], shape["stream_length"]
     st = DESIGN["statistics"]
     problems: list[str] = []
@@ -75,7 +76,7 @@ def verify_stage(document: Mapping[str, Any], *, rerun: bool = False) -> dict[st
                     per.setdefault((row["arm"], family, mode), {})[row["init"]] = unbits(payload["bits"])
     grids: dict[tuple[str, str, str], list[list[float]]] = {}
     for cell_key, by_init in per.items():
-        if sorted(by_init) != list(range(shape["initializations"])):
+        if sorted(by_init) != list(range(offset, offset + shape["initializations"])):
             problems.append(f"{cell_key}: initializations are not the declared set")
             continue
         grids[cell_key] = [_cells(by_init[i], streams, length) for i in sorted(by_init)]
@@ -132,7 +133,7 @@ def verify_stage(document: Mapping[str, Any], *, rerun: bool = False) -> dict[st
     rerun_checked = 0
     if rerun:
         for row in stage.get("evaluations", []):
-            if row["init"] != 0:
+            if row["init"] != 0 or split != "evaluate":
                 continue
             spec = dict(stage["arms"][row["arm"]])
             spec_arm = ArmSpec(

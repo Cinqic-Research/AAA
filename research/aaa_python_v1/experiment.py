@@ -81,6 +81,7 @@ DESIGN: dict[str, Any] = {
         "probe_bank": 100,
     },
     "attack": {"initializations": 10, "streams": 15, "stream_length": 40},
+    "confirmation": {"initializations": 10, "init_offset": 2000, "streams": 30, "stream_length": 40},
     "statistics": {"draws": 4000, "confidence": 0.95, "seed": 20260924, "holm_alpha": 0.05},
 }
 

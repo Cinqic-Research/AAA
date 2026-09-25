@@ -234,7 +234,7 @@ def cmd_summarize(args: argparse.Namespace) -> int:
     else:
         primary = [tuple(c) for c in stage["primary"]]
         secondary = [tuple(c) for c in stage["secondary"]]
-        split = "attack" if stage["stage"] == "attack" else "development"
+        split = stage["stage"] if stage["stage"] in ("attack", "confirmation") else "development"
         fresh = summarize(stage, primary, secondary, split=split)
     same = json.dumps(fresh, sort_keys=True) == json.dumps(stage["summary"], sort_keys=True)
     print("summary reproduced from primitives" if same else "SUMMARY DIFFERS from its primitives")
@@ -272,6 +272,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     develop.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     summ = sub.add_parser("summarize")
     summ.add_argument("--evidence", type=Path, required=True)
+    conf = sub.add_parser("confirm")
+    conf.add_argument(
+        "--output", type=Path, required=True, help="written outside the checkout, then committed"
+    )
+    conf.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     rec = sub.add_parser("recompute")
     rec.add_argument("--evidence", type=Path, required=True)
     rec.add_argument(
@@ -305,6 +310,35 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 0 if not problems else 1
         if args.command == "develop":
             return cmd_develop(args)
+        if args.command == "confirm":
+            from . import confirm
+            from .freeze import Admission, FreezeError
+            from .identity import provenance
+
+            try:
+                admission = Admission.obtain()
+            except FreezeError as error:
+                print(f"refused: confirmation is not admitted: {error}", file=sys.stderr)
+                return 2
+            record = provenance()
+            started = time.time()
+            stage = confirm.run(admission, workers=args.workers)
+            write_json(
+                args.output,
+                {
+                    "schema": "aaa.python.v1.confirmation.v1",
+                    "protocol": PROTOCOL_VERSION,
+                    "status": "confirmation evidence under the committed freeze; observed once",
+                    "spec_sha256": spec_module.spec_hash(),
+                    "design": DESIGN,
+                    "freeze": admission.manifest,
+                    "provenance": record,
+                    "wall_seconds": time.time() - started,
+                    "stage": stage,
+                },
+            )
+            print(f"wrote {args.output}")
+            return 0
         if args.command == "recompute":
             from .recompute import verify_stage
 
