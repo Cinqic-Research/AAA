@@ -11,6 +11,7 @@ import ast
 import copy
 import itertools
 import math
+import re
 import unittest
 from unittest import mock
 
@@ -342,10 +343,12 @@ class ToolBoundaryTests(unittest.TestCase):
         with mock.patch.object(episode, "run_many", side_effect=capture):
             results = env.run_visible_tests(view)
         self.assertEqual(len(results), 4)
-        hidden_inputs = {i for i, _ in task.hidden_tests} - {i for i, _ in task.visible_tests}
+        visible_inputs = [i for i, _ in task.visible_tests]
+        self.assertEqual(len(seen), len(task.candidates))
         for source in seen:
-            called = {int(x) for x in __import__("re").findall(r"print\(\w+\((-?\d+)\)\)", source)}
-            self.assertFalse(called & hidden_inputs, source)
+            called = [int(x) for x in re.findall(r"print\(\w+\((-?\d+)\)\)", source)]
+            self.assertEqual(called, visible_inputs, source)
+        self.assertTrue(all(len(r) == len(task.visible_tests) for r in results))
         self.assertEqual([e for _, e, _ in env.events], ["present", "tool"])
         env.commit(view, Action(0, 0.5))
         with self.assertRaises(BoundaryError):
@@ -522,3 +525,116 @@ class LifeStageRecomputeTests(unittest.TestCase):
             else:
                 entry["late_minus_fresh"]["mean"] += 0.01
             self.assertEqual(recompute.verify_document(tampered)["verdict"], "FAIL")
+
+
+class PlasticityTests(unittest.TestCase):
+    def test_permutation_relabels_answer_and_revealed_feedback_consistently(self) -> None:
+        from research.aaa_python.episode import feedback_of
+        from research.aaa_python.learners import target_from_feedback
+        from research.aaa_python_v1 import plasticity
+
+        for family in ("syntax", "outcome"):
+            for task in _train(family, 6):
+                moved = plasticity.permuted(task)
+                self.assertEqual(moved.answer, plasticity.PLASTICITY["permutations"][family][task.answer])
+                self.assertNotEqual(moved.answer, task.answer)
+                self.assertEqual(moved.source, task.source)
+                view = view_of(moved, 0, SPEC)
+                feedback = feedback_of(moved, Action(view.labels[0], 0.5), SPEC)
+                self.assertEqual(target_from_feedback(view, feedback), moved.answer)
+
+    def test_permutations_are_bijections(self) -> None:
+        from research.aaa_python_v1 import plasticity
+
+        for mapping in plasticity.PLASTICITY["permutations"].values():
+            self.assertEqual(set(mapping), set(mapping.values()))
+
+
+class DecisionRuleTests(unittest.TestCase):
+    def _summary(self, d1: dict[str, tuple[float, bool, float]], d4: dict[str, tuple[float, bool]]) -> dict:
+        contrasts = {}
+        for family in FAMILIES:
+            mean, resolved, upper = d1.get(family, (0.0, False, 0.01))
+            contrasts[f"{family}: 10k@e2 - 1k@e2 [frozen]"] = {
+                "mean": mean,
+                "holm": {"resolved_after_holm": resolved},
+                "interval_status": "MEASURED",
+                "upper": upper,
+            }
+            mean4, resolved4 = d4.get(family, (0.0, False))
+            contrasts[f"{family}: 10k@e2 - 4k@e2 [frozen]"] = {
+                "mean": mean4,
+                "holm": {"resolved_after_holm": resolved4},
+                "interval_status": "MEASURED",
+                "upper": 0.1,
+            }
+        return {"contrasts": contrasts}
+
+    def test_declared_capacity_rule(self) -> None:
+        from research.aaa_python_v1.stages import capacity_verdict
+
+        nothing = capacity_verdict(self._summary({}, {}), "e2")
+        self.assertEqual(nothing["verdict"], "SCALE_NOT_JUSTIFIED")
+        two = capacity_verdict(
+            self._summary({"repair": (0.2, True, 0.3), "outcome": (0.03, True, 0.05)}, {}), "e2"
+        )
+        self.assertEqual(two["verdict"], "MIXED")
+        small = capacity_verdict(self._summary({"repair": (0.029, True, 0.05)}, {}), "e2")
+        self.assertEqual(small["materially_improved"], [])
+        three_no_4k = dict.fromkeys(("repair", "outcome", "syntax"), (0.05, True, 0.1))
+        self.assertEqual(capacity_verdict(self._summary(three_no_4k, {}), "e2")["verdict"], "MIXED")
+        earns = {"repair": (0.03, True), "outcome": (0.02, True)}
+        self.assertEqual(
+            capacity_verdict(self._summary(three_no_4k, earns), "e2")["verdict"],
+            "SCALE_JUSTIFIED_PENDING_ADAPTATION_AND_PLASTICITY",
+        )
+        harmed = dict(three_no_4k, output=(-0.05, True, -0.03))
+        self.assertEqual(capacity_verdict(self._summary(harmed, earns), "e2")["verdict"], "MIXED")
+
+    def test_budget_trigger(self) -> None:
+        from research.aaa_python_v1.stages import budget_trigger
+
+        def capacity(gain: float, epochs: int = 32) -> dict:
+            tuning = [
+                {"learning_rate": 0.1, "epochs": 16, "mean_tune_accuracy": 0.5},
+                {"learning_rate": 0.1, "epochs": 32, "mean_tune_accuracy": 0.5 + gain},
+            ]
+            return {"arms": {"10k@e2": {"epochs": epochs, "learning_rate": 0.1, "tuning": tuning}}}
+
+        self.assertTrue(budget_trigger(capacity(0.02), "e2"))
+        self.assertFalse(budget_trigger(capacity(0.005), "e2"))
+        self.assertFalse(budget_trigger(capacity(0.02, epochs=16), "e2"))
+
+
+class BaselineTests(unittest.TestCase):
+    def test_baselines_answer_inside_the_label_space_and_tools_are_required(self) -> None:
+        from research.aaa_python_v1 import baselines
+
+        tasks = [t for f in FAMILIES for t in _train(f, 4)]
+        for name, cls in baselines.BASELINES.items():
+            agent = cls(3)
+            env = episode.ToolEnvironment(SPEC)
+            for task in tasks:
+                view = env.present(task)
+                if name == "visible_tests" and task.family == "repair":
+                    agent.tool_results[view.task_ref] = env.run_visible_tests(view)
+                action = agent.act(view)
+                self.assertIn(action.answer, view.labels if task.family != "repair" else range(4), name)
+                env.commit(view, action)
+                _, feedback = env.reveal(view)
+                agent.learn(view, action, feedback)
+            if hasattr(agent, "training"):
+                agent.training = False
+        tool = baselines.VisibleTests(1)
+        tool.training = False
+        env = episode.ToolEnvironment(SPEC)
+        view = env.present(_train("repair", 1)[0])
+        with self.assertRaises(RuntimeError):
+            tool.act(view)
+
+    def test_first_risky_line_and_signature(self) -> None:
+        from research.aaa_python_v1 import baselines
+
+        source = "a = 3\nb = 4\nc = a // (b - 4)\nprint(a)\n"
+        self.assertEqual(baselines.first_risky_line(source), 3)
+        self.assertEqual(baselines.risky_signature(source), ("floordiv_paren",))

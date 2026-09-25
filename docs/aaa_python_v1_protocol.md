@@ -71,8 +71,13 @@ The development pool is split by index, and no task has two roles:
 |---|---|
 | 0-399 | `tune`: learning rate and training budget selection only |
 | 400-1599 | `evaluate`: 30 streams x 40 tasks |
-| 1600-3399 | `adapt`: distribution-switch branches |
-| 3400-3599 | plasticity test blocks |
+| 1600-3399 | `adapt`: distribution-switch branches (15 streams x 20 tasks per branch) |
+| 3400-3599 | `adapt` (plasticity part): permuted-label learning and test blocks, and activation diagnostics |
+
+The attack pool (600 per family, 15 streams x 40) is used **once**, after the
+development selections, with development budgets and no re-tuning. The
+confirmation pool (1,200 per family, 30 streams x 40) exists only inside a run
+holding an admitted freeze.
 
 ## The tool channel
 
@@ -115,6 +120,16 @@ the early-life gain. Weight norms, saturated and dormant unit fractions,
 activation effective rank and gradient norms are recorded at every checkpoint.
 
 ## Confirmation
+
+The freeze declares the arms and their development budgets, the baselines,
+the primary contrasts, the unchanged capacity rule and four
+`aaa.promotion.crossed.v1` contracts, each over the five families as
+`crossed` groups of 30 streams with ten fresh initializations (2000-2009, never
+used in development) and 20,000 draws: `encoder` (`e2` over `e1` at identical
+capacity, superior at 0.95), `scale_over_1k` (10K over 1K, 0.95),
+`scale_over_4k` (10K over 4K, 0.97) and `scale_4k_over_1k` (4K over 1K,
+0.95). The metric is the per-cell Jeffreys-smoothed error ratio
+`(errors + 0.5) / (n + 1)`, strictly positive as the contract requires.
 
 `build("confirmation", ...)` refuses unless given an
 [`Admission`](../research/aaa_python_v1/freeze.py) that re-verifies, at the

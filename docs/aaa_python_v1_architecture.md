@@ -70,7 +70,24 @@ training pool in an initialization-seeded order shared by every arm.
 
 `CoreModel.accounting()` reports trainable parameters per block, optimizer
 state, the update counter, and the remembered initial state that the
-`reset_each_task` control restores. There is no persistent recurrent state,
+`reset_each_task` control restores.
+
+The capacity family with the selected encoder (`e2`, D = 256) and heads
+(one-hot output, pointer localization):
+
+| Size | Core width | Trainable | Core | Output head | Other heads | Optimizer state | Adaptive state | x Champion 1 (994) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| ~1K | 2 | 846 | 514 | 303 | 29 | 0 | 847 | 0.85 |
+| ~2K | 5 | 1,950 | 1,285 | 606 | 59 | 0 | 1,951 | 1.96 |
+| ~4K | 11 | 4,158 | 2,827 | 1,212 | 119 | 0 | 4,159 | 4.18 |
+| ~10K | 27 | 10,046 | 6,939 | 2,828 | 279 | 0 | 10,047 | 10.11 |
+| ~20K | 54 | 19,982 | 13,878 | 5,555 | 549 | 0 | 19,983 | 20.10 |
+
+(10,046 is 11.9 times the 846-parameter v1 point.) Momentum arms add one
+velocity entry per parameter as counted state (846 and 10,046). The encoder
+comparison uses a 16-unit core with one-hot heads: 6,662 trainable for every
+encoder. The linear reference at D = 256 with one-hot heads has 38,550. A
+strict-JSON state of the 10K model is about 0.16 MB before training. There is no persistent recurrent state,
 replay memory or eligibility trace. The encoders' fixed tables (the lexer's
 eleven keywords and ten builtin names) are listed by
 `encoders.accounting()`; no learned lookup table exists anywhere. The parameter
@@ -89,7 +106,9 @@ block names, shapes, finiteness and counter type before replacing anything;
 
 ## Compute
 
-NumPy on the CPU. The declared development workload trains a model at about
-5,000 online updates per second on FLOWBOX (Ryzen 7 5700G). See the
-[compute report](aaa_python_v1_compute_report.md) for the measured CPU/CUDA
-decision.
+NumPy on the CPU, by measurement (see the
+[compute report](aaa_python_v1_compute_report.md)): for the actual online,
+one-task-at-a-time workload the CPU is 20-30 times faster than CUDA on the
+RTX 2060; CUDA wins (1.9 times) only when 100 independent 10K learners step
+in lockstep, which the causal pipeline does not do. CPU/CUDA parameters agree
+to 1.2e-13 relative after 200 identical batched steps.
