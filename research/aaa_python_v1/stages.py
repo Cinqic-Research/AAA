@@ -147,3 +147,77 @@ def capacity_verdict(summary: Mapping[str, Any], encoder: str) -> dict[str, Any]
     else:
         verdict = "MIXED"
     return {"materially_improved": material, "earns_over_4k": earns, "harmed": harmed, "verdict": verdict}
+
+
+# ------------------------------------------------------------------ later stages
+def selected_sizes(capacity: Mapping[str, Any], encoder: str) -> dict[str, dict[str, Any]]:
+    """The capacity stage's arms with their tuned budgets, by size tag."""
+
+    arms = capacity["arms"]
+    return {tag: arms[f"{tag}@{encoder}"] for tag in ("1k", "4k", "10k") if f"{tag}@{encoder}" in arms}
+
+
+def _fixed(arm: Mapping[str, Any], name: str, **changes: Any) -> ArmSpec:
+    base = {
+        "encoder": arm["encoder"],
+        "hidden": arm["hidden"],
+        "output_head": arm["output_head"],
+        "localize_head": arm["localize_head"],
+        "channels": tuple(arm["channels"]),
+        "learning_rate": arm["learning_rate"],
+        "epochs": arm["epochs"],
+    }
+    base.update(changes)
+    return ArmSpec(name, **base)
+
+
+def optimization_arms(capacity: Mapping[str, Any], encoder: str) -> list[ArmSpec]:
+    """One change at a time at the tuned 1K and 10K budgets (rate and epochs held)."""
+
+    sizes = selected_sizes(capacity, encoder)
+    arms = []
+    for tag in ("1k", "10k"):
+        arm = sizes[tag]
+        arms += [
+            _fixed(arm, f"{tag}:sgd"),
+            _fixed(arm, f"{tag}:wd", weight_decay=1e-4),
+            _fixed(arm, f"{tag}:momentum", momentum=0.9, learning_rate=arm["learning_rate"] * 0.1),
+            _fixed(arm, f"{tag}:clip", clip=1.0),
+        ]
+    return arms
+
+
+def optimization_primary() -> list[tuple[str, str, str]]:
+    return [(f"{t}:{v}", f"{t}:sgd", "frozen") for t in ("1k", "10k") for v in ("wd", "momentum", "clip")]
+
+
+def tool_arms(capacity: Mapping[str, Any], encoder: str) -> list[ArmSpec]:
+    """Each selected size with the visible-test tool inputs, tuned afresh (the input differs)."""
+
+    sizes = selected_sizes(capacity, encoder)
+    arms = []
+    for tag, arm in sizes.items():
+        arms.append(_fixed(arm, f"{tag}:no_tool"))
+        arms.append(
+            ArmSpec(
+                f"{tag}:tool",
+                arm["encoder"],
+                arm["hidden"],
+                arm["output_head"],
+                arm["localize_head"],
+                tuple(arm["channels"]),
+                tool=True,
+            )
+        )
+    return arms
+
+
+def tool_primary() -> list[tuple[str, str, str]]:
+    return [(f"{t}:tool", f"{t}:no_tool", "frozen") for t in ("1k", "4k", "10k")] + [
+        (f"{t}:tool", "visible_tests", "frozen") for t in ("1k", "4k", "10k")
+    ]
+
+
+def adapt_or_plasticity_arms(capacity: Mapping[str, Any], encoder: str) -> list[ArmSpec]:
+    sizes = selected_sizes(capacity, encoder)
+    return [_fixed(sizes[tag], tag) for tag in ("1k", "10k")]

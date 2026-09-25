@@ -65,9 +65,10 @@ DESIGN: dict[str, Any] = {
     "init_scale": 1.0,
     "tune": {
         "learning_rates": [0.03, 0.1, 0.3],
-        "epochs": [1, 3, 8],
+        "epochs": [1, 2, 4, 8, 16, 32],
         "initializations": [1000, 1001],
         "criterion": "mean over families of frozen accuracy on the tune range; ties -> fewer epochs, then lower rate",
+        "amendment": "2026-09-24: the grid was {1, 3, 8}; in the first encoder stage every arm selected 8 while still improving (+0.02 to +0.05 from 3 to 8), so the budget was censored. Every stage, including a re-run encoder stage, uses one run per rate scored after 1, 2, 4, 8, 16 and 32 epochs",
     },
     "evaluate": {"initializations": 10, "streams": 30, "stream_length": 40},
     "adapt": {
@@ -240,19 +241,45 @@ def unbits(text: str) -> list[bool]:
 
 
 # ------------------------------------------------------------------- stages
-def tune_job(arm: ArmSpec, learning_rate: float, epochs: int, init: int) -> dict[str, Any]:
-    agent = trained_agent(arm, init, learning_rate, epochs)
-    accuracy = {}
-    for family in FAMILIES:
-        correct, _ = frozen_pass(agent.clone(), dev_range("tune", family))
-        accuracy[family] = sum(correct) / len(correct)
-    return {
-        "arm": arm.name,
-        "learning_rate": learning_rate,
-        "epochs": epochs,
-        "init": init,
-        "accuracy": accuracy,
-    }
+def tune_job(arm: ArmSpec, learning_rate: float, init: int) -> dict[str, Any]:
+    """One training run per rate, scored on the tune range after every declared epoch count.
+
+    The training order depends only on the initialization and the epoch index,
+    so the state after ``e`` epochs is exactly the model trained for ``e`` epochs.
+    """
+
+    spec = spec_module.load()
+    agent = CoreAgent(CoreModel(arm.config(init_seed(init), learning_rate)), name=arm.name)
+    tasks = train_tasks(arm.train_per_family)
+    env = ToolEnvironment(spec)
+    checkpoints = sorted(DESIGN["tune"]["epochs"])
+    rows = []
+    for epoch in range(checkpoints[-1]):
+        for task in training_order(tasks, init, epoch):
+            run_task(agent, env, task)
+        if epoch + 1 in checkpoints:
+            accuracy = {}
+            for family in FAMILIES:
+                correct, _ = frozen_pass(agent.clone(), dev_range("tune", family))
+                accuracy[family] = sum(correct) / len(correct)
+            rows.append({"epochs": epoch + 1, "accuracy": accuracy})
+    return {"arm": arm.name, "learning_rate": learning_rate, "init": init, "checkpoints": rows}
+
+
+def tuning_rows(results: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Flatten per-run tuning checkpoints into ``(arm, rate, epochs, init, accuracy)`` rows."""
+
+    return [
+        {
+            "arm": r["arm"],
+            "learning_rate": r["learning_rate"],
+            "epochs": c["epochs"],
+            "init": r["init"],
+            "accuracy": c["accuracy"],
+        }
+        for r in results
+        for c in r["checkpoints"]
+    ]
 
 
 def select(arm: ArmSpec, rows: Sequence[Mapping[str, Any]]) -> tuple[float, int, list[dict[str, Any]]]:
@@ -486,14 +513,13 @@ def run_stage(
     if missing:
         grid = DESIGN["tune"]
         jobs = [
-            (a, lr, ep, init)
+            (a, lr, init)
             for a in missing
             for lr in grid["learning_rates"]
-            for ep in grid["epochs"]
             for init in grid["initializations"]
         ]
         log(f"{stage}: tuning {len(missing)} arms, {len(jobs)} jobs")
-        tune_rows += _map(tune_job, jobs, workers)
+        tune_rows += tuning_rows(_map(tune_job, jobs, workers))
     selected: dict[str, dict[str, Any]] = {}
     for arm in arms:
         lr, ep, table = select(arm, tune_rows)

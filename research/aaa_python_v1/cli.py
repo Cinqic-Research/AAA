@@ -78,7 +78,40 @@ def plan(
             [],
             selections,
         )
+    capacity = _selected(previous, "capacity")["stage"]
+    if stage == "optimization":
+        return stages.optimization_arms(capacity, encoder), stages.optimization_primary(), [], [], selections
+    if stage == "tool":
+        return stages.tool_arms(capacity, encoder), stages.tool_primary(), [], ["visible_tests"], selections
     raise SystemExit(f"stage {stage} is run by its own command")
+
+
+def run_life_stage(stage: str, previous: dict[str, Any], workers: int) -> dict[str, Any]:
+    """The adaptation and plasticity stages: the tuned 1K and 10K arms of the capacity stage."""
+
+    from concurrent.futures import ProcessPoolExecutor
+
+    from .plasticity import PLASTICITY, life_job, summarize_plasticity
+    from .summarize import summarize_adapt
+
+    encoder = stages.select_encoder(_selected(previous, "encoders")["summary"])
+    capacity = _selected(previous, "capacity")["stage"]
+    arms = stages.adapt_or_plasticity_arms(capacity, encoder)
+    selected = {a.name: {"learning_rate": a.learning_rate, "epochs": a.epochs} for a in arms}
+    evidence: dict[str, Any] = {
+        "stage": stage,
+        "arms": {a.name: {**a.to_json(), "parameters": a.parameters()} for a in arms},
+    }
+    if stage == "adapt":
+        evidence["rows"] = run_adapt(arms, selected, workers=workers)
+        evidence["summary"] = summarize_adapt(evidence["rows"])
+    else:
+        jobs = [(a, a.learning_rate, i) for a in arms for i in range(PLASTICITY["initializations"])]
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            evidence["rows"] = list(pool.map(life_job, *zip(*jobs, strict=True)))
+        evidence["design"] = PLASTICITY
+        evidence["summary"] = summarize_plasticity(evidence["rows"])
+    return evidence
 
 
 def cmd_develop(args: argparse.Namespace) -> int:
@@ -92,8 +125,23 @@ def cmd_develop(args: argparse.Namespace) -> int:
         )
         return 2
     previous = {p.stem.split("_", 1)[-1] if "_" in p.stem else p.stem: read_json(p) for p in args.previous}
-    arms, primary, secondary, baselines, selections = plan(args.stage, previous)
     started = time.time()
+    if args.stage in ("adapt", "plasticity"):
+        evidence = run_life_stage(args.stage, previous, args.workers)
+        document = {
+            "schema": "aaa.python.v1.development_stage.v1",
+            "protocol": PROTOCOL_VERSION,
+            "status": "development evidence: not confirmation, not a capability claim",
+            "spec_sha256": spec_module.spec_hash(),
+            "design": DESIGN,
+            "provenance": record,
+            "wall_seconds": time.time() - started,
+            "stage": evidence,
+        }
+        write_json(args.output, document)
+        print(f"wrote {args.output} ({document['wall_seconds']:.0f} s)")
+        return 0
+    arms, primary, secondary, baselines, selections = plan(args.stage, previous)
     evidence = run_stage(args.stage, arms, baselines=baselines, workers=args.workers)
     if args.stage == "encoders":
         from concurrent.futures import ProcessPoolExecutor

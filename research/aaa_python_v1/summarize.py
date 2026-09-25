@@ -127,3 +127,47 @@ def summarize(
         for name, row in adjusted.items():
             contrasts[name]["holm"] = row
     return {"arms": arms, "contrasts": contrasts}
+
+
+def summarize_adapt(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Per arm and family: online advantage on changed and control branches, their difference, forgetting."""
+
+    st = DESIGN["statistics"]
+    streams = DESIGN["adapt"]["streams"]
+    out: dict[str, Any] = {}
+    for arm in sorted({r["arm"] for r in rows}):
+        mine = sorted((r for r in rows if r["arm"] == arm), key=lambda r: r["init"])
+        if [r["init"] for r in mine] != list(range(DESIGN["adapt"]["initializations"])):
+            raise ValueError(f"{arm}: adaptation initializations are not the declared set")
+        entry: dict[str, Any] = {}
+        for family in FAMILIES:
+
+            def grid(key: str, family: str = family, mine: Sequence[Mapping[str, Any]] = mine) -> np.ndarray:
+                values = np.empty((len(mine), streams))
+                for r, row in enumerate(mine):
+                    cells = row["families"][family]
+                    if [c["stream"] for c in cells] != list(range(streams)):
+                        raise ValueError("adaptation streams are not the declared set")
+                    for s, cell in enumerate(cells):
+                        bits = unbits(cell[key])
+                        values[r, s] = 1.0 - sum(bits) / len(bits)
+                return values
+
+            changed = grid("changed_frozen") - grid("changed_online")
+            control = grid("control_frozen") - grid("control_online")
+            measures = {
+                "online_advantage_changed": changed,
+                "online_advantage_control": control,
+                "difference_of_differences": changed - control,
+                "forgetting_after_changed": grid("probe_after_changed") - grid("probe_before"),
+                "forgetting_after_control": grid("probe_after_control") - grid("probe_before"),
+            }
+            fam: dict[str, Any] = {}
+            for name, values in measures.items():
+                result = crossed(values, seed=st["seed"], draws=st["draws"], confidence=st["confidence"])
+                result["resolved_sign"] = resolved_sign(result)
+                result["variance_components"] = variance_components(values)
+                fam[name] = result
+            entry[family] = fam
+        out[arm] = entry
+    return out

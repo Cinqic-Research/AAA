@@ -395,3 +395,25 @@ class FreezeTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TuningCheckpointTests(unittest.TestCase):
+    def test_a_checkpoint_equals_a_model_trained_for_that_many_epochs(self) -> None:
+        from research.aaa_python_v1 import experiment
+
+        small = {family: _train(family, 3) for family in FAMILIES}
+        tune = {family: _train(family, 6)[3:] for family in FAMILIES}
+        arm = experiment.ArmSpec("t", "e1", 3, train_per_family=3)
+        with (
+            mock.patch.object(experiment, "train_tasks", return_value=small),
+            mock.patch.object(experiment, "dev_range", side_effect=lambda _role, family: tune[family]),
+            mock.patch.dict(experiment.DESIGN["tune"], {"epochs": [1, 2, 3]}),
+        ):
+            run = experiment.tune_job(arm, 0.1, 1000)
+            direct = experiment.trained_agent(arm, 1000, 0.1, 2)
+            accuracy = {}
+            for family in FAMILIES:
+                correct, _ = experiment.frozen_pass(direct.clone(), tune[family])
+                accuracy[family] = sum(correct) / len(correct)
+        self.assertEqual([c["epochs"] for c in run["checkpoints"]], [1, 2, 3])
+        self.assertEqual(run["checkpoints"][1]["accuracy"], accuracy)

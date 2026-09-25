@@ -87,8 +87,8 @@ from v1's non-training splits; confirmation only under a committed freeze.
 
 All stages use [`experiment.DESIGN`](../research/aaa_python_v1/experiment.py):
 D = 256; the full 2,400-program training pool per family; per-arm tuning of
-learning rate {0.03, 0.1, 0.3} x epochs {1, 3, 8} on the development *tune*
-range with its own initializations; evaluation on 10 initializations x 30
+learning rate {0.03, 0.1, 0.3} x epochs {1, 2, 4, 8, 16, 32} on the development
+*tune* range with its own initializations (see the amendment below); evaluation on 10 initializations x 30
 streams x 40 tasks of the *evaluate* range, frozen and online; crossed
 bootstrap intervals (4,000 draws); Holm across the five families of each
 primary contrast.
@@ -119,6 +119,19 @@ Development results guide engineering. They are never confirmation.
    15 streams, branches of 20 tasks (the adapt range holds 300 `novel_structure`
    tasks per family), probe bank of 100.
 7. **Plasticity** at 1K and 10K ([plasticity protocol](aaa_python_v1_protocol.md#plasticity)).
+
+### Amendment, 2026-09-24: the training-budget grid was censored
+
+The first encoder-stage run used epochs {1, 3, 8}. All nine arms selected 8,
+and every arm was still improving from 3 to 8 epochs (+0.02 to +0.05 mean tune
+accuracy), so the grid could not satisfy the plan's own requirement that no
+arm be under-trained (`AAA-197`). The tuning procedure was therefore changed,
+uniformly for every arm and before any head, capacity or later stage ran: one
+training run per rate, scored on the tune range after 1, 2, 4, 8, 16 and 32
+epochs (the state after `e` epochs is exactly the model trained for `e`
+epochs; tested). The encoder stage was re-run under the amended grid; the
+censored run is retained as superseded evidence. Nothing in the selection or
+decision rules changed, and the change concerns tuning only.
 
 ## Capacity decision rule (declared before any capacity arm ran)
 
