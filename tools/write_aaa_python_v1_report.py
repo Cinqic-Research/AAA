@@ -296,6 +296,42 @@ def render() -> str:
             "",
             *slice_table(st, [a for a in st["arms"] if a.startswith(("h16", "1k", "10k"))]),
         ]
+    confirmation_path = EVIDENCE / "confirmation.json"
+    if confirmation_path.is_file():
+        doc = json.loads(confirmation_path.read_text(encoding="utf-8"))
+        st = doc["stage"]
+        src = doc["provenance"]["source"]
+        lines += [
+            "",
+            "## 9. Confirmation (fresh identities, observed once under the committed freeze)",
+            "",
+            f"`{confirmation_path.relative_to(ROOT)}` sha256 `{sha(confirmation_path)[:16]}...`, commit `{src['commit'][:12]}`"
+            f" (dirty: {src['dirty']}), phase fingerprint `{src['phase_fingerprint'][:12]}...` (the freeze records"
+            f" `{doc['freeze']['phase_fingerprint'][:12]}...`); 10 fresh initializations x 30 streams x 40 tasks per family.",
+            "",
+        ]
+        lines += [*arm_table(st, list(st["summary"]["arms"])), "", *contrast_table(st)]
+        verdict = st["capacity_verdict"]
+        lines += [
+            "",
+            f"Declared per-family capacity rule on confirmation: `{verdict['verdict']}` (materially improved over 1K:"
+            f" {verdict['materially_improved'] or 'none'}; earns its size over 4K: {verdict['earns_over_4k'] or 'none'}).",
+            "",
+            "| Contract (`aaa.promotion.crossed.v1`) | Reference -> challenger | Geometric error ratio [95%] | Threshold | Verdict |",
+            "|---|---|---|---|---|",
+        ]
+        for declared in doc["freeze"]["contracts"]:
+            adj = st["adjudications"][declared["name"]]
+            p = adj.get("primary", {})
+            ratio = (
+                f"{p['geometric_ratio']:.3f} [{p['lower']:.3f}, {p['upper']:.3f}]"
+                if p.get("interval_status") == "MEASURED"
+                else "n/a"
+            )
+            lines.append(
+                f"| `{declared['name']}` | `{declared['reference']}` -> `{declared['challenger']}` | {ratio} | "
+                f"superior < {declared['criteria'][0]['threshold']} | **{adj['verdict']}** |"
+            )
     lines += [
         "",
         "## Reproduce",

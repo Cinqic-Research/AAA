@@ -540,6 +540,56 @@ Frozen accuracy by slice:
 | `h16@e2` | localize | 0.392 | 0.358 | 0.376 | 0.350 | 0.114 |
 | `h16@e2` | repair | 0.689 | 0.515 | 0.705 | 0.332 | 0.720 |
 
+## 9. Confirmation (fresh identities, observed once under the committed freeze)
+
+`docs/evidence/aaa_python_v1/confirmation.json` sha256 `dba2cb1f8b91838e...`, commit `a73765b278ab` (dirty: False), phase fingerprint `f1eb96177abc...` (the freeze records `f1eb96177abc...`); 10 fresh initializations x 30 streams x 40 tasks per family.
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `10k@e2` | 10046 | 0.948 [0.938, 0.957] | 0.683 [0.662, 0.703] | 0.191 [0.170, 0.213] | 0.626 [0.605, 0.647] | 0.651 [0.627, 0.675] |
+| `1k@e2` | 846 | 0.898 [0.858, 0.930] | 0.636 [0.613, 0.656] | 0.168 [0.148, 0.190] | 0.595 [0.574, 0.616] | 0.475 [0.375, 0.554] |
+| `4k@e2` | 4158 | 0.942 [0.930, 0.954] | 0.680 [0.658, 0.703] | 0.171 [0.151, 0.195] | 0.633 [0.611, 0.654] | 0.657 [0.634, 0.681] |
+| `h16@e1` | 6662 | 0.807 [0.783, 0.831] | 0.651 [0.627, 0.673] | 0.151 [0.133, 0.169] | 0.189 [0.174, 0.204] | 0.509 [0.481, 0.539] |
+| `h16@e2` | 6662 | 0.918 [0.844, 0.962] | 0.662 [0.637, 0.685] | 0.178 [0.157, 0.201] | 0.335 [0.312, 0.360] | 0.675 [0.654, 0.698] |
+| `lookup` |  | 0.542 [0.523, 0.564] | 0.611 [0.585, 0.637] | 0.182 [0.159, 0.206] | 0.182 [0.161, 0.203] | 0.241 [0.224, 0.258] |
+| `majority` |  | 0.542 [0.523, 0.564] | 0.611 [0.585, 0.637] | 0.182 [0.159, 0.206] | 0.182 [0.161, 0.203] | 0.241 [0.223, 0.257] |
+| `medoid` |  | 0.956 [0.944, 0.967] | 0.709 [0.684, 0.736] | 0.155 [0.138, 0.171] | 0.607 [0.579, 0.634] | 0.328 [0.300, 0.358] |
+| `rules` |  | 0.956 [0.944, 0.967] | 0.709 [0.684, 0.736] | 0.155 [0.138, 0.171] | 0.607 [0.579, 0.634] | 0.435 [0.414, 0.457] |
+| `v0_heuristic` |  | 0.956 [0.944, 0.967] | 0.611 [0.585, 0.637] | 0.092 [0.077, 0.107] | 0.603 [0.575, 0.631] | 0.345 [0.312, 0.379] |
+| `visible_tests` |  | 0.956 [0.944, 0.967] | 0.709 [0.684, 0.736] | 0.155 [0.138, 0.171] | 0.607 [0.579, 0.634] | 0.953 [0.941, 0.965] |
+
+| Contrast | Difference [95%] | Sign | Holm p | Disagreements |
+|---|---|---|---:|---:|
+| localize: 10k@e2 - 1k@e2 [frozen] | +0.032 [+0.008, +0.055] | POSITIVE | 0.0180 | 3369 |
+| localize: 10k@e2 - 4k@e2 [frozen] | -0.007 [-0.025, +0.013] | INCONCLUSIVE | 1.0000 | 2526 |
+| localize: 4k@e2 - 1k@e2 [frozen] | +0.038 [+0.013, +0.064] | POSITIVE | 0.0105 | 3411 |
+| localize: h16@e2 - h16@e1 [frozen] | +0.147 [+0.116, +0.177] | POSITIVE | 0.0013 | 4460 |
+| outcome: 10k@e2 - 1k@e2 [frozen] | +0.047 [+0.026, +0.068] | POSITIVE | 0.0013 | 2626 |
+| outcome: 10k@e2 - 4k@e2 [frozen] | +0.002 [-0.012, +0.017] | INCONCLUSIVE | 1.0000 | 1799 |
+| outcome: 4k@e2 - 1k@e2 [frozen] | +0.045 [+0.026, +0.064] | POSITIVE | 0.0013 | 2807 |
+| outcome: h16@e2 - h16@e1 [frozen] | +0.011 [-0.015, +0.038] | INCONCLUSIVE | 0.4040 | 3157 |
+| output: 10k@e2 - 1k@e2 [frozen] | +0.022 [+0.004, +0.041] | POSITIVE | 0.0205 | 1926 |
+| output: 10k@e2 - 4k@e2 [frozen] | +0.019 [+0.002, +0.037] | POSITIVE | 0.1075 | 1366 |
+| output: 4k@e2 - 1k@e2 [frozen] | +0.003 [-0.013, +0.018] | INCONCLUSIVE | 0.6835 | 1874 |
+| output: h16@e2 - h16@e1 [frozen] | +0.027 [+0.005, +0.053] | POSITIVE | 0.0320 | 1957 |
+| repair: 10k@e2 - 1k@e2 [frozen] | +0.176 [+0.090, +0.283] | POSITIVE | 0.0013 | 4890 |
+| repair: 10k@e2 - 4k@e2 [frozen] | -0.005 [-0.028, +0.017] | INCONCLUSIVE | 1.0000 | 3008 |
+| repair: 4k@e2 - 1k@e2 [frozen] | +0.181 [+0.098, +0.289] | POSITIVE | 0.0013 | 4732 |
+| repair: h16@e2 - h16@e1 [frozen] | +0.166 [+0.125, +0.206] | POSITIVE | 0.0013 | 4543 |
+| syntax: 10k@e2 - 1k@e2 [frozen] | +0.050 [+0.019, +0.088] | POSITIVE | 0.0015 | 1310 |
+| syntax: 10k@e2 - 4k@e2 [frozen] | +0.006 [-0.006, +0.019] | INCONCLUSIVE | 1.0000 | 624 |
+| syntax: 4k@e2 - 1k@e2 [frozen] | +0.044 [+0.011, +0.085] | POSITIVE | 0.0120 | 1294 |
+| syntax: h16@e2 - h16@e1 [frozen] | +0.111 [+0.032, +0.168] | POSITIVE | 0.0285 | 2786 |
+
+Declared per-family capacity rule on confirmation: `MIXED` (materially improved over 1K: ['syntax', 'outcome', 'localize', 'repair']; earns its size over 4K: none).
+
+| Contract (`aaa.promotion.crossed.v1`) | Reference -> challenger | Geometric error ratio [95%] | Threshold | Verdict |
+|---|---|---|---|---|
+| `encoder` | `h16@e1` -> `h16@e2` | 0.750 [0.650, 0.853] | superior < 0.95 | **PROMOTE** |
+| `scale_over_1k` | `1k@e2` -> `10k@e2` | 0.785 [0.728, 0.852] | superior < 0.95 | **PROMOTE** |
+| `scale_over_4k` | `4k@e2` -> `10k@e2` | 0.983 [0.942, 1.025] | superior < 0.97 | **INCONCLUSIVE** |
+| `scale_4k_over_1k` | `1k@e2` -> `4k@e2` | 0.798 [0.737, 0.874] | superior < 0.95 | **PROMOTE** |
+
 ## Reproduce
 
 At each file's recorded commit, with `AAA_DATA_ROOT` on the HDD:
