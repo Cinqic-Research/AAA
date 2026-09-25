@@ -1,0 +1,3065 @@
+{
+ "design": {
+  "adapt": {
+   "branch": 20,
+   "changed_slice": "novel_structure",
+   "control_slice": "in_distribution",
+   "initializations": 10,
+   "probe_bank": 100,
+   "range": [
+    1600,
+    3400
+   ],
+   "streams": 15
+  },
+  "attack": {
+   "initializations": 10,
+   "stream_length": 40,
+   "streams": 15
+  },
+  "confirmation": {
+   "init_offset": 2000,
+   "initializations": 10,
+   "stream_length": 40,
+   "streams": 30
+  },
+  "dimensions": 256,
+  "evaluate": {
+   "initializations": 10,
+   "stream_length": 40,
+   "streams": 30
+  },
+  "init_scale": 1.0,
+  "statistics": {
+   "confidence": 0.95,
+   "draws": 4000,
+   "holm_alpha": 0.05,
+   "seed": 20260924
+  },
+  "train_per_family": 2400,
+  "tune": {
+   "amendment": "2026-09-24: the grid was {1, 3, 8}; in the first encoder stage every arm selected 8 while still improving (+0.02 to +0.05 from 3 to 8), so the budget was censored. Every stage, including a re-run encoder stage, uses one run per rate scored after 1, 2, 4, 8, 16 and 32 epochs",
+   "criterion": "mean over families of frozen accuracy on the tune range; ties -> fewer epochs, then lower rate",
+   "epochs": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+   ],
+   "initializations": [
+    1000,
+    1001
+   ],
+   "learning_rates": [
+    0.03,
+    0.1,
+    0.3
+   ]
+  }
+ },
+ "protocol": "aaa.python.v1",
+ "provenance": {
+  "captured_at_unix": 1790315678.7180405,
+  "captured_before_run": true,
+  "compute": {
+   "array_library": "numpy",
+   "array_library_version": "2.5.3",
+   "base_lock_sha256": "2b5a23094b0cd99df66fa534b2e979a7a3e8c8b393df71cd53f1345281ab45b6",
+   "cpu_model": "AMD Ryzen 7 5700G with Radeon Graphics",
+   "cuda": null,
+   "cuda_lock_sha256": "aa12fceae9b2ae72e1a4e6215b2f4f1d3981b2f61dfa591ec66dd43342ceb9f6",
+   "deterministic_settings": {
+    "cupy_cub_accelerators": null,
+    "note": "no atomics or nondeterministic reductions are used by AAA's array programs; run-to-run determinism on each backend is tested, cross-backend equality is not assumed"
+   },
+   "dtype": "float64",
+   "machine_profile_sha256": "cd15c6f9526d44e0f09f36370d357d34a66470c320d91315f790a0affd6ede56",
+   "numpy_blas": {
+    "name": "scipy-openblas",
+    "openblas_configuration": "OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=64",
+    "version": "0.3.34.106.0"
+   },
+   "numpy_version": "2.5.3",
+   "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+   "processor": "CPU",
+   "python": "3.12.3",
+   "requested_device": "cpu",
+   "resolved_device": "cpu",
+   "schema": "aaa.compute.provenance.v1"
+  },
+  "generator_version": "aaa.python.gen.v1",
+  "interpreter": {
+   "build": [
+    "main",
+    "Aug 31 2026 10:18:26"
+   ],
+   "cache_tag": "cpython-312",
+   "compiler": "GCC 13.3.0",
+   "implementation": "cpython",
+   "machine": "x86_64",
+   "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+   "version": "3.12.3",
+   "version_info": [
+    3,
+    12,
+    3
+   ]
+  },
+  "protocol": "aaa.python.v1",
+  "source": {
+   "commit": "cc3c1e3f2ccf5a423069fce27491559e4c847ce2",
+   "dirty": false,
+   "phase_fingerprint": "087908309ef75a42c7219d02b4aa6b5f67aef080a5bf7b84c33dcccbcafa749d"
+  },
+  "spec_sha256": "992aa2b0cc765f2c73b82092dcb1779622370f3b0e1e13a808c666598f46ea5a"
+ },
+ "schema": "aaa.python.v1.development_stage.v1",
+ "spec_sha256": "992aa2b0cc765f2c73b82092dcb1779622370f3b0e1e13a808c666598f46ea5a",
+ "stage": {
+  "arms": {
+   "10k": {
+    "channels": [
+     "alpha",
+     "line",
+     "flow"
+    ],
+    "clip": 0.0,
+    "encoder": "e2",
+    "epochs": 32,
+    "hidden": 27,
+    "learning_rate": 0.03,
+    "localize_head": "pointer",
+    "momentum": 0.0,
+    "name": "10k",
+    "output_head": "onehot",
+    "parameters": {
+     "adaptive_state_total": 10047,
+     "core": 6939,
+     "encoder": {
+      "adaptive_state": 0,
+      "identity": "aaa.python.v1.encoders.v1:e2:D256",
+      "trainable_parameters": 0
+     },
+     "heads": {
+      "localize": 27,
+      "outcome": 168,
+      "output": 2828,
+      "repair": 28,
+      "syntax": 56
+     },
+     "optimizer_state": 0,
+     "per_block": {
+      "core.W": 6912,
+      "core.b": 27,
+      "localize.W": 27,
+      "outcome.W": 162,
+      "outcome.b": 6,
+      "output.W": 2727,
+      "output.b": 101,
+      "repair.W": 27,
+      "repair.b": 1,
+      "syntax.W": 54,
+      "syntax.b": 2
+     },
+     "persistent_recurrent_state": 0,
+     "remembered_initial_state_for_reset_control": 10046,
+     "replay_memory": 0,
+     "trainable_parameters": 10046,
+     "update_counter": 1
+    },
+    "tool": false,
+    "train_per_family": 2400,
+    "weight_decay": 0.0
+   },
+   "1k": {
+    "channels": [
+     "alpha",
+     "line",
+     "flow"
+    ],
+    "clip": 0.0,
+    "encoder": "e2",
+    "epochs": 32,
+    "hidden": 2,
+    "learning_rate": 0.03,
+    "localize_head": "pointer",
+    "momentum": 0.0,
+    "name": "1k",
+    "output_head": "onehot",
+    "parameters": {
+     "adaptive_state_total": 847,
+     "core": 514,
+     "encoder": {
+      "adaptive_state": 0,
+      "identity": "aaa.python.v1.encoders.v1:e2:D256",
+      "trainable_parameters": 0
+     },
+     "heads": {
+      "localize": 2,
+      "outcome": 18,
+      "output": 303,
+      "repair": 3,
+      "syntax": 6
+     },
+     "optimizer_state": 0,
+     "per_block": {
+      "core.W": 512,
+      "core.b": 2,
+      "localize.W": 2,
+      "outcome.W": 12,
+      "outcome.b": 6,
+      "output.W": 202,
+      "output.b": 101,
+      "repair.W": 2,
+      "repair.b": 1,
+      "syntax.W": 4,
+      "syntax.b": 2
+     },
+     "persistent_recurrent_state": 0,
+     "remembered_initial_state_for_reset_control": 846,
+     "replay_memory": 0,
+     "trainable_parameters": 846,
+     "update_counter": 1
+    },
+    "tool": false,
+    "train_per_family": 2400,
+    "weight_decay": 0.0
+   }
+  },
+  "design": {
+   "bootstrap": {
+    "confidence": 0.95,
+    "draws": 4000,
+    "seed": 20260925
+   },
+   "checkpoints": [
+    0,
+    1,
+    4,
+    16,
+    32
+   ],
+   "families": [
+    "syntax",
+    "outcome"
+   ],
+   "initializations": 8,
+   "learn_block": 100,
+   "life_epochs": 32,
+   "loss_threshold": 0.9,
+   "permutations": {
+    "outcome": {
+     "IndexError": "ValueError",
+     "NameError": "TypeError",
+     "TypeError": "IndexError",
+     "ValueError": "ok",
+     "ZeroDivisionError": "NameError",
+     "ok": "ZeroDivisionError"
+    },
+    "syntax": {
+     "invalid": "valid",
+     "valid": "invalid"
+    }
+   },
+   "probe_passes": 2,
+   "range": [
+    3400,
+    3600
+   ],
+   "test_block": 100
+  },
+  "rows": [
+   {
+    "arm": "1k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.8729669601346715,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.03166666666666667,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 23.20277188726266,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.565,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.5,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9803573628471849,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.9781690376509593,
+       "saturated_fraction": 0.03333333333333333,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 23.59994462958327,
+        "core.b": 0.5273957828680454,
+        "localize.W": 3.8318524549892374,
+        "outcome.W": 2.5570588334850775,
+        "outcome.b": 1.9296456126533037,
+        "output.W": 4.826602132335796,
+        "output.b": 5.336337290930556,
+        "repair.W": 0.14055908168373552,
+        "repair.b": 0.28147678503849327,
+        "syntax.W": 0.24940609818821555,
+        "syntax.b": 0.033765499119103974
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.1,
+       "syntax_after": 0.54,
+       "syntax_before": 0.47
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9948804761967696,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0149387772675562,
+       "saturated_fraction": 0.01,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 24.24248351999165,
+        "core.b": 0.3776007691306871,
+        "localize.W": 4.593920720713682,
+        "outcome.W": 4.1213707743928865,
+        "outcome.b": 3.1145577226597987,
+        "output.W": 7.8619068518023525,
+        "output.b": 8.475155781304824,
+        "repair.W": 1.1615171432251024,
+        "repair.b": 0.44945474008939096,
+        "syntax.W": 0.492798981177227,
+        "syntax.b": 0.00015486449575957887
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.5800000000000001,
+       "outcome_after": 0.64,
+       "outcome_before": 0.06,
+       "syntax_after": 0.52,
+       "syntax_before": 0.45
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9942757787519103,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1984176339314574,
+       "saturated_fraction": 0.021666666666666667,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 29.397318181616463,
+        "core.b": 2.1872691669243105,
+        "localize.W": 5.669284018236034,
+        "outcome.W": 7.353657098919058,
+        "outcome.b": 4.235276544767409,
+        "output.W": 13.151838021397383,
+        "output.b": 12.695979783998279,
+        "repair.W": 1.819855945662106,
+        "repair.b": 0.02201659078212423,
+        "syntax.W": 5.0551939754560875,
+        "syntax.b": 1.5531629212360183
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.495,
+       "outcome_after": 0.58,
+       "outcome_before": 0.01,
+       "syntax_after": 0.41,
+       "syntax_before": 0.16
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.996581839643177,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.156559837958991,
+       "saturated_fraction": 0.041666666666666664,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 36.53055527957429,
+        "core.b": 2.7148087416421465,
+        "localize.W": 6.379852182891556,
+        "outcome.W": 8.81187944937167,
+        "outcome.b": 5.860131750271912,
+        "output.W": 17.55627669441913,
+        "output.b": 13.809297060290334,
+        "repair.W": 2.2149193571724752,
+        "repair.b": 1.5049815422051485,
+        "syntax.W": 7.4987759697880065,
+        "syntax.b": 2.0389488674722958
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.56,
+       "outcome_after": 0.58,
+       "outcome_before": 0.01,
+       "syntax_after": 0.54,
+       "syntax_before": 0.17
+      }
+     }
+    ],
+    "init": 0,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "1k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9855654252917774,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.0,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 22.289362240278333,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.54,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9583292618430594,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0034235921099295,
+       "saturated_fraction": 0.018333333333333333,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 22.76768406749235,
+        "core.b": 0.1863746866960678,
+        "localize.W": 3.487023977102304,
+        "outcome.W": 2.968820273614342,
+        "outcome.b": 1.6108002693920487,
+        "output.W": 5.01781177977668,
+        "output.b": 5.1905246851103986,
+        "repair.W": 0.42849865949648275,
+        "repair.b": 1.1004906515050719,
+        "syntax.W": 0.48644015918167055,
+        "syntax.b": 0.27459865631388874
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.08,
+       "syntax_after": 0.54,
+       "syntax_before": 0.49
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9706502862987014,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1341837748660535,
+       "saturated_fraction": 0.016666666666666666,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 23.762866419909287,
+        "core.b": 0.2787255897367492,
+        "localize.W": 4.542456037166299,
+        "outcome.W": 4.528243452218063,
+        "outcome.b": 2.686725115130656,
+        "output.W": 8.200807443826847,
+        "output.b": 7.903021678371489,
+        "repair.W": 1.4212084841573518,
+        "repair.b": 1.845036913205032,
+        "syntax.W": 2.008345766242743,
+        "syntax.b": 0.49843672995753935
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.575,
+       "outcome_after": 0.63,
+       "outcome_before": 0.06,
+       "syntax_after": 0.52,
+       "syntax_before": 0.34
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9740745695960809,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1394905519259981,
+       "saturated_fraction": 0.05,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 29.916197614706732,
+        "core.b": 1.333169883906918,
+        "localize.W": 5.483402662817942,
+        "outcome.W": 6.941774338778541,
+        "outcome.b": 3.784172341865171,
+        "output.W": 13.85093201236941,
+        "output.b": 10.876398905393213,
+        "repair.W": 1.8194060428297862,
+        "repair.b": 1.9835130208810452,
+        "syntax.W": 7.855335835393677,
+        "syntax.b": 1.906581640115175
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.5449999999999999,
+       "outcome_after": 0.62,
+       "outcome_before": 0.06,
+       "syntax_after": 0.47,
+       "syntax_before": 0.11
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9794655979502012,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1254820020543141,
+       "saturated_fraction": 0.056666666666666664,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 36.55759979691299,
+        "core.b": 2.72854018689959,
+        "localize.W": 6.406598086862569,
+        "outcome.W": 9.460218640791995,
+        "outcome.b": 5.320183056041048,
+        "output.W": 19.269325369623004,
+        "output.b": 12.284807071566448,
+        "repair.W": 0.5990527326930886,
+        "repair.b": 0.9630114235798144,
+        "syntax.W": 9.19720046901599,
+        "syntax.b": 2.198080612287507
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.515,
+       "outcome_after": 0.56,
+       "outcome_before": 0.05,
+       "syntax_after": 0.47,
+       "syntax_before": 0.11
+      }
+     }
+    ],
+    "init": 1,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "1k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9681452727144004,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.16666666666666666,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 22.67863979212367,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.595,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.56,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.6526449987006933,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1102056612192979,
+       "saturated_fraction": 0.395,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 22.8445960182245,
+        "core.b": 0.7500482873711555,
+        "localize.W": 3.6468648912007207,
+        "outcome.W": 2.128007589448455,
+        "outcome.b": 1.3629164958287827,
+        "output.W": 5.234822134146363,
+        "output.b": 4.156502719854809,
+        "repair.W": 0.9847165076905947,
+        "repair.b": 0.05391648079853495,
+        "syntax.W": 0.27931151059436754,
+        "syntax.b": 0.15233485663961824
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.5800000000000001,
+       "outcome_after": 0.63,
+       "outcome_before": 0.1,
+       "syntax_after": 0.53,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9572912263068718,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0565508556105703,
+       "saturated_fraction": 0.04,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 23.661879381259602,
+        "core.b": 0.5007678000966125,
+        "localize.W": 5.052223319065082,
+        "outcome.W": 4.63526346295914,
+        "outcome.b": 2.996671620528768,
+        "output.W": 8.58953411174333,
+        "output.b": 6.98081889667433,
+        "repair.W": 0.792114504272692,
+        "repair.b": 0.37241430743458254,
+        "syntax.W": 1.2883078217664858,
+        "syntax.b": 0.24480478223832866
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.07,
+       "syntax_after": 0.54,
+       "syntax_before": 0.28
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9744993094463796,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1573716866681907,
+       "saturated_fraction": 0.04,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 30.09185628029317,
+        "core.b": 1.0524846866049231,
+        "localize.W": 6.073108427230226,
+        "outcome.W": 7.803669494094532,
+        "outcome.b": 4.235226599234789,
+        "output.W": 14.19233068354898,
+        "output.b": 10.707704485044179,
+        "repair.W": 0.7642827201114591,
+        "repair.b": 1.1350090046575296,
+        "syntax.W": 6.906330757050078,
+        "syntax.b": 0.16128899400539343
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.5800000000000001,
+       "outcome_after": 0.62,
+       "outcome_before": 0.03,
+       "syntax_after": 0.54,
+       "syntax_before": 0.06
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9848368928270554,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1996906911121814,
+       "saturated_fraction": 0.06,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 37.0321477297878,
+        "core.b": 1.032566795326822,
+        "localize.W": 6.5987235043731465,
+        "outcome.W": 9.641367104066937,
+        "outcome.b": 6.229899663884757,
+        "output.W": 19.01410645023996,
+        "output.b": 12.564600951360925,
+        "repair.W": 1.522149203675361,
+        "repair.b": 1.410514443215962,
+        "syntax.W": 7.54041262474079,
+        "syntax.b": 0.6530414757602384
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.03,
+       "syntax_after": 0.54,
+       "syntax_before": 0.06
+      }
+     }
+    ],
+    "init": 2,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "1k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.985918244010641,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.0016666666666666668,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 21.29691325163027,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.61,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.59,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.4910595126527346,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0993070742863411,
+       "saturated_fraction": 0.35333333333333333,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 21.57675379701633,
+        "core.b": 0.801839125729534,
+        "localize.W": 3.2575247964704466,
+        "outcome.W": 2.6885237736076055,
+        "outcome.b": 1.3123880790709557,
+        "output.W": 5.176107950348347,
+        "output.b": 4.302284951005859,
+        "repair.W": 0.1931563676703616,
+        "repair.b": 0.8658651454451808,
+        "syntax.W": 0.2102278557820872,
+        "syntax.b": 0.07832055854165668
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.04,
+       "syntax_after": 0.54,
+       "syntax_before": 0.5
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.8967470979559584,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0044217672947815,
+       "saturated_fraction": 0.013333333333333334,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 22.032667793292262,
+        "core.b": 0.2947973839510702,
+        "localize.W": 4.299321942331278,
+        "outcome.W": 3.7302983355976815,
+        "outcome.b": 2.718607932650962,
+        "output.W": 7.862496092999741,
+        "output.b": 6.472909554971977,
+        "repair.W": 0.2734509467887787,
+        "repair.b": 0.8434135973405593,
+        "syntax.W": 0.6069343940371615,
+        "syntax.b": 0.034113545266444806
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.08,
+       "syntax_after": 0.54,
+       "syntax_before": 0.4
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9488066277514091,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1041213419766769,
+       "saturated_fraction": 0.056666666666666664,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 28.189282633990352,
+        "core.b": 0.8981594767038069,
+        "localize.W": 5.659797693109664,
+        "outcome.W": 8.011389899055194,
+        "outcome.b": 5.077782409051857,
+        "output.W": 13.55736230457629,
+        "output.b": 10.824397329018462,
+        "repair.W": 1.4149678241350552,
+        "repair.b": 1.4806840444957539,
+        "syntax.W": 6.91670073344865,
+        "syntax.b": 1.23167705702373
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.53,
+       "outcome_after": 0.63,
+       "outcome_before": 0.04,
+       "syntax_after": 0.43,
+       "syntax_before": 0.13
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9712555712072746,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1522888696868536,
+       "saturated_fraction": 0.04833333333333333,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 35.42920838655799,
+        "core.b": 0.9472109494706873,
+        "localize.W": 6.483356426581234,
+        "outcome.W": 10.121547290291655,
+        "outcome.b": 6.991644394271104,
+        "output.W": 17.710174060320927,
+        "output.b": 13.244908465087237,
+        "repair.W": 2.556376009571913,
+        "repair.b": 2.060596987502612,
+        "syntax.W": 8.28404642756966,
+        "syntax.b": 1.4709152995073729
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.515,
+       "outcome_after": 0.63,
+       "outcome_before": 0.02,
+       "syntax_after": 0.4,
+       "syntax_before": 0.1
+      }
+     }
+    ],
+    "init": 3,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "1k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9867595239412295,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.0,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 22.536363323318174,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.54,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.7054431966705952,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.987386736685113,
+       "saturated_fraction": 0.12333333333333334,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 22.936518355498333,
+        "core.b": 0.6424044160073167,
+        "localize.W": 3.696329651001815,
+        "outcome.W": 2.374609829704666,
+        "outcome.b": 1.7859736969886464,
+        "output.W": 4.7433150454671065,
+        "output.b": 5.040126956233522,
+        "repair.W": 0.21407916662972215,
+        "repair.b": 0.8645474798275525,
+        "syntax.W": 0.3460478302666147,
+        "syntax.b": 0.13390698022825318
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.08,
+       "syntax_after": 0.54,
+       "syntax_before": 0.45
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9776032243120008,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0315483008304172,
+       "saturated_fraction": 0.011666666666666667,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 23.71620297350168,
+        "core.b": 0.283171578174784,
+        "localize.W": 4.795012988320145,
+        "outcome.W": 4.299257270272379,
+        "outcome.b": 2.957737227561354,
+        "output.W": 7.6211645223137445,
+        "output.b": 7.79117322537021,
+        "repair.W": 0.571443162054459,
+        "repair.b": 1.2179018936202308,
+        "syntax.W": 0.6975946980011775,
+        "syntax.b": 0.2081050722750817
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.5900000000000001,
+       "outcome_after": 0.63,
+       "outcome_before": 0.05,
+       "syntax_after": 0.55,
+       "syntax_before": 0.37
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.983618826646757,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1131738058513774,
+       "saturated_fraction": 0.023333333333333334,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 29.164917038371645,
+        "core.b": 1.5942903396301933,
+        "localize.W": 5.869396703000074,
+        "outcome.W": 6.762609989929293,
+        "outcome.b": 4.493402325163995,
+        "output.W": 12.868505615242569,
+        "output.b": 11.89656891561853,
+        "repair.W": 2.0678125267498513,
+        "repair.b": 1.9451517658059154,
+        "syntax.W": 7.014704307476962,
+        "syntax.b": 1.4851655584117343
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.38,
+       "outcome_after": 0.61,
+       "outcome_before": 0.02,
+       "syntax_after": 0.15,
+       "syntax_before": 0.04
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9968093970929282,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0998828863309913,
+       "saturated_fraction": 0.05,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 35.968464602389936,
+        "core.b": 1.5035503766238654,
+        "localize.W": 6.516200169703082,
+        "outcome.W": 8.693911872402246,
+        "outcome.b": 6.176010155319486,
+        "output.W": 17.79849364572977,
+        "output.b": 13.936977699560362,
+        "repair.W": 2.5801000846255167,
+        "repair.b": 2.5694384628326707,
+        "syntax.W": 8.488666089291607,
+        "syntax.b": 2.170289580472719
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.5,
+       "outcome_after": 0.63,
+       "outcome_before": 0.02,
+       "syntax_after": 0.37,
+       "syntax_before": 0.06
+      }
+     }
+    ],
+    "init": 4,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "1k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9822788898010704,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.07166666666666667,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 23.166733052245224,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.54,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.8741953746947768,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0046426695334358,
+       "saturated_fraction": 0.04833333333333333,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 23.378817241812087,
+        "core.b": 0.7389041690303948,
+        "localize.W": 2.673162845312618,
+        "outcome.W": 2.3134404731221485,
+        "outcome.b": 1.52876407108252,
+        "output.W": 5.1220199289398,
+        "output.b": 4.603602305516278,
+        "repair.W": 0.17224330891342954,
+        "repair.b": 1.1676969559713282,
+        "syntax.W": 0.5192717330343226,
+        "syntax.b": 0.3928537483944239
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.63,
+       "outcome_before": 0.1,
+       "syntax_after": 0.54,
+       "syntax_before": 0.43
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9159095654266627,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0312595529153281,
+       "saturated_fraction": 0.018333333333333333,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 23.96941961346006,
+        "core.b": 1.3079645512870157,
+        "localize.W": 4.160540504357413,
+        "outcome.W": 3.8320030634683486,
+        "outcome.b": 2.7288888453274693,
+        "output.W": 7.789781389463415,
+        "output.b": 7.071226172907184,
+        "repair.W": 0.4834686814451329,
+        "repair.b": 1.0620635773404496,
+        "syntax.W": 1.155463202706785,
+        "syntax.b": 0.38603210088311757
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.5449999999999999,
+       "outcome_after": 0.57,
+       "outcome_before": 0.07,
+       "syntax_after": 0.52,
+       "syntax_before": 0.32
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.966695056468504,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0786590663852151,
+       "saturated_fraction": 0.075,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 29.67557606829984,
+        "core.b": 0.4908609401506244,
+        "localize.W": 4.997339376357179,
+        "outcome.W": 7.3595870691695,
+        "outcome.b": 4.224800093680056,
+        "output.W": 13.170091768220722,
+        "output.b": 10.48190846067041,
+        "repair.W": 2.3853783255382246,
+        "repair.b": 2.5156125056907976,
+        "syntax.W": 7.416996877395325,
+        "syntax.b": 1.3823945677632572
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.495,
+       "outcome_after": 0.63,
+       "outcome_before": 0.05,
+       "syntax_after": 0.36,
+       "syntax_before": 0.07
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9852387544109915,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.16011293732395,
+       "saturated_fraction": 0.075,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 37.489211110628936,
+        "core.b": 0.5992439065421742,
+        "localize.W": 5.8591711299635,
+        "outcome.W": 9.336742391258747,
+        "outcome.b": 5.904286188872752,
+        "output.W": 18.545671099125194,
+        "output.b": 12.50477303276585,
+        "repair.W": 2.748275762569735,
+        "repair.b": 2.69609444568156,
+        "syntax.W": 8.69118092074762,
+        "syntax.b": 1.722211965804401
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.495,
+       "outcome_after": 0.55,
+       "outcome_before": 0.07,
+       "syntax_after": 0.44,
+       "syntax_before": 0.06
+      }
+     }
+    ],
+    "init": 5,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "1k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9641772889199642,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.021666666666666667,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 23.266301832002867,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.595,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.56,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.2466532986243033,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0487474692492056,
+       "saturated_fraction": 0.4583333333333333,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 23.607193381059332,
+        "core.b": 1.0523230428222443,
+        "localize.W": 3.753493690586751,
+        "outcome.W": 2.5248904252570488,
+        "outcome.b": 1.6784135942632044,
+        "output.W": 5.299399718107651,
+        "output.b": 4.9599507978687845,
+        "repair.W": 0.5954492341928566,
+        "repair.b": 0.22801682770010595,
+        "syntax.W": 0.27064326493372276,
+        "syntax.b": 0.187514884441025
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.545,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.46,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.2401448866821716,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1118450212825841,
+       "saturated_fraction": 0.48833333333333334,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 24.204427135959914,
+        "core.b": 0.8704403187316153,
+        "localize.W": 4.463440635630618,
+        "outcome.W": 4.383512690942584,
+        "outcome.b": 2.3341475648449195,
+        "output.W": 7.78153084567354,
+        "output.b": 7.3885360535077815,
+        "repair.W": 1.3998962614290118,
+        "repair.b": 0.05410190853794465,
+        "syntax.W": 1.0491826552355092,
+        "syntax.b": 0.35443084566845456
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.51,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.39,
+       "syntax_before": 0.36
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.929063128306003,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1554805191002806,
+       "saturated_fraction": 0.13333333333333333,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 28.545360265596642,
+        "core.b": 0.9050343954955948,
+        "localize.W": 5.047542312626297,
+        "outcome.W": 6.380610433465869,
+        "outcome.b": 3.4532795504104254,
+        "output.W": 12.06872008819603,
+        "output.b": 10.021689176128127,
+        "repair.W": 0.9934916580938293,
+        "repair.b": 0.9912152913814763,
+        "syntax.W": 6.09082564329631,
+        "syntax.b": 1.0906689333696702
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.5800000000000001,
+       "outcome_after": 0.62,
+       "outcome_before": 0.02,
+       "syntax_after": 0.54,
+       "syntax_before": 0.14
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9963483214415443,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.2073034315495068,
+       "saturated_fraction": 0.05,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 35.18621243862065,
+        "core.b": 0.35005559369721995,
+        "localize.W": 5.731460226927529,
+        "outcome.W": 9.701955929259604,
+        "outcome.b": 6.8884149204660705,
+        "output.W": 17.485229984867885,
+        "output.b": 16.107741209134982,
+        "repair.W": 1.7367355651692744,
+        "repair.b": 1.3105192718064467,
+        "syntax.W": 8.43957915469578,
+        "syntax.b": 2.343714666619918
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.575,
+       "outcome_after": 0.61,
+       "outcome_before": 0.05,
+       "syntax_after": 0.54,
+       "syntax_before": 0.17
+      }
+     }
+    ],
+    "init": 6,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "1k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9994166848946904,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.0,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 22.574171107280026,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.61,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.59,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.8624165538808304,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0306658502370434,
+       "saturated_fraction": 0.05333333333333334,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 22.96459956813677,
+        "core.b": 0.6398071644880968,
+        "localize.W": 3.751910732006466,
+        "outcome.W": 2.6599557050859857,
+        "outcome.b": 2.1949612628691275,
+        "output.W": 4.2318948728988035,
+        "output.b": 5.370668008518335,
+        "repair.W": 0.5003085120128036,
+        "repair.b": 0.6885090413937938,
+        "syntax.W": 0.48462400268025363,
+        "syntax.b": 0.16079579510177677
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.5800000000000001,
+       "outcome_after": 0.62,
+       "outcome_before": 0.08,
+       "syntax_after": 0.54,
+       "syntax_before": 0.48
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9593147686677275,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.0172762079552735,
+       "saturated_fraction": 0.03166666666666667,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 23.84755945026033,
+        "core.b": 0.10422316429212078,
+        "localize.W": 4.884713105195821,
+        "outcome.W": 4.706767933579709,
+        "outcome.b": 3.0317141951824587,
+        "output.W": 7.417867325971969,
+        "output.b": 8.387522157329085,
+        "repair.W": 1.3486762378050507,
+        "repair.b": 1.60221739101273,
+        "syntax.W": 0.5273741397053835,
+        "syntax.b": 0.2528427368927982
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.5549999999999999,
+       "outcome_after": 0.57,
+       "outcome_before": 0.05,
+       "syntax_after": 0.54,
+       "syntax_before": 0.35
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9572327368433768,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.1412292691056851,
+       "saturated_fraction": 0.04833333333333333,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 29.416904370320857,
+        "core.b": 1.508575646632601,
+        "localize.W": 6.13707030555011,
+        "outcome.W": 8.034321510577207,
+        "outcome.b": 4.762863369583126,
+        "output.W": 12.678211796164728,
+        "output.b": 12.657164224684282,
+        "repair.W": 1.116936734250866,
+        "repair.b": 0.36710741464178825,
+        "syntax.W": 5.214410538462069,
+        "syntax.b": 0.8250798192645645
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.48,
+       "outcome_after": 0.63,
+       "outcome_before": 0.03,
+       "syntax_after": 0.33,
+       "syntax_before": 0.09
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 1.9851651456266524,
+       "hidden_units": 2,
+       "mean_gradient_norm_recent": 1.047637080526232,
+       "saturated_fraction": 0.06666666666666667,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 36.1186535399804,
+        "core.b": 1.577008279412591,
+        "localize.W": 6.836444489705677,
+        "outcome.W": 10.176325993029153,
+        "outcome.b": 6.665482336305093,
+        "output.W": 16.63593794579321,
+        "output.b": 14.413617579413453,
+        "repair.W": 0.7634613653079362,
+        "repair.b": 0.3531993612132105,
+        "syntax.W": 7.202686297187868,
+        "syntax.b": 0.6634332718521727
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.49,
+       "outcome_after": 0.63,
+       "outcome_before": 0.03,
+       "syntax_after": 0.35,
+       "syntax_before": 0.1
+      }
+     }
+    ],
+    "init": 7,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "10k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 21.632375040272585,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.039753086419753086,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 82.44741969230024,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.5700000000000001,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.51,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 21.721092102336637,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.1599280172027404,
+       "saturated_fraction": 0.03728395061728395,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 82.59962689872067,
+        "core.b": 1.1761768329665412,
+        "localize.W": 3.046206494098419,
+        "outcome.W": 4.678794685837571,
+        "outcome.b": 0.7132737629288544,
+        "output.W": 6.2067771968137,
+        "output.b": 2.1143262584600886,
+        "repair.W": 1.5154085682981484,
+        "repair.b": 0.21573371322361767,
+        "syntax.W": 2.3694119826577396,
+        "syntax.b": 0.29830840380418266
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.44999999999999996,
+       "outcome_after": 0.6,
+       "outcome_before": 0.04,
+       "syntax_after": 0.3,
+       "syntax_before": 0.24
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.24964656586085,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9631815634906202,
+       "saturated_fraction": 0.0345679012345679,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 83.32599848799734,
+        "core.b": 1.8158450217119215,
+        "localize.W": 3.232193296421947,
+        "outcome.W": 6.41359996679339,
+        "outcome.b": 1.6648486402562792,
+        "output.W": 11.388273148595392,
+        "output.b": 3.2500312455106526,
+        "repair.W": 1.8617938569814607,
+        "repair.b": 0.41678994883710857,
+        "syntax.W": 6.257221063731589,
+        "syntax.b": 0.44473252765423577
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.385,
+       "outcome_after": 0.55,
+       "outcome_before": 0.01,
+       "syntax_after": 0.22,
+       "syntax_before": 0.04
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.867611457136686,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8836785478643387,
+       "saturated_fraction": 0.04,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 86.87851975692371,
+        "core.b": 2.198469620886212,
+        "localize.W": 4.456680617320478,
+        "outcome.W": 8.728016928280272,
+        "outcome.b": 2.9204602378835363,
+        "output.W": 21.579229549904692,
+        "output.b": 4.9861484850949935,
+        "repair.W": 2.3029551778012167,
+        "repair.b": 0.6364996188616175,
+        "syntax.W": 9.771988923510373,
+        "syntax.b": 0.1690021843240942
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.5549999999999999,
+       "outcome_after": 0.58,
+       "outcome_before": 0.01,
+       "syntax_after": 0.53,
+       "syntax_before": 0.02
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.101052986676034,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8580576029423639,
+       "saturated_fraction": 0.04197530864197531,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 92.06892441080686,
+        "core.b": 2.950556354914309,
+        "localize.W": 5.811883190710137,
+        "outcome.W": 10.335769426883493,
+        "outcome.b": 3.713062250924222,
+        "output.W": 29.438312840333914,
+        "output.b": 5.989579303103975,
+        "repair.W": 2.4486322543188184,
+        "repair.b": 0.7908157753781208,
+        "syntax.W": 11.55912947781372,
+        "syntax.b": 0.362632553706969
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.55,
+       "outcome_after": 0.58,
+       "outcome_before": 0.01,
+       "syntax_after": 0.52,
+       "syntax_before": 0.03
+      }
+     }
+    ],
+    "init": 0,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "10k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 21.946398574786198,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.06777777777777778,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 83.32975694364285,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.65,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.67,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.488380524444803,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.177560370281919,
+       "saturated_fraction": 0.04037037037037037,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 83.5087900370662,
+        "core.b": 1.3256202423619396,
+        "localize.W": 3.200906850311647,
+        "outcome.W": 4.59563047664328,
+        "outcome.b": 0.5402556723227185,
+        "output.W": 6.400345062743909,
+        "output.b": 1.8937133046999501,
+        "repair.W": 1.5668882559233717,
+        "repair.b": 0.51197340846549,
+        "syntax.W": 2.8013874483653387,
+        "syntax.b": 0.3757276815049055
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.485,
+       "outcome_after": 0.55,
+       "outcome_before": 0.04,
+       "syntax_after": 0.42,
+       "syntax_before": 0.3
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.726241393661738,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.002997271515045,
+       "saturated_fraction": 0.03888888888888889,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 84.32962138859284,
+        "core.b": 1.914553391240155,
+        "localize.W": 3.9771082961010564,
+        "outcome.W": 6.7582250900866345,
+        "outcome.b": 1.3835934021818157,
+        "output.W": 11.958083794593072,
+        "output.b": 3.089621982686798,
+        "repair.W": 2.0428519356475117,
+        "repair.b": 0.5272759892513434,
+        "syntax.W": 6.29813096989775,
+        "syntax.b": 0.5915318149840746
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.47,
+       "outcome_after": 0.53,
+       "outcome_before": 0.05,
+       "syntax_after": 0.41,
+       "syntax_before": 0.08
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.073429901967785,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8880345427445033,
+       "saturated_fraction": 0.041234567901234566,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 87.81641021948016,
+        "core.b": 2.7043523705717387,
+        "localize.W": 5.837173556834769,
+        "outcome.W": 8.800040579359395,
+        "outcome.b": 2.6275507449324276,
+        "output.W": 22.030537468479945,
+        "output.b": 4.688567625917133,
+        "repair.W": 2.038893318753539,
+        "repair.b": 0.4093529189840708,
+        "syntax.W": 9.5826398441426,
+        "syntax.b": 0.6330977461167542
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.43000000000000005,
+       "outcome_after": 0.53,
+       "outcome_before": 0.02,
+       "syntax_after": 0.33,
+       "syntax_before": 0.08
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.335714584107997,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9086040288780992,
+       "saturated_fraction": 0.04617283950617284,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 92.94097408780203,
+        "core.b": 3.171749682394959,
+        "localize.W": 7.204457433753749,
+        "outcome.W": 10.247406999960782,
+        "outcome.b": 3.588102783238539,
+        "output.W": 29.664386734864067,
+        "output.b": 5.582567063983885,
+        "repair.W": 2.406420723594992,
+        "repair.b": 0.5512229257276969,
+        "syntax.W": 11.262935666929929,
+        "syntax.b": 0.42081945490610834
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.44000000000000006,
+       "outcome_after": 0.55,
+       "outcome_before": 0.02,
+       "syntax_after": 0.33,
+       "syntax_before": 0.05
+      }
+     }
+    ],
+    "init": 1,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "10k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 21.674609115777592,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.0745679012345679,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 83.55635057632936,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.64,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.65,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.299807751024627,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.0555586286840053,
+       "saturated_fraction": 0.015432098765432098,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 83.7137271672217,
+        "core.b": 1.76133600656319,
+        "localize.W": 3.155877147038252,
+        "outcome.W": 4.5501374298910315,
+        "outcome.b": 0.759109919272093,
+        "output.W": 6.544470053806491,
+        "output.b": 1.9563292956692533,
+        "repair.W": 1.1899231301571853,
+        "repair.b": 0.0313379557714915,
+        "syntax.W": 3.1788196198598224,
+        "syntax.b": 0.08593014463048851
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.45499999999999996,
+       "outcome_after": 0.59,
+       "outcome_before": 0.06,
+       "syntax_after": 0.32,
+       "syntax_before": 0.18
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.677242174841595,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9088807069901002,
+       "saturated_fraction": 0.009259259259259259,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 84.45554553480835,
+        "core.b": 2.347769553562941,
+        "localize.W": 3.748801941622105,
+        "outcome.W": 6.485374123171931,
+        "outcome.b": 2.038998765474068,
+        "output.W": 12.035601077969918,
+        "output.b": 3.310872190731876,
+        "repair.W": 1.7588305113616962,
+        "repair.b": 0.34301380955585065,
+        "syntax.W": 6.4659025883901275,
+        "syntax.b": 0.013221048681139325
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.505,
+       "outcome_after": 0.53,
+       "outcome_before": 0.06,
+       "syntax_after": 0.48,
+       "syntax_before": 0.18
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.43638322647725,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8455913532220591,
+       "saturated_fraction": 0.007530864197530864,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 87.93439578660312,
+        "core.b": 3.1092405614408163,
+        "localize.W": 5.166094286318068,
+        "outcome.W": 8.199573905830903,
+        "outcome.b": 4.8009163123027365,
+        "output.W": 22.251264596667514,
+        "output.b": 5.471610244798624,
+        "repair.W": 2.2413899088408877,
+        "repair.b": 0.463549244974337,
+        "syntax.W": 9.662912089225333,
+        "syntax.b": 0.2440572898271994
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.47,
+       "outcome_after": 0.53,
+       "outcome_before": 0.02,
+       "syntax_after": 0.41,
+       "syntax_before": 0.04
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.81009879620501,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9005882671455248,
+       "saturated_fraction": 0.015061728395061728,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 93.08635012223097,
+        "core.b": 3.61327418629238,
+        "localize.W": 6.391139065436774,
+        "outcome.W": 9.750332322315227,
+        "outcome.b": 5.949335075841844,
+        "output.W": 29.850205485417927,
+        "output.b": 6.950678345323,
+        "repair.W": 2.2844738478134756,
+        "repair.b": 0.16648223346502652,
+        "syntax.W": 11.371679390221436,
+        "syntax.b": 0.5074299627886615
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.4,
+       "outcome_after": 0.48,
+       "outcome_before": 0.06,
+       "syntax_after": 0.32,
+       "syntax_before": 0.03
+      }
+     }
+    ],
+    "init": 2,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "10k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 20.61444931943572,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.08185185185185186,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 81.84729741232854,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.54,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.45,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 20.767844430384116,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.182695525749984,
+       "saturated_fraction": 0.0734567901234568,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 81.98208022996761,
+        "core.b": 0.9934964068006987,
+        "localize.W": 3.2977328404200223,
+        "outcome.W": 4.754476331627822,
+        "outcome.b": 0.7471238883293155,
+        "output.W": 6.377946473602954,
+        "output.b": 2.024913499377125,
+        "repair.W": 1.0872352868873894,
+        "repair.b": 0.4217037991701211,
+        "syntax.W": 2.672754458915471,
+        "syntax.b": 0.2242294459061965
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.45999999999999996,
+       "outcome_after": 0.57,
+       "outcome_before": 0.04,
+       "syntax_after": 0.35,
+       "syntax_before": 0.19
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 21.45960379434948,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9238697024744607,
+       "saturated_fraction": 0.06037037037037037,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 82.65090525098725,
+        "core.b": 1.7192129047241866,
+        "localize.W": 3.672433753440934,
+        "outcome.W": 6.86177605122542,
+        "outcome.b": 1.4553595586386983,
+        "output.W": 11.580665977164033,
+        "output.b": 3.2486201754857005,
+        "repair.W": 1.504770353971609,
+        "repair.b": 0.7049674810963692,
+        "syntax.W": 6.576955980128829,
+        "syntax.b": 0.4385222187154894
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.39,
+       "outcome_after": 0.55,
+       "outcome_before": 0.06,
+       "syntax_after": 0.23,
+       "syntax_before": 0.04
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.263464468122056,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8927564830922798,
+       "saturated_fraction": 0.06444444444444444,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 86.1496373780218,
+        "core.b": 2.3151973960084375,
+        "localize.W": 5.1887814980387645,
+        "outcome.W": 9.185893349156212,
+        "outcome.b": 2.103184765395348,
+        "output.W": 21.443454809935133,
+        "output.b": 4.522477683146181,
+        "repair.W": 2.366065054649309,
+        "repair.b": 0.9992315368143995,
+        "syntax.W": 9.998783086208972,
+        "syntax.b": 0.34380025688032967
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.42500000000000004,
+       "outcome_after": 0.55,
+       "outcome_before": 0.01,
+       "syntax_after": 0.3,
+       "syntax_before": 0.05
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.84999663761402,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9204783279375375,
+       "saturated_fraction": 0.05074074074074074,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 91.62036295925873,
+        "core.b": 2.9251236978160366,
+        "localize.W": 6.586998452207965,
+        "outcome.W": 10.828825686306134,
+        "outcome.b": 2.763640990792869,
+        "output.W": 29.345575945982763,
+        "output.b": 5.179724073967549,
+        "repair.W": 2.8716600094134948,
+        "repair.b": 0.9264016497099727,
+        "syntax.W": 11.55211585919042,
+        "syntax.b": 0.18824121595497093
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.4,
+       "outcome_after": 0.53,
+       "outcome_before": 0.03,
+       "syntax_after": 0.27,
+       "syntax_before": 0.03
+      }
+     }
+    ],
+    "init": 3,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "10k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 21.471672651670787,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.08456790123456791,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 82.97399552299271,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.585,
+       "outcome_after": 0.64,
+       "outcome_before": 0.11,
+       "syntax_after": 0.53,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 21.670279183336753,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.1199960091442853,
+       "saturated_fraction": 0.04839506172839506,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 83.09000838049927,
+        "core.b": 1.685803123379642,
+        "localize.W": 2.865581812008726,
+        "outcome.W": 4.476178080358462,
+        "outcome.b": 0.662648382314514,
+        "output.W": 6.2039226407725545,
+        "output.b": 1.8050306520533397,
+        "repair.W": 1.1428373399968004,
+        "repair.b": 0.22148136511121838,
+        "syntax.W": 2.493970907989205,
+        "syntax.b": 0.5946537977438333
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.49,
+       "outcome_after": 0.6,
+       "outcome_before": 0.03,
+       "syntax_after": 0.38,
+       "syntax_before": 0.32
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.033559490687786,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.0147626351277568,
+       "saturated_fraction": 0.043827160493827164,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 83.86554065381699,
+        "core.b": 2.662623551665513,
+        "localize.W": 3.5465060373038777,
+        "outcome.W": 6.926049457755163,
+        "outcome.b": 1.579974411748707,
+        "output.W": 11.667018288294742,
+        "output.b": 3.0253067213313365,
+        "repair.W": 1.5889000784433631,
+        "repair.b": 0.5107816046426481,
+        "syntax.W": 6.443501016625233,
+        "syntax.b": 0.755541679812151
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.44000000000000006,
+       "outcome_after": 0.56,
+       "outcome_before": 0.04,
+       "syntax_after": 0.32,
+       "syntax_before": 0.17
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.81058068052676,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8264488341844913,
+       "saturated_fraction": 0.029135802469135802,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 87.49873715421171,
+        "core.b": 3.2142235506561527,
+        "localize.W": 5.182111431437189,
+        "outcome.W": 9.208213527130612,
+        "outcome.b": 2.604076557370784,
+        "output.W": 21.634872945413417,
+        "output.b": 4.555873460292892,
+        "repair.W": 2.1403237255483494,
+        "repair.b": 0.6483766469296574,
+        "syntax.W": 10.024357963126098,
+        "syntax.b": 0.5014000313543758
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.47,
+       "outcome_after": 0.58,
+       "outcome_before": 0.07,
+       "syntax_after": 0.36,
+       "syntax_before": 0.06
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.390511931850526,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8923486785237218,
+       "saturated_fraction": 0.019012345679012346,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 92.77137748084712,
+        "core.b": 3.435971530067861,
+        "localize.W": 6.504974006599889,
+        "outcome.W": 10.868364420043834,
+        "outcome.b": 3.637829634654358,
+        "output.W": 29.328088961462797,
+        "output.b": 5.5677682721533115,
+        "repair.W": 2.4306840043506592,
+        "repair.b": 0.533179818950282,
+        "syntax.W": 11.776548027854975,
+        "syntax.b": 0.43117315273834994
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.43999999999999995,
+       "outcome_after": 0.57,
+       "outcome_before": 0.03,
+       "syntax_after": 0.31,
+       "syntax_before": 0.03
+      }
+     }
+    ],
+    "init": 4,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "10k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.235138268904795,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.06172839506172839,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 82.6914810934614,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.6,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.57,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.297980076924595,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.111471686066101,
+       "saturated_fraction": 0.05925925925925926,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 82.88262048359766,
+        "core.b": 1.830945430061118,
+        "localize.W": 2.993826913175637,
+        "outcome.W": 4.67895713949273,
+        "outcome.b": 0.7398806190932382,
+        "output.W": 6.568532187504418,
+        "output.b": 2.004568435414994,
+        "repair.W": 1.201461187612238,
+        "repair.b": 0.23381947451215532,
+        "syntax.W": 3.439742119066578,
+        "syntax.b": 0.31279900082474527
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.5549999999999999,
+       "outcome_after": 0.59,
+       "outcome_before": 0.02,
+       "syntax_after": 0.52,
+       "syntax_before": 0.15
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.548855676799477,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9691080183212097,
+       "saturated_fraction": 0.05592592592592593,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 83.69809575186909,
+        "core.b": 2.468125336366561,
+        "localize.W": 3.7795150210885478,
+        "outcome.W": 6.700820783158142,
+        "outcome.b": 1.5595271347958943,
+        "output.W": 11.997679917558774,
+        "output.b": 3.2315167503068283,
+        "repair.W": 1.6127100146318194,
+        "repair.b": 0.508534041266518,
+        "syntax.W": 6.513710670158681,
+        "syntax.b": 0.1646597612738795
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.5349999999999999,
+       "outcome_after": 0.58,
+       "outcome_before": 0.05,
+       "syntax_after": 0.49,
+       "syntax_before": 0.05
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.054269604986217,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9197346514562401,
+       "saturated_fraction": 0.04728395061728395,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 87.38731934802169,
+        "core.b": 3.1015365429654027,
+        "localize.W": 5.44751410689147,
+        "outcome.W": 9.174663292463723,
+        "outcome.b": 2.7215929030493395,
+        "output.W": 22.026224177626364,
+        "output.b": 4.7137075899330565,
+        "repair.W": 1.9706608816915714,
+        "repair.b": 0.5488500230684447,
+        "syntax.W": 9.353681203447032,
+        "syntax.b": 0.21522572734492532
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.44,
+       "outcome_after": 0.53,
+       "outcome_before": 0.07,
+       "syntax_after": 0.35,
+       "syntax_before": 0.02
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.526639700221043,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9389188276252376,
+       "saturated_fraction": 0.04049382716049383,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 92.66023377279151,
+        "core.b": 3.270171072176442,
+        "localize.W": 6.702553396309,
+        "outcome.W": 10.604118998089739,
+        "outcome.b": 3.956679502281653,
+        "output.W": 29.68315245443771,
+        "output.b": 5.634463570224305,
+        "repair.W": 2.212928864786014,
+        "repair.b": 0.15242400513325685,
+        "syntax.W": 10.87220913833967,
+        "syntax.b": 0.534987556565372
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.45499999999999996,
+       "outcome_after": 0.5,
+       "outcome_before": 0.02,
+       "syntax_after": 0.41,
+       "syntax_before": 0.12
+      }
+     }
+    ],
+    "init": 5,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "10k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.970308218428695,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.03320987654320988,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 83.83682442419571,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.61,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.59,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.94024658723017,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.038688352102205,
+       "saturated_fraction": 0.005555555555555556,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 83.96589812967429,
+        "core.b": 1.6695202939870832,
+        "localize.W": 2.9936346959253464,
+        "outcome.W": 4.511015933812707,
+        "outcome.b": 0.7263559763599529,
+        "output.W": 6.453510881423981,
+        "output.b": 1.9861818005985254,
+        "repair.W": 1.4177763701095871,
+        "repair.b": 0.15725032390962845,
+        "syntax.W": 3.033003056108916,
+        "syntax.b": 0.08978349212478978
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.485,
+       "outcome_after": 0.59,
+       "outcome_before": 0.03,
+       "syntax_after": 0.38,
+       "syntax_before": 0.26
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.9682396213984,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.949550993651764,
+       "saturated_fraction": 0.008271604938271605,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 84.70167559996719,
+        "core.b": 1.8184432675018332,
+        "localize.W": 3.505060861163815,
+        "outcome.W": 6.617656112971776,
+        "outcome.b": 2.068676293741193,
+        "output.W": 11.885760244000846,
+        "output.b": 3.5182650568960163,
+        "repair.W": 1.5529472208947985,
+        "repair.b": 0.014480533430922647,
+        "syntax.W": 6.502814775970519,
+        "syntax.b": 0.42275117553191527
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.37,
+       "outcome_after": 0.55,
+       "outcome_before": 0.02,
+       "syntax_after": 0.19,
+       "syntax_before": 0.07
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.475036810026435,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.879798786040177,
+       "saturated_fraction": 0.009382716049382716,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 88.39961918370916,
+        "core.b": 2.2691897630055213,
+        "localize.W": 5.063820243984252,
+        "outcome.W": 8.916149340795709,
+        "outcome.b": 3.599042819440713,
+        "output.W": 22.013396633988407,
+        "output.b": 5.560322734427487,
+        "repair.W": 2.0152974584085817,
+        "repair.b": 0.4359759593936293,
+        "syntax.W": 9.859136696657915,
+        "syntax.b": 0.6516339163698636
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.455,
+       "outcome_after": 0.51,
+       "outcome_before": 0.03,
+       "syntax_after": 0.4,
+       "syntax_before": 0.03
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.59132165760874,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8592988671992108,
+       "saturated_fraction": 0.014197530864197531,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 93.82914007115441,
+        "core.b": 2.544251398009117,
+        "localize.W": 6.523414888186544,
+        "outcome.W": 10.827719200558365,
+        "outcome.b": 4.510457832075311,
+        "output.W": 29.452534155485615,
+        "output.b": 6.6726792372489,
+        "repair.W": 2.467090132420682,
+        "repair.b": 0.5354968909265772,
+        "syntax.W": 11.610294359152775,
+        "syntax.b": 0.6241707035276255
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.475,
+       "outcome_after": 0.5,
+       "outcome_before": 0.0,
+       "syntax_after": 0.45,
+       "syntax_before": 0.04
+      }
+     }
+    ],
+    "init": 6,
+    "learning_rate": 0.03
+   },
+   {
+    "arm": "10k",
+    "checkpoints": [
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 21.918385465947626,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 0.0,
+       "saturated_fraction": 0.08061728395061728,
+       "updates": 0,
+       "weight_norms": {
+        "core.W": 82.92862704522564,
+        "core.b": 0.0,
+        "localize.W": 0.0,
+        "outcome.W": 0.0,
+        "outcome.b": 0.0,
+        "output.W": 0.0,
+        "output.b": 0.0,
+        "repair.W": 0.0,
+        "repair.b": 0.0,
+        "syntax.W": 0.0,
+        "syntax.b": 0.0
+       }
+      },
+      "epoch": 0,
+      "probe": {
+       "after_mean": 0.635,
+       "outcome_after": 0.63,
+       "outcome_before": 0.11,
+       "syntax_after": 0.64,
+       "syntax_before": 0.46
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.38098047407692,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 2.149268008529533,
+       "saturated_fraction": 0.0354320987654321,
+       "updates": 12000,
+       "weight_norms": {
+        "core.W": 83.06150740000496,
+        "core.b": 1.4203393718287092,
+        "localize.W": 2.9416133457001954,
+        "outcome.W": 4.735838614549581,
+        "outcome.b": 0.8791840647791254,
+        "output.W": 6.215826987657373,
+        "output.b": 1.8714318025715184,
+        "repair.W": 1.099981280452489,
+        "repair.b": 0.46725020081398705,
+        "syntax.W": 3.1527951975649167,
+        "syntax.b": 0.44957518167059674
+       }
+      },
+      "epoch": 1,
+      "probe": {
+       "after_mean": 0.48,
+       "outcome_after": 0.57,
+       "outcome_before": 0.06,
+       "syntax_after": 0.39,
+       "syntax_before": 0.17
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 22.606757329074,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.9913319154791365,
+       "saturated_fraction": 0.028271604938271605,
+       "updates": 48000,
+       "weight_norms": {
+        "core.W": 83.76658226860351,
+        "core.b": 2.3826900718603112,
+        "localize.W": 3.6348425941932736,
+        "outcome.W": 6.57153624582379,
+        "outcome.b": 1.9873553087914506,
+        "output.W": 11.723539066155174,
+        "output.b": 3.1772210149819022,
+        "repair.W": 1.5257937348562816,
+        "repair.b": 0.9707224943988723,
+        "syntax.W": 6.658854930703662,
+        "syntax.b": 0.44023944425115874
+       }
+      },
+      "epoch": 4,
+      "probe": {
+       "after_mean": 0.485,
+       "outcome_after": 0.54,
+       "outcome_before": 0.04,
+       "syntax_after": 0.43,
+       "syntax_before": 0.09
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.0980029404072,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.8263335708931827,
+       "saturated_fraction": 0.03740740740740741,
+       "updates": 192000,
+       "weight_norms": {
+        "core.W": 87.10738974711218,
+        "core.b": 3.3244175894979135,
+        "localize.W": 5.46349113880476,
+        "outcome.W": 9.025776125366491,
+        "outcome.b": 3.7157797391714675,
+        "output.W": 21.78385332093926,
+        "output.b": 5.017997597549641,
+        "repair.W": 1.9140948045339077,
+        "repair.b": 1.7937258362023214,
+        "syntax.W": 9.612549777919153,
+        "syntax.b": 0.01527965165131365
+       }
+      },
+      "epoch": 16,
+      "probe": {
+       "after_mean": 0.42500000000000004,
+       "outcome_after": 0.52,
+       "outcome_before": 0.02,
+       "syntax_after": 0.33,
+       "syntax_before": 0.08
+      }
+     },
+     {
+      "diagnostics": {
+       "clipped": 0,
+       "dormant_fraction": 0.0,
+       "effective_rank": 23.320398722869925,
+       "hidden_units": 27,
+       "mean_gradient_norm_recent": 1.7616770355371296,
+       "saturated_fraction": 0.03851851851851852,
+       "updates": 384000,
+       "weight_norms": {
+        "core.W": 92.17882556146475,
+        "core.b": 4.010270660290865,
+        "localize.W": 7.164443718991139,
+        "outcome.W": 10.994349583371555,
+        "outcome.b": 4.2124599920057895,
+        "output.W": 29.50854514472664,
+        "output.b": 5.993002939352898,
+        "repair.W": 2.4600666368827904,
+        "repair.b": 2.502956213432116,
+        "syntax.W": 11.128139113910487,
+        "syntax.b": 0.23136356586651435
+       }
+      },
+      "epoch": 32,
+      "probe": {
+       "after_mean": 0.43,
+       "outcome_after": 0.51,
+       "outcome_before": 0.04,
+       "syntax_after": 0.35,
+       "syntax_before": 0.03
+      }
+     }
+    ],
+    "init": 7,
+    "learning_rate": 0.03
+   }
+  ],
+  "stage": "plasticity",
+  "summary": {
+   "10k": {
+    "curve": {
+     "0": {
+      "after_mean": 0.60375,
+      "core_weight_norm": 82.95146908880955,
+      "dormant_fraction": 0.0,
+      "effective_rank": 21.807917081903,
+      "mean_gradient_norm_recent": 0.0,
+      "saturated_fraction": 0.06550925925925927
+     },
+     "1": {
+      "after_mean": 0.48249999999999993,
+      "core_weight_norm": 83.10053234084404,
+      "dormant_fraction": 0.0,
+      "effective_rank": 22.07082639121983,
+      "mean_gradient_norm_recent": 2.1243958247200965,
+      "saturated_fraction": 0.03939814814814815
+     },
+     "16": {
+      "after_mean": 0.45875,
+      "core_weight_norm": 87.39650357176043,
+      "dormant_fraction": 0.0,
+      "effective_rank": 23.009847386206296,
+      "mean_gradient_norm_recent": 1.870297096187159,
+      "saturated_fraction": 0.03455246913580247
+     },
+     "32": {
+      "after_mean": 0.44875,
+      "core_weight_norm": 92.64452355829454,
+      "dormant_fraction": 0.0,
+      "effective_rank": 23.36571687714416,
+      "mean_gradient_norm_recent": 1.8799964544736032,
+      "saturated_fraction": 0.0332716049382716
+     },
+     "4": {
+      "after_mean": 0.4475,
+      "core_weight_norm": 83.84924561708033,
+      "dormant_fraction": 0.0,
+      "effective_rank": 22.408768255834165,
+      "mean_gradient_norm_recent": 1.9654603508812616,
+      "saturated_fraction": 0.03492283950617284
+     }
+    },
+    "initializations": 8,
+    "late_minus_fresh": {
+     "lower": -0.195,
+     "mean": -0.15500000000000003,
+     "upper": -0.10812500000000001
+    },
+    "late_over_early_ratio": {
+     "lower": 0.8694956840078143,
+     "mean": 0.9338898242131699,
+     "upper": 1.0270787247466309
+    },
+    "loss_of_plasticity": false
+   },
+   "1k": {
+    "curve": {
+     "0": {
+      "after_mean": 0.59125,
+      "core_weight_norm": 22.62640706076765,
+      "dormant_fraction": 0.0,
+      "effective_rank": 1.9681535362135556,
+      "mean_gradient_norm_recent": 0.0,
+      "saturated_fraction": 0.03666666666666667
+     },
+     "1": {
+      "after_mean": 0.57875,
+      "core_weight_norm": 22.95951338235287,
+      "dormant_fraction": 0.0,
+      "effective_rank": 1.721387444989272,
+      "mean_gradient_norm_recent": 1.0328185113714157,
+      "saturated_fraction": 0.18541666666666665
+     },
+     "16": {
+      "after_mean": 0.5106250000000001,
+      "core_weight_norm": 29.299676556649466,
+      "dormant_fraction": 0.0,
+      "effective_rank": 1.9660332542263026,
+      "mean_gradient_norm_recent": 1.13599298436811,
+      "saturated_fraction": 0.05604166666666667
+     },
+     "32": {
+      "after_mean": 0.529375,
+      "core_weight_norm": 36.289006610556626,
+      "dormant_fraction": 0.0,
+      "effective_rank": 1.9869626900249782,
+      "mean_gradient_norm_recent": 1.1436197170678777,
+      "saturated_fraction": 0.05604166666666667
+     },
+     "4": {
+      "after_mean": 0.565625,
+      "core_weight_norm": 23.67968828595435,
+      "dormant_fraction": 0.0,
+      "effective_rank": 1.8640676914808578,
+      "mean_gradient_norm_recent": 1.0502530322528205,
+      "saturated_fraction": 0.07875
+     }
+    },
+    "initializations": 8,
+    "late_minus_fresh": {
+     "lower": -0.08937499999999998,
+     "mean": -0.06187499999999997,
+     "upper": -0.033124999999999946
+    },
+    "late_over_early_ratio": {
+     "lower": 0.8662872089596227,
+     "mean": 0.9159121957781401,
+     "upper": 0.970883207500872
+    },
+    "loss_of_plasticity": false
+   }
+  }
+ },
+ "status": "development evidence: not confirmation, not a capability claim",
+ "wall_seconds": 210.94026398658752
+}

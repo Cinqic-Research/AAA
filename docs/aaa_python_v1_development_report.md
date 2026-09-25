@@ -12,6 +12,12 @@ primary contrast. `DEGENERATE` means the two arms never disagreed on any task.
 - `docs/evidence/aaa_python_v1/stage_encoders.json` sha256 `8c231984456159eb...`, commit `59465dd5992f` (dirty: False), phase fingerprint `4f0174628f54...`, 1981 s
 - `docs/evidence/aaa_python_v1/stage_heads.json` sha256 `608122c4a3f41499...`, commit `f043d299676b` (dirty: False), phase fingerprint `b7b1c2d13537...`, 584 s
 - `docs/evidence/aaa_python_v1/stage_capacity.json` sha256 `8bd0013f896dcb57...`, commit `e85b18f0cb3c` (dirty: False), phase fingerprint `b7b1c2d13537...`, 1109 s
+- `docs/evidence/aaa_python_v1/stage_budget.json` sha256 `61e8c25309a39458...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 696 s
+- `docs/evidence/aaa_python_v1/stage_optimization.json` sha256 `69c38f82b215b622...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 942 s
+- `docs/evidence/aaa_python_v1/stage_tool.json` sha256 `7fd0528b55c1e3ea...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 1788 s
+- `docs/evidence/aaa_python_v1/stage_adapt.json` sha256 `a7e7731a544bf882...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 269 s
+- `docs/evidence/aaa_python_v1/stage_plasticity.json` sha256 `dc885a8482664def...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 211 s
+- `docs/evidence/aaa_python_v1/stage_attack.json` sha256 `62c09fde3fff9abe...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 711 s
 
 ## 1. Encoders at matched capacity (one-hot heads)
 
@@ -240,6 +246,248 @@ Contrasts:
 | syntax: 4k@e2 - 2k@e2 [frozen] | +0.013 [-0.004, +0.028] | INCONCLUSIVE |  | 711 |
 
 **Declared 1K-versus-10K rule, development: `MIXED`.** Materially improved families: ['outcome', 'repair']; families where 10K earns its size over 4K: none; harmed: none.
+
+## 3b. Declared budget-extension diagnostic (64 epochs)
+
+| Arm | Core width | Trainable | Rate | Epochs |
+|---|---:|---:|---:|---:|
+| `10k:ep32` | 27 | 10046 | 0.03 | 32 |
+| `10k:ep64` | 27 | 10046 | 0.03 | 64 |
+| `1k:ep32` | 2 | 846 | 0.03 | 32 |
+| `1k:ep64` | 2 | 846 | 0.03 | 64 |
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `10k:ep32` | 10046 | 0.921 [0.903, 0.938] | 0.672 [0.652, 0.694] | 0.200 [0.180, 0.226] | 0.623 [0.595, 0.648] | 0.638 [0.613, 0.662] |
+| `10k:ep64` | 10046 | 0.933 [0.917, 0.949] | 0.680 [0.657, 0.703] | 0.205 [0.183, 0.232] | 0.621 [0.599, 0.645] | 0.654 [0.630, 0.678] |
+| `1k:ep32` | 846 | 0.888 [0.860, 0.915] | 0.639 [0.618, 0.660] | 0.177 [0.159, 0.199] | 0.610 [0.583, 0.638] | 0.463 [0.419, 0.510] |
+| `1k:ep64` | 846 | 0.900 [0.870, 0.929] | 0.646 [0.625, 0.667] | 0.181 [0.162, 0.202] | 0.612 [0.585, 0.638] | 0.452 [0.387, 0.507] |
+
+| Contrast | Difference [95%] | Sign | Holm p | Disagreements |
+|---|---|---|---:|---:|
+| localize: 10k:ep64 - 10k:ep32 [frozen] | -0.002 [-0.015, +0.012] | INCONCLUSIVE | 0.8140 | 2056 |
+| localize: 10k:ep64 - 1k:ep64 [frozen] | +0.010 [-0.013, +0.032] | INCONCLUSIVE | 0.4130 | 3474 |
+| localize: 1k:ep64 - 1k:ep32 [frozen] | +0.001 [-0.009, +0.010] | INCONCLUSIVE | 1.0000 | 991 |
+| outcome: 10k:ep64 - 10k:ep32 [frozen] | +0.008 [-0.003, +0.019] | INCONCLUSIVE | 0.5070 | 1598 |
+| outcome: 10k:ep64 - 1k:ep64 [frozen] | +0.033 [+0.012, +0.054] | POSITIVE | 0.0060 | 2404 |
+| outcome: 1k:ep64 - 1k:ep32 [frozen] | +0.007 [-0.005, +0.019] | INCONCLUSIVE | 0.8340 | 1118 |
+| output: 10k:ep64 - 10k:ep32 [frozen] | +0.005 [-0.007, +0.019] | INCONCLUSIVE | 0.8080 | 1269 |
+| output: 10k:ep64 - 1k:ep64 [frozen] | +0.025 [+0.004, +0.046] | POSITIVE | 0.0555 | 1999 |
+| output: 1k:ep64 - 1k:ep32 [frozen] | +0.003 [-0.004, +0.011] | INCONCLUSIVE | 1.0000 | 525 |
+| repair: 10k:ep64 - 10k:ep32 [frozen] | +0.016 [+0.002, +0.031] | POSITIVE | 0.0880 | 1993 |
+| repair: 10k:ep64 - 1k:ep64 [frozen] | +0.202 [+0.151, +0.263] | POSITIVE | 0.0013 | 5039 |
+| repair: 1k:ep64 - 1k:ep32 [frozen] | -0.011 [-0.048, +0.019] | INCONCLUSIVE | 1.0000 | 2436 |
+| syntax: 10k:ep64 - 10k:ep32 [frozen] | +0.013 [+0.003, +0.025] | POSITIVE | 0.0550 | 396 |
+| syntax: 10k:ep64 - 1k:ep64 [frozen] | +0.034 [+0.006, +0.062] | POSITIVE | 0.0555 | 1120 |
+| syntax: 1k:ep64 - 1k:ep32 [frozen] | +0.012 [-0.003, +0.024] | INCONCLUSIVE | 0.4875 | 762 |
+
+## 4. Optimization, one change at a time
+
+| Arm | Core width | Trainable | Rate | Epochs |
+|---|---:|---:|---:|---:|
+| `10k:clip` | 27 | 10046 | 0.03 | 32 |
+| `10k:momentum` | 27 | 10046 | 0.003 | 32 |
+| `10k:sgd` | 27 | 10046 | 0.03 | 32 |
+| `10k:wd` | 27 | 10046 | 0.03 | 32 |
+| `1k:clip` | 2 | 846 | 0.03 | 32 |
+| `1k:momentum` | 2 | 846 | 0.003 | 32 |
+| `1k:sgd` | 2 | 846 | 0.03 | 32 |
+| `1k:wd` | 2 | 846 | 0.03 | 32 |
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `10k:clip` | 10046 | 0.919 [0.902, 0.935] | 0.663 [0.642, 0.685] | 0.198 [0.178, 0.221] | 0.644 [0.614, 0.671] | 0.637 [0.615, 0.661] |
+| `10k:momentum` | 10046 | 0.926 [0.909, 0.943] | 0.672 [0.650, 0.694] | 0.200 [0.179, 0.225] | 0.625 [0.597, 0.651] | 0.634 [0.609, 0.659] |
+| `10k:sgd` | 10046 | 0.921 [0.903, 0.938] | 0.672 [0.652, 0.694] | 0.200 [0.180, 0.226] | 0.623 [0.595, 0.648] | 0.638 [0.613, 0.662] |
+| `10k:wd` | 10046 | 0.937 [0.921, 0.951] | 0.674 [0.653, 0.696] | 0.209 [0.187, 0.236] | 0.641 [0.610, 0.668] | 0.622 [0.595, 0.650] |
+| `1k:clip` | 846 | 0.841 [0.813, 0.869] | 0.631 [0.607, 0.656] | 0.156 [0.140, 0.173] | 0.627 [0.597, 0.654] | 0.554 [0.520, 0.588] |
+| `1k:momentum` | 846 | 0.879 [0.850, 0.906] | 0.639 [0.617, 0.660] | 0.176 [0.157, 0.198] | 0.610 [0.583, 0.637] | 0.436 [0.348, 0.506] |
+| `1k:sgd` | 846 | 0.888 [0.860, 0.915] | 0.639 [0.618, 0.660] | 0.177 [0.159, 0.199] | 0.610 [0.583, 0.638] | 0.463 [0.419, 0.510] |
+| `1k:wd` | 846 | 0.895 [0.868, 0.922] | 0.639 [0.617, 0.660] | 0.184 [0.165, 0.206] | 0.624 [0.594, 0.652] | 0.486 [0.445, 0.531] |
+
+| Contrast | Difference [95%] | Sign | Holm p | Disagreements |
+|---|---|---|---:|---:|
+| localize: 10k:clip - 10k:sgd [frozen] | +0.021 [+0.009, +0.035] | POSITIVE | 0.0050 | 2020 |
+| localize: 10k:momentum - 10k:sgd [frozen] | +0.002 [-0.002, +0.006] | INCONCLUSIVE | 0.9620 | 230 |
+| localize: 10k:wd - 10k:sgd [frozen] | +0.018 [+0.007, +0.027] | POSITIVE | 0.0100 | 1255 |
+| localize: 1k:clip - 1k:sgd [frozen] | +0.016 [-0.001, +0.032] | INCONCLUSIVE | 0.1360 | 1957 |
+| localize: 1k:momentum - 1k:sgd [frozen] | -0.000 [-0.003, +0.002] | INCONCLUSIVE | 1.0000 | 157 |
+| localize: 1k:wd - 1k:sgd [frozen] | +0.013 [+0.004, +0.023] | POSITIVE | 0.0450 | 805 |
+| outcome: 10k:clip - 10k:sgd [frozen] | -0.009 [-0.022, +0.005] | INCONCLUSIVE | 0.7500 | 1575 |
+| outcome: 10k:momentum - 10k:sgd [frozen] | -0.000 [-0.005, +0.004] | INCONCLUSIVE | 1.0000 | 271 |
+| outcome: 10k:wd - 10k:sgd [frozen] | +0.002 [-0.007, +0.011] | INCONCLUSIVE | 0.7410 | 804 |
+| outcome: 1k:clip - 1k:sgd [frozen] | -0.008 [-0.021, +0.006] | INCONCLUSIVE | 0.2690 | 1418 |
+| outcome: 1k:momentum - 1k:sgd [frozen] | -0.000 [-0.006, +0.006] | INCONCLUSIVE | 1.0000 | 312 |
+| outcome: 1k:wd - 1k:sgd [frozen] | -0.000 [-0.008, +0.007] | INCONCLUSIVE | 0.9455 | 685 |
+| output: 10k:clip - 10k:sgd [frozen] | -0.002 [-0.011, +0.007] | INCONCLUSIVE | 1.0000 | 1070 |
+| output: 10k:momentum - 10k:sgd [frozen] | -0.000 [-0.005, +0.005] | INCONCLUSIVE | 1.0000 | 262 |
+| output: 10k:wd - 10k:sgd [frozen] | +0.009 [-0.000, +0.018] | INCONCLUSIVE | 0.1200 | 762 |
+| output: 1k:clip - 1k:sgd [frozen] | -0.021 [-0.037, -0.008] | NEGATIVE | 0.0120 | 1192 |
+| output: 1k:momentum - 1k:sgd [frozen] | -0.001 [-0.008, +0.004] | INCONCLUSIVE | 1.0000 | 165 |
+| output: 1k:wd - 1k:sgd [frozen] | +0.007 [+0.000, +0.014] | POSITIVE | 0.1960 | 364 |
+| repair: 10k:clip - 10k:sgd [frozen] | -0.001 [-0.024, +0.020] | INCONCLUSIVE | 1.0000 | 1938 |
+| repair: 10k:momentum - 10k:sgd [frozen] | -0.004 [-0.016, +0.006] | INCONCLUSIVE | 1.0000 | 729 |
+| repair: 10k:wd - 10k:sgd [frozen] | -0.016 [-0.033, -0.001] | NEGATIVE | 0.1200 | 1841 |
+| repair: 1k:clip - 1k:sgd [frozen] | +0.091 [+0.051, +0.138] | POSITIVE | 0.0013 | 4087 |
+| repair: 1k:momentum - 1k:sgd [frozen] | -0.027 [-0.087, +0.006] | INCONCLUSIVE | 1.0000 | 1014 |
+| repair: 1k:wd - 1k:sgd [frozen] | +0.023 [-0.008, +0.056] | INCONCLUSIVE | 0.4650 | 3075 |
+| syntax: 10k:clip - 10k:sgd [frozen] | -0.002 [-0.013, +0.011] | INCONCLUSIVE | 1.0000 | 636 |
+| syntax: 10k:momentum - 10k:sgd [frozen] | +0.006 [+0.001, +0.012] | POSITIVE | 0.1575 | 156 |
+| syntax: 10k:wd - 10k:sgd [frozen] | +0.016 [+0.005, +0.027] | POSITIVE | 0.0260 | 447 |
+| syntax: 1k:clip - 1k:sgd [frozen] | -0.047 [-0.067, -0.027] | NEGATIVE | 0.0013 | 1299 |
+| syntax: 1k:momentum - 1k:sgd [frozen] | -0.009 [-0.020, +0.001] | INCONCLUSIVE | 0.4800 | 267 |
+| syntax: 1k:wd - 1k:sgd [frozen] | +0.007 [-0.005, +0.021] | INCONCLUSIVE | 0.5250 | 489 |
+
+## 5. The visible-test tool (repair)
+
+| Arm | Core width | Trainable | Rate | Epochs |
+|---|---:|---:|---:|---:|
+| `10k:no_tool` | 27 | 10046 | 0.03 | 32 |
+| `10k:tool` | 27 | 10100 | 0.03 | 32 |
+| `1k:no_tool` | 2 | 846 | 0.03 | 32 |
+| `1k:tool` | 2 | 850 | 0.03 | 32 |
+| `4k:no_tool` | 11 | 4158 | 0.1 | 32 |
+| `4k:tool` | 11 | 4180 | 0.1 | 32 |
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `10k:no_tool` | 10046 | 0.921 [0.903, 0.938] | 0.672 [0.652, 0.694] | 0.200 [0.180, 0.226] | 0.623 [0.595, 0.648] | 0.638 [0.613, 0.662] |
+| `10k:tool` | 10100 | 0.928 [0.912, 0.943] | 0.680 [0.659, 0.703] | 0.199 [0.180, 0.223] | 0.618 [0.591, 0.643] | 0.963 [0.949, 0.974] |
+| `1k:no_tool` | 846 | 0.888 [0.860, 0.915] | 0.639 [0.618, 0.660] | 0.177 [0.159, 0.199] | 0.610 [0.583, 0.638] | 0.463 [0.419, 0.510] |
+| `1k:tool` | 850 | 0.900 [0.867, 0.927] | 0.640 [0.616, 0.662] | 0.179 [0.160, 0.201] | 0.607 [0.579, 0.632] | 0.927 [0.909, 0.945] |
+| `4k:no_tool` | 4158 | 0.935 [0.919, 0.949] | 0.672 [0.652, 0.693] | 0.187 [0.167, 0.212] | 0.619 [0.591, 0.645] | 0.633 [0.600, 0.663] |
+| `4k:tool` | 4180 | 0.933 [0.915, 0.949] | 0.664 [0.640, 0.688] | 0.181 [0.161, 0.205] | 0.617 [0.590, 0.644] | 0.953 [0.939, 0.965] |
+| `visible_tests` |  | 0.960 [0.953, 0.967] | 0.699 [0.676, 0.721] | 0.160 [0.139, 0.182] | 0.608 [0.580, 0.637] | 0.945 [0.930, 0.959] |
+
+| Contrast | Difference [95%] | Sign | Holm p | Disagreements |
+|---|---|---|---:|---:|
+| localize: 10k:tool - 10k:no_tool [frozen] | -0.005 [-0.022, +0.011] | INCONCLUSIVE | 1.0000 | 2369 |
+| localize: 10k:tool - visible_tests [frozen] | +0.010 [-0.030, +0.050] | INCONCLUSIVE | 0.6185 | 4882 |
+| localize: 1k:tool - 1k:no_tool [frozen] | -0.004 [-0.021, +0.012] | INCONCLUSIVE | 1.0000 | 2151 |
+| localize: 1k:tool - visible_tests [frozen] | -0.001 [-0.042, +0.040] | INCONCLUSIVE | 0.9560 | 5521 |
+| localize: 4k:tool - 4k:no_tool [frozen] | -0.002 [-0.020, +0.016] | INCONCLUSIVE | 1.0000 | 2822 |
+| localize: 4k:tool - visible_tests [frozen] | +0.010 [-0.034, +0.052] | INCONCLUSIVE | 0.6480 | 4992 |
+| outcome: 10k:tool - 10k:no_tool [frozen] | +0.008 [-0.003, +0.019] | INCONCLUSIVE | 0.5820 | 1532 |
+| outcome: 10k:tool - visible_tests [frozen] | -0.019 [-0.044, +0.007] | INCONCLUSIVE | 0.3230 | 2908 |
+| outcome: 1k:tool - 1k:no_tool [frozen] | +0.001 [-0.011, +0.012] | INCONCLUSIVE | 1.0000 | 1648 |
+| outcome: 1k:tool - visible_tests [frozen] | -0.059 [-0.084, -0.036] | NEGATIVE | 0.0013 | 2502 |
+| outcome: 4k:tool - 4k:no_tool [frozen] | -0.008 [-0.024, +0.007] | INCONCLUSIVE | 1.0000 | 1774 |
+| outcome: 4k:tool - visible_tests [frozen] | -0.035 [-0.061, -0.009] | NEGATIVE | 0.0220 | 2964 |
+| output: 10k:tool - 10k:no_tool [frozen] | -0.001 [-0.009, +0.008] | INCONCLUSIVE | 1.0000 | 1110 |
+| output: 10k:tool - visible_tests [frozen] | +0.040 [+0.026, +0.053] | POSITIVE | 0.0013 | 2008 |
+| output: 1k:tool - 1k:no_tool [frozen] | +0.002 [-0.008, +0.011] | INCONCLUSIVE | 1.0000 | 731 |
+| output: 1k:tool - visible_tests [frozen] | +0.019 [+0.000, +0.039] | POSITIVE | 0.1000 | 1514 |
+| output: 4k:tool - 4k:no_tool [frozen] | -0.006 [-0.023, +0.010] | INCONCLUSIVE | 1.0000 | 1306 |
+| output: 4k:tool - visible_tests [frozen] | +0.021 [+0.004, +0.038] | POSITIVE | 0.0585 | 2077 |
+| repair: 10k:tool - 10k:no_tool [frozen] | +0.325 [+0.301, +0.349] | POSITIVE | 0.0013 | 4238 |
+| repair: 10k:tool - visible_tests [frozen] | +0.018 [+0.001, +0.033] | POSITIVE | 0.0930 | 605 |
+| repair: 1k:tool - 1k:no_tool [frozen] | +0.464 [+0.422, +0.503] | POSITIVE | 0.0013 | 6126 |
+| repair: 1k:tool - visible_tests [frozen] | -0.018 [-0.034, -0.004] | NEGATIVE | 0.0330 | 587 |
+| repair: 4k:tool - 4k:no_tool [frozen] | +0.320 [+0.293, +0.347] | POSITIVE | 0.0013 | 4325 |
+| repair: 4k:tool - visible_tests [frozen] | +0.008 [-0.007, +0.021] | INCONCLUSIVE | 0.5700 | 555 |
+| syntax: 10k:tool - 10k:no_tool [frozen] | +0.007 [-0.010, +0.024] | INCONCLUSIVE | 1.0000 | 753 |
+| syntax: 10k:tool - visible_tests [frozen] | -0.032 [-0.049, -0.016] | NEGATIVE | 0.0013 | 1325 |
+| syntax: 1k:tool - 1k:no_tool [frozen] | +0.012 [-0.017, +0.042] | INCONCLUSIVE | 1.0000 | 1172 |
+| syntax: 1k:tool - visible_tests [frozen] | -0.060 [-0.094, -0.033] | NEGATIVE | 0.0013 | 1624 |
+| syntax: 4k:tool - 4k:no_tool [frozen] | -0.002 [-0.020, +0.016] | INCONCLUSIVE | 1.0000 | 663 |
+| syntax: 4k:tool - visible_tests [frozen] | -0.027 [-0.046, -0.009] | NEGATIVE | 0.0075 | 1276 |
+
+## 6. Adaptation after a distribution switch, and retention
+
+Error-rate estimands (10 initializations x 15 streams, branches of 20 tasks):
+
+| Arm | Family | Online advantage, changed | Online advantage, control | Difference of differences | Forgetting (changed) |
+|---|---|---|---|---|---|
+| `10k` | syntax | -0.004 [-0.023, +0.016] | -0.002 [-0.011, +0.006] | -0.002 [-0.020, +0.018] INCONCLUSIVE | +0.020 [+0.001, +0.041] POSITIVE |
+| `10k` | outcome | +0.062 [+0.030, +0.094] | +0.005 [-0.013, +0.027] | +0.057 [+0.018, +0.096] POSITIVE | +0.006 [-0.017, +0.030] INCONCLUSIVE |
+| `10k` | output | +0.044 [+0.028, +0.060] | -0.002 [-0.019, +0.015] | +0.046 [+0.023, +0.068] POSITIVE | +0.075 [+0.048, +0.104] POSITIVE |
+| `10k` | localize | +0.028 [+0.006, +0.055] | -0.001 [-0.017, +0.015] | +0.028 [+0.001, +0.055] POSITIVE | +0.025 [+0.011, +0.041] POSITIVE |
+| `10k` | repair | +0.040 [+0.016, +0.066] | +0.006 [-0.008, +0.021] | +0.034 [+0.005, +0.066] POSITIVE | +0.017 [-0.006, +0.040] INCONCLUSIVE |
+| `1k` | syntax | +0.014 [-0.004, +0.033] | +0.002 [-0.006, +0.012] | +0.012 [-0.008, +0.034] INCONCLUSIVE | +0.068 [+0.029, +0.110] POSITIVE |
+| `1k` | outcome | +0.023 [+0.004, +0.044] | -0.004 [-0.016, +0.007] | +0.027 [+0.008, +0.048] POSITIVE | -0.002 [-0.017, +0.012] INCONCLUSIVE |
+| `1k` | output | +0.002 [-0.014, +0.020] | +0.000 [-0.014, +0.013] | +0.002 [-0.020, +0.024] INCONCLUSIVE | +0.061 [+0.035, +0.085] POSITIVE |
+| `1k` | localize | +0.003 [-0.010, +0.014] | +0.001 [-0.003, +0.006] | +0.002 [-0.012, +0.013] INCONCLUSIVE | -0.007 [-0.017, +0.002] INCONCLUSIVE |
+| `1k` | repair | +0.003 [-0.003, +0.010] | +0.002 [-0.005, +0.011] | +0.001 [-0.010, +0.010] INCONCLUSIVE | -0.000 [-0.005, +0.004] INCONCLUSIVE |
+
+## 7. Plasticity
+
+| Arm | Late/early learning ratio [95%] | Late - fresh | Loss of plasticity |
+|---|---|---|---|
+| `10k` | 0.934 [0.869, 1.027] | -0.155 [-0.195, -0.108] | False |
+| `1k` | 0.916 [0.866, 0.971] | -0.062 [-0.089, -0.033] | False |
+
+| Arm | Epoch | Permuted accuracy after learning | Saturated | Dormant | Effective rank | Grad norm | Core weight norm |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `10k` | 0 | 0.604 | 0.066 | 0.000 | 21.808 | 0.000 | 82.951 |
+| `10k` | 1 | 0.482 | 0.039 | 0.000 | 22.071 | 2.124 | 83.101 |
+| `10k` | 16 | 0.459 | 0.035 | 0.000 | 23.010 | 1.870 | 87.397 |
+| `10k` | 32 | 0.449 | 0.033 | 0.000 | 23.366 | 1.880 | 92.645 |
+| `10k` | 4 | 0.448 | 0.035 | 0.000 | 22.409 | 1.965 | 83.849 |
+| `1k` | 0 | 0.591 | 0.037 | 0.000 | 1.968 | 0.000 | 22.626 |
+| `1k` | 1 | 0.579 | 0.185 | 0.000 | 1.721 | 1.033 | 22.960 |
+| `1k` | 16 | 0.511 | 0.056 | 0.000 | 1.966 | 1.136 | 29.300 |
+| `1k` | 32 | 0.529 | 0.056 | 0.000 | 1.987 | 1.144 | 36.289 |
+| `1k` | 4 | 0.566 | 0.079 | 0.000 | 1.864 | 1.050 | 23.680 |
+
+## 8. Attack pool (used once, development budgets, no re-tuning; 10 x 15 cells of 40 tasks)
+
+| Arm | Trainable | syntax | outcome | output | localize | repair |
+|---|---:|---|---|---|---|---|
+| `10k@e2` | 10046 | 0.915 [0.898, 0.933] | 0.671 [0.637, 0.705] | 0.183 [0.158, 0.211] | 0.655 [0.627, 0.683] | 0.622 [0.591, 0.651] |
+| `1k@e2` | 846 | 0.878 [0.854, 0.902] | 0.645 [0.614, 0.678] | 0.161 [0.137, 0.185] | 0.652 [0.624, 0.680] | 0.445 [0.404, 0.488] |
+| `20k@e2` | 19982 | 0.925 [0.905, 0.945] | 0.639 [0.599, 0.677] | 0.174 [0.153, 0.197] | 0.637 [0.608, 0.668] | 0.627 [0.601, 0.655] |
+| `4k@e2` | 4158 | 0.926 [0.909, 0.942] | 0.659 [0.626, 0.693] | 0.166 [0.144, 0.191] | 0.642 [0.615, 0.669] | 0.631 [0.601, 0.658] |
+| `h16@e1` | 6662 | 0.814 [0.782, 0.849] | 0.661 [0.627, 0.695] | 0.152 [0.130, 0.177] | 0.176 [0.158, 0.196] | 0.482 [0.444, 0.524] |
+| `h16@e2` | 6662 | 0.918 [0.898, 0.936] | 0.652 [0.615, 0.687] | 0.164 [0.144, 0.188] | 0.330 [0.298, 0.364] | 0.608 [0.571, 0.641] |
+| `lookup` |  | 0.560 [0.520, 0.598] | 0.640 [0.610, 0.673] | 0.168 [0.143, 0.193] | 0.210 [0.182, 0.238] | 0.246 [0.226, 0.269] |
+| `majority` |  | 0.560 [0.520, 0.598] | 0.640 [0.610, 0.673] | 0.168 [0.143, 0.193] | 0.210 [0.182, 0.238] | 0.250 [0.230, 0.268] |
+| `medoid` |  | 0.947 [0.922, 0.970] | 0.675 [0.637, 0.710] | 0.141 [0.115, 0.173] | 0.598 [0.562, 0.633] | 0.313 [0.272, 0.357] |
+| `rules` |  | 0.947 [0.922, 0.970] | 0.675 [0.637, 0.710] | 0.141 [0.115, 0.173] | 0.598 [0.562, 0.633] | 0.443 [0.415, 0.472] |
+| `v0_heuristic` |  | 0.947 [0.922, 0.970] | 0.640 [0.610, 0.673] | 0.092 [0.070, 0.113] | 0.593 [0.557, 0.628] | 0.347 [0.310, 0.382] |
+| `visible_tests` |  | 0.947 [0.922, 0.970] | 0.675 [0.637, 0.710] | 0.141 [0.115, 0.173] | 0.598 [0.562, 0.633] | 0.948 [0.930, 0.967] |
+
+| Contrast | Difference [95%] | Sign | Holm p | Disagreements |
+|---|---|---|---:|---:|
+| localize: 10k@e2 - 1k@e2 [frozen] | +0.003 [-0.025, +0.033] | INCONCLUSIVE | 0.8690 | 1601 |
+| localize: 10k@e2 - 4k@e2 [frozen] | +0.013 [-0.010, +0.039] | INCONCLUSIVE | 1.0000 | 1199 |
+| localize: h16@e2 - h16@e1 [frozen] | +0.154 [+0.115, +0.193] | POSITIVE | 0.0013 | 2122 |
+| outcome: 10k@e2 - 1k@e2 [frozen] | +0.027 [-0.007, +0.059] | INCONCLUSIVE | 0.2470 | 1377 |
+| outcome: 10k@e2 - 4k@e2 [frozen] | +0.012 [-0.010, +0.037] | INCONCLUSIVE | 1.0000 | 876 |
+| outcome: h16@e2 - h16@e1 [frozen] | -0.008 [-0.042, +0.020] | INCONCLUSIVE | 0.6340 | 1580 |
+| output: 10k@e2 - 1k@e2 [frozen] | +0.022 [-0.000, +0.046] | INCONCLUSIVE | 0.1680 | 868 |
+| output: 10k@e2 - 4k@e2 [frozen] | +0.017 [+0.003, +0.033] | POSITIVE | 0.0675 | 569 |
+| output: h16@e2 - h16@e1 [frozen] | +0.012 [-0.011, +0.033] | INCONCLUSIVE | 0.5510 | 946 |
+| repair: 10k@e2 - 1k@e2 [frozen] | +0.177 [+0.129, +0.225] | POSITIVE | 0.0013 | 2539 |
+| repair: 10k@e2 - 4k@e2 [frozen] | -0.009 [-0.039, +0.023] | INCONCLUSIVE | 1.0000 | 1431 |
+| repair: h16@e2 - h16@e1 [frozen] | +0.126 [+0.075, +0.168] | POSITIVE | 0.0013 | 2170 |
+| syntax: 10k@e2 - 1k@e2 [frozen] | +0.037 [+0.010, +0.065] | POSITIVE | 0.0280 | 650 |
+| syntax: 10k@e2 - 4k@e2 [frozen] | -0.011 [-0.030, +0.009] | INCONCLUSIVE | 1.0000 | 360 |
+| syntax: h16@e2 - h16@e1 [frozen] | +0.103 [+0.065, +0.141] | POSITIVE | 0.0013 | 1222 |
+
+Frozen accuracy by slice:
+
+| Arm | Family | in_distribution | novel_literals | novel_names | novel_structure | novel_composition |
+|---|---|---:|---:|---:|---:|---:|
+| `10k@e2` | syntax | 0.990 | 0.931 | 0.987 | 0.825 | 0.769 |
+| `10k@e2` | outcome | 0.754 | 0.647 | 0.750 | 0.476 | 0.648 |
+| `10k@e2` | output | 0.260 | 0.080 | 0.270 | 0.057 | 0.172 |
+| `10k@e2` | localize | 0.690 | 0.655 | 0.678 | 0.548 | 0.670 |
+| `10k@e2` | repair | 0.703 | 0.509 | 0.696 | 0.401 | 0.723 |
+| `1k@e2` | syntax | 0.966 | 0.912 | 0.971 | 0.717 | 0.738 |
+| `1k@e2` | outcome | 0.661 | 0.638 | 0.692 | 0.515 | 0.701 |
+| `1k@e2` | output | 0.215 | 0.064 | 0.193 | 0.080 | 0.196 |
+| `1k@e2` | localize | 0.674 | 0.651 | 0.733 | 0.534 | 0.648 |
+| `1k@e2` | repair | 0.486 | 0.433 | 0.462 | 0.309 | 0.492 |
+| `h16@e1` | syntax | 0.932 | 0.858 | 0.663 | 0.649 | 0.851 |
+| `h16@e1` | outcome | 0.723 | 0.669 | 0.663 | 0.504 | 0.682 |
+| `h16@e1` | output | 0.237 | 0.073 | 0.136 | 0.046 | 0.181 |
+| `h16@e1` | localize | 0.192 | 0.229 | 0.193 | 0.206 | 0.046 |
+| `h16@e1` | repair | 0.587 | 0.454 | 0.466 | 0.213 | 0.584 |
+| `h16@e2` | syntax | 0.981 | 0.987 | 0.985 | 0.813 | 0.759 |
+| `h16@e2` | outcome | 0.741 | 0.660 | 0.729 | 0.488 | 0.556 |
+| `h16@e2` | output | 0.238 | 0.083 | 0.242 | 0.059 | 0.125 |
+| `h16@e2` | localize | 0.392 | 0.358 | 0.376 | 0.350 | 0.114 |
+| `h16@e2` | repair | 0.689 | 0.515 | 0.705 | 0.332 | 0.720 |
 
 ## Reproduce
 
