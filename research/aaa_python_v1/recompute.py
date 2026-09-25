@@ -165,3 +165,79 @@ def verify_stage(document: Mapping[str, Any], *, rerun: bool = False) -> dict[st
         "problems": problems,
         "verdict": "FAIL" if problems else "PASS",
     }
+
+
+def _rate(text: str) -> float:
+    values = unbits(text)
+    return 1.0 - sum(1 for v in values if v) / len(values)
+
+
+def verify_adapt(rows: Sequence[Mapping[str, Any]], summary: Mapping[str, Any]) -> list[str]:
+    """Recount every adaptation and forgetting mean from the bits, with plain Python arithmetic."""
+
+    problems = []
+    for arm, fams in summary.items():
+        mine = [r for r in rows if r["arm"] == arm]
+        for family, measures in fams.items():
+            cells = [c for r in mine for c in r["families"][family]]
+            n = len(cells)
+            recount = {
+                "online_advantage_changed": sum(
+                    _rate(c["changed_frozen"]) - _rate(c["changed_online"]) for c in cells
+                )
+                / n,
+                "online_advantage_control": sum(
+                    _rate(c["control_frozen"]) - _rate(c["control_online"]) for c in cells
+                )
+                / n,
+                "forgetting_after_changed": sum(
+                    _rate(c["probe_after_changed"]) - _rate(c["probe_before"]) for c in cells
+                )
+                / n,
+                "forgetting_after_control": sum(
+                    _rate(c["probe_after_control"]) - _rate(c["probe_before"]) for c in cells
+                )
+                / n,
+            }
+            recount["difference_of_differences"] = (
+                recount["online_advantage_changed"] - recount["online_advantage_control"]
+            )
+            for name, value in recount.items():
+                if not math.isclose(value, measures[name]["mean"], rel_tol=1e-9, abs_tol=1e-12):
+                    problems.append(f"{arm}/{family}/{name}: {value!r} != stored {measures[name]['mean']!r}")
+    return problems
+
+
+def verify_plasticity(rows: Sequence[Mapping[str, Any]], summary: Mapping[str, Any]) -> list[str]:
+    problems = []
+    for arm, stored in summary.items():
+        mine = [r for r in rows if r["arm"] == arm]
+        epochs = sorted({c["epoch"] for r in mine for c in r["checkpoints"]})
+        early, late = epochs[1], epochs[-1]
+        ratios, gaps = [], []
+        for r in mine:
+            by = {c["epoch"]: c["probe"]["after_mean"] for c in r["checkpoints"]}
+            ratios.append(by[late] / max(by[early], 1e-9))
+            gaps.append(by[late] - by[0])
+        for name, values in (("late_over_early_ratio", ratios), ("late_minus_fresh", gaps)):
+            mean = sum(values) / len(values)
+            if not math.isclose(mean, stored[name]["mean"], rel_tol=1e-9, abs_tol=1e-12):
+                problems.append(f"{arm}/{name}: {mean!r} != stored {stored[name]['mean']!r}")
+    return problems
+
+
+def verify_document(document: Mapping[str, Any], *, rerun: bool = False) -> dict[str, Any]:
+    """Dispatch on the stage kind; every kind is recounted independently of :mod:`.summarize`."""
+
+    stage = document["stage"]
+    kind = stage["stage"]
+    if kind == "adapt":
+        problems = verify_adapt(stage["rows"], stage["summary"])
+    elif kind == "plasticity":
+        problems = verify_plasticity(stage["rows"], stage["summary"])
+    elif kind == "posthoc":
+        problems = verify_adapt(stage["adapt_rows"], stage["adapt_summary"])
+        problems += verify_plasticity(stage["life_rows"], stage["plasticity_summary"])
+    else:
+        return verify_stage(document, rerun=rerun)
+    return {"kind": kind, "problems": problems, "verdict": "FAIL" if problems else "PASS"}

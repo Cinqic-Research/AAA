@@ -18,7 +18,18 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "docs/evidence/aaa_python_v1"
 REPORT = ROOT / "docs/aaa_python_v1_development_report.md"
 FAMILIES = ("syntax", "outcome", "output", "localize", "repair")
-STAGES = ("encoders", "heads", "capacity", "budget", "optimization", "tool", "adapt", "plasticity", "attack")
+STAGES = (
+    "encoders",
+    "heads",
+    "capacity",
+    "budget",
+    "optimization",
+    "tool",
+    "adapt",
+    "plasticity",
+    "posthoc",
+    "attack",
+)
 
 
 def load(stage: str) -> dict[str, Any] | None:
@@ -236,6 +247,40 @@ def render() -> str:
                     f"| `{arm}` | {epoch} | {c['after_mean']:.3f} | {fmt(c['saturated_fraction'])} | {fmt(c['dormant_fraction'])} | "
                     f"{fmt(c['effective_rank'])} | {fmt(c['mean_gradient_norm_recent'])} | {fmt(c['core_weight_norm'])} |"
                 )
+    posthoc = load("posthoc")
+    if posthoc:
+        st = posthoc["stage"]
+        lines += [
+            "",
+            "## 7b. Post-hoc diagnostic: 4K adaptation and plasticity",
+            "",
+            "**Post-hoc, labelled:** added after observing sections 6 and 7; part of no declared verdict. Re-running",
+            "1K and 10K reproduced the committed adaptation and plasticity rows exactly.",
+            "",
+            "| Contrast | Difference [95%] | Sign |",
+            "|---|---|---|",
+        ]
+        for name, row in st["contrasts"].items():
+            lines.append(f"| {name} | {signed(row)} | {row['resolved_sign']} |")
+        lines += [
+            "",
+            "| Size | Family | Difference of differences | Forgetting (changed) |",
+            "|---|---|---|---|",
+        ]
+        for arm, fams in st["adapt_summary"].items():
+            for family in FAMILIES:
+                f = fams[family]
+                lines.append(
+                    f"| `{arm}` | {family} | {signed(f['difference_of_differences'])} "
+                    f"{f['difference_of_differences']['resolved_sign']} | {signed(f['forgetting_after_changed'])} |"
+                )
+        lines += ["", "| Size | Late/early ratio | Late - fresh |", "|---|---|---|"]
+        for arm, row in st["plasticity_summary"].items():
+            r, g = row["late_over_early_ratio"], row["late_minus_fresh"]
+            lines.append(
+                f"| `{arm}` | {r['mean']:.3f} [{r['lower']:.3f}, {r['upper']:.3f}] | "
+                f"{g['mean']:+.3f} [{g['lower']:+.3f}, {g['upper']:+.3f}] |"
+            )
     attack = load("attack")
     if attack:
         st = attack["stage"]

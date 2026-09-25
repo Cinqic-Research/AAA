@@ -498,3 +498,27 @@ class StagePlanTests(unittest.TestCase):
         self.assertEqual(len(plan_arms), 4)
         self.assertTrue(all(a.encoder == "e2" for a in plan_arms))
         self.assertEqual(len(primary), 2)
+
+
+class LifeStageRecomputeTests(unittest.TestCase):
+    def test_retained_adaptation_and_plasticity_recount_and_tampering_fails(self) -> None:
+        import json
+        from pathlib import Path
+
+        from research.aaa_python_v1 import recompute
+
+        root = Path(__file__).resolve().parents[1] / "docs/evidence/aaa_python_v1"
+        for name in ("stage_adapt.json", "stage_plasticity.json"):
+            path = root / name
+            if not path.is_file():
+                self.skipTest("retained life-stage evidence is not present")
+            document = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(recompute.verify_document(document)["verdict"], "PASS")
+            tampered = copy.deepcopy(document)
+            arm = next(iter(tampered["stage"]["summary"]))
+            entry = tampered["stage"]["summary"][arm]
+            if name == "stage_adapt.json":
+                entry["output"]["difference_of_differences"]["mean"] += 0.01
+            else:
+                entry["late_minus_fresh"]["mean"] += 0.01
+            self.assertEqual(recompute.verify_document(tampered)["verdict"], "FAIL")

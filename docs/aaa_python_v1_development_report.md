@@ -17,6 +17,7 @@ primary contrast. `DEGENERATE` means the two arms never disagreed on any task.
 - `docs/evidence/aaa_python_v1/stage_tool.json` sha256 `7fd0528b55c1e3ea...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 1788 s
 - `docs/evidence/aaa_python_v1/stage_adapt.json` sha256 `a7e7731a544bf882...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 269 s
 - `docs/evidence/aaa_python_v1/stage_plasticity.json` sha256 `dc885a8482664def...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 211 s
+- `docs/evidence/aaa_python_v1/stage_posthoc.json` sha256 `bf8dbe29ced1c5a4...`, commit `882405a5ab48` (dirty: False), phase fingerprint `147f29913cd5...`, 658 s
 - `docs/evidence/aaa_python_v1/stage_attack.json` sha256 `62c09fde3fff9abe...`, commit `cc3c1e3f2ccf` (dirty: False), phase fingerprint `087908309ef7...`, 711 s
 
 ## 1. Encoders at matched capacity (one-hot heads)
@@ -428,6 +429,56 @@ Error-rate estimands (10 initializations x 15 streams, branches of 20 tasks):
 | `1k` | 16 | 0.511 | 0.056 | 0.000 | 1.966 | 1.136 | 29.300 |
 | `1k` | 32 | 0.529 | 0.056 | 0.000 | 1.987 | 1.144 | 36.289 |
 | `1k` | 4 | 0.566 | 0.079 | 0.000 | 1.864 | 1.050 | 23.680 |
+
+## 7b. Post-hoc diagnostic: 4K adaptation and plasticity
+
+**Post-hoc, labelled:** added after observing sections 6 and 7; part of no declared verdict. Re-running
+1K and 10K reproduced the committed adaptation and plasticity rows exactly.
+
+| Contrast | Difference [95%] | Sign |
+|---|---|---|
+| adaptation DiD localize: 10k - 1k | +0.026 [-0.004, +0.057] | INCONCLUSIVE |
+| adaptation DiD localize: 10k - 4k | +0.002 [-0.036, +0.038] | INCONCLUSIVE |
+| adaptation DiD localize: 4k - 1k | +0.024 [-0.005, +0.056] | INCONCLUSIVE |
+| adaptation DiD outcome: 10k - 1k | +0.029 [-0.013, +0.071] | INCONCLUSIVE |
+| adaptation DiD outcome: 10k - 4k | -0.030 [-0.070, +0.008] | INCONCLUSIVE |
+| adaptation DiD outcome: 4k - 1k | +0.060 [+0.012, +0.107] | POSITIVE |
+| adaptation DiD output: 10k - 1k | +0.044 [+0.016, +0.068] | POSITIVE |
+| adaptation DiD output: 10k - 4k | -0.010 [-0.041, +0.019] | INCONCLUSIVE |
+| adaptation DiD output: 4k - 1k | +0.054 [+0.013, +0.093] | POSITIVE |
+| adaptation DiD repair: 10k - 1k | +0.033 [+0.003, +0.066] | POSITIVE |
+| adaptation DiD repair: 10k - 4k | -0.030 [-0.091, +0.029] | INCONCLUSIVE |
+| adaptation DiD repair: 4k - 1k | +0.064 [+0.015, +0.116] | POSITIVE |
+| adaptation DiD syntax: 10k - 1k | -0.014 [-0.041, +0.014] | INCONCLUSIVE |
+| adaptation DiD syntax: 10k - 4k | +0.013 [-0.012, +0.039] | INCONCLUSIVE |
+| adaptation DiD syntax: 4k - 1k | -0.027 [-0.060, +0.007] | INCONCLUSIVE |
+| plasticity late-minus-fresh: 10k - 1k | -0.093 [-0.142, -0.053] | NEGATIVE |
+| plasticity late-minus-fresh: 10k - 4k | -0.122 [-0.157, -0.087] | NEGATIVE |
+| plasticity late-minus-fresh: 4k - 1k | +0.029 [-0.009, +0.067] | INCONCLUSIVE |
+
+| Size | Family | Difference of differences | Forgetting (changed) |
+|---|---|---|---|
+| `10k` | syntax | -0.002 [-0.020, +0.018] INCONCLUSIVE | +0.020 [+0.001, +0.041] |
+| `10k` | outcome | +0.057 [+0.018, +0.096] POSITIVE | +0.006 [-0.017, +0.030] |
+| `10k` | output | +0.046 [+0.023, +0.068] POSITIVE | +0.075 [+0.048, +0.104] |
+| `10k` | localize | +0.028 [+0.001, +0.055] POSITIVE | +0.025 [+0.011, +0.041] |
+| `10k` | repair | +0.034 [+0.005, +0.066] POSITIVE | +0.017 [-0.006, +0.040] |
+| `1k` | syntax | +0.012 [-0.008, +0.034] INCONCLUSIVE | +0.068 [+0.029, +0.110] |
+| `1k` | outcome | +0.027 [+0.008, +0.048] POSITIVE | -0.002 [-0.017, +0.012] |
+| `1k` | output | +0.002 [-0.020, +0.024] INCONCLUSIVE | +0.061 [+0.035, +0.085] |
+| `1k` | localize | +0.002 [-0.012, +0.013] INCONCLUSIVE | -0.007 [-0.017, +0.002] |
+| `1k` | repair | +0.001 [-0.010, +0.010] INCONCLUSIVE | -0.000 [-0.005, +0.004] |
+| `4k` | syntax | -0.015 [-0.040, +0.011] INCONCLUSIVE | +0.029 [+0.010, +0.053] |
+| `4k` | outcome | +0.087 [+0.040, +0.134] POSITIVE | +0.045 [+0.021, +0.073] |
+| `4k` | output | +0.056 [+0.022, +0.091] POSITIVE | +0.082 [+0.058, +0.107] |
+| `4k` | localize | +0.026 [-0.000, +0.057] INCONCLUSIVE | +0.082 [+0.048, +0.120] |
+| `4k` | repair | +0.064 [+0.017, +0.117] POSITIVE | +0.012 [-0.017, +0.041] |
+
+| Size | Late/early ratio | Late - fresh |
+|---|---|---|
+| `10k` | 0.934 [0.869, 1.027] | -0.155 [-0.195, -0.108] |
+| `1k` | 0.916 [0.866, 0.971] | -0.062 [-0.089, -0.033] |
+| `4k` | 0.906 [0.857, 0.948] | -0.033 [-0.076, +0.008] |
 
 ## 8. Attack pool (used once, development budgets, no re-tuning; 10 x 15 cells of 40 tasks)
 

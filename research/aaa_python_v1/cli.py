@@ -261,6 +261,19 @@ def cmd_develop(args: argparse.Namespace) -> int:
 def cmd_summarize(args: argparse.Namespace) -> int:
     document = read_json(args.evidence)
     stage = document["stage"]
+    if stage["stage"] == "posthoc":
+        from .plasticity import summarize_plasticity
+        from .summarize import summarize_adapt
+
+        fresh = {
+            "adapt": summarize_adapt(stage["adapt_rows"]),
+            "plasticity": summarize_plasticity(stage["life_rows"]),
+        }
+        same = json.dumps(fresh, sort_keys=True) == json.dumps(
+            {"adapt": stage["adapt_summary"], "plasticity": stage["plasticity_summary"]}, sort_keys=True
+        )
+        print("summary reproduced from primitives" if same else "SUMMARY DIFFERS from its primitives")
+        return 0 if same else 1
     if stage["stage"] == "adapt":
         from .summarize import summarize_adapt
 
@@ -382,9 +395,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"wrote {args.output}")
             return 0
         if args.command == "recompute":
-            from .recompute import verify_stage
+            from .recompute import verify_document
 
-            result = verify_stage(read_json(args.evidence), rerun=args.rerun)
+            result = verify_document(read_json(args.evidence), rerun=args.rerun)
             print(json.dumps(result, indent=1))
             return 0 if result["verdict"] == "PASS" else 1
         return cmd_summarize(args)

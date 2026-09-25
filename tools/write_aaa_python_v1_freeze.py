@@ -16,6 +16,7 @@ The manifest is derived mechanically from the development stages:
   - ``encoder``: ``h16@e2`` against ``h16@e1``, superior at 0.95;
   - ``scale_over_1k``: 10K against 1K, superior at 0.95;
   - ``scale_over_4k``: 10K against 4K, superior at 0.97;
+  - ``scale_4k_over_1k``: 4K against 1K, superior at 0.95;
 
 * the phase fingerprint and specification hash of the source that will run.
 
@@ -101,6 +102,7 @@ def manifest() -> dict:
                 ["h16@e2", "h16@e1", "frozen"],
                 [f"10k@{encoder}", f"1k@{encoder}", "frozen"],
                 [f"10k@{encoder}", f"4k@{encoder}", "frozen"],
+                [f"4k@{encoder}", f"1k@{encoder}", "frozen"],
             ],
             "capacity_rule": "docs/aaa_python_v1_research_brief.md, 'Capacity decision rule', applied unchanged",
             "confirmation": shape,
@@ -112,11 +114,13 @@ def manifest() -> dict:
             contract("encoder", "h16@e1", "h16@e2", 0.95, 20260926),
             contract("scale_over_1k", f"1k@{encoder}", f"10k@{encoder}", 0.95, 20260927),
             contract("scale_over_4k", f"4k@{encoder}", f"10k@{encoder}", 0.97, 20260928),
+            contract("scale_4k_over_1k", f"1k@{encoder}", f"4k@{encoder}", 0.95, 20260929),
         ],
         "hypotheses": {
             "C1": "At matched trainable capacity, e2 has lower smoothed error than e1 (geometric ratio upper bound < 0.95).",
             "C2": "10K has lower smoothed error than 1K (upper bound < 0.95), and the declared per-family rule holds on fresh tasks.",
             "C3": "10K earns its size over 4K (upper bound < 0.97).",
+            "C4": "4K has lower smoothed error than 1K (upper bound < 0.95); added before the freeze after development showed capacity gains saturating by about 4K and 4K adapting at least as well as 10K.",
             "scale_justified_requires": "C2 and C3 PROMOTE, the per-family rule SCALE_JUSTIFIED_PENDING_ADAPTATION_AND_PLASTICITY, and no development adaptation, forgetting or plasticity regression at 10K",
         },
     }
