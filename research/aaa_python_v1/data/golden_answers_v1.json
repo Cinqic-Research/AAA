@@ -1,0 +1,381 @@
+{
+ "generator": "aaa.python.gen.v1",
+ "keys": {
+  "aaa.python.v1:development:localize:0:draft0": {
+   "source_sha256": "5333c561d8d6842452e6478ca7d7bee22be8c2f93b04029c63f899d4cc48ec53"
+  },
+  "aaa.python.v1:development:localize:10:draft0": {
+   "source_sha256": "754714ea5b36d4653dcf86e0f7e8d059c3695a30e1f67ec2f7e2fd27a9f98632"
+  },
+  "aaa.python.v1:development:localize:11:draft0": {
+   "source_sha256": "8c4adc7dedd7d25981873a78979c2e09e694f513a0cc266ed8fe140732ad4987"
+  },
+  "aaa.python.v1:development:localize:1:draft0": {
+   "source_sha256": "e872340494bf424bc141249683665fbed54a8c6e44c100def505b00d6dd2492c"
+  },
+  "aaa.python.v1:development:localize:2:draft0": {
+   "source_sha256": "adb8951c947c56e9c258b2daf7abdf054752857f8645be36ac84da591d2c3c41"
+  },
+  "aaa.python.v1:development:localize:3:draft0": {
+   "source_sha256": "778ba07cce23183a0954faf61f51e72fc022caeafe1bdfa7de0a467b75302ff6"
+  },
+  "aaa.python.v1:development:localize:4:draft0": {
+   "source_sha256": "041cd634317ab1029bc744b21f683fd12edb07a86409dfeb4ab3a6b123aa0d34"
+  },
+  "aaa.python.v1:development:localize:5:draft0": {
+   "source_sha256": "464a8b4c5972790fc702b820be41aec77cb8a53afd5c07f54d017b120cdc6075"
+  },
+  "aaa.python.v1:development:localize:6:draft0": {
+   "source_sha256": "b763944d1eea459f11e68d3520ab93b7bde922a4433e5c2952c60678a909631f"
+  },
+  "aaa.python.v1:development:localize:7:draft0": {
+   "source_sha256": "f860d6cfbce9aa0eaf0b39809089052cdebf5423d71d0337c86da719c2250eac"
+  },
+  "aaa.python.v1:development:localize:8:draft0": {
+   "source_sha256": "b92edb1e39b064da2a35ac0d48204637be34d94a6bacc4fa1321abe3ea2a6183"
+  },
+  "aaa.python.v1:development:localize:9:draft0": {
+   "source_sha256": "e2f078ebce26c499f9ad4aaf41bc3c723dcb3e017168bc203a870dd18de3c52d"
+  },
+  "aaa.python.v1:development:outcome:0:draft0": {
+   "source_sha256": "c5dbe58829933671f82bfd986efc9f7dae029cd65ac9629acbb2803148c98949"
+  },
+  "aaa.python.v1:development:outcome:10:draft0": {
+   "source_sha256": "7f8f8e6e201cfe9f40131f5ae92e2525236e22b99a5be908c7ef7df4873b7fc1"
+  },
+  "aaa.python.v1:development:outcome:11:draft0": {
+   "source_sha256": "86e5da3a34e564c57bd305a55e4b173ced72d1d01b507b3429499d855b9761b4"
+  },
+  "aaa.python.v1:development:outcome:1:draft0": {
+   "source_sha256": "3e3b2cabde449b2e9b2fb6f8090afbe5eda2c5d186b83c91139cdce884374442"
+  },
+  "aaa.python.v1:development:outcome:2:draft0": {
+   "source_sha256": "cfbb7ddbbf4fcdc7dbe77bd511a8755f11dfaa132aa2b25468e1359c66312468"
+  },
+  "aaa.python.v1:development:outcome:3:draft0": {
+   "source_sha256": "8c7979f8056bc23f0dc289705f2e69e7183f40c9f99722de2344c6357fd8dbe9"
+  },
+  "aaa.python.v1:development:outcome:4:draft0": {
+   "source_sha256": "71ae169a76021eb4ca80f922021b992cb7cce3e855b960b03751e458cfc9eb19"
+  },
+  "aaa.python.v1:development:outcome:5:draft0": {
+   "source_sha256": "d1e86078b88d0c5163e24c25a615a6554aaa46e14feb5b3977ccc5e901ef99a4"
+  },
+  "aaa.python.v1:development:outcome:6:draft0": {
+   "source_sha256": "0332efaa2107de29e70bac8893c9fdd422086654ff62cf06e4ee8ce5383f8d91"
+  },
+  "aaa.python.v1:development:outcome:7:draft0": {
+   "source_sha256": "f63cf83df329899c2a220599323d895e898d340c7ab2ae3f03b0ae5744a09c0e"
+  },
+  "aaa.python.v1:development:outcome:8:draft0": {
+   "source_sha256": "bc860916ffbd58683a90ad0fcbad05742d912c0ed7ffdfe74fb49b15353f98f3"
+  },
+  "aaa.python.v1:development:outcome:9:draft0": {
+   "source_sha256": "66a3fcf8114f00daa7bea0aeca2ebfc80837c73fa74aa1b744725d56ab553c71"
+  },
+  "aaa.python.v1:development:output:0:draft0": {
+   "source_sha256": "0c36c8f59306e76b55c38c71fdc190c5fa4a92541a34fb1c205ffe10c7d8d612"
+  },
+  "aaa.python.v1:development:output:10:draft0": {
+   "source_sha256": "3644f8e5cccb6c8830e872f32cdd4f0c121d0e9a0aceb60e76f2dfecbee24c57"
+  },
+  "aaa.python.v1:development:output:11:draft0": {
+   "source_sha256": "9abbe7c531a48ae2b46fee494c02f7c5337dd564c14814cff6c3320e573f1460"
+  },
+  "aaa.python.v1:development:output:1:draft0": {
+   "source_sha256": "ac35c8cd63c2288ef060b7e060d2d31c0fb6b39c87dfc3ace8358c7017bd04cf"
+  },
+  "aaa.python.v1:development:output:2:draft0": {
+   "source_sha256": "f820dd4645a096c00b64415e8b786b09dddff0b874069377c91fb0be058aa8c7"
+  },
+  "aaa.python.v1:development:output:3:draft0": {
+   "source_sha256": "8f9d577c366479f1b9d660ee828119a4e5eb87006fd99dc7d7b76d196bae4a95"
+  },
+  "aaa.python.v1:development:output:4:draft0": {
+   "source_sha256": "99b232f27aca350e3dbe01cc2c7eea769b0683ce5441edf0cb09252d1f74ba1b"
+  },
+  "aaa.python.v1:development:output:5:draft0": {
+   "source_sha256": "092fdab7d27fd5b8443c59ce2649185b1001e4f5ff561e89955351e9ecbc04b7"
+  },
+  "aaa.python.v1:development:output:6:draft0": {
+   "source_sha256": "37f82e2a17ce7fa345f473a55fce7c04ffce4fd4b108fc5dc7941fd76d034033"
+  },
+  "aaa.python.v1:development:output:7:draft0": {
+   "source_sha256": "db03b3b8cf12602070b252d9f68f921880b09d4f62c43fc77d1c134f47358e3c"
+  },
+  "aaa.python.v1:development:output:8:draft0": {
+   "source_sha256": "31cf32c4e39245c7e5ee03e57a6a08d24de80544b32296892e3969dc06192c18"
+  },
+  "aaa.python.v1:development:output:9:draft0": {
+   "source_sha256": "b18228252aa5fec1bd3cf2deecd22effd53b43db7106778b7954b83b9f60e58b"
+  },
+  "aaa.python.v1:development:repair:0:draft0": {
+   "source_sha256": "6147944596394d329965ed5edd2dde74bd7fa60a233f0a4455968cec6773f593"
+  },
+  "aaa.python.v1:development:repair:10:draft0": {
+   "source_sha256": "83757e4efec2d7dcdddfc48ca0e086679c56f03fc37f7e5ad85d2ca8d4c02028"
+  },
+  "aaa.python.v1:development:repair:11:draft0": {
+   "source_sha256": "2dd6d527fa59dc9f0779c2c5430cf4ea4991a6bdde56e07e9fd8beef4608f30d"
+  },
+  "aaa.python.v1:development:repair:1:draft0": {
+   "source_sha256": "0eebb0dc3544b04ff5f77e2c2b00fb9725177dec3d2be7b9ef9d994941fc4f2d"
+  },
+  "aaa.python.v1:development:repair:2:draft0": {
+   "source_sha256": "d5a2775c6ece589b096c0b9f196b2def9bc9a0e7b5b4dee42fd4211ad90ae20c"
+  },
+  "aaa.python.v1:development:repair:3:draft0": {
+   "source_sha256": "0bc7caf0efdd5391c52e12a8a5ff04a229e28cdfacdabc7e4fe32dbb828a0ebb"
+  },
+  "aaa.python.v1:development:repair:4:draft0": {
+   "source_sha256": "ed4c2c85df464dbda2f62d28ee88a4aa71cb11f584d8351635409561b51858f4"
+  },
+  "aaa.python.v1:development:repair:5:draft0": null,
+  "aaa.python.v1:development:repair:6:draft0": {
+   "source_sha256": "6e6a4aa015987002a9e72a08619a791cda08b9f90d11336eb37e103edcc518b9"
+  },
+  "aaa.python.v1:development:repair:7:draft0": null,
+  "aaa.python.v1:development:repair:8:draft0": null,
+  "aaa.python.v1:development:repair:9:draft0": {
+   "source_sha256": "51e7bb20b0071667ae685f05aa7065e1a9e23496b1e2e931a022f1ab7ccd93df"
+  },
+  "aaa.python.v1:development:syntax:0:draft0": {
+   "source_sha256": "28c6d850e6800155d03e2f56d5f7875d86322ff6d06cc5f0942bd57b8dd0a803"
+  },
+  "aaa.python.v1:development:syntax:10:draft0": {
+   "source_sha256": "7aa57cad15d263c130ac07c118e5bb4bee69a013abc1997054948238cff86837"
+  },
+  "aaa.python.v1:development:syntax:11:draft0": {
+   "source_sha256": "c23cfc2f38a8c0a5365099b7b7ecbbba59bb40a4bcb3a8e2080c01754bc65bbd"
+  },
+  "aaa.python.v1:development:syntax:1:draft0": {
+   "source_sha256": "924f4e1d514934edbd505676f4a621055f494041f3c496915bba0b8143f9503b"
+  },
+  "aaa.python.v1:development:syntax:2:draft0": {
+   "source_sha256": "6c023f864c14748e328ea7ddc3a85e353d86a51cf75363d63266ace8097fd11a"
+  },
+  "aaa.python.v1:development:syntax:3:draft0": {
+   "source_sha256": "f9bd7f3fae2b8f37e0c0eebb41a46072dc39b60c29fbb2536f90dc703dc41d46"
+  },
+  "aaa.python.v1:development:syntax:4:draft0": {
+   "source_sha256": "68cc6cad98d0ed7db3622fdc7498242bce9c3aa17a7ae7c3ab3af4b51877af47"
+  },
+  "aaa.python.v1:development:syntax:5:draft0": {
+   "source_sha256": "9b54ea4ebda31db12c4ec7deeb6521a9b1c0c08841112765781f2489a53d8fc5"
+  },
+  "aaa.python.v1:development:syntax:6:draft0": {
+   "source_sha256": "2db2d6de5b01807bd6b5af86adfd690a86fe8a0f166fc939e02a4128fb2fa79d"
+  },
+  "aaa.python.v1:development:syntax:7:draft0": {
+   "source_sha256": "bb61067945ba87473b3f8746e8538d43518ee807d906fcfe3503c153320a635c"
+  },
+  "aaa.python.v1:development:syntax:8:draft0": {
+   "source_sha256": "a41b12be92c2fe24856bce13ab5402008889ecff333d00318e119fbab2f083c1"
+  },
+  "aaa.python.v1:development:syntax:9:draft0": {
+   "source_sha256": "db6a7423052652ad6d236fa0cdefdee3d96d904733d5439ff620ce36bbc7f40f"
+  },
+  "aaa.python.v1:train:localize:0": {
+   "answer": 6,
+   "source_sha256": "8dee01a15780ba96cbb1952bdfd8bbff76fb2070a93215f5289730fefd7b13e5"
+  },
+  "aaa.python.v1:train:localize:1": {
+   "answer": 8,
+   "source_sha256": "32303ff3bdec48e0793643717b14f1e00b480b932fa0d75850dc20cdebdacc9c"
+  },
+  "aaa.python.v1:train:localize:2": {
+   "answer": 6,
+   "source_sha256": "9548c75558119614e7a3062f4510db1ed69b88b49309e3d57afd0104346dd38b"
+  },
+  "aaa.python.v1:train:localize:3": {
+   "answer": 2,
+   "source_sha256": "ef2230e9d89a2f2279f354bc60a939c2a1c87665dbd4c4e01a2e1e03f0e8a4b1"
+  },
+  "aaa.python.v1:train:localize:4": {
+   "answer": 4,
+   "source_sha256": "4bf89fbb4290ba8861e92c3ee623fd12d2b6ceb5390001a85ecea22245331dc4"
+  },
+  "aaa.python.v1:train:localize:5": {
+   "answer": 2,
+   "source_sha256": "4d836f98a04fc9ba71c527a05b16c28eb95cf09d3a031badb58adc4b4c69f700"
+  },
+  "aaa.python.v1:train:localize:6": {
+   "answer": 3,
+   "source_sha256": "d3e2339bf7831feb77bb86189b45b8de5caf1afc480b8850b24a9ce4ac1e7b71"
+  },
+  "aaa.python.v1:train:localize:7": {
+   "answer": 7,
+   "source_sha256": "79880e309627801b5b141f2b5ead771678d7bc41f04d52f3279c3ef509737cc4"
+  },
+  "aaa.python.v1:train:localize:8": {
+   "answer": 6,
+   "source_sha256": "6e4c0694a3b5639d8bcd0f0b36f4b9888b2f6e890bd9ea56377ffcd723593f71"
+  },
+  "aaa.python.v1:train:localize:9": {
+   "answer": 4,
+   "source_sha256": "a7bb08d44be30810f6be6ae6e7f7c54147f3613432066c7e196a79de90bae3ff"
+  },
+  "aaa.python.v1:train:outcome:0": {
+   "answer": "ok",
+   "source_sha256": "b40d84df6e4f531052f15192ce3becfd9f1c0d7b00b456b2576d47f63f5ed78a"
+  },
+  "aaa.python.v1:train:outcome:1": {
+   "answer": "ok",
+   "source_sha256": "20cf69f72579bea918fd0c9d32013dcc297fbbb3a9a70183fc1ac5c796e218af"
+  },
+  "aaa.python.v1:train:outcome:2": {
+   "answer": "ok",
+   "source_sha256": "4515b58442034d3869191a081314c464483f1b4ce14f1a64b52f071d7ba95c7c"
+  },
+  "aaa.python.v1:train:outcome:3": {
+   "answer": "ok",
+   "source_sha256": "f04bf70c11f9d9f180a35139795ec50ca211d3f42075095317fac681da665ae0"
+  },
+  "aaa.python.v1:train:outcome:4": {
+   "answer": "ValueError",
+   "source_sha256": "062e51f1918dcb516c3823e73fd1dd18c14a4920df68a1a9e5ab0f970739ec52"
+  },
+  "aaa.python.v1:train:outcome:5": {
+   "answer": "ok",
+   "source_sha256": "a47b6081c8835713908d6f42d135d2c066290837f648fc00453cedc233e11549"
+  },
+  "aaa.python.v1:train:outcome:6": {
+   "answer": "ok",
+   "source_sha256": "d52e0f289ec95cdf62994e82b4011970c06c697861b6118f159c290aefa2cd51"
+  },
+  "aaa.python.v1:train:outcome:7": {
+   "answer": "ok",
+   "source_sha256": "e1cc5a50041aa45222aac42f66707ba8802b25c2728e14b5879f9bf307aab30e"
+  },
+  "aaa.python.v1:train:outcome:8": {
+   "answer": "ok",
+   "source_sha256": "58174a7747e6ad8fd5f29e17dcb3d2dbe9b777ac53598fed0ccaf0672cea4ba0"
+  },
+  "aaa.python.v1:train:outcome:9": {
+   "answer": "ok",
+   "source_sha256": "eb92cc5f2fb2a581d6fec2509c0e3ff2331f94980c999cda99bd0501f431e101"
+  },
+  "aaa.python.v1:train:output:0": {
+   "answer": 1,
+   "source_sha256": "cafaae7c24eee3cd6bc3a8a296f8e41f64d9617f30269b91516d15dedd69b742"
+  },
+  "aaa.python.v1:train:output:1": {
+   "answer": 7,
+   "source_sha256": "b5916a923b757fa052dd120b90947e491957ddde5c46ea40e00fdcbd09c70e4d"
+  },
+  "aaa.python.v1:train:output:2": {
+   "answer": 11,
+   "source_sha256": "89bf6d98f1311f68d85761c7cdcb357663bd967a4695fa7b361c2e7399ca4e66"
+  },
+  "aaa.python.v1:train:output:3": {
+   "answer": -12,
+   "source_sha256": "5379d355b8ca09d3993516542e5c343ea11cf696901df13ac49f1b3194530608"
+  },
+  "aaa.python.v1:train:output:4": {
+   "answer": 2,
+   "source_sha256": "d9bfe52dc363c6264c6c057ce96d444e740225f16c5fcce0bbabe724986386b7"
+  },
+  "aaa.python.v1:train:output:5": {
+   "answer": -4,
+   "source_sha256": "dda3ebf03f92782da121aa745cf7d3386b8e1dc04e2199b6213c58370e070d48"
+  },
+  "aaa.python.v1:train:output:6": {
+   "answer": 7,
+   "source_sha256": "7f16df15de7aecafcc8643f1450ab1c8a981c1cd6b0a2c9e9e759e88ccd9fabc"
+  },
+  "aaa.python.v1:train:output:7": {
+   "answer": -1,
+   "source_sha256": "4475d95c52bc40a6396a815bc7ebd1231ca76e4452789e1264d0a84145274d0b"
+  },
+  "aaa.python.v1:train:output:8": {
+   "answer": 13,
+   "source_sha256": "4e961bcac3ea86a1996d5a09f8f511f2c4d99de1c13ff238c3318a9224ad1eb8"
+  },
+  "aaa.python.v1:train:output:9": {
+   "answer": 0,
+   "source_sha256": "d97d0711d69c7197d10a0c610a08c33c0d24a5f75276f55fd868440164259ff0"
+  },
+  "aaa.python.v1:train:repair:0": {
+   "answer": 0,
+   "source_sha256": "e02abf4d7b7723890ece634122758e4a9c73558194c7757f35504d800a2236d2"
+  },
+  "aaa.python.v1:train:repair:1": {
+   "answer": 2,
+   "source_sha256": "c09cd828dd875d3ac35441dcbfe4a8c7f2d2dc1a4063d0c00e79038feae144f6"
+  },
+  "aaa.python.v1:train:repair:2": {
+   "answer": 0,
+   "source_sha256": "9ea13fee524968d5b9787bc106e455aa1600b22e7b81a8625d0803782f6ced96"
+  },
+  "aaa.python.v1:train:repair:3": {
+   "answer": 1,
+   "source_sha256": "f71af80f17723916f8f7df13b7acad4b4efed4334c4bcd3e2de805da19b33ba6"
+  },
+  "aaa.python.v1:train:repair:4": {
+   "answer": 1,
+   "source_sha256": "a33714c5519bf8165947d36271ab64a287615375441f4f32b34cff28b70f9765"
+  },
+  "aaa.python.v1:train:repair:5": {
+   "answer": 0,
+   "source_sha256": "c456cf094ae52ef02cdc260837855f817438f21cd35e3ca42af1adcc9c40aec6"
+  },
+  "aaa.python.v1:train:repair:6": {
+   "answer": 2,
+   "source_sha256": "bad3cf23edaf3d4fafd59901796960e3d1ae3e164a4f22a71786083253b5f12d"
+  },
+  "aaa.python.v1:train:repair:7": {
+   "answer": 0,
+   "source_sha256": "e37e736343101e5d766a99aff6ba924bd13a0fa029fc6e61f04415999f9cc082"
+  },
+  "aaa.python.v1:train:repair:8": {
+   "answer": 0,
+   "source_sha256": "f5f2dcb656f0deb46d893368f143a187d215863551f95c4620b51646e3863a07"
+  },
+  "aaa.python.v1:train:repair:9": {
+   "answer": 0,
+   "source_sha256": "fcdfd6d850d10ea9d954e7187137c4b8ed60d241e453b24792bee70b0e8dda19"
+  },
+  "aaa.python.v1:train:syntax:0": {
+   "answer": "valid",
+   "source_sha256": "0e97d684761f42c015ddcd667062f2a91e81881752f7ccfba14633cf4e9fcae1"
+  },
+  "aaa.python.v1:train:syntax:1": {
+   "answer": "invalid",
+   "source_sha256": "af40ef056b1cf8533894682b207f307aadffa1cacf70198ea3121b15035b8c8d"
+  },
+  "aaa.python.v1:train:syntax:2": {
+   "answer": "valid",
+   "source_sha256": "ac8536026a19a78459bcb718b722c9890c89ed5bfbbb240626d8bd0e49e331b5"
+  },
+  "aaa.python.v1:train:syntax:3": {
+   "answer": "invalid",
+   "source_sha256": "00ddc2d00e51628244d76953d9a62f315bcd0937478a37b1d158948344ffa52f"
+  },
+  "aaa.python.v1:train:syntax:4": {
+   "answer": "valid",
+   "source_sha256": "d3e4842db371ac9588eafdfb42860874ac5209df68e9a67999a0d453a34bc892"
+  },
+  "aaa.python.v1:train:syntax:5": {
+   "answer": "valid",
+   "source_sha256": "c8521a08c3bee430c0d0227b45eb00b6e932d816bb5f554272f907bf5c883ec7"
+  },
+  "aaa.python.v1:train:syntax:6": {
+   "answer": "invalid",
+   "source_sha256": "6e06d68a4208286aadf85221a83dfe6ae20048f220eb5dd09bc4f7a8ee85fd76"
+  },
+  "aaa.python.v1:train:syntax:7": {
+   "answer": "valid",
+   "source_sha256": "d0ae181242f345317d87519f972c2d335e5485ef59a9fa6e3923f08ba22dd9c5"
+  },
+  "aaa.python.v1:train:syntax:8": {
+   "answer": "invalid",
+   "source_sha256": "c73830dd2839455e096f7d88f819d04d5853a8874bf8365cd59f31e3cbeef14e"
+  },
+  "aaa.python.v1:train:syntax:9": {
+   "answer": "valid",
+   "source_sha256": "62d379727ab7a6df70ffd5b0abd1f120013b902b0528024de1ed023ac3d2278d"
+  }
+ },
+ "protocol": "aaa.python.v1",
+ "schema": "aaa.python.v1.golden_answers.v1"
+}

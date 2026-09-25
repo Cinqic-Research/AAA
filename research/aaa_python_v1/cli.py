@@ -261,6 +261,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub.add_parser("spec-hash")
     sub.add_parser("fingerprint")
     sub.add_parser("audit")
+    golden = sub.add_parser("golden")
+    golden.add_argument(
+        "--write", action="store_true", help="write the packaged keys (once, on the reference interpreter)"
+    )
     develop = sub.add_parser("develop")
     develop.add_argument("--stage", choices=STAGES, required=True)
     develop.add_argument("--output", type=Path, required=True)
@@ -286,6 +290,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 0
         if args.command == "audit":
             return cmd_audit(args)
+        if args.command == "golden":
+            from . import golden as golden_module
+
+            if args.write:
+                if golden_module.path().exists():
+                    print("refused: golden keys exist and are never rewritten", file=sys.stderr)
+                    return 2
+                write_json(golden_module.path(), golden_module.payload())
+                print(f"wrote {golden_module.path()}")
+                return 0
+            problems = golden_module.differences()
+            print("golden keys identical" if not problems else "\n".join(problems[:20]))
+            return 0 if not problems else 1
         if args.command == "develop":
             return cmd_develop(args)
         if args.command == "recompute":

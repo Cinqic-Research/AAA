@@ -458,3 +458,10 @@ class RecomputeTests(unittest.TestCase):
         dropped = copy.deepcopy(document)
         dropped["stage"]["evaluations"] = [r for r in dropped["stage"]["evaluations"] if r["init"] != 3]
         self.assertEqual(recompute.verify_stage(dropped)["verdict"], "FAIL")
+
+
+class GoldenKeyTests(unittest.TestCase):
+    def test_this_interpreter_reproduces_the_packaged_golden_keys(self) -> None:
+        from research.aaa_python_v1 import golden
+
+        self.assertEqual(golden.differences(), [])
