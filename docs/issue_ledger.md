@@ -2470,7 +2470,10 @@ history and repaired prospectively in `aaa.python.gen.v1`.
   visible-test baseline ran the sandboxed tool on every training task it never
   uses; the adaptation design declared 320 `novel_structure` tasks per family
   where the adapt range holds 300; Holm pooled all primary contrasts although
-  the declared capacity rule adjusts across the five families of each.
+  the declared capacity rule adjusts across the five families of each. A
+  clean-wheel test later found `python -m research.aaa_python_v1 fingerprint`
+  raising a traceback (exit 1) outside a checkout instead of refusing (exit 2).
 - **Repair** Absent tool evidence contributes zero (regression test); tools
   run only when used; 15 x 20 branches; Holm per contrast. All fixed before
-  observation and recorded in the committed brief.
+  observation and recorded in the committed brief. `fingerprint` now refuses
+  with exit 2 outside a checkout (regression test).

@@ -288,9 +288,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"protocol: {PROTOCOL_VERSION}\nhash: {spec_module.spec_hash()}")
             return 0
         if args.command == "fingerprint":
-            from .identity import fingerprint
+            from .identity import IdentityError, fingerprint
 
-            fp = fingerprint()
+            try:
+                fp = fingerprint()
+            except IdentityError as error:
+                print(f"refused: {error}", file=sys.stderr)
+                return 2
             print(f"{fp['sha256']}\n{fp['file_count']} files, phase {fp['phase_version']}")
             return 0
         if args.command == "audit":

@@ -465,3 +465,17 @@ class GoldenKeyTests(unittest.TestCase):
         from research.aaa_python_v1 import golden
 
         self.assertEqual(golden.differences(), [])
+
+
+class CliExitTests(unittest.TestCase):
+    def test_fingerprint_outside_a_checkout_is_a_refusal(self) -> None:
+        from research.aaa_python_v1 import cli, identity
+
+        with mock.patch.object(identity, "_tracked", side_effect=identity.IdentityError("no checkout")):
+            self.assertEqual(cli.main(["fingerprint"]), 2)
+
+    def test_confirmation_without_a_freeze_is_a_refusal(self) -> None:
+        from research.aaa_python_v1 import cli
+
+        with mock.patch.object(freeze, "load_manifest", side_effect=freeze.FreezeError("none")):
+            self.assertEqual(cli.main(["confirm", "--output", "/nonexistent/x.json"]), 2)
