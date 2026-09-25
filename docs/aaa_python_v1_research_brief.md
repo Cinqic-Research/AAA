@@ -133,6 +133,14 @@ epochs; tested). The encoder stage was re-run under the amended grid; the
 censored run is retained as superseded evidence. Nothing in the selection or
 decision rules changed, and the change concerns tuning only.
 
+Under the amended grid, seven of nine encoder-stage arms again selected the
+largest budget (32). From 16 to 32 epochs, `e0` and `e1` arms gained at most
+0.016 mean tune accuracy (essentially converged), while `e2` arms gained up to
+0.026. Residual under-training therefore disadvantages `e2`, not `e1`. Declared
+before the capacity stage: if any capacity size selects 32 epochs with a 16-to-32
+gain above 0.01, the 1K and 10K sizes are also evaluated after 64 epochs as a
+budget-extension diagnostic, reported beside the declared result.
+
 ## Capacity decision rule (declared before any capacity arm ran)
 
 Let `d1_f = acc(10K) - acc(1K)` and `d4_f = acc(10K) - acc(4K)` be frozen
