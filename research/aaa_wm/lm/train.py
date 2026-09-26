@@ -83,19 +83,38 @@ def tokenize(kind: str, vocab: int) -> dict[str, Any]:
         sep = vocab - 1
     for s in SOURCES:
         for split in ("train", "dev", "test"):
-            raw = (root() / "corpus" / f"{s}.{split}.txt").read_bytes()
-            if kind == "bytes":
-                ids = np.frombuffer(raw, dtype=np.uint8).astype(np.uint16)
-                ids[ids == 0] = SEP
-            else:
-                parts = []
-                docs = raw.split(b"\x00")
-                for i in range(0, len(docs), 4096):
-                    for enc in tk.encode_batch([d.decode("utf-8", "replace") for d in docs[i : i + 4096] if d]):
-                        parts.append(np.array(enc.ids + [sep], dtype=np.uint16))
-                ids = np.concatenate(parts) if parts else np.zeros(0, np.uint16)
+            path = root() / "corpus" / f"{s}.{split}.txt"
+            if kind == "bytes":  # streamed in 64 MB chunks into a memory-mapped .npy (bounded RAM)
+                n = path.stat().st_size
+                ids = np.lib.format.open_memmap(out / f"{s}.{split}.npy", mode="w+", dtype=np.uint16, shape=(n,))
+                with open(path, "rb") as fh:
+                    pos = 0
+                    while chunk := fh.read(64 * 2**20):
+                        a = np.frombuffer(chunk, dtype=np.uint8).astype(np.uint16)
+                        a[a == 0] = SEP
+                        ids[pos : pos + len(a)] = a
+                        pos += len(a)
+                ids.flush()
+                info[f"{s}.{split}"] = {"tokens": int(n), "bytes": int(n)}
+                del ids
+                continue
+            parts = []
+            carry = b""
+            with open(path, "rb") as fh:  # streamed: documents are NUL-terminated
+                while True:
+                    chunk = fh.read(32 * 2**20)
+                    data = carry + chunk
+                    docs = data.split(b"\x00")
+                    carry = docs.pop() if chunk else b""
+                    for i in range(0, len(docs), 4096):
+                        for enc in tk.encode_batch([d.decode("utf-8", "replace") for d in docs[i : i + 4096] if d]):
+                            parts.append(np.array(enc.ids + [sep], dtype=np.uint16))
+                    if not chunk:
+                        break
+            ids = np.concatenate(parts) if parts else np.zeros(0, np.uint16)
             np.save(out / f"{s}.{split}.npy", ids)
-            info[f"{s}.{split}"] = {"tokens": int(len(ids)), "bytes": len(raw)}
+            info[f"{s}.{split}"] = {"tokens": int(len(ids)), "bytes": path.stat().st_size}
+            del parts, ids
     (out / "info.json").write_text(json.dumps(info, indent=1))
     return info
 

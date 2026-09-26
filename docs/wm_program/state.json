@@ -1,6 +1,6 @@
 {
  "schema": "aaa.wm_program.state.v1",
- "updated": "2026-09-26",
+ "updated": "2026-09-26T10:40",
  "canonical": {
   "repo": "Cinqic-Research/AAA",
   "main_sha": "dbee13c",
@@ -65,23 +65,48 @@
    "id": "E5",
    "name": "AMP validation",
    "result": "wm 1500 steps: fp32 loss 2.84 / fp16 2.80, same accuracy; 1.7x faster -> AMP adopted"
+  },
+  {
+   "id": "E6",
+   "name": "opaque.v0 tune stage (dev, seed 0)",
+   "result": "WM-S online 0.507, WM-S frozen 0.337, policy_aux 0.121, black-box WM d1 0.191, value 0.042-0.050, tool 0.029, ceiling 0.794; WM-S ablations 0.02-0.11",
+   "doc": "docs/wm_program/opaque_tune_decisions.md"
+  },
+  {
+   "id": "E7",
+   "name": "OOM freeze diagnosis",
+   "result": "parallel eval processes exhausted RAM (boot 2026-09-26 01:56-09:16); fixed with research/aaa_wm/capped.sh + jobs.py (cgroup MemoryMax, no swap, nice/ionice, budget)"
+  },
+  {
+   "id": "E8",
+   "name": "LM corpus v1",
+   "result": "1.79 GB train text (usgpo 600MB, fineweb-edu 600MB, cosmopedia 400MB, simplewiki 188MB, pydocs 4.6MB) + dev/test 1% each; bytes and BPE-8K tokenized"
+  },
+  {
+   "id": "E9",
+   "name": "language rule baseline",
+   "result": "exact 3-test extraction: train phrasings 1.00, held-out phrasings 0.13"
   }
  ],
- "experiments_running": [],
+ "experiments_running": [
+  "evaluate-stage queue (48 jobs; data/tmp/queue_evaluate.json via research/aaa_wm/jobs.py)",
+  "LM tokenizer experiment bytes vs BPE-8K matched FLOPs (seeds 0,1)"
+ ],
  "best_dev_result": null,
  "confirmation_status": "none declared for this program",
  "blockers": [],
  "next_actions": [
-  "train wm/value/policy/policy_aux (AMP, matched steps) and evaluate on tune",
-  "diagnose WM intrinsic accuracy",
-  "structured WM",
-  "adaptation on library_B",
-  "JEPA variant"
+  "finish evaluate stage -> set MDE/thresholds",
+  "attack pool once",
+  "adaptation (adapt range)",
+  "freeze + confirmation (fresh identities, inits 100-102)",
+  "independent review subagent",
+  "LM: tokenizer decision, size ladder, adapter, language-conditioned factorial"
  ],
  "candidate_architectures": [
-  "WM-black-box: 4-layer d128 transformer consequence model (~0.98M params)",
-  "WM-structured (planned): exact Python semantics + learned opaque-library model",
-  "J-2 action-conditioned JEPA (planned)"
+  "WM-S online (selected candidate)",
+  "black-box transformer WM (diagnosed: execution-modeling deficiency)",
+  "J-4 JEPA auxiliary (not yet run)"
  ],
  "datasets": {
   "opaque.v0 spec": "research/aaa_wm/opaque/data/aaa_python_opaque_v0.json",
