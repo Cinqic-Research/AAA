@@ -51,6 +51,10 @@ PYTHON_PATHS = (
 
 
 def purpose(path: str) -> str:
+    if path.startswith("research/aaa_python_v1/"):
+        return "frozen aaa.python.v1 implementation or packaged protocol data"
+    if path.startswith("docs/evidence/aaa_python_v1/"):
+        return "retained aaa.python.v1 development, freeze or confirmation evidence"
     if path.startswith("research/aaa_python/"):
         return "active aaa.python.v0 research implementation or packaged protocol data"
     if path.startswith("aaa/promotion/"):
@@ -98,6 +102,7 @@ def category(path: str) -> str:
     if path in {
         "docs/evidence/phase_closure_validation.json",
         "docs/aaa_python_development_report.md",
+        "docs/aaa_python_v1_development_report.md",
         "docs/final_audit.md",
         "docs/handoff_sol.md",
         "docs/sol_review.md",
@@ -240,6 +245,17 @@ def findings(path: str) -> str:
 
 
 def inherited_findings(path: str) -> str:
+    if path.startswith(
+        (
+            "research/aaa_python_v1/",
+            "docs/aaa_python_v1_",
+            "docs/evidence/aaa_python_v1/",
+            "tests/test_aaa_python_v1",
+            "tools/write_aaa_python_v1_",
+            "tools/benchmark_aaa_python_v1_",
+        )
+    ):
+        return "aaa.python.v1 evidence-gated pre-scale phase; retained confirmation at a73765b freeze"
     if path.startswith(PYTHON_PATHS):
         if (
             path.startswith(

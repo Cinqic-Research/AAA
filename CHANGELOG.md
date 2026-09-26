@@ -1,5 +1,21 @@
 # Research history
 
+## `aaa.python.v1`: the evidence-gated 1K-to-10K pre-scale phase (2026-09-24/25)
+
+A successor Python phase asked whether ~10K trainable parameters (10,046;
+10.1 times Champion 1) earn their cost. It first repaired the exam
+(`AAA-192`..`AAA-194`: a repair shortcut, weak baselines, trivial
+localization) and v0 tooling (`AAA-195`, `AAA-198`), found v0's learner
+under-trained (`AAA-197`), and reviewed the literature before any development
+observation. Development tuned every arm's budget, then compared encoders at
+identical capacity, heads, a 1K/2K/4K/10K/20K sweep, optimizers, a
+visible-test tool, adaptation after a distribution switch and plasticity. A
+committed freeze preceded fresh confirmation: the structural encoder,
+10K over 1K and 4K over 1K `PROMOTE`; 10K over 4K `INCONCLUSIVE`. Verdict:
+`SCALE_NOT_JUSTIFIED` for ~10K; ~4K is the supported next candidate, pending
+independent review. The canonical repository is now `Cinqic-Research/AAA`
+(`AAA-203`).
+
 ## Independent PR #28 review and FLOWBOX backup policy (2026-09-24)
 
 An independent review reproduced and repaired five Python-first defects or

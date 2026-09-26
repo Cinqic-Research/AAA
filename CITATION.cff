@@ -4,14 +4,14 @@ message: "If you refer to this work, please cite it as below."
 type: software
 authors:
   - name: "Cinqic"
-repository-code: "https://github.com/Cinqic/AAA"
+repository-code: "https://github.com/Cinqic-Research/AAA"
 license: Apache-2.0
 version: "0.2.0"
 abstract: >-
-  An experimental research programme investigating whether an artificial system
+  An experimental research program investigating whether an artificial system
   can autonomously learn, predict, reason from feedback, adapt, retain useful
   knowledge, detect when that knowledge is inadequate, and improve its future
-  behaviour. Its first deliberate specialization is coding, beginning with
+  behavior. Its first deliberate specialization is coding, beginning with
   Python: a safe, deterministic environment in which CPython is the external
   ground truth and feedback arrives only after a committed action. Its earlier
   moving-dot benchmarks are retained as evidence and regression benchmarks. The

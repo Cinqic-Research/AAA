@@ -3,7 +3,7 @@
 ## Reporting
 
 Report a vulnerability through GitHub's private security advisory form on
-[Cinqic/AAA](https://github.com/Cinqic/AAA/security/advisories/new). Please do
+[Cinqic-Research/AAA](https://github.com/Cinqic-Research/AAA/security/advisories/new). Please do
 not open a public issue for an unfixed vulnerability.
 
 Expect an acknowledgement within a few days. AAA is a small research prototype
@@ -83,7 +83,7 @@ in [`docs/issue_ledger.md`](docs/issue_ledger.md).
 - *Enforce for administrators.* Left off so the maintainer retains a recovery
   path if a required check is ever misconfigured or a runner is unavailable.
   Turn it on with
-  `gh api -X POST repos/Cinqic/AAA/branches/main/protection/enforce_admins`
+  `gh api -X POST repos/Cinqic-Research/AAA/branches/main/protection/enforce_admins`
   once the check names are considered stable.
 - *Required signed commits.* Not enabled. Existing scientific identity and CI
   checks verify content and behavior, but do not constitute author-signature
@@ -92,6 +92,6 @@ in [`docs/issue_ledger.md`](docs/issue_ledger.md).
 Verify the current state with:
 
 ```bash
-gh api repos/Cinqic/AAA/branches/main/protection
-gh api repos/Cinqic/AAA --jq '.delete_branch_on_merge, .security_and_analysis'
+gh api repos/Cinqic-Research/AAA/branches/main/protection
+gh api repos/Cinqic-Research/AAA --jq '.delete_branch_on_merge, .security_and_analysis'
 ```

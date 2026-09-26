@@ -123,6 +123,9 @@ def main(argv: list[str] | None = None) -> int:
     recompute = sub.add_parser("recompute")
     recompute.add_argument("--evidence", type=Path, required=True)
     recompute.add_argument("--records", type=Path, default=None)
+    recompute.add_argument(
+        "--rerun", action="store_true", help="also re-run the plan from source and require identical actions"
+    )
     sub.add_parser("confirm")
     args = parser.parse_args(argv)
 
@@ -211,11 +214,20 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "recompute":
         from .experiment import read_records
-        from .recompute import load_evidence, verify
+        from .recompute import RecomputeError, load_evidence, verify
 
-        evidence = load_evidence(args.evidence.read_text(encoding="utf-8"))
-        loaded = read_records(args.records) if args.records else None
-        result = verify(evidence, loaded)
+        try:
+            evidence = load_evidence(args.evidence.read_text(encoding="utf-8"))
+            loaded = read_records(args.records) if args.records else None
+        except (OSError, ValueError, RecomputeError) as error:
+            # Unreadable or malformed input is a refusal (2), never a FAIL verdict (1) or a traceback.
+            print(f"refused: {error}", file=sys.stderr)
+            return 2
+        try:
+            result = verify(evidence, loaded, rerun=args.rerun)
+        except (KeyError, TypeError, ValueError, RecomputeError) as error:
+            print(f"refused: malformed evidence: {error!r}", file=sys.stderr)
+            return 2
         print(json.dumps(result, indent=1))
         return 0 if result["verdict"] == "PASS" else 1
     if args.command == "confirm":

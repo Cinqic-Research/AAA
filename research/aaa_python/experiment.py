@@ -167,6 +167,16 @@ def _label_probe(family: str) -> Task:
     return Task("probe", "train", family, 0, 0, "in_distribution", "none", "", candidates=("",) * 4)
 
 
+def code_identity() -> str:
+    """A digest of this package's Python source, so a checkpoint cannot resume under changed code (``AAA-198``)."""
+
+    digest = hashlib.sha256()
+    for path in sorted(Path(__file__).parent.glob("*.py")):
+        digest.update(path.name.encode("utf-8"))
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
 def trained_learner(
     spec: Mapping[str, Any],
     plan: Plan,
@@ -183,6 +193,7 @@ def trained_learner(
         "train_pool_sha256": spec_module.canonical_hash(
             {family: [asdict(task) for task in tasks["train"][family]] for family in sorted(tasks["train"])}
         ),
+        "code_sha256": code_identity(),
     }
     path = None if checkpoints is None else checkpoints / f"init-{init}-{representation}.json"
     if path is not None and path.exists():

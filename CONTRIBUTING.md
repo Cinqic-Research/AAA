@@ -1,7 +1,7 @@
 # Contributing to AAA
 
-AAA is a research programme whose whole point is that its measurements can be
-trusted. Its current focus is **Coding, beginning with Python** (`aaa.python.v0`);
+AAA is a research program whose whole point is that its measurements can be
+trusted. Its current focus is **Coding, beginning with Python** (`aaa.python.v1`);
 the moving-dot work is retained as evidence and benchmark lineage
 ([archive](docs/dot_benchmark_archive.md)). Contributions are welcome; the
 conventions below exist to keep that property.
@@ -117,6 +117,15 @@ identity must keep meaning the same program. Changing the learner does not
 change the exam. `tools/check_protected_identities.py` fails if any retained
 dot-era evidence byte or identity moves; adding new evidence is fine.
 
+**`aaa.python.v1` is the current, confirmed experiment, with spent held-out
+identities.** Its phase fingerprint covers the executable v1 package and
+declared protocol and architecture files. The freeze was committed before
+confirmation, and changing a fingerprinted component requires a successor
+identity and fresh prospective evidence. Run the v1 summary, recomputation,
+and post-freeze decision audit in [reproduction](docs/reproduction.md). The
+protected-file manifest includes the retained v1 freeze, stages, and
+confirmation; preserve their bytes.
+
 **Python tasks keep the causal boundary.** A learner sees only a `TaskView`,
 never a `Task`. Feedback is post-action and limited to the family's declared
 fields. Answer keys come from CPython, never from what a generator meant to
@@ -178,8 +187,10 @@ process record separate from scientific experiment evidence.
 
 ## Scope
 
-The active scope is `aaa.python.v0`: the frozen safe subset, its five task
-families, its baselines and its minimal learner. Rungs of the
+The active scope is `aaa.python.v1`: the same safe subset, a repaired generated
+exam with five task families, strong baselines, fixed structural encoders,
+and a small learner family explored through about 20K parameters in development,
+with selected 1K/4K/10K comparisons in confirmation. Rungs of the
 [capability ladder](docs/research_direction.md) beyond it are added in order,
 each with baselines that can beat it. Not in scope now: English or natural-language
 training, other programming languages, scraped code corpora, executing

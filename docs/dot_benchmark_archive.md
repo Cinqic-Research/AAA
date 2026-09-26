@@ -46,7 +46,7 @@ pre-AAA-1K evidence exactly.
 
 [`benchmarks/protected_identities.json`](../benchmarks/protected_identities.json)
 records the v2.1 specification hash, the observation-noise v1.1 protocol hash,
-the `aaa.1k.v1` and `aaa.1k.v2` fingerprints, and the SHA-256 of 471 retained
+the `aaa.1k.v1` and `aaa.1k.v2` fingerprints, and the SHA-256 of 493 retained
 files: all of `docs/evidence/` and `results/`, the frozen registries and
 ledgers, and the historical reports, reviews, decision logs and handoffs.
 `python tools/check_protected_identities.py` recomputes each one and fails on

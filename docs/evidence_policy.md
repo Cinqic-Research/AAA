@@ -254,13 +254,33 @@ Any disagreement fails. The strict JSON writer rejects NaN and infinity.
 Reports are generated from primitives; report prose is never the only copy of a
 result.
 
-**Development only.** This evidence is labelled development evidence. v0
+**Development only.** This evidence is labeled development evidence. v0
 generates no confirmation identities, and any later confirmation must be frozen
 and claimed before observation, under a successor protocol.
+
+## `aaa.python.v1`
+
+The v1 evidence directory retains ten development stages, the superseded
+censored encoder diagnostic, the committed `freeze.json`, the spent
+`confirmation.json`, the compute benchmark, and pre-design diagnostics.
+The [generated report](aaa_python_v1_development_report.md) names the stage
+files, producing commits, source fingerprints, and measured outcomes. A stage
+summary is regenerated from per-task correctness bits with `summarize` and
+independently recounted with `recompute`. The post-freeze
+`tools/check_aaa_python_v1_decisions.py` additionally checks stored Holm,
+capacity, and promotion verdicts against those bits and the committed freeze.
+
+The freeze was committed at `a73765b` before the confirmation file first
+appeared at `7c46e48`. Its held-out identities have been observed and cannot
+be reused as fresh evidence. Fingerprinted scientific source and protocol
+files are retained at that identity; later audit tools and interpretation
+errata sit outside it. The v1 evidence files are covered by the protected-file
+manifest.
 
 ## Protected historical identities
 
 `benchmarks/protected_identities.json` records the dot-era identities and the
-SHA-256 of 471 retained files. `python tools/check_protected_identities.py`
+SHA-256 of 493 retained files, including the new Python evidence.
+`python tools/check_protected_identities.py`
 fails on any change. New evidence may be added; retained evidence may not
 change.

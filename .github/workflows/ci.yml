@@ -96,6 +96,19 @@ jobs:
             --records docs/evidence/aaa_python_v0/development_records.jsonl.gz
           python tools/write_aaa_python_report.py --check
 
+      - name: aaa.python.v1 identity, accounting and retained-evidence recomputation
+        run: |
+          python -m research.aaa_python_v1 spec-hash
+          python -m research.aaa_python_v1 fingerprint
+          python -m research.aaa_python_v1 audit
+          shopt -s nullglob
+          for evidence in docs/evidence/aaa_python_v1/stage_*.json docs/evidence/aaa_python_v1/confirmation*.json; do
+            python -m research.aaa_python_v1 summarize --evidence "$evidence"
+            python -m research.aaa_python_v1 recompute --evidence "$evidence"
+          done
+          python tools/check_aaa_python_v1_decisions.py
+          python tools/write_aaa_python_v1_report.py --check
+
       # ---- Dot-era benchmark integrity (retained evidence, recomputation) --
       # Full re-execution of loop iterations 0004-0006 runs in
       # loop-reproduction.yml (weekly, on demand, and on relevant paths).

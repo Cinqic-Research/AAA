@@ -13,8 +13,17 @@ Three checks, each failing closed:
 3. **Primitives.** Cell counts are re-aggregated from the records by a separate
    loop and compared with the stored cells; the summary is recomputed from the
    stored cells and compared with the stored summary.
+4. **Design** (``AAA-195``). The stored plan must equal the plan the packaged
+   specification declares (full or quick), and the stored cells must be exactly
+   the declared ``arm x family x initialization x stream`` grid with the declared
+   task counts. Before this check, dropping an initialization from both records
+   and cells, or lowering the bootstrap ``draws``, passed.
 
-A stored value is never trusted because it is stored.
+What these checks cannot see: whether the *learner* produced the recorded
+answers. A record whose answer was replaced by the truth is internally
+consistent. Only ``rerun=True`` (``recompute --rerun``) detects that, by
+re-running the whole development plan from source and requiring the identical
+records digest and trained-state hashes.
 """
 
 from __future__ import annotations
@@ -22,11 +31,12 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Mapping, Sequence
+from dataclasses import asdict
 from typing import Any
 
 from . import generator
 from . import spec as spec_module
-from .experiment import Plan, records_sha256, summarize
+from .experiment import BASELINES, LEARNER_CONTROLS, Plan, develop, records_sha256, summarize
 from .oracle import check_syntax, execute
 
 
@@ -142,11 +152,81 @@ def _tasks_by_id(task_ids: set[str]) -> dict[str, generator.Task]:
     return tasks
 
 
-def verify(evidence: Mapping[str, Any], records: Sequence[Mapping[str, Any]] | None) -> dict[str, Any]:
+def expected_cells(plan: Plan, spec: Mapping[str, Any]) -> dict[tuple[str, str, int, int], int]:
+    """The declared ``(arm, family, init, stream) -> task count`` grid of a development run."""
+
+    arms = list(LEARNER_CONTROLS)
+    for rep in plan.representations:
+        if rep != plan.default_representation:
+            arms += [f"online@{rep}", f"frozen@{rep}"]
+    arms += list(BASELINES)
+    cells: dict[tuple[str, str, int, int], int] = {}
+    for family in spec["families"]:
+        for init in range(plan.initializations):
+            for stream in range(plan.streams):
+                for arm in arms:
+                    cells[(arm, family, init, stream)] = plan.stream_length
+                if family in plan.adaptation_families:
+                    cells[("adapt:prefix", family, init, stream)] = plan.prefix
+                    for branch in ("changed", "control"):
+                        for mode in ("online", "frozen"):
+                            cells[(f"adapt:{branch}:{mode}", family, init, stream)] = plan.branch
+                    for when in ("before", "after_changed", "after_control"):
+                        cells[(f"probe:{when}", family, init, stream)] = plan.probe_bank
+    return cells
+
+
+def design_problems(evidence: Mapping[str, Any], spec: Mapping[str, Any]) -> list[str]:
+    stored = evidence.get("plan")
+    if not isinstance(stored, Mapping) or not isinstance(stored.get("quick"), bool):
+        return ["the evidence carries no well-formed plan"]
+    declared = json.loads(json.dumps(asdict(Plan.from_spec(spec, quick=stored["quick"]))))
+    if json.loads(json.dumps(stored)) != declared:
+        changed = sorted(k for k in declared if stored.get(k) != declared[k])
+        return [
+            f"the stored plan differs from the declared plan in {changed or sorted(set(stored) ^ set(declared))}"
+        ]
+    plan = Plan(
+        **{
+            **declared,
+            "representations": tuple(declared["representations"]),
+            "adaptation_families": tuple(declared["adaptation_families"]),
+        }
+    )
+    expected = expected_cells(plan, spec)
+    try:
+        actual = {(c["arm"], c["family"], c["init"], c["stream"]): c["n"] for c in evidence["cells"]}
+    except (KeyError, TypeError):
+        return ["malformed stored cells"]
+    problems = []
+    if len(actual) != len(evidence["cells"]):
+        problems.append("duplicate stored cell identities")
+    missing, extra = set(expected) - set(actual), set(actual) - set(expected)
+    if missing or extra:
+        problems.append(
+            f"the stored cells are not the declared grid: {len(missing)} missing, {len(extra)} extra"
+        )
+    wrong = [key for key in set(expected) & set(actual) if actual[key] != expected[key]]
+    if wrong:
+        problems.append(f"{len(wrong)} cells hold a task count other than the declared one")
+    return problems
+
+
+def verify(
+    evidence: Mapping[str, Any], records: Sequence[Mapping[str, Any]] | None, *, rerun: bool = False
+) -> dict[str, Any]:
     spec = spec_module.load()
     problems: list[str] = []
     if evidence.get("spec_sha256") != spec_module.canonical_hash(spec):
         problems.append("the evidence was produced under a different specification")
+    problems += design_problems(evidence, spec)
+    if problems:
+        return {
+            "summary_recomputed": False,
+            "records_checked": False,
+            "problems": problems,
+            "verdict": "FAIL",
+        }
     plan = Plan(
         **{
             **evidence["plan"],
@@ -233,8 +313,15 @@ def verify(evidence: Mapping[str, Any], records: Sequence[Mapping[str, Any]] | N
         problems.append(
             f"{len(mismatched)} tasks' recorded truth differs from fresh CPython execution: {mismatched[:5]}"
         )
+    if rerun:
+        fresh, fresh_records = develop(spec, quick=bool(evidence["plan"]["quick"]), log=lambda _: None)
+        if records_sha256(fresh_records) != evidence["records"]["sha256"]:
+            problems.append("re-running the plan from source does not reproduce the recorded actions")
+        if fresh["trained_state_hashes"] != evidence.get("trained_state_hashes"):
+            problems.append("re-running the plan from source does not reproduce the trained states")
     result.update(
         records_checked=True,
+        rerun=rerun,
         tasks_reexecuted=len(truths),
         problems=problems,
         verdict="FAIL" if problems else "PASS",

@@ -10,7 +10,7 @@ The [work policy](agent_work_policy.md) gives the host-specific rule. CI and
 other hosts use their own storage roots.
 
 ```bash
-git clone https://github.com/Cinqic/AAA.git
+git clone https://github.com/Cinqic-Research/AAA.git
 cd AAA
 python3 -m venv .venv
 . .venv/bin/activate
@@ -37,7 +37,29 @@ python tools/check_exit_codes.py
 
 Set `MPLBACKEND=Agg` in a headless environment.
 
-## `aaa.python.v0` (current phase)
+## `aaa.python.v1` (current evidence-gated phase)
+
+The [v1 handoff](aaa_python_v1_handoff.md) lists the stage-specific commands
+and exact evidence identities. In a clean HDD checkout with the locked
+environment, verify the retained confirmation and its decision fields with:
+
+```bash
+python -m research.aaa_python_v1 spec-hash
+python -m research.aaa_python_v1 fingerprint
+python -m research.aaa_python_v1 golden
+python -m research.aaa_python_v1 audit
+for f in docs/evidence/aaa_python_v1/stage_*.json docs/evidence/aaa_python_v1/confirmation.json; do
+  python -m research.aaa_python_v1 summarize --evidence "$f"
+  python -m research.aaa_python_v1 recompute --evidence "$f"
+done
+python tools/check_aaa_python_v1_decisions.py
+python tools/write_aaa_python_v1_report.py --check
+```
+
+The confirmation identities are spent. A deterministic rerun at the recorded
+freeze commit tests reproducibility; it is not fresh held-out evidence.
+
+## `aaa.python.v0` (historical first Python phase)
 
 ```bash
 python -m research.aaa_python spec-hash         # packaged protocol identity

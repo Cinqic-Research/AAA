@@ -1,0 +1,98 @@
+{
+ "command": "python tools/benchmark_aaa_python_v1_compute.py --device both --steps 2000",
+ "cpu": "AMD Ryzen 7 5700G (16 threads)",
+ "cupy": "14.2.0",
+ "decision": "CPU: every single-learner layout is 20-30x faster on CPU; CUDA wins only when 100 independent 10K learners step in lockstep (1.9x), which the causal task-by-task pipeline does not do and whose throughput is bounded by per-task Python overhead",
+ "gpu": "NVIDIA GeForce RTX 2060 6 GB, driver 595.91.07",
+ "machine_load_before_run": "idle (load average 2.0, no experiment running)",
+ "numpy": "2.5.3",
+ "parity_max_relative_difference": 1.1703022147221967e-13,
+ "platform": "x86_64",
+ "python": "3.12.3",
+ "rows": [
+  {
+   "backend": "cpu",
+   "batch": 1,
+   "hidden": 4,
+   "learner_updates_per_second": 40063.750239331326,
+   "steps": 2000
+  },
+  {
+   "backend": "cuda",
+   "batch": 1,
+   "hidden": 4,
+   "learner_updates_per_second": 1271.8635660196041,
+   "steps": 2000
+  },
+  {
+   "backend": "cpu",
+   "batch": 10,
+   "hidden": 4,
+   "learner_updates_per_second": 246621.0420220748,
+   "steps": 2000
+  },
+  {
+   "backend": "cuda",
+   "batch": 10,
+   "hidden": 4,
+   "learner_updates_per_second": 13058.123141846967,
+   "steps": 2000
+  },
+  {
+   "backend": "cpu",
+   "batch": 100,
+   "hidden": 4,
+   "learner_updates_per_second": 686186.841027096,
+   "steps": 2000
+  },
+  {
+   "backend": "cuda",
+   "batch": 100,
+   "hidden": 4,
+   "learner_updates_per_second": 129031.71088687093,
+   "steps": 2000
+  },
+  {
+   "backend": "cpu",
+   "batch": 1,
+   "hidden": 37,
+   "learner_updates_per_second": 28905.735376370925,
+   "steps": 2000
+  },
+  {
+   "backend": "cuda",
+   "batch": 1,
+   "hidden": 37,
+   "learner_updates_per_second": 1259.645307234867,
+   "steps": 2000
+  },
+  {
+   "backend": "cpu",
+   "batch": 10,
+   "hidden": 37,
+   "learner_updates_per_second": 82861.0598177743,
+   "steps": 2000
+  },
+  {
+   "backend": "cuda",
+   "batch": 10,
+   "hidden": 37,
+   "learner_updates_per_second": 12953.136036324722,
+   "steps": 2000
+  },
+  {
+   "backend": "cpu",
+   "batch": 100,
+   "hidden": 37,
+   "learner_updates_per_second": 67434.3849079815,
+   "steps": 2000
+  },
+  {
+   "backend": "cuda",
+   "batch": 100,
+   "hidden": 37,
+   "learner_updates_per_second": 128369.29261669973,
+   "steps": 2000
+  }
+ ]
+}

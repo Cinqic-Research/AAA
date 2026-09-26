@@ -38,9 +38,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Cinqic/AAA"
-Source = "https://github.com/Cinqic/AAA"
-Issues = "https://github.com/Cinqic/AAA/issues"
+Homepage = "https://github.com/Cinqic-Research/AAA"
+Source = "https://github.com/Cinqic-Research/AAA"
+Issues = "https://github.com/Cinqic-Research/AAA/issues"
 
 [project.scripts]
 aaa = "aaa.cli:main"
@@ -57,11 +57,14 @@ include = ["aaa*", "research*"]
 # aaa.python.v0: the protocol and the cross-version golden answer keys. The
 # sandbox child (_sandbox_child.py) ships as an ordinary module file.
 "research.aaa_python" = ["data/*.json"]
+# aaa.python.v1: the successor protocol specification.
+"research.aaa_python_v1" = ["data/*.json"]
 
 [tool.ruff]
 line-length = 110
 target-version = "py310"
-extend-exclude = ["results"]
+# Retained diagnostic scripts are evidence, kept byte for byte as they ran.
+extend-exclude = ["results", "docs/evidence/aaa_python_v1/diagnostics"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF", "ARG", "PTH"]
