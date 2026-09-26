@@ -72,7 +72,7 @@ def result_class(result: tuple[str, object]) -> int:
     return NUM_MAX - NUM_MIN + 4
 
 
-@lru_cache(maxsize=300000)
+@lru_cache(maxsize=100000)
 def encode_program(source: str) -> tuple[tuple[int, ...], tuple[tuple[int, int], ...]]:
     """Token ids, and for every id its ``(row, col)`` in the source (``(0, 0)`` for layout tokens)."""
 

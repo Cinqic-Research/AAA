@@ -10,6 +10,7 @@ interpreter, and no agent receives the library.
 from __future__ import annotations
 
 import io
+import re
 import tokenize
 from dataclasses import dataclass
 from functools import lru_cache
@@ -102,16 +103,46 @@ def _stubs(api_names: tuple[str, ...]) -> str:
     return "".join(f"def {n}(x):\n    return x\n" for n in api_names)
 
 
-@lru_cache(maxsize=500000)
-def compiled(source: str, api_names: tuple[str, ...]) -> Any:
+_NUMBER = re.compile(r"\b\d+\b")
+
+
+@lru_cache(maxsize=100000)
+def _valid_skeleton(skeleton: str, api_names: tuple[str, ...]) -> bool:
+    try:
+        validate(_stubs(api_names) + skeleton, v1_spec.load())
+        return True
+    except (SubsetError, SyntaxError):
+        return False
+
+
+def valid(source: str, api_names: tuple[str, ...]) -> bool:
+    """Subset validity. The v1 validator's verdict on these programs depends on literal values only
+    through the integer-literal and ``range``-bound limits. So when every literal is within the smaller
+    of the two limits, the verdict equals that of the skeleton with every literal set to 0, which is
+    cached. Otherwise the full validator runs. ``tests/test_aaa_wm_opaque.py`` checks the equivalence."""
+
+    limits = v1_spec.load()["subset"]["limits"]
+    bound = min(int(limits["max_int_literal"]), int(limits["max_range_bound"]))
+    if all(int(m) <= bound for m in _NUMBER.findall(source)):
+        return _valid_skeleton(_NUMBER.sub("0", source), api_names)
     try:
         validate(_stubs(api_names) + source, v1_spec.load())
-        return compile(source, "<opaque>", "exec")
+        return True
     except (SubsetError, SyntaxError):
+        return False
+
+
+@lru_cache(maxsize=100000)
+def compiled(source: str, api_names: tuple[str, ...]) -> Any:
+    if not valid(source, api_names):
+        return None
+    try:
+        return compile(source, "<opaque>", "exec")
+    except SyntaxError:
         return None
 
 
-@lru_cache(maxsize=4000000)
+@lru_cache(maxsize=400000)
 def run(source: str, lib: tuple[ApiSpec, ...], argument: int) -> tuple[str, Any]:
     """Environment execution: ``("ok", int)``, ``("error", ExceptionName)`` or ``("invalid", None)``."""
 

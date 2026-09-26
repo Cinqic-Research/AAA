@@ -104,6 +104,28 @@ class Boundary(unittest.TestCase):
         self.assertLessEqual(out.runs, 2)
 
 
+class FastValidation(unittest.TestCase):
+    def test_skeleton_cache_matches_full_validator(self) -> None:
+        from research.aaa_python.subset import SubsetError, validate
+        from research.aaa_python_v1 import spec as v1_spec
+        from research.aaa_wm.opaque.program import _stubs, valid
+
+        names = tuple(a.name for a in gen.library("A"))
+        checked = 0
+        for i in range(15):
+            t = gen.build("pilot", 300 + i)
+            for e in edits(t.buggy, names):
+                src = apply(t.buggy, e)
+                try:
+                    validate(_stubs(names) + src, v1_spec.load())
+                    full = True
+                except (SubsetError, SyntaxError):
+                    full = False
+                self.assertEqual(valid(src, names), full, src)
+                checked += 1
+        self.assertGreater(checked, 100)
+
+
 class ExecutorAgreement(unittest.TestCase):
     def test_sandbox_agrees_on_sample(self) -> None:
         from research.aaa_wm.opaque.sandbox_check import agreement

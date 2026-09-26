@@ -105,6 +105,36 @@ def train_cmd(args: argparse.Namespace) -> int:
     return 0
 
 
+def jepa_cmd(args: argparse.Namespace) -> int:
+    """Train J-4 (wm consequence head + action-conditioned JEPA auxiliary) at the wm step budget."""
+
+    import torch
+
+    from . import data as D
+    from . import jepa as J
+    from . import models as M
+
+    ds = D.build("train", args.train_tasks)
+    trans = J.build_transitions(ds, gen.pool("train", args.train_tasks), limit=args.transition_tasks)
+    model = J.JepaArm(M.ArmConfig("wm", seed=args.seed), lam_j=args.lam_j)
+    t0 = time.time()
+    info = J.train_jepa(model, ds, trans, steps=args.steps, amp=True, vic=args.vic)
+    info["seconds"] = time.time() - t0
+    info["peak_vram_bytes"] = int(torch.cuda.max_memory_allocated())
+    info["trainable_parameters"] = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    info["ema_target_parameters"] = sum(p.numel() for p in model.target.parameters())
+    info["provenance"] = provenance()
+    # the planner uses the consequence head: save the inner wm arm (plus the JEPA parts for the record)
+    fp = M.save(model.inner, ckpt_path("wm", args.seed, args.steps, args.tag), {k: v for k, v in info.items() if k != "curve"})
+    torch.save({"edit": model.edit.state_dict(), "pred": model.pred.state_dict(), "target": model.target.state_dict()}, ckpt_path("jepa_parts", args.seed, args.steps, args.tag))
+    info["fingerprint"] = fp
+    out = data_root() / "train_logs" / f"jepa_s{args.seed}_n{args.steps}{args.tag}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(info, indent=1, default=str))
+    print(json.dumps(info["diagnostics"], indent=1), info["curve"][-2:])
+    return 0
+
+
 def make_agent(name: str, seed: int, steps: int, prior: A.Prior, device: str, tag: str = "") -> Any:
     if name == "submit_asis":
         return A.SubmitAsIs()
@@ -278,7 +308,17 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--tag", default="")
     e.add_argument("--output", required=True)
     e.add_argument("--cpu", action="store_true")
+    j = sub.add_parser("jepa")
+    j.add_argument("--seed", type=int, default=0)
+    j.add_argument("--steps", type=int, default=20000)
+    j.add_argument("--lam-j", type=float, default=1.0)
+    j.add_argument("--vic", type=float, default=1.0)
+    j.add_argument("--train-tasks", type=int, default=6000)
+    j.add_argument("--transition-tasks", type=int, default=6000)
+    j.add_argument("--tag", default="_jepa")
     args = ap.parse_args(argv)
+    if args.cmd == "jepa":
+        return jepa_cmd(args)
     return train_cmd(args) if args.cmd == "train" else evaluate_cmd(args)
 
 
