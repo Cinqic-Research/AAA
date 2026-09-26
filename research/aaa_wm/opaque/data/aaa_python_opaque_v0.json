@@ -1,0 +1,17 @@
+{
+  "protocol": "aaa.python.opaque.v0",
+  "status": "DESIGN: development identities only; no freeze; confirmation not admitted",
+  "library": {"count": 6, "A": "A-2026-09-26", "B": {"identity": "B-2026-09-26", "changes": 3}},
+  "literals": {"in_distribution": [2, 9], "novel_literals": [12, 19]},
+  "statements": [2, 4],
+  "domain": [-6, 20],
+  "faults": {"k": [1, 2]},
+  "tests": {"visible": 3},
+  "budgets": {"steps": 8, "runs": 2, "run_sweep": [0, 1, 2, 3, 4, 8]},
+  "splits": {"pilot": 1000, "train": 6000, "development": 6000, "attack": 1500},
+  "slices": {
+    "pure": {"pilot": "in_distribution", "train": "in_distribution"},
+    "block_size": 40,
+    "blocks": ["in_distribution", "two_fault", "novel_literals", "novel_grammar", "library_B"]
+  }
+}

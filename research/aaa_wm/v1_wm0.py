@@ -80,7 +80,7 @@ class Params:
 
     def count(self, arm: str) -> int:
         n = self.W.size + self.b.size + self.h.size
-        if arm in ("direct", "direct_t"):
+        if arm in ("direct", "direct_t", "direct_t2"):
             n += self.s.size
         if arm == "wm":
             n += self.t.size
@@ -161,7 +161,7 @@ class WM0Agent:
             s = math.log(max(_sig(_logit(self.p.h, z)), 1e-12))
             if self.mode == "direct":
                 s += math.log(max(_sig(_logit(self.p.s, z)), 1e-12))
-            if self.mode == "direct_t":
+            if self.mode in ("direct_t", "direct_t2"):
                 xa = enc[k]
                 s += math.log(max(_sig(_logit(self.p.s, _core(self.p, xa, self._pooled(view)))), 1e-12))
             if self.mode == "wm" and not disable_consequence:
@@ -187,8 +187,10 @@ class WM0Agent:
         for k, x in enumerate(enc):
             if self.mode == "direct":
                 _step(self.p, "s", x, None, 1.0 if all(tool[k]) else 0.0, self.lr)
-            elif self.mode == "direct_t":
-                _step(self.p, "s", x, self._pooled(view), 1.0 if all(tool[k]) else 0.0, self.lr)
+            elif self.mode in ("direct_t", "direct_t2"):
+                # direct_t2: the compute-matched control, with as many gradient steps per candidate as wm
+                for _ in range(len(tests) if self.mode == "direct_t2" else 1):
+                    _step(self.p, "s", x, self._pooled(view), 1.0 if all(tool[k]) else 0.0, self.lr)
             else:
                 for j, t in enumerate(tests):
                     _step(self.p, "t", x, t, 1.0 if tool[k][j] else 0.0, self.lr)

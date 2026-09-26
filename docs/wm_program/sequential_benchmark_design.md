@@ -1,6 +1,10 @@
-# `aaa.python.seq.v0`: a sequential debugging benchmark (design draft)
+# `aaa.python.seq.v0`: a sequential debugging benchmark (REJECTED design draft)
 
-Status: **draft for red-team review**, 2026-09-26. No identities exist yet. This is a new,
+Status: **rejected by red-team review on 2026-09-26, before any learned arm was built**; superseded by
+[`aaa.python.opaque.v0`](opaque_benchmark_design.md). Kept unchanged below as the record of what was
+proposed. Pilot numbers on 400 `pilot` tasks: best non-learned 2-run tool agent 0.207; real-executor
+planner depth 1: 0.525, depth 2: 0.902. That "ceiling" is a zero-run local enumerator, which is the
+central defect. Original status line: draft for red-team review, 2026-09-26. No identities exist yet. This is a new,
 prospective benchmark. It does not modify `aaa.python.v0` or `v1`, whose modules it imports
 read-only: the safe subset, the sandboxed oracle, the random stream and the symmetric
 mutation relation `research.aaa_python_v1.generator.mutations`.
