@@ -84,7 +84,11 @@ def run(admission: Admission, output: Path) -> dict[str, Any]:
                 raise gen.ConfirmationNotAdmitted("the source changed during confirmation")
             outs = []
             agent = None
+            ceilings = {lib: A.Planner(A.TrueLibraryPredictor(gen.library(lib)), prior, "ceiling", depth=2) for lib in ("A", "B")}
             for i, t in enumerate(tasks):
+                if arm["name"] == "ceiling":  # imagines with the task's actual library
+                    outs.append(play(ceilings[t.library], t, i))
+                    continue
                 if agent is None or ("online" in arm["name"] and i % BLOCK == 0):
                     agent = E.make_agent(arm["name"], seed, arm.get("train_steps", 20000), prior, device, arm.get("tag", ""))
                 outs.append(play(agent, t, i))
