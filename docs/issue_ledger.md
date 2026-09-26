@@ -2495,6 +2495,11 @@ history and repaired prospectively in `aaa.python.gen.v1`.
   mutation regression tests reject each altered decision field. The tool and
   tests are outside the committed v1 fingerprint, which remains unchanged.
   The frozen source and spent confirmation identities were not rewritten.
+  An initial exact-dictionary comparison failed on Python 3.10/3.11/3.13
+  and one Python 3.12 runner because bootstrap floating-point bounds differ
+  across environments. The follow-up gate requires exact contracts,
+  categorical verdicts and criteria, tight point agreement, and bound
+  agreement within the frozen contract's declared width tolerance.
 
 ### AAA-206 — Newly retained Python evidence was outside the protected-file manifest
 - **Source** independent Codex GPT-6 review of PR #29 · **Severity** medium ·

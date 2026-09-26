@@ -36,7 +36,10 @@ their own scope. The v1 confirmation is spent evidence, not a new run.
    adjudications from retained bits and the committed freeze. CI invokes it;
    mutation tests reject the three altered fields. The frozen v1 source was
    left unchanged, so the original confirmation's source identity remains
-   honest.
+   honest. The first post-freeze implementation compared floating bounds for
+   exact dictionary equality and failed cross-platform CI; the repaired gate
+   requires exact decisions with the promotion contract's declared tolerance
+   for interval bounds.
 2. **AAA-206, protected evidence:** 22 newly added Python evidence paths were
    selected by the protected-file policy but absent from its 471-path
    manifest. Their current hashes were added without changing prior expected
@@ -103,8 +106,8 @@ the checkout. This is packaging smoke, not a full scientific rerun.
 The local v0 safety and leakage probes passed 68/68 and 52/52 respectively;
 the historical v2 fingerprint and confirmation exit-code contract also passed.
 
-The original-head full suite passed 932 tests with one skip; two new
-decision-audit mutation tests passed separately. Coverage over the complete
+The original-head full suite passed 932 tests with one skip; three new
+decision-audit tests passed separately. Coverage over the complete
 suite was 64% overall. The capacity-stage source rerun was still running
 when this record was drafted. Its final result and exact final-head CI belong
 in the PR review comment. Full held-out re-observation would be invalid;

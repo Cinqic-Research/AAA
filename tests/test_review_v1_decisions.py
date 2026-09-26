@@ -7,7 +7,7 @@ import json
 import unittest
 from pathlib import Path
 
-from tools.check_aaa_python_v1_decisions import DEFAULT, verify
+from tools.check_aaa_python_v1_decisions import DEFAULT, same_adjudication, verify
 
 
 class DecisionAuditTest(unittest.TestCase):
@@ -17,6 +17,18 @@ class DecisionAuditTest(unittest.TestCase):
 
     def test_retained_confirmation(self) -> None:
         self.assertEqual(verify(self.original), [])
+
+    def test_adjudication_tolerates_only_numeric_drift(self) -> None:
+        original = self.original["stage"]["adjudications"]["encoder"]
+        drift = copy.deepcopy(original)
+        drift["primary"]["upper"] += 1e-9
+        drift["primary"]["geometric_ratio"] += 1e-13
+        self.assertTrue(same_adjudication(original, drift))
+        drift["verdict"] = "REJECT"
+        self.assertFalse(same_adjudication(original, drift))
+        drift = copy.deepcopy(original)
+        drift["primary"]["upper"] += 0.2
+        self.assertFalse(same_adjudication(original, drift))
 
     def test_mutated_decision_fields_are_rejected(self) -> None:
         for name, change in (

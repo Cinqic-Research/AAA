@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +24,56 @@ from research.aaa_python_v1.summarize import summarize
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT = ROOT / "docs/evidence/aaa_python_v1/confirmation.json"
+
+
+def same_adjudication(
+    stored: Any, fresh: Any, *, bound_width: float = 0.0, tolerance_widths: float = 0.05
+) -> bool:
+    """Require exact decisions and contract, allowing cross-platform float drift.
+
+    Recomputed bootstrap bounds may differ within the frozen promotion
+    contract's own width tolerance. All verdicts, criteria and status fields
+    must still agree exactly. Point values use a much tighter tolerance.
+    """
+
+    if isinstance(stored, Mapping) and isinstance(fresh, Mapping):
+        if stored.keys() != fresh.keys():
+            return False
+        if all(key in stored for key in ("lower", "upper")):
+            bound_width = max(
+                float(stored["upper"]) - float(stored["lower"]),
+                float(fresh["upper"]) - float(fresh["lower"]),
+                1e-12,
+            )
+        return all(
+            (
+                math.isclose(float(stored[key]), float(fresh[key]), abs_tol=tolerance_widths * bound_width)
+                if key in ("lower", "upper") and bound_width > 0
+                else same_adjudication(
+                    stored[key], fresh[key], bound_width=bound_width, tolerance_widths=tolerance_widths
+                )
+            )
+            for key in stored
+        )
+    if isinstance(stored, Sequence) and not isinstance(stored, (str, bytes)):
+        return (
+            isinstance(fresh, Sequence)
+            and not isinstance(fresh, (str, bytes))
+            and len(stored) == len(fresh)
+            and all(
+                same_adjudication(a, b, bound_width=bound_width, tolerance_widths=tolerance_widths)
+                for a, b in zip(stored, fresh, strict=True)
+            )
+        )
+    if isinstance(stored, bool) or isinstance(fresh, bool):
+        return stored is fresh
+    if isinstance(stored, (int, float)) and isinstance(fresh, (int, float)):
+        return (
+            math.isfinite(stored)
+            and math.isfinite(fresh)
+            and math.isclose(stored, fresh, rel_tol=1e-12, abs_tol=1e-12)
+        )
+    return stored == fresh
 
 
 def verify(document: dict[str, Any]) -> list[str]:
@@ -64,8 +116,16 @@ def verify(document: dict[str, Any]) -> list[str]:
         records = smoothed_errors(stage["evaluations"], contract.reference)
         records += smoothed_errors(stage["evaluations"], contract.challenger)
         fresh = adjudicate(contract, records)
-        if stage["adjudications"].get(name) != fresh:
-            problems.append(f"{name}: stored adjudication differs from primitives and frozen contract")
+        stored = stage["adjudications"].get(name, {})
+        if stored.get("contract") != fresh["contract"] or not same_adjudication(
+            stored, fresh, tolerance_widths=float(fresh["contract"]["bound_tolerance_widths"])
+        ):
+            problems.append(
+                f"{name}: stored adjudication differs from primitives and frozen contract "
+                f"(stored verdict={stored.get('verdict')}, fresh verdict={fresh['verdict']}; "
+                f"stored primary={stored.get('primary')}, fresh primary={fresh['primary']}; "
+                f"stored independent={stored.get('independent')}, fresh independent={fresh['independent']})"
+            )
     return problems
 
 
