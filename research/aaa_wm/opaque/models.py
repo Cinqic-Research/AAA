@@ -66,7 +66,9 @@ class Backbone(nn.Module):
         self.norm = nn.LayerNorm(c.d_model)
 
     def forward(self, ids: torch.Tensor, types: torch.Tensor) -> torch.Tensor:
-        pos = torch.arange(ids.shape[1], device=ids.device)
+        # code positions 0..W-1 (W varies with trimming); the tail always sits at CODE_LEN..CODE_LEN+TAIL-1
+        width = ids.shape[1] - TAIL
+        pos = torch.cat([torch.arange(width), torch.arange(CODE_LEN, CODE_LEN + TAIL)]).to(ids.device)
         h = self.tok(ids) + self.typ(types) + self.pos(pos)[None]
         h = self.enc(h, src_key_padding_mask=ids == tok.PAD)
         return self.norm(h)
@@ -144,10 +146,13 @@ def _tail_queries(xs: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return ids, types
 
 
-QUERY_SLOTS = [CODE_LEN + 2 * j for j in range(3)]
+QUERY_SLOTS = [-TAIL + 2 * j for j in range(3)]  # relative to the end: robust to trimming
 
 
 def assemble(code: np.ndarray, tail_ids: np.ndarray, tail_types: np.ndarray, marks: np.ndarray | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+    nonpad = code != tok.PAD
+    width = int(nonpad.shape[1] - np.argmax(nonpad[:, ::-1].any(axis=0))) if nonpad.any() else 1
+    code = code[:, :width]
     types = np.zeros(code.shape, dtype=np.int64)
     if marks is not None:
         rows = np.nonzero(marks > 0)[0]

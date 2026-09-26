@@ -106,9 +106,6 @@ def train_cmd(args: argparse.Namespace) -> int:
 
 
 def make_agent(name: str, seed: int, steps: int, prior: A.Prior, device: str, tag: str = "") -> Any:
-    from . import learned as L
-    from . import models as M
-
     if name == "submit_asis":
         return A.SubmitAsIs()
     if name == "prior":
@@ -121,6 +118,11 @@ def make_agent(name: str, seed: int, steps: int, prior: A.Prior, device: str, ta
         depth = 1 if name.endswith("_d1") else 2
         return A.Planner(A.TrueLibraryPredictor(gen.library("A")), prior, name, depth=depth)
     base, _, variant = name.partition(":")
+    if base == "wms":
+        return wms_agent(variant, seed, prior)
+    from . import learned as L  # torch arms only below this line
+    from . import models as M
+
     if base in ("policy", "policy_aux"):
         return L.policy_agent(M.load(ckpt_path(base, seed, steps, tag), device), device, name)
     if base == "wm":
@@ -141,10 +143,69 @@ def make_agent(name: str, seed: int, steps: int, prior: A.Prior, device: str, ta
     raise ValueError(name)
 
 
-def evaluate_cmd(args: argparse.Namespace) -> int:
-    import torch
+def wms_table(seed: int, programs: int) -> Any:
+    """Learn (or load) the WM-S library table from ``programs`` sampled training programs' real observations."""
 
-    device = "cuda" if torch.cuda.is_available() and not args.cpu else "cpu"
+    from . import data as D
+    from . import structured as S
+
+    names = tuple(a.name for a in gen.library("A"))
+    path = data_root() / "wms" / f"table_s{seed}_p{programs}.json"
+    model = S.LibraryModel(names)
+    if path.exists():
+        raw = json.loads(path.read_text())
+        model.table = {(k.split("|")[0], int(k.split("|")[1])): v for k, v in raw["table"].items()}
+        model.updates = raw["updates"]
+        return model
+    ds = D.build("train", 6000)
+    rng = np.random.default_rng(seed)
+    idx = rng.choice(len(ds.sources), min(programs, len(ds.sources)), replace=False)
+    sub = type(ds)(ds.code[idx], [], ds.results[idx], ds.task_of[idx], ds.equivalent[idx], ds.visible_pass[idx], ds.tests, ds.policy[:0], [ds.sources[i] for i in idx])
+    t0 = time.time()
+    stats = model.learn(S.observations_from_dataset(sub, gen.domain()), rounds=12)
+    stats["seconds"] = time.time() - t0
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"stats": stats, "updates": model.updates, "table": {f"{k[0]}|{k[1]}": v for k, v in model.table.items()}}))
+    return model
+
+
+def wms_agent(variant: str, seed: int, prior: A.Prior) -> Any:
+    import copy
+
+    from . import structured as S
+
+    parts = set(variant.split("+")) if variant else set()
+    programs = next((int(p[1:]) for p in parts if p.startswith("p") and p[1:].isdigit()), 200000)
+    model = copy.deepcopy(wms_table(seed, programs))
+    if "empty" in parts:
+        model.table = {}
+    if "identity" in parts:  # ablation: the learned library replaced by 'every API returns its argument'
+        model.table = {k: k[1] for k in model.table}
+    if "random" in parts:  # ablation: learned values permuted across entries of the same API
+        rng = np.random.default_rng(seed + 99)
+        by: dict[str, list[tuple[str, int]]] = defaultdict(list)
+        for k in model.table:
+            by[k[0]].append(k)
+        new = {}
+        for keys in by.values():
+            vals = [model.table[k] for k in keys]
+            rng.shuffle(vals)
+            new.update(zip(keys, vals, strict=True))
+        model.table = new
+    pred = S.StructuredPredictor(model, online="online" in parts)
+    agent = A.Planner(pred, prior, "wms:" + variant, depth=1 if "d1" in parts else 2)
+    if "online" in parts:
+        agent.on_observation = lambda obs, view: pred.observe(obs, view)  # type: ignore[method-assign]
+    return agent
+
+
+def evaluate_cmd(args: argparse.Namespace) -> int:
+    try:
+        import torch
+
+        device = "cuda" if torch.cuda.is_available() and not args.cpu else "cpu"
+    except ImportError:  # non-neural agents (baselines, WM-S) need no torch
+        device = "cpu"
     tasks = dev_tasks(args.role)
     if args.limit:
         tasks = tasks[: args.limit]

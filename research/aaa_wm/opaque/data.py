@@ -38,7 +38,7 @@ from . import generator as gen
 from . import tokens as tok
 from .program import Edit, apply, edits, signature
 
-CODE_LEN = 104  # [CLS] + code (<= 102) + [SEP]
+CODE_LEN = 144  # [CLS] + code (<= 142) + [SEP]; batches are trimmed to their longest row
 _SOURCES = ("generator.py", "program.py", "tokens.py", "data.py", "library.py")
 
 
@@ -184,7 +184,7 @@ def _load(path: Path) -> Dataset:
     sources = list(z["sources"])
     return Dataset(
         z["code"],
-        [tok.encode_program(s)[1] for s in sources],
+        [],  # token positions are recomputed on demand (tok.encode_program); training uses precomputed marks
         z["results"],
         z["task_of"],
         z["equivalent"],
