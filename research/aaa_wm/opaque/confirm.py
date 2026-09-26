@@ -57,6 +57,7 @@ def run(admission: Admission, output: Path) -> dict[str, Any]:
 
     m = admission.manifest
     design = m["design"]
+    verify_artifacts(m)
     tasks = confirmation_tasks(admission, design["tasks"])
     prior = A.Prior(A.fit_prior(gen.pool("train", 6000)))
     slices = [t.slice for t in tasks]
@@ -102,6 +103,17 @@ def run(admission: Admission, output: Path) -> dict[str, Any]:
     return doc
 
 
+def verify_artifacts(manifest: dict[str, Any]) -> None:
+    """Every learned artifact the confirmation loads must match the hash recorded in the freeze."""
+
+    from .experiment import data_root
+
+    for name, digest in manifest["artifacts_sha256"].items():
+        path = (data_root() / "wms" / name) if name.startswith("table_") else (data_root() / "ckpt" / name)
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise gen.ConfirmationNotAdmitted(f"artifact {name} differs from the frozen hash")
+
+
 def adjudicate_all(doc: dict[str, Any]) -> dict[str, Any]:
     """Every declared contract, recomputed from the document's own bits (usable for re-audit)."""
 
@@ -115,7 +127,8 @@ def adjudicate_all(doc: dict[str, Any]) -> dict[str, Any]:
         seeds = [str(s) for s in c["initializations"]]
         ref = {s: arms[c["reference"]][s if s in arms[c["reference"]] else "0"] for s in seeds} if c.get("reference_deterministic") else arms[c["reference"]]
         local = {c["reference"]: ref, c["challenger"]: arms[c["challenger"]]}
-        out[c["name"]] = adjudicate_ratio(local, doc["slices"], seeds, c["reference"], c["challenger"], c["threshold"], seed=c["seed"])
+        only = c["groups"] if isinstance(c.get("groups"), list) else None
+        out[c["name"]] = adjudicate_ratio(local, doc["slices"], seeds, c["reference"], c["challenger"], c["threshold"], seed=c["seed"], rule=c["criterion"]["rule"], only=only)
     return out
 
 

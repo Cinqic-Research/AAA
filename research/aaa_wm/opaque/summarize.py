@@ -99,22 +99,23 @@ def contract_records(arms: dict[str, dict[str, np.ndarray]], slices: list[str], 
     return recs
 
 
-def adjudicate_ratio(arms: dict[str, dict[str, np.ndarray]], slices: list[str], seeds: list[str], reference: str, challenger: str, threshold: float, seed: int = 20260926) -> dict[str, Any]:
+def adjudicate_ratio(arms: dict[str, dict[str, np.ndarray]], slices: list[str], seeds: list[str], reference: str, challenger: str, threshold: float, seed: int = 20260926, *, rule: str = "superior", only: list[str] | None = None) -> dict[str, Any]:
     from aaa.promotion.adjudicate import adjudicate
     from aaa.promotion.contract import Contract, Criterion, GroupDeclaration
 
-    groups = sorted(set(slices))
+    groups = sorted(set(slices)) if only is None else sorted(only)
     n_streams = {g: sum(1 for s in slices if s == g) // BLOCK for g in groups}
     contract = Contract(
         reference=reference,
         challenger=challenger,
         initializations=tuple(seeds),
         groups=tuple(GroupDeclaration(g, "crossed", tuple(range(n_streams[g]))) for g in groups),
-        criteria=(Criterion("superior", "superior", threshold),),
+        criteria=(Criterion(rule, rule, threshold),),
         seed=seed,
         draws=20000,
     )
     recs = contract_records(arms, slices, seeds, reference) + contract_records(arms, slices, seeds, challenger)
+    recs = [r for r in recs if r["group"] in groups]
     res = adjudicate(contract, recs)
     p = res.get("primary", {})
     q = res.get("independent", {})
