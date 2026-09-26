@@ -1,0 +1,23 @@
+{
+  "schema": "aaa.wm_program.state.v1",
+  "updated": "2026-09-26",
+  "canonical": {"repo": "Cinqic-Research/AAA", "main_sha": "dbee13c", "open_prs": []},
+  "working_branch": "opus/world-model-program",
+  "workspace": "/media/cinqic/Cinqic Storage/AAA/wm (repo/, venv/, data/ = AAA_DATA_ROOT, logs/, notes/)",
+  "protected": {
+    "rule": "never edit fingerprinted phases; tools/check_protected_identities.py before/after",
+    "phases": ["aaa.1k.v1 5ce6e019", "aaa.1k.v2 e5b11bdb", "observation noise 546e2434", "aaa.python.v0 (spec/golden)", "aaa.python.v1 f1eb9617 (freeze a73765b, confirmation SPENT)"],
+    "protected_files": 493,
+    "do_not_modify": ["research/aaa_python/**", "research/aaa_python_v1/**", "tests/test_aaa_python_v1*", "docs/evidence/**", "docs/aaa_charter.md", "research/aaa_1k*", "aaa/{__init__,config,environment,predictors}.py"]
+  },
+  "reference_model": "aaa.python.v1 4k@e2 (4,158 trainable; e2 encoder, one-hot output, pointer localize, bandit repair scorer); evidence-supported next experimental reference, NOT promoted",
+  "ledger_next_id": "AAA-210 (grep docs/issue_ledger.md before assigning)",
+  "open_hypotheses": [],
+  "rejected_hypotheses": [],
+  "experiments_completed": [],
+  "experiments_running": [],
+  "best_dev_result": null,
+  "confirmation_status": "none declared for this program",
+  "blockers": [],
+  "next_actions": ["baseline reproduction", "diagnosis", "literature", "WM-0 on v1 dev identities (diagnostic)", "sequential successor benchmark design"]
+}

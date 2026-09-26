@@ -1,0 +1,26 @@
+{
+  "protocol": "aaa.python.seq.v0",
+  "status": "DRAFT: benchmark design; identities other than pilot not yet admitted",
+  "templates": {
+    "in_distribution": ["affine3", "piecewise", "clamp", "accumulate", "count"],
+    "novel_structure": ["branch_else", "double_loop"]
+  },
+  "literals": {"in_distribution": [0, 9], "novel_literals": [10, 19]},
+  "names": {
+    "in_distribution": {"function": "f", "parameter": "p", "local": "q", "loops": ["i", "j"]},
+    "novel_names": {"function": "g", "parameter": "r", "local": "h", "loops": ["t", "s"]}
+  },
+  "faults": {"k": [1, 2], "k_by_slice": {}},
+  "tests": {"visible": 3, "hidden": 6},
+  "budgets": {"steps": 6, "runs": 2},
+  "splits": {"pilot": 600, "train": 4000, "development": 3000, "attack": 600, "confirmation": 1200},
+  "slices": {
+    "cycle": {
+      "pilot": ["in_distribution"],
+      "train": ["in_distribution"],
+      "development": ["in_distribution", "in_distribution", "novel_literals", "novel_names", "novel_structure"],
+      "attack": ["in_distribution", "in_distribution", "novel_literals", "novel_names", "novel_structure"],
+      "confirmation": ["in_distribution", "in_distribution", "novel_literals", "novel_names", "novel_structure"]
+    }
+  }
+}
