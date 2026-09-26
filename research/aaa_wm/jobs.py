@@ -48,10 +48,15 @@ def main() -> int:
     ap.add_argument("--cpu", type=int, default=2)
     ap.add_argument("--gpu", type=int, default=1)
     ap.add_argument("--budget", default="9G")
+    ap.add_argument("--vram", default="5000M", help="GPU memory budget; a job's 'vram' field (default 1G for gpu jobs)")
     args = ap.parse_args()
     running: dict[str, tuple[subprocess.Popen[bytes], dict]] = {}
     started: set[str] = set()
     budget = _bytes(args.budget)
+    vbudget = _bytes(args.vram)
+
+    def vram(job: dict) -> int:
+        return _bytes(job.get("vram", "1G")) if job.get("kind") == "gpu" else 0
 
     def locked(job: dict) -> bool:
         lock = Path(job["output"] + ".lock")
@@ -80,10 +85,11 @@ def main() -> int:
                 Path(job["output"] + ".lock").unlink(missing_ok=True)
                 del running[name]
         used = sum(_bytes(j["mem"]) for _, j in running.values())
+        vused = sum(vram(j) for _, j in running.values())
         for job in list(pending):
             kind = job.get("kind", "cpu")
             n_kind = sum(1 for _, j in running.values() if j.get("kind", "cpu") == kind)
-            if n_kind >= (args.gpu if kind == "gpu" else args.cpu) or used + _bytes(job["mem"]) > budget:
+            if n_kind >= (args.gpu if kind == "gpu" else args.cpu) or used + _bytes(job["mem"]) > budget or vused + vram(job) > vbudget:
                 continue
             if not all(Path(p).exists() for p in job.get("needs", [])):
                 continue
@@ -94,6 +100,7 @@ def main() -> int:
             running[job["name"]] = (proc, job)
             started.add(job["name"])
             used += _bytes(job["mem"])
+            vused += vram(job)
             pending.remove(job)
             print(time.strftime("%H:%M:%S"), "start", job["name"], flush=True)
         time.sleep(20)
