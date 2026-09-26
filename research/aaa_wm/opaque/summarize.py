@@ -117,7 +117,19 @@ def adjudicate_ratio(arms: dict[str, dict[str, np.ndarray]], slices: list[str], 
     recs = contract_records(arms, slices, seeds, reference) + contract_records(arms, slices, seeds, challenger)
     res = adjudicate(contract, recs)
     p = res.get("primary", {})
-    return {"verdict": res["verdict"], "ratio": p.get("point"), "interval": p.get("interval"), "threshold": threshold, "reason": res.get("reason")}
+    q = res.get("independent", {})
+    return {
+        "verdict": res["verdict"],
+        "ratio": p.get("geometric_ratio"),
+        "interval": [p.get("lower"), p.get("upper")],
+        "interval_status": p.get("interval_status"),
+        "group_ratios": p.get("group_ratios"),
+        "independent_ratio": q.get("geometric_ratio"),
+        "independent_interval": [q.get("lower"), q.get("upper")],
+        "agreement_problems": res.get("agreement_problems"),
+        "threshold": threshold,
+        "reason": res.get("reason"),
+    }
 
 
 def main() -> int:
