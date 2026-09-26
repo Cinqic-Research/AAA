@@ -76,3 +76,34 @@ Intrinsic numbers:
 - Compute is not matched. WM-S spends about 0.3-0.4 CPU seconds per episode imagining up to about
   1,000 programs. The neural policy spends about 0.06 seconds. The scarce resource in this benchmark
   is real runs (R), and every arm has the same number of them.
+
+## Erratum and red-team findings (added 2026-09-26, after the tune stage; the text above is unchanged)
+
+The pre-confirmation red team (`notes/redteam_opaque_wms.md`) found no leakage. It found the
+following, and each item is accepted:
+
+1. **The tune row for `wms:online` (0.507) was not the selected configuration.** The tune runs
+   carried online learning across all 1,000 tasks, over streams and slices. The selected
+   configuration resets at every stream. With the reset, WM-S online scores **0.425** on tune. The
+   online gain over frozen is about **+0.088, not +0.170**, and most of it (+0.063) comes from
+   learning within the episode. The evaluate stage and everything after it use the reset.
+2. **`wms:empty` is not a matched control for the training-learned library.** It removes online
+   learning too. `wms:online+empty` (online learning from an empty library) scores 0.190 on tune,
+   which is already above `policy_aux` (0.121). The training-learned table adds about +0.235 on top
+   of it. Both controls are now declared.
+3. **The comparison mixed controllers.** WM-S uses the depth-2 verified planner, while the neural
+   policies used single-edit tool search. `policy_aux:plan` puts the policy inside the same
+   planner and is now declared.
+4. **The declared non-learned baseline was weak.** A grammar-legality recognizer (no library,
+   no learning), used by the same planner, scores 0.163 on tune and 0.237 on pilot. It is now the
+   declared strongest non-learned baseline (`tells`, `research/aaa_wm/opaque/attacks.py`). It
+   exposes a generator weakness: some mutations produce text the grammar never emits. A successor
+   benchmark should confine mutations to the grammar.
+5. **Wording.** WM-S is an exact interpreter of the visible code plus a *learned tabular model
+   of the opaque library* (six unary functions), abduced from real observations and updated
+   online. All state and action conditioning is in the hand-written interpreter. Claims will say
+   exactly this.
+6. **Freeze coverage.** Library tables and neural checkpoints for the confirmation
+   initializations will be produced before the freeze, and their SHA-256 hashes recorded in it.
+7. **Statistics.** Per-slice non-inferiority contracts are added, so a losing slice cannot hide
+   in the geometric mean. Initializations increase from 3 to 5.
