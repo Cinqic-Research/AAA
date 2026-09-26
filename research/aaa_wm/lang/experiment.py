@@ -104,11 +104,14 @@ def adapter_cmd(a: argparse.Namespace) -> int:
 
 
 class LanguageAgent:
-    """Wraps a decision agent; the view's visible tests are replaced by the language channel's proposal."""
+    """Wraps a decision agent; the view's visible tests are replaced by the language channel's proposal.
 
-    def __init__(self, inner: Any, proposal: list[tuple[int, int]] | None) -> None:
-        self.inner = inner
+    ``fallback`` (an agent needing no tests) is used when the channel produced no parse and the
+    wrapped agent cannot act without tests (the neural policies)."""
+
+    def __init__(self, inner: Any, proposal: list[tuple[int, int]] | None, fallback: Any = None) -> None:
         self.tests = tuple((x, ("ok", e)) for x, e in proposal) if proposal else ()
+        self.inner = fallback if (not self.tests and fallback is not None) else inner
 
     def _view(self, view: Any) -> Any:
         return dataclasses.replace(view, visible_tests=self.tests)
@@ -125,6 +128,49 @@ class LanguageAgent:
             self.inner.observe(self._view(view), action, obs)
 
 
+def play_cmd(a: argparse.Namespace) -> int:
+    from ..opaque import agents as OA
+    from ..opaque.env import play
+    from ..opaque.experiment import dev_tasks, make_agent, provenance
+
+    tasks = dev_tasks(a.role)
+    items = items_for(tasks, "heldout")
+    if a.channel == "none":
+        proposals: list[Any] = [None] * len(tasks)
+    elif a.channel == "rules":
+        proposals = [rules.extract(it["text"]) for it in items]
+    elif a.channel == "gold":  # ceiling of the language channel (perfect understanding), not an arm
+        proposals = [[tuple(g) for g in it["gold"]] for it in items]
+    else:
+        ext = json.loads(Path(a.channel).read_text())["extractions"]
+        proposals = [ext.get(t.task_id) for t in tasks]
+    prior = OA.Prior(OA.fit_prior(gen.pool("train", 6000)))
+    try:
+        import torch
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    except ImportError:
+        device = "cpu"
+    doc: dict[str, Any] = {"schema": "aaa.wm.lang.play.v1", "status": "development", "role": a.role, "channel": a.channel, "tasks": [t.task_id for t in tasks], "slices": [t.slice for t in tasks], "provenance": provenance(), "results": {}}
+    doc["channel_exact"] = float(np.mean([p is not None and [tuple(x) for x in p] == [tuple(g) for g in it["gold"]] for p, it in zip(proposals, items, strict=True)]))
+    for name in a.agents.split(","):
+        per = {}
+        for seed in [int(x) for x in a.seeds.split(",")]:
+            outs = []
+            inner = None
+            for i, (t, prop) in enumerate(zip(tasks, proposals, strict=True)):
+                if inner is None or ("online" in name and i % 40 == 0):
+                    inner = make_agent(name, seed, 20000, prior, device)
+                fb = OA.ToolSearch(lambda v, e: prior.score(e), "tool_prior") if name.split(":")[0] in ("policy", "policy_aux") else None
+                outs.append(play(LanguageAgent(inner, [tuple(x) for x in prop] if prop else None, fb), t, i))
+            per[str(seed)] = {"bits": "".join("1" if o.success else "0" for o in outs)}
+            print(name, a.channel, seed, round(float(np.mean([o.success for o in outs])), 3), flush=True)
+        doc["results"][name] = per
+    Path(a.output).parent.mkdir(parents=True, exist_ok=True)
+    Path(a.output).write_text(json.dumps(doc))
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -135,8 +181,14 @@ def main() -> int:
     ad.add_argument("--seed", type=int, default=0)
     ad.add_argument("--train-tasks", type=int, default=6000)
     ad.add_argument("--role", default="tune", choices=list(ROLE))
+    pl = sub.add_parser("play")
+    pl.add_argument("--channel", required=True, help="none | rules | gold | <adapter eval json>")
+    pl.add_argument("--agents", required=True)
+    pl.add_argument("--seeds", default="0")
+    pl.add_argument("--role", default="tune")
+    pl.add_argument("--output", required=True)
     a = ap.parse_args()
-    return adapter_cmd(a)
+    return adapter_cmd(a) if a.cmd == "adapter" else play_cmd(a)
 
 
 if __name__ == "__main__":
