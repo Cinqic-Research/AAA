@@ -2536,3 +2536,14 @@ shortcut. No scientific generator or analysis source changed after the
 - **Repair** The erratum scopes each citation and distinguishes the tested AAA
   interventions from those in the cited papers. The pre-development review is
   retained as written for chronology.
+
+### AAA-209 — Contributing and evidence policy still identified v0 as current
+- **Source** independent Codex GPT-6 review of PR #29 · **Severity** low ·
+  **Status** repaired.
+- **Reproduction** `CONTRIBUTING.md` described `aaa.python.v0` as the current
+  focus and active scope. `docs/evidence_policy.md` ended with the v0 evidence
+  and still said 471 protected files, although the reviewed manifest includes
+  493 and v1 has a spent confirmation.
+- **Repair** Current contribution scope and evidence policy now describe v1,
+  its committed freeze, retained evidence, post-freeze decision audit, and
+  protected-file count. Historical v0 evidence and boundaries remain explicit.

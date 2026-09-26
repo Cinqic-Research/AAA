@@ -85,7 +85,7 @@ In particular:
   runs without intervention after launch. It does not mean general
   intelligence, physical understanding, or independent goal formation, and
   nothing here is evidence for any of those.
-- **Five training replicas is a routine engineering minimum**, labelled as such.
+- **Five training replicas is a routine engineering minimum**, labeled as such.
   Five checkpoints evaluated on 500 episodes is 500 episodes from five
   learners.
 
@@ -218,7 +218,7 @@ diagnostic, development and attack identities, never on confirmation
 evidence, so they are characterizations rather than confirmed claims.
 
 - **Q4's negative sign is one family.** Recomputed from round-3 primitives,
-  all 24 `coarse_speed_v1` streams favour the ungated control in every
+  all 24 `coarse_speed_v1` streams favor the ungated control in every
   initialization, and without that family the Q4 aggregate is positive.
 - **Why: the gated core's zero-bias operating point.** With `z = r = 0.5` the
   one-step Jacobian has no sign-alternating mode, so the champion cannot track
@@ -324,7 +324,7 @@ evidence, so they are characterizations rather than confirmed claims.
   the visible-test tool alone solves 95% of repair. The learners beat the
   rules on localization and, without the tool, on repair.
 - **Adaptation and plasticity are development evidence.** They were not part
-  of the confirmation. The 4K comparison is a labelled post-hoc diagnostic.
+  of the confirmation. The 4K comparison is a labeled post-hoc diagnostic.
   The plasticity probe (a conflicting permuted mapping) mixes loss of
   plasticity with interference from what was learned; the declared ratio
   estimand did not detect the fresh-learner gap, which is reported beside it.

@@ -57,6 +57,10 @@ their own scope. The v1 confirmation is spent evidence, not a new run.
 5. Reproduction, limitations, research-direction metadata, and current-facing
    spelling were updated to distinguish v1 from the historical v0 phase. The
    inventory classifier now describes v1 paths as v1 rather than v0.
+6. **AAA-209, operator guidance:** the contributing and evidence-policy files
+   still described v0 as the active phase and 471 protected files. They now
+   describe v1's scope, spent confirmation, post-freeze audit, and 493-file
+   manifest; the dot-era archive's current protection count was updated too.
 
 ## Scientific checks and interpretation
 

@@ -9,7 +9,7 @@ explicitly reviewed recovery decision.
 ## Before substantive work on FLOWBOX
 
 The 256 GB NVMe carries the operating system. The dedicated 500 GB ext4 HDD
-is labelled `Cinqic Storage`. Before cloning, creating a worktree or venv,
+is labeled `Cinqic Storage`. Before cloning, creating a worktree or venv,
 building, running substantial tests, or writing experiment data, run:
 
 ```bash

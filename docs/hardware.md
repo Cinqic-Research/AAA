@@ -50,7 +50,7 @@ deliberately not recorded.
 | Swap | 2 GiB swap file | machine-verified |
 | System storage | Fanxiang S500Pro 256 GB NVMe SSD: EFI partition and the ext4 root filesystem (OS). **About 17 GB free at capture (93% used)**; this is historical occupancy, not the current work-storage policy | machine-verified (`lsblk`, `df`) |
 | Home directory | ecryptfs-encrypted overlay on the NVMe root; historical home-directory checkouts paid this layer, while HDD checkouts do not | machine-verified (`findmnt`) |
-| Cinqic working storage | HGST HTS545050A7E380 500 GB SATA HDD, one ext4 partition labelled "Cinqic Storage", about 419 GB free at capture | machine-verified |
+| Cinqic working storage | HGST HTS545050A7E380 500 GB SATA HDD, one ext4 partition labeled "Cinqic Storage", about 419 GB free at capture | machine-verified |
 | Motherboard | ASRock B450M/ac R2.0; firmware American Megatrends P3.10 (2022-10-27) | machine-verified (`/sys/class/dmi/id`) |
 | Operating system | Linux Mint 22.3 (Zena), kernel 7.0.0-31-generic, glibc 2.39 | machine-verified |
 | Python / NumPy | Python 3.12.3; NumPy 2.5.3 on scipy-openblas 0.3.34 (DYNAMIC_ARCH, Haswell kernels, 64-bit integers) | machine-verified |
@@ -86,7 +86,7 @@ The two drives have different jobs and different standing:
 - the **500 GB ext4 HDD** is dedicated to Cinqic repositories, worktrees,
   project virtual environments, builds, experiments, checkpoints, large
   caches, local Git backups and data roots. Its
-  filesystem behaviour under an AAA workload was measured and retained at
+  filesystem behavior under an AAA workload was measured and retained at
   [`evidence/phase_closure_storage_profile.json`](evidence/phase_closure_storage_profile.json).
 
 Portable scientific code does not hard-code a path to either drive. External
@@ -287,8 +287,8 @@ change that.
 
 | Name | What it is |
 |---|---|
-| AAA | the research programme that develops and validates mechanisms |
-| Juniper | the persistent agent the programme is ultimately intended to produce |
+| AAA | the research program that develops and validates mechanisms |
+| Juniper | the persistent agent the program is ultimately intended to produce |
 | Juniper App | the intended practical harness, runtime and interface for Juniper models |
 | FLOWBOX | the current primary local development machine |
 | the planned server | a future execution and serving environment; not built |

@@ -82,7 +82,7 @@ Thus the tested measurement paths are equivalent on those identities; the
 v2 result is a genuine **failure to replicate on fresh identities**, within
 the precision of this diagnostic. Neither result is erased, and the v2 result
 does not establish a negative adaptation effect. V2 retention on fresh
-identities resolves favourably; this is not general immunity to forgetting.
+identities resolves favorably; this is not general immunity to forgetting.
 
 External benchmarks are descriptive and do not demonstrate Python coding,
 generalization to repositories, general agency or autonomy. Observation-noise
