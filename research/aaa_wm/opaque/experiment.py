@@ -12,6 +12,7 @@ The ``attack`` split is used once, later, by a separate command; confirmation is
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import os
 import platform
@@ -28,7 +29,7 @@ from . import agents as A
 from . import generator as gen
 from .env import play
 
-LAYOUT = {"tune": (0, 1000), "evaluate": (1000, 5000), "adapt": (5000, 6000)}
+LAYOUT = {"tune": (0, 1000), "evaluate": (1000, 5000), "adapt": (5000, 6000), "attack": (0, 1480)}
 
 
 def data_root() -> Path:
@@ -71,10 +72,11 @@ def dev_tasks(role: str) -> list[gen.OpaqueTask]:
             )
             for r in raw
         ]
-    # disjointness: no development reference or buggy program equals a pilot or train program
-    earlier = gen.pool("pilot") + gen.pool("train")
+    # disjointness: no development reference or buggy program equals a pilot or train program;
+    # the attack split (used once) also excludes every development program
+    earlier = gen.pool("pilot") + gen.pool("train") + (gen.pool("development") if role == "attack" else [])
     exclude = {gen.program_hash(t.reference) for t in earlier} | {gen.program_hash(t.buggy) for t in earlier}
-    tasks = gen.pool("development", hi - lo, start=lo, exclude=exclude)
+    tasks = gen.pool("attack" if role == "attack" else "development", hi - lo, start=lo, exclude=exclude)
     cache.parent.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps([t.to_json() for t in tasks]))
     return tasks
@@ -233,6 +235,13 @@ def wms_agent(variant: str, seed: int, prior: A.Prior) -> Any:
             return out[rng_s.permutation(len(out))]
 
         pred = shuffled
+    if "corrupt" in parts:  # attack: every expected value shifted by +1 (a wrong specification)
+
+        def corrupt(programs: Any, view: Any, _p: Any = pred) -> Any:
+            bad = dataclasses.replace(view, visible_tests=tuple((x, (e[0], e[1] + 1) if e[0] == "ok" else e) for x, e in view.visible_tests))
+            return _p(programs, bad)
+
+        pred = corrupt
     if "stale" in parts:  # action control: every plan gets the prediction for the unedited program
 
         def stale(programs: Any, view: Any, _p: Any = base_pred) -> Any:
