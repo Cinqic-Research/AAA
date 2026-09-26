@@ -146,6 +146,10 @@ def make_agent(name: str, seed: int, steps: int, prior: A.Prior, device: str, ta
         return A.ToolSearch(lambda v, e: prior.score(e), "tool_prior")
     if name == "tool_gap":
         return A.ToolSearch(A.gap_scorer(prior), "tool_gap", initial_run=True)
+    if name == "tells":  # red-team shortcut: grammar legality only, same verified planner (no world model)
+        from .attacks import TellPredictor
+
+        return A.Planner(TellPredictor(), prior, name, depth=2)
     if name.startswith("ceiling"):
         depth = 1 if name.endswith("_d1") else 2
         return A.Planner(A.TrueLibraryPredictor(gen.library("A")), prior, name, depth=depth)
@@ -155,6 +159,8 @@ def make_agent(name: str, seed: int, steps: int, prior: A.Prior, device: str, ta
     from . import learned as L  # torch arms only below this line
     from . import models as M
 
+    if base in ("policy", "policy_aux") and variant == "plan":  # controller-matched: same planner as WM-S
+        return L.PolicyPlanner(M.load(ckpt_path(base, seed, steps, tag), device), device, prior, name)
     if base in ("policy", "policy_aux"):
         return L.policy_agent(M.load(ckpt_path(base, seed, steps, tag), device), device, name)
     if base == "wm":
@@ -283,7 +289,7 @@ def evaluate_cmd(args: argparse.Namespace) -> int:
     }
     for name in args.agents.split(","):
         per_seed = {}
-        for seed in seeds if not name.split(":")[0] in ("submit_asis", "prior", "tool_prior", "tool_gap") and not name.startswith("ceiling") else [0]:
+        for seed in seeds if not name.split(":")[0] in ("submit_asis", "prior", "tool_prior", "tool_gap", "tells") and not name.startswith("ceiling") else [0]:
             agent = make_agent(name, seed, args.train_steps, prior, device, args.tag)
             t0 = time.time()
             if name.startswith("ceiling"):  # the ceiling imagines with the task's *actual* library (A or B)

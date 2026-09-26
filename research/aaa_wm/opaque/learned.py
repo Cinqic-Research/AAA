@@ -7,6 +7,7 @@ real ``RUN`` (``REAL_OBSERVATION``) is ever treated as evidence about the curren
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from typing import Any
 
@@ -77,3 +78,38 @@ class ValuePredictor:
 
 def planner(predictor: Any, prior: Prior, name: str, depth: int = 2) -> Planner:
     return Planner(predictor, prior, name, depth=depth)
+
+
+class PolicyPlanner(Planner):
+    """The model-free policy inside the *same* verified planner as WM-S (controller-matched control).
+
+    A plan's score is the policy's log-probability that each of its edits is part of a fix, the
+    second edit scored in the state after the first. That is sequential model-free scoring with
+    exact text transitions and no consequence prediction. Second edits are expanded for the
+    ``beam`` best first edits (compute bound). Verification, re-planning, budgets and the prior
+    tie-break are identical to the world-model planner.
+    """
+
+    def __init__(self, model: Any, device: str, prior: Prior, name: str, *, beam: int = 8) -> None:
+        super().__init__(lambda programs, view: np.ones((len(programs), 1)), prior, name, depth=2)
+        self.scorer = PolicyScorer(model, device)
+        self.beam = beam
+
+    def _choose(self, view: View) -> tuple[Edit, ...]:
+        from dataclasses import replace
+
+        firsts = list(view.edits())
+        if not firsts:
+            return ()
+        s1 = {e: math.log(max(self.scorer(view, e), 1e-6)) for e in firsts}
+        cands: list[tuple[float, tuple[Edit, ...]]] = []
+        for e in firsts:
+            if apply(view.source, e) not in self.failed:
+                cands.append((s1[e] + 0.1 * self.prior.score(e), (e,)))
+        for e in sorted(firsts, key=lambda k: -s1[k])[: self.beam]:
+            after = replace(view, source=apply(view.source, e))
+            for e2 in after.edits():
+                if (e2.row, e2.col) == (e.row, e.col) or apply(after.source, e2) in self.failed:
+                    continue
+                cands.append((s1[e] + math.log(max(self.scorer(after, e2), 1e-6)) + 0.1 * (self.prior.score(e) + self.prior.score(e2)), (e, e2)))
+        return max(cands, key=lambda c: c[0])[1] if cands else ()
