@@ -132,6 +132,19 @@ def adjudicate_all(doc: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def audit(doc: dict[str, Any]) -> list[str]:
+    """Recompute every adjudication from the stored bits; list every stored verdict that disagrees."""
+
+    fresh = adjudicate_all(doc)
+    problems = []
+    for name, stored in doc.get("adjudications", {}).items():
+        if fresh.get(name, {}).get("verdict") != stored.get("verdict"):
+            problems.append(f"{name}: stored {stored.get('verdict')} != recomputed {fresh.get(name, {}).get('verdict')}")
+    missing = set(fresh) - set(doc.get("adjudications", {}))
+    problems += [f"{m}: not stored" for m in sorted(missing)]
+    return problems
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--output", required=True)

@@ -168,3 +168,53 @@ class Freeze(unittest.TestCase):
         self.assertIn("research/aaa_wm/opaque/generator.py", files)
         self.assertIn("research/aaa_wm/opaque/data/aaa_python_opaque_v0.json", files)
         self.assertIn("aaa/promotion/adjudicate.py", files)
+
+
+class Provenance(unittest.TestCase):
+    def test_imagination_is_never_a_real_observation(self) -> None:
+        from research.aaa_wm.opaque import agents as Ag
+        from research.aaa_wm.opaque import env as En
+
+        self.assertNotEqual(Ag.IMAGINATION, En.REAL)
+        self.assertEqual(En.RunObservation("x", (), ()).provenance, En.REAL)
+
+
+class ActionConditioning(unittest.TestCase):
+    def test_structured_predictions_depend_on_the_planned_program(self) -> None:
+        from research.aaa_wm.opaque import structured as S
+        from research.aaa_wm.opaque.env import OpaqueEnv
+
+        lib = gen.library("A")
+        model = S.LibraryModel(tuple(a.name for a in lib))
+        for i in range(20):  # a small, genuinely learned table
+            t = gen.build("pilot", 400 + i)
+            model.learn([(t.reference, x, run(t.reference, lib, x)) for x in gen.domain()], rounds=4)
+        pred = S.StructuredPredictor(model)
+        differing = 0
+        for i in range(10):
+            t = gen.build("pilot", 400 + i)
+            view = OpaqueEnv(t).view()
+            progs = [apply(view.source, e) for e in view.edits()][:30]
+            p = pred(progs, view)
+            differing += len({tuple(r) for r in p}) > 1
+        self.assertGreater(differing, 5)
+
+
+class Audit(unittest.TestCase):
+    def test_altered_stored_verdict_is_detected(self) -> None:
+        import numpy as np
+
+        from research.aaa_wm.opaque.confirm import adjudicate_all, audit
+
+        rng = np.random.default_rng(3)
+        slices = ["a"] * 80 + ["b"] * 80
+        bits = lambda p: "".join("1" if v else "0" for v in rng.random(160) < p)  # noqa: E731
+        doc = {
+            "slices": slices,
+            "results": {"ref": {s: {"bits": bits(0.2)} for s in ("1", "2")}, "ch": {s: {"bits": bits(0.7)} for s in ("1", "2")}},
+            "freeze": {"contracts": [{"name": "C", "reference": "ref", "challenger": "ch", "initializations": [1, 2], "threshold": 0.8, "seed": 5, "criterion": {"rule": "superior"}, "groups": "all"}]},
+        }
+        doc["adjudications"] = adjudicate_all(doc)
+        self.assertEqual(audit(doc), [])
+        doc["adjudications"]["C"]["verdict"] = "REJECT" if doc["adjudications"]["C"]["verdict"] != "REJECT" else "PROMOTE"
+        self.assertTrue(audit(doc))

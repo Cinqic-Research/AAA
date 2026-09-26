@@ -1,0 +1,113 @@
+{
+ "schema": "aaa.wm.mutation.v1",
+ "results": [
+  {
+   "id": "M1_view_exposes_reference",
+   "what": "the agent's View carries the hidden reference program",
+   "tests": [
+    "tests.test_aaa_wm_opaque.Boundary"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M2_run_uses_whole_domain",
+   "what": "RUN executes the program on the hidden domain instead of the visible tests",
+   "tests": [
+    "tests.test_aaa_wm_opaque.Boundary"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (errors=3)"
+  },
+  {
+   "id": "M3_confirmation_without_admission",
+   "what": "confirmation identities can be generated without an admission",
+   "tests": [
+    "tests.test_aaa_wm_opaque.Generation"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M4_forged_admission_accepted",
+   "what": "confirmation tasks are generated for an admission that fails verification",
+   "tests": [
+    "tests.test_aaa_wm_opaque.Freeze"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M5_fingerprint_omits_generator",
+   "what": "the frozen source fingerprint omits the task generator",
+   "tests": [
+    "tests.test_aaa_wm_opaque.Freeze"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M6_imagination_marked_real",
+   "what": "world-model imagination carries the REAL_OBSERVATION tag",
+   "tests": [
+    "tests.test_aaa_wm_opaque.Provenance"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M7_world_model_ignores_action",
+   "what": "WM-S predicts every plan with the unedited program (action removed)",
+   "tests": [
+    "tests.test_aaa_wm_opaque.ActionConditioning"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M8_stored_verdict_not_recomputed",
+   "what": "the audit trusts stored verdicts instead of recomputing from primitives",
+   "tests": [
+    "tests.test_aaa_wm_opaque.Audit"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M9_checkpoint_fingerprint_skips_tensors",
+   "what": "the checkpoint fingerprint ignores parameter values (tampering undetected)",
+   "tests": [
+    "tests.test_aaa_wm_models.Checkpoints"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M10_library_learner_accepts_inconsistent",
+   "what": "the abductive library learner records a value that does not reproduce the observation",
+   "tests": [
+    "tests.test_aaa_wm_models.StructuredModel"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M11_contamination_check_blind",
+   "what": "the LM corpus contamination check never flags a shared n-gram",
+   "tests": [
+    "tests.test_aaa_wm_lm.Contamination"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  },
+  {
+   "id": "M12_dialect_filter_disabled",
+   "what": "British-spelled documents are kept in the American-English corpus",
+   "tests": [
+    "tests.test_aaa_wm_lm.Dialect"
+   ],
+   "result": "caught",
+   "last_line": "FAILED (failures=1)"
+  }
+ ]
+}
