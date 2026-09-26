@@ -104,3 +104,33 @@ Pre-registered comparisons (development first, confirmation later under a separa
 
 Language results are **conditional on the world-model result**. The language track is used to
 demonstrate integration only after the world-model confirmation.
+
+## Development results, adapter v1 (added 2026-09-26 after the runs; development tune range, one seed each)
+
+| LM | Dev bits per byte | Adapter: held-out exact | Random twin: held-out exact | Training phrasings exact (pretrained / random) |
+|---|---:|---:|---:|---|
+| R1: d256, 4 layers, 5.2M params, 100M tokens | 1.332 | **0.252** | 0.044 | 0.973 / 0.897 |
+| R2: d384, 6 layers, 13.8M params, 262M tokens | 1.137 | 0.102 | 0.114 | 0.980 / 0.923 |
+| rules (hand-written, training phrasings) | - | 0.130 | - | 1.000 |
+
+**Reading.**
+
+- At R1, pretraining helps generalization to unseen phrasings (0.252 against 0.044) and beats the rule
+  parser.
+- At R2 the benefit **does not replicate** (0.102 against 0.114), even though R2 is the better
+  language model by bits per byte.
+- Every fine-tuned adapter nearly memorizes the training phrasings: the fine-tuning loss falls to
+  about 1e-3 in 3,000 fixed steps. The likeliest cause is over-fitting to the 12 training templates,
+  which a stronger model does faster. A capacity limit is not the likely cause.
+
+**Pre-registered rule applied.** R3 (about 27M) is **not justified**. R2 does not improve held-out
+extraction over R1.
+
+**Next (adapter v2, to be written before it runs).**
+
+- A third, disjoint *selection* family of phrasings, used only to choose the number of fine-tuning
+  steps and never for evaluation.
+- Three seeds per arm.
+- The comparison of pretrained against random twin is repeated at both rungs.
+
+The v1 numbers above are retained as they are.
