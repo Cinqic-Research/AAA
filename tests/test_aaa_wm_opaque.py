@@ -143,3 +143,28 @@ class ExecutorAgreement(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Freeze(unittest.TestCase):
+    def test_admission_refused_without_committed_manifest(self) -> None:
+        from research.aaa_wm.opaque import freeze
+
+        if (freeze.ROOT / freeze.FREEZE_PATH).exists():
+            self.skipTest("a freeze manifest exists; its admission is checked by the confirmation run")
+        with self.assertRaises(freeze.FreezeError):
+            freeze.Admission.obtain()
+
+    def test_forged_admission_cannot_generate_confirmation(self) -> None:
+        from research.aaa_wm.opaque import confirm, freeze
+
+        forged = freeze.Admission(manifest={"schema": freeze.SCHEMA})
+        with self.assertRaises(gen.ConfirmationNotAdmitted):
+            confirm.confirmation_tasks(forged, 1)
+
+    def test_fingerprint_covers_sources_and_imports(self) -> None:
+        from research.aaa_wm.opaque import freeze
+
+        files = freeze.fingerprint()["files"]
+        self.assertIn("research/aaa_wm/opaque/generator.py", files)
+        self.assertIn("research/aaa_wm/opaque/data/aaa_python_opaque_v0.json", files)
+        self.assertIn("aaa/promotion/adjudicate.py", files)

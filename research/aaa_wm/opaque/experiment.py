@@ -307,6 +307,55 @@ def evaluate_cmd(args: argparse.Namespace) -> int:
     return 0
 
 
+def adapt_cmd(args: argparse.Namespace) -> int:
+    """Adaptation, retention and plasticity on the ``adapt`` range (development identities).
+
+    For each initialization and each library_B stream (40 tasks) paired with an in_distribution
+    (library A) probe stream from the same range:
+
+    * ``online`` / ``frozen``: WM-S starting from the trained table; per-position success on the B stream.
+    * ``retention``: after the online agent has adapted through the B stream, its library model is
+      frozen and scored on the A probe stream, against the unadapted frozen model on the same probe.
+    * ``fresh``: an online WM-S that starts from an *empty* library (a fresh learner) on the same B stream.
+      Experienced minus fresh = what prior learning contributes after the switch.
+    """
+
+    import copy
+
+    from . import structured as S
+
+    tasks = dev_tasks("adapt")
+    prior = A.Prior(A.fit_prior(gen.pool("train", args.train_tasks)))
+    block = gen.load_spec()["slices"]["block_size"]
+    streams: dict[str, list[list[gen.OpaqueTask]]] = defaultdict(list)
+    for k in range(0, len(tasks), block):
+        streams[tasks[k].slice].append(tasks[k : k + block])
+    pairs = list(zip(streams["library_B"], streams["in_distribution"], strict=False))
+    doc: dict[str, Any] = {"schema": "aaa.wm.opaque.adapt.v1", "status": "development", "provenance": provenance(), "seeds": {}}
+    for seed in [int(x) for x in args.seeds.split(",")]:
+        base = wms_table(seed, 200000)
+        rows = []
+        for b_stream, a_stream in pairs:
+            rec: dict[str, Any] = {"b_tasks": [t.task_id for t in b_stream], "a_tasks": [t.task_id for t in a_stream]}
+            for mode in ("online", "frozen", "fresh"):
+                model = copy.deepcopy(base) if mode != "fresh" else S.LibraryModel(base.names)
+                pred = S.StructuredPredictor(model, online=mode != "frozen")
+                agent = A.Planner(pred, prior, mode, depth=2)
+                if mode != "frozen":
+                    agent.on_observation = lambda obs, view, _p=pred: _p.observe(obs, view)  # type: ignore[method-assign]
+                rec[mode] = "".join("1" if play(agent, t, i).success else "0" for i, t in enumerate(b_stream))
+                if mode == "online":
+                    adapted = model
+            for label, model in (("retention_adapted", adapted), ("retention_unadapted", copy.deepcopy(base))):
+                agent = A.Planner(S.StructuredPredictor(model, online=False), prior, label, depth=2)
+                rec[label] = "".join("1" if play(agent, t, i).success else "0" for i, t in enumerate(a_stream))
+            rows.append(rec)
+            print(seed, {k: v.count("1") for k, v in rec.items() if isinstance(v, str) and set(v) <= {"0", "1"}}, flush=True)
+        doc["seeds"][str(seed)] = rows
+    Path(args.output).write_text(json.dumps(doc))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="opaque-experiment")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -335,6 +384,10 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--output", required=True)
     e.add_argument("--cpu", action="store_true")
     e.add_argument("--no-stream-reset", dest="stream_reset", action="store_false", help="(tune-era behavior) online learning carries across streams")
+    ad = sub.add_parser("adapt")
+    ad.add_argument("--seeds", default="0")
+    ad.add_argument("--train-tasks", type=int, default=6000)
+    ad.add_argument("--output", required=True)
     j = sub.add_parser("jepa")
     j.add_argument("--seed", type=int, default=0)
     j.add_argument("--steps", type=int, default=20000)
@@ -346,6 +399,8 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     if args.cmd == "jepa":
         return jepa_cmd(args)
+    if args.cmd == "adapt":
+        return adapt_cmd(args)
     return train_cmd(args) if args.cmd == "train" else evaluate_cmd(args)
 
 
