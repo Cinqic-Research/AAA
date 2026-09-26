@@ -222,10 +222,27 @@ def wms_agent(variant: str, seed: int, prior: A.Prior) -> Any:
             rng.shuffle(vals)
             new.update(zip(keys, vals, strict=True))
         model.table = new
-    pred = S.StructuredPredictor(model, online="online" in parts)
+    unknown = next((float(p[1:]) for p in parts if p.startswith("u") and p[1:].replace(".", "").isdigit()), 0.3)
+    pred: Any = S.StructuredPredictor(model, online="online" in parts, unknown=unknown)
+    base_pred = pred
+    if "shuffle" in parts:  # action control: plan i is scored with the prediction for another plan
+        rng_s = np.random.default_rng(seed + 7)
+
+        def shuffled(programs: Any, view: Any, _p: Any = base_pred) -> Any:
+            out = _p(programs, view)
+            return out[rng_s.permutation(len(out))]
+
+        pred = shuffled
+    if "stale" in parts:  # action control: every plan gets the prediction for the unedited program
+
+        def stale(programs: Any, view: Any, _p: Any = base_pred) -> Any:
+            one = _p([view.source], view)
+            return np.repeat(one, len(programs), axis=0)
+
+        pred = stale
     agent = A.Planner(pred, prior, "wms:" + variant, depth=1 if "d1" in parts else 2)
     if "online" in parts:
-        agent.on_observation = lambda obs, view: pred.observe(obs, view)  # type: ignore[method-assign]
+        agent.on_observation = lambda obs, view: base_pred.observe(obs, view)  # type: ignore[method-assign]
     return agent
 
 
@@ -247,6 +264,7 @@ def evaluate_cmd(args: argparse.Namespace) -> int:
         "role": args.role,
         "range": LAYOUT[args.role],
         "runs_budget": args.runs,
+        "stream_reset": args.stream_reset,
         "steps_budget": args.steps_budget,
         "tasks": [t.task_id for t in tasks],
         "slices": [t.slice for t in tasks],
@@ -262,6 +280,14 @@ def evaluate_cmd(args: argparse.Namespace) -> int:
             if name.startswith("ceiling"):  # the ceiling imagines with the task's *actual* library (A or B)
                 ceilings = {lib: A.Planner(A.TrueLibraryPredictor(gen.library(lib)), prior, name, depth=agent.depth) for lib in ("A", "B")}
                 outs = [play(ceilings[t.library], t, i, runs=args.runs, steps=args.steps_budget) for i, t in enumerate(tasks)]
+            elif "online" in name and args.stream_reset:
+                # every stream (block of 40 tasks = one slice) starts from the trained state
+                block = gen.load_spec()["slices"]["block_size"]
+                outs = []
+                for i, t in enumerate(tasks):
+                    if i % block == 0:
+                        agent = make_agent(name, seed, args.train_steps, prior, device, args.tag)
+                    outs.append(play(agent, t, i, runs=args.runs, steps=args.steps_budget))
             else:
                 outs = [play(agent, t, i, runs=args.runs, steps=args.steps_budget) for i, t in enumerate(tasks)]
             per_seed[str(seed)] = {
@@ -308,6 +334,7 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--tag", default="")
     e.add_argument("--output", required=True)
     e.add_argument("--cpu", action="store_true")
+    e.add_argument("--no-stream-reset", dest="stream_reset", action="store_false", help="(tune-era behavior) online learning carries across streams")
     j = sub.add_parser("jepa")
     j.add_argument("--seed", type=int, default=0)
     j.add_argument("--steps", type=int, default=20000)
