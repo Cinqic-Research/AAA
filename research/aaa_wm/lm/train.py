@@ -120,7 +120,16 @@ def tokenize(kind: str, vocab: int) -> dict[str, Any]:
 
 
 class Windows:
-    def __init__(self, kind: str, vocab: int, split: str, context: int, seed: int) -> None:
+    """Random training windows drawn from in-RAM blocks.
+
+    Each source keeps ``blocks`` contiguous blocks of ``block_tokens`` tokens, read from random
+    offsets of its memory-mapped shard (sequential reads, which suit the HDD). Every
+    ``refresh`` batches one block per source is replaced. Windows are uniform within the
+    blocks, and blocks are uniform over the shard, so every window position has the same
+    long-run probability. Source proportions follow ``WEIGHTS``.
+    """
+
+    def __init__(self, kind: str, vocab: int, split: str, context: int, seed: int, *, block_tokens: int = 4 * 2**20, blocks: int = 4, refresh: int = 50) -> None:
         d = tok_dir(kind, vocab)
         self.data = {s: np.load(d / f"{s}.{split}.npy", mmap_mode="r") for s in SOURCES}
         self.ctx = context
@@ -128,12 +137,25 @@ class Windows:
         names = [s for s in SOURCES if len(self.data[s]) > context + 1]
         w = np.array([WEIGHTS[s] for s in names])
         self.names, self.p = names, w / w.sum()
+        self.block_tokens, self.refresh, self.calls = block_tokens, refresh, 0
+        self.buf = {s: [self._block(s) for _ in range(blocks)] for s in names}
+
+    def _block(self, s: str) -> np.ndarray:
+        arr = self.data[s]
+        n = min(len(arr), self.block_tokens)
+        j = int(self.rng.integers(0, len(arr) - n + 1))
+        return np.array(arr[j : j + n])
 
     def batch(self, B: int) -> np.ndarray:
+        self.calls += 1
+        if self.calls % self.refresh == 0:
+            for s in self.names:
+                self.buf[s][int(self.rng.integers(0, len(self.buf[s])))] = self._block(s)
         src = self.rng.choice(len(self.names), B, p=self.p)
         out = np.empty((B, self.ctx + 1), dtype=np.int64)
         for i, k in enumerate(src):
-            arr = self.data[self.names[k]]
+            blocks = self.buf[self.names[k]]
+            arr = blocks[int(self.rng.integers(0, len(blocks)))]
             j = self.rng.integers(0, len(arr) - self.ctx - 1)
             out[i] = arr[j : j + self.ctx + 1]
         return out
