@@ -29,6 +29,7 @@ from-scratch American-English language model integrate usefully through explicit
 | [language_confirmation.md](language_confirmation.md) | **language confirmation: L2 PROMOTE; L1, F1, F2 INCONCLUSIVE; integration success not declared** |
 | [mutation_results.json](mutation_results.json) | 12/12 deliberate boundary breaks caught |
 | [handoff.md](handoff.md) | what is and is not established; next steps |
+| [timeline.md](timeline.md) | reconstructed timeline and time accounting, including lost time and process lapses |
 | `state.json` | machine-readable program state |
 
 The literature and red-team notes are kept in the workspace (`/media/cinqic/Cinqic
