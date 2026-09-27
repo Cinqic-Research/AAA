@@ -63,7 +63,9 @@ def train_bpe(vocab: int, sample_bytes: int = 100_000_000) -> str:
     tk = Tokenizer(models.BPE())
     tk.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
     tk.decoder = decoders.ByteLevel()
-    trainer = trainers.BpeTrainer(vocab_size=vocab - 1, initial_alphabet=pre_tokenizers.ByteLevel.alphabet(), special_tokens=[])
+    trainer = trainers.BpeTrainer(
+        vocab_size=vocab - 1, initial_alphabet=pre_tokenizers.ByteLevel.alphabet(), special_tokens=[]
+    )
     tk.train_from_iterator(docs(), trainer)
     path = _bpe_path(vocab)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -86,8 +88,10 @@ def tokenize(kind: str, vocab: int) -> dict[str, Any]:
             path = root() / "corpus" / f"{s}.{split}.txt"
             if kind == "bytes":  # streamed in 64 MB chunks into a memory-mapped .npy (bounded RAM)
                 n = path.stat().st_size
-                ids = np.lib.format.open_memmap(out / f"{s}.{split}.npy", mode="w+", dtype=np.uint16, shape=(n,))
-                with open(path, "rb") as fh:
+                ids = np.lib.format.open_memmap(
+                    out / f"{s}.{split}.npy", mode="w+", dtype=np.uint16, shape=(n,)
+                )
+                with path.open("rb") as fh:
                     pos = 0
                     while chunk := fh.read(64 * 2**20):
                         a = np.frombuffer(chunk, dtype=np.uint8).astype(np.uint16)
@@ -100,21 +104,23 @@ def tokenize(kind: str, vocab: int) -> dict[str, Any]:
                 continue
             parts = []
             carry = b""
-            with open(path, "rb") as fh:  # streamed: documents are NUL-terminated
+            with path.open("rb") as fh:  # streamed: documents are NUL-terminated
                 while True:
                     chunk = fh.read(32 * 2**20)
                     data = carry + chunk
                     docs = data.split(b"\x00")
                     carry = docs.pop() if chunk else b""
                     for i in range(0, len(docs), 4096):
-                        for enc in tk.encode_batch([d.decode("utf-8", "replace") for d in docs[i : i + 4096] if d]):
-                            parts.append(np.array(enc.ids + [sep], dtype=np.uint16))
+                        for enc in tk.encode_batch(
+                            [d.decode("utf-8", "replace") for d in docs[i : i + 4096] if d]
+                        ):
+                            parts.append(np.array([*enc.ids, sep], dtype=np.uint16))
                     if not chunk:
                         break
-            ids = np.concatenate(parts) if parts else np.zeros(0, np.uint16)
-            np.save(out / f"{s}.{split}.npy", ids)
-            info[f"{s}.{split}"] = {"tokens": int(len(ids)), "bytes": path.stat().st_size}
-            del parts, ids
+            bpe_ids = np.concatenate(parts) if parts else np.zeros(0, np.uint16)
+            np.save(out / f"{s}.{split}.npy", bpe_ids)
+            info[f"{s}.{split}"] = {"tokens": len(bpe_ids), "bytes": path.stat().st_size}
+            del parts, bpe_ids
     (out / "info.json").write_text(json.dumps(info, indent=1))
     return info
 
@@ -129,7 +135,18 @@ class Windows:
     long-run probability. Source proportions follow ``WEIGHTS``.
     """
 
-    def __init__(self, kind: str, vocab: int, split: str, context: int, seed: int, *, block_tokens: int = 4 * 2**20, blocks: int = 4, refresh: int = 50) -> None:
+    def __init__(
+        self,
+        kind: str,
+        vocab: int,
+        split: str,
+        context: int,
+        seed: int,
+        *,
+        block_tokens: int = 4 * 2**20,
+        blocks: int = 4,
+        refresh: int = 50,
+    ) -> None:
         d = tok_dir(kind, vocab)
         self.data = {s: np.load(d / f"{s}.{split}.npy", mmap_mode="r") for s in SOURCES}
         self.ctx = context
@@ -161,7 +178,9 @@ class Windows:
         return out
 
 
-def bits_per_byte(model: Any, kind: str, vocab: int, split: str, device: str, budget_bytes: int = 2_000_000) -> dict[str, float]:
+def bits_per_byte(
+    model: Any, kind: str, vocab: int, split: str, device: str, budget_bytes: int = 2_000_000
+) -> dict[str, float]:
     """Nats over the first ``budget_bytes`` bytes of each source's split, per byte, in bits."""
 
     import torch
@@ -200,11 +219,24 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
 
     vocab = 257 if args.kind == "bytes" else args.vocab
     tokname = "bytes" if args.kind == "bytes" else f"bpe:{bpe_hash(args.vocab)}"
-    cfg = Mm.LMConfig(vocab=vocab, d_model=args.d_model, layers=args.layers, heads=max(1, args.d_model // 64), context=args.context, seed=args.seed, tokenizer=tokname)
+    cfg = Mm.LMConfig(
+        vocab=vocab,
+        d_model=args.d_model,
+        layers=args.layers,
+        heads=max(1, args.d_model // 64),
+        context=args.context,
+        seed=args.seed,
+        tokenizer=tokname,
+    )
     model = Mm.LM(cfg).cuda()
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.95), weight_decay=0.1)
     warm = min(500, args.steps // 10)
-    sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: min(1.0, (s + 1) / warm) * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * min(1.0, s / args.steps)))))
+    sched = torch.optim.lr_scheduler.LambdaLR(
+        opt,
+        lambda s: (
+            min(1.0, (s + 1) / warm) * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * min(1.0, s / args.steps))))
+        ),
+    )
     scaler = torch.amp.GradScaler("cuda", enabled=args.amp)
     data = Windows(args.kind, args.vocab, "train", args.context, args.seed + 1)
     curve, t0 = [], time.time()
@@ -240,10 +272,17 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "dev_bits_per_byte": bits_per_byte(model, args.kind, args.vocab, "dev", "cuda"),
     }
     name = f"{args.kind}{'' if args.kind == 'bytes' else args.vocab}_d{args.d_model}_l{args.layers}_s{args.seed}_n{args.steps}{args.tag}"
-    info["fingerprint"] = Mm.save(model, root() / "ckpt" / f"{name}.pt", {k: v for k, v in info.items() if k != "curve"})
+    info["fingerprint"] = Mm.save(
+        model, root() / "ckpt" / f"{name}.pt", {k: v for k, v in info.items() if k != "curve"}
+    )
     (root() / "logs").mkdir(parents=True, exist_ok=True)
     (root() / "logs" / f"{name}.json").write_text(json.dumps(info, indent=1, default=str))
-    print(json.dumps({k: info[k] for k in ("dev_bits_per_byte", "tokens_per_second", "peak_vram_bytes")}, indent=1), info["accounting"])
+    print(
+        json.dumps(
+            {k: info[k] for k in ("dev_bits_per_byte", "tokens_per_second", "peak_vram_bytes")}, indent=1
+        ),
+        info["accounting"],
+    )
     return info
 
 

@@ -341,3 +341,23 @@ evidence, so they are characterizations rather than confirmed claims.
   parameters, but its static def-use and line features encode human
   knowledge of Python; the matched-capacity comparison controls parameters,
   not prior knowledge.
+
+## World-model and language program (`research/aaa_wm`, added 2026-09-27)
+
+- **What the world-model claim covers.** It is confirmed and independently reviewed, but narrow: within the
+  generated `opaque.v0` benchmark, with two real test runs, an exact interpreter of visible Python plus a
+  *learned tabular model* of a fixed six-function library halves AAA's errors against the comparators
+  tested ([confirmation](wm_program/opaque_confirmation.md)).
+- **Where it is weak.**
+  - It depends strongly on the library-table seed.
+  - The online-update benefit is fragile.
+  - The model-free reference is one small network.
+  - It is weakest when the library changes, and adapting forgets the old library.
+- **What did not work.** Generic learned world models (a black-box transformer WM, and a JEPA auxiliary)
+  did not earn a place.
+- **Language.** The from-scratch American-English LM (5.2M parameters) beats hand-written rules at
+  extracting tests from held-out phrasings. Pretraining and full-system superiority are
+  **inconclusive** on fresh confirmation, so language-integration and full-system success are not
+  claimed ([language confirmation](wm_program/language_confirmation.md)). The statements are
+  templated paraphrases, not open-ended English.
+- **Compute.** Compute is not matched across arms (the matched resource is real test runs).

@@ -17,16 +17,17 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 
-MUTATIONS = [
+MUTATIONS: list[dict[str, Any]] = [
     {
         "id": "M1_view_exposes_reference",
         "what": "the agent's View carries the hidden reference program",
         "file": "research/aaa_wm/opaque/env.py",
         "old": "    api_names: tuple[str, ...]\n\n    def edits",
-        "new": "    api_names: tuple[str, ...]\n    reference: str = \"\"\n\n    def edits",
+        "new": '    api_names: tuple[str, ...]\n    reference: str = ""\n\n    def edits',
         "tests": ["tests.test_aaa_wm_opaque.Boundary"],
     },
     {
@@ -41,15 +42,15 @@ MUTATIONS = [
         "id": "M3_confirmation_without_admission",
         "what": "confirmation identities can be generated without an admission",
         "file": "research/aaa_wm/opaque/generator.py",
-        "old": "    if split == \"confirmation\" and admission is None:\n        raise ConfirmationNotAdmitted(\"opaque.v0 confirmation",
-        "new": "    if False:\n        raise ConfirmationNotAdmitted(\"opaque.v0 confirmation",
+        "old": '    if split == "confirmation" and admission is None:\n        raise ConfirmationNotAdmitted("opaque.v0 confirmation',
+        "new": '    if False:\n        raise ConfirmationNotAdmitted("opaque.v0 confirmation',
         "tests": ["tests.test_aaa_wm_opaque.Generation"],
     },
     {
         "id": "M4_forged_admission_accepted",
         "what": "confirmation tasks are generated for an admission that fails verification",
         "file": "research/aaa_wm/opaque/confirm.py",
-        "old": "    if not admission.verify():\n        raise gen.ConfirmationNotAdmitted(\"admission failed verification\")",
+        "old": '    if not admission.verify():\n        raise gen.ConfirmationNotAdmitted("admission failed verification")',
         "new": "    pass",
         "tests": ["tests.test_aaa_wm_opaque.Freeze"],
     },
@@ -57,16 +58,16 @@ MUTATIONS = [
         "id": "M5_fingerprint_omits_generator",
         "what": "the frozen source fingerprint omits the task generator",
         "file": "research/aaa_wm/opaque/freeze.py",
-        "old": "if p.is_file() and \"__pycache__\" not in p.parts)",
-        "new": "if p.is_file() and \"__pycache__\" not in p.parts and p.name != \"generator.py\")",
+        "old": 'if p.is_file() and "__pycache__" not in p.parts)',
+        "new": 'if p.is_file() and "__pycache__" not in p.parts and p.name != "generator.py")',
         "tests": ["tests.test_aaa_wm_opaque.Freeze"],
     },
     {
         "id": "M6_imagination_marked_real",
         "what": "world-model imagination carries the REAL_OBSERVATION tag",
         "file": "research/aaa_wm/opaque/agents.py",
-        "old": "IMAGINATION = \"WORLD_MODEL_IMAGINATION\"",
-        "new": "IMAGINATION = \"REAL_OBSERVATION\"",
+        "old": 'IMAGINATION = "WORLD_MODEL_IMAGINATION"',
+        "new": 'IMAGINATION = "REAL_OBSERVATION"',
         "tests": ["tests.test_aaa_wm_opaque.Provenance"],
     },
     {
@@ -82,7 +83,7 @@ MUTATIONS = [
         "what": "the audit trusts stored verdicts instead of recomputing from primitives",
         "file": "research/aaa_wm/opaque/confirm.py",
         "old": "    fresh = adjudicate_all(doc)",
-        "new": "    fresh = doc.get(\"adjudications\", {})",
+        "new": '    fresh = doc.get("adjudications", {})',
         "tests": ["tests.test_aaa_wm_opaque.Audit"],
     },
     {
@@ -106,7 +107,7 @@ MUTATIONS = [
         "id": "M11_contamination_check_blind",
         "what": "the LM corpus contamination check never flags a shared n-gram",
         "file": "research/aaa_wm/lm/corpus.py",
-        "old": "                if any(\" \".join(w[i : i + n]) in grams for i in range(len(w) - n + 1)):",
+        "old": '                if any(" ".join(w[i : i + n]) in grams for i in range(len(w) - n + 1)):',
         "new": "                if False:",
         "tests": ["tests.test_aaa_wm_lm.Contamination"],
     },
@@ -130,9 +131,17 @@ def run_one(m: dict, python: str) -> dict:
         if m["old"] not in text:
             return {**m, "result": "PATCH_DID_NOT_APPLY"}
         target.write_text(text.replace(m["old"], m["new"], 1))
-        r = subprocess.run([python, "-m", "unittest", *m["tests"]], cwd=tmp, capture_output=True, text=True, timeout=900)
+        r = subprocess.run(
+            [python, "-m", "unittest", *m["tests"]], cwd=tmp, capture_output=True, text=True, timeout=900
+        )
         tail = (r.stderr or r.stdout).strip().splitlines()[-1:] or [""]
-        return {"id": m["id"], "what": m["what"], "tests": m["tests"], "result": "caught" if r.returncode != 0 else "MISSED", "last_line": tail[0]}
+        return {
+            "id": m["id"],
+            "what": m["what"],
+            "tests": m["tests"],
+            "result": "caught" if r.returncode != 0 else "MISSED",
+            "last_line": tail[0],
+        }
 
 
 def main() -> int:

@@ -14,7 +14,10 @@ from research.aaa_wm.lm.corpus import contamination, dialect_counts, verdict
 class Contamination(unittest.TestCase):
     def test_injected_evaluation_text_is_flagged(self) -> None:
         with tempfile.TemporaryDirectory() as d:
-            clean = "The committee reviewed the annual budget and approved the new program for the county schools this year." * 2
+            clean = (
+                "The committee reviewed the annual budget and approved the new program for the county schools this year."
+                * 2
+            )
             leak = "Heads up: f has a bug. Feeding in four is expected to produce thirty-two. In addition, the answer for ten has to be sixteen."
             Path(d, "x.train.txt").write_bytes((clean + "\x00" + "Intro text. " + leak + "\x00").encode())
             report = contamination(Path(d), [leak])
@@ -23,8 +26,14 @@ class Contamination(unittest.TestCase):
 
 class Dialect(unittest.TestCase):
     def test_british_documents_are_dropped(self) -> None:
-        uk = "The colour of the centre was a favourite of the neighbourhood, and the organisation liked its behaviour. " * 3
-        us = "The color of the center was a favorite of the neighborhood, and the organization liked its behavior. " * 3
+        uk = (
+            "The colour of the centre was a favourite of the neighbourhood, and the organisation liked its behaviour. "
+            * 3
+        )
+        us = (
+            "The color of the center was a favorite of the neighborhood, and the organization liked its behavior. "
+            * 3
+        )
         self.assertEqual(verdict(uk), "british_spelling")
         self.assertIsNone(verdict(us))
         self.assertGreater(dialect_counts(us)[0], 0)

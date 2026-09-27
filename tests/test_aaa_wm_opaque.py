@@ -14,7 +14,22 @@ from research.aaa_wm.opaque.program import Edit, apply, edits, mutations_of, run
 class MutationRelation(unittest.TestCase):
     def test_symmetric(self) -> None:
         names = tuple(f"api{k}" for k in range(6))
-        tokens = [str(v) for v in range(0, 25)] + ["+", "-", "*", "//", "%", ">", ">=", "<", "<=", "==", "!=", "+=", "-=", *names]
+        tokens = [str(v) for v in range(0, 25)] + [
+            "+",
+            "-",
+            "*",
+            "//",
+            "%",
+            ">",
+            ">=",
+            "<",
+            "<=",
+            "==",
+            "!=",
+            "+=",
+            "-=",
+            *names,
+        ]
         for t in tokens:
             for m in mutations_of(t, names):
                 self.assertIn(t, mutations_of(m, names), (t, m))
@@ -40,7 +55,9 @@ class Generation(unittest.TestCase):
         for i in range(30):
             t = gen.build("pilot", i)
             self.assertTrue(any(run(t.buggy, lib, x) != e for x, e in t.visible_tests))
-            self.assertNotEqual(signature(t.buggy, lib, gen.domain()), signature(t.reference, lib, gen.domain()))
+            self.assertNotEqual(
+                signature(t.buggy, lib, gen.domain()), signature(t.reference, lib, gen.domain())
+            )
             self.assertIn("api", t.reference)
 
     def test_confirmation_refused_without_admission(self) -> None:
@@ -52,7 +69,9 @@ class Generation(unittest.TestCase):
     def test_library_b_differs_from_a(self) -> None:
         a, b = gen.library("A"), gen.library("B")
         self.assertEqual([x.name for x in a], [x.name for x in b])
-        self.assertEqual(sum(x != y for x, y in zip(a, b, strict=True)), gen.load_spec()["library"]["B"]["changes"])
+        self.assertEqual(
+            sum(x != y for x, y in zip(a, b, strict=True)), gen.load_spec()["library"]["B"]["changes"]
+        )
 
 
 class Boundary(unittest.TestCase):
@@ -211,10 +230,28 @@ class Audit(unittest.TestCase):
         bits = lambda p: "".join("1" if v else "0" for v in rng.random(160) < p)  # noqa: E731
         doc = {
             "slices": slices,
-            "results": {"ref": {s: {"bits": bits(0.2)} for s in ("1", "2")}, "ch": {s: {"bits": bits(0.7)} for s in ("1", "2")}},
-            "freeze": {"contracts": [{"name": "C", "reference": "ref", "challenger": "ch", "initializations": [1, 2], "threshold": 0.8, "seed": 5, "criterion": {"rule": "superior"}, "groups": "all"}]},
+            "results": {
+                "ref": {s: {"bits": bits(0.2)} for s in ("1", "2")},
+                "ch": {s: {"bits": bits(0.7)} for s in ("1", "2")},
+            },
+            "freeze": {
+                "contracts": [
+                    {
+                        "name": "C",
+                        "reference": "ref",
+                        "challenger": "ch",
+                        "initializations": [1, 2],
+                        "threshold": 0.8,
+                        "seed": 5,
+                        "criterion": {"rule": "superior"},
+                        "groups": "all",
+                    }
+                ]
+            },
         }
         doc["adjudications"] = adjudicate_all(doc)
         self.assertEqual(audit(doc), [])
-        doc["adjudications"]["C"]["verdict"] = "REJECT" if doc["adjudications"]["C"]["verdict"] != "REJECT" else "PROMOTE"
+        doc["adjudications"]["C"]["verdict"] = (
+            "REJECT" if doc["adjudications"]["C"]["verdict"] != "REJECT" else "PROMOTE"
+        )
         self.assertTrue(audit(doc))

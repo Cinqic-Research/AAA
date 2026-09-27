@@ -46,7 +46,7 @@ def logprob(model: Any, codec: Any, texts: list[str], device: str = "cuda") -> n
     import torch
 
     out = np.zeros(len(texts))
-    enc = [[codec.sep] + codec.encode(t)[: model.config.context - 1] for t in texts]
+    enc = [[codec.sep, *codec.encode(t)[: model.config.context - 1]] for t in texts]
     order = sorted(range(len(texts)), key=lambda i: len(enc[i]))
     for s in range(0, len(order), 32):
         group = order[s : s + 32]
@@ -59,7 +59,9 @@ def logprob(model: Any, codec: Any, texts: list[str], device: str = "cuda") -> n
         x, m = x.to(device), m.to(device)
         with torch.no_grad(), torch.autocast("cuda", dtype=torch.float16):
             logits = model(x[:, :-1])
-        tok = -torch.nn.functional.cross_entropy(logits.float().reshape(-1, logits.shape[-1]), x[:, 1:].reshape(-1), reduction="none").reshape(x.shape[0], -1)
+        tok = -torch.nn.functional.cross_entropy(
+            logits.float().reshape(-1, logits.shape[-1]), x[:, 1:].reshape(-1), reduction="none"
+        ).reshape(x.shape[0], -1)
         vals = (tok * m).sum(-1).cpu().numpy()
         for r, i in enumerate(group):
             out[i] = vals[r]
@@ -137,7 +139,9 @@ def noisy(text: str, rate: float, rng: np.random.Generator) -> str:
     return "".join(out)
 
 
-def noise_robustness(model: Any, codec: Any, split: str = "dev", n_docs: int = 300, rate: float = 0.05) -> dict[str, float]:
+def noise_robustness(
+    model: Any, codec: Any, split: str = "dev", n_docs: int = 300, rate: float = 0.05
+) -> dict[str, float]:
     rng = np.random.default_rng(20260926)
     docs = []
     for s in SOURCES:
@@ -148,7 +152,12 @@ def noise_robustness(model: Any, codec: Any, split: str = "dev", n_docs: int = 3
     dirty = logprob(model, codec, dirty_docs)
     bits_clean = -clean.sum() / math.log(2) / sum(len(d.encode()) for d in docs)
     bits_dirty = -dirty.sum() / math.log(2) / sum(len(d.encode()) for d in dirty_docs)
-    return {"bpb_clean": float(bits_clean), "bpb_noisy": float(bits_dirty), "delta": float(bits_dirty - bits_clean), "rate": rate}
+    return {
+        "bpb_clean": float(bits_clean),
+        "bpb_noisy": float(bits_dirty),
+        "delta": float(bits_dirty - bits_clean),
+        "rate": rate,
+    }
 
 
 def main() -> int:
@@ -168,12 +177,19 @@ def main() -> int:
     pairs = spelling_pairs("test" if a.split == "test" else "dev")
     us = logprob(model, codec, [p[1] for p in pairs])
     uk = logprob(model, codec, [p[2] for p in pairs])
-    res["american_spelling"] = {"pairs": len(pairs), "prefers_american": float(np.mean(us > uk)) if pairs else None}
+    res["american_spelling"] = {
+        "pairs": len(pairs),
+        "prefers_american": float(np.mean(us > uk)) if pairs else None,
+    }
     res["noise"] = noise_robustness(model, codec)
     out = Path(a.output) if a.output else root() / "eval_results" / (Path(a.lm).stem + f"_{a.split}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, indent=1))
-    print(json.dumps({k: (v if k != "blimp" else v["overall"]) for k, v in res.items() if k != "config"}, indent=1))
+    print(
+        json.dumps(
+            {k: (v if k != "blimp" else v["overall"]) for k, v in res.items() if k != "config"}, indent=1
+        )
+    )
     return 0
 
 

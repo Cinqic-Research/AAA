@@ -1,6 +1,6 @@
 {
  "schema": "aaa.wm_program.state.v1",
- "updated": "2026-09-26T10:40",
+ "updated": "2026-09-27",
  "canonical": {
   "repo": "Cinqic-Research/AAA",
   "main_sha": "dbee13c",
@@ -37,7 +37,9 @@
  ],
  "rejected_hypotheses": [
   "H-WM0: an action-conditioned per-test consequence model beats a matched direct scorer on v1 repair (inconclusive, not supported)",
-  "seq.v0 benchmark design (no information value in RUN)"
+  "seq.v0 benchmark design (no information value in RUN)",
+  "JEPA auxiliary improves the black-box WM's decisions (J-4, development)",
+  "R3 ~27M LM justified (R2 no better than R1)"
  ],
  "experiments_completed": [
   {
@@ -88,20 +90,19 @@
    "result": "exact 3-test extraction: train phrasings 1.00, held-out phrasings 0.13"
   }
  ],
- "experiments_running": [
-  "evaluate-stage queue (48 jobs; data/tmp/queue_evaluate.json via research/aaa_wm/jobs.py)",
-  "LM tokenizer experiment bytes vs BPE-8K matched FLOPs (seeds 0,1)"
- ],
+ "experiments_running": [],
  "best_dev_result": null,
- "confirmation_status": "none declared for this program",
+ "confirmation_status": {
+  "opaque.v0 world model": "OBSERVED ONCE (freeze f994d91, evidence 14eaf5d): 11/11 crossed.v1 PROMOTE; independent review: survives, narrowed; identities confirmation[0,4000) SPENT",
+  "aaa.wm.lang.v0": "OBSERVED ONCE (freeze a8c088d, evidence f0a7982): L2 PROMOTE; L1, F1, F2 INCONCLUSIVE; LANGUAGE_INTEGRATION_SUCCESS and FULL_SYSTEM_SUCCESS NOT declared; identities confirmation[4000,6000) SPENT"
+ },
  "blockers": [],
  "next_actions": [
-  "finish evaluate stage -> set MDE/thresholds",
-  "attack pool once",
-  "adaptation (adapt range)",
-  "freeze + confirmation (fresh identities, inits 100-102)",
-  "independent review subagent",
-  "LM: tokenizer decision, size ladder, adapter, language-conditioned factorial"
+  "owner review of PR #30",
+  "opaque.v1 successor benchmark (grammar-confined mutations, >=10 inits, >=30 streams/slice, guarded draft)",
+  "versioned library model (forgetting)",
+  "stronger model-free reference",
+  "richer paraphrase data for the language adapter; language confirmation with >=10 inits"
  ],
  "candidate_architectures": [
   "WM-S online (selected candidate)",
@@ -112,5 +113,8 @@
   "opaque.v0 spec": "research/aaa_wm/opaque/data/aaa_python_opaque_v0.json",
   "dev layout": "tune [0,1000) evaluate [1000,5000) adapt [5000,6000)",
   "train dataset": "6000 train tasks, shared behavior dataset (AAA_DATA_ROOT/opaque)"
- }
+ },
+ "unresolved_review_findings": [
+  "see docs/wm_program/independent_review_opaque.md issues 6-8 (minor): remote anchoring of freeze, unguarded draft(), CPU budget unverified"
+ ]
 }

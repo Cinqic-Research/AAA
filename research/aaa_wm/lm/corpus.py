@@ -81,10 +81,76 @@ for _pair in _PAIRS.split("|"):
         _us, _uk = _pair.split()
         VARIANTS[_us], VARIANTS[_uk] = "US", "UK"
 # "program" is also standard British for software; "draft", "gauge", "ax", "judgment" are ambiguous:
-for _w in ("program", "programs", "programme", "programmes", "draft", "draught", "gage", "gauge", "ax", "axe", "judgment", "judgement"):
+for _w in (
+    "program",
+    "programs",
+    "programme",
+    "programmes",
+    "draft",
+    "draught",
+    "gage",
+    "gauge",
+    "ax",
+    "axe",
+    "judgment",
+    "judgement",
+):
     VARIANTS.pop(_w, None)
 FUNCTION_WORDS = frozenset(
-    "the of and to a in is that for it as was with be by on not he i this are or his from at which but have an they you were her she there been one all we their has would when if so no will can more who what its".split()
+    [
+        "the",
+        "of",
+        "and",
+        "to",
+        "a",
+        "in",
+        "is",
+        "that",
+        "for",
+        "it",
+        "as",
+        "was",
+        "with",
+        "be",
+        "by",
+        "on",
+        "not",
+        "he",
+        "i",
+        "this",
+        "are",
+        "or",
+        "his",
+        "from",
+        "at",
+        "which",
+        "but",
+        "have",
+        "an",
+        "they",
+        "you",
+        "were",
+        "her",
+        "she",
+        "there",
+        "been",
+        "one",
+        "all",
+        "we",
+        "their",
+        "has",
+        "would",
+        "when",
+        "if",
+        "so",
+        "no",
+        "will",
+        "can",
+        "more",
+        "who",
+        "what",
+        "its",
+    ]
 )
 _WORD = re.compile(r"[A-Za-z]+")
 _CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -104,11 +170,45 @@ class Source:
 
 
 SOURCES: tuple[Source, ...] = (
-    Source("usgpo", ("usgpo-0000.json.gz", "usgpo-0002.json.gz"), "public domain (17 U.S.C. 105)", "common-pile/usgpo_filtered; card warns of possible metadata/license inaccuracies", 600_000_000),
-    Source("fineweb_edu", ("fineweb-edu-10BT-000_00000.parquet",), "ODC-By 1.0 (+ Common Crawl terms of use)", "HuggingFaceFW/fineweb-edu sample-10BT", 600_000_000),
-    Source("cosmopedia", ("cosmopedia-stories-00000.parquet", "cosmopedia-stories-00001.parquet", "cosmopedia-wikihow-00000.parquet"), "Apache-2.0", "HuggingFaceTB/cosmopedia (synthetic, Mixtral-8x7B-Instruct)", 400_000_000),
-    Source("simplewiki", ("simplewiki-20231101.parquet",), "CC BY-SA 3.0 / GFDL (attribution: Wikipedia contributors)", "wikimedia/wikipedia 20231101.simple", 300_000_000),
-    Source("pydocs", ("python-3.12-docs-text.tar.bz2",), "PSF License v2 (examples PSF-2.0 / 0BSD)", "docs.python.org 3.12 text archive", 50_000_000),
+    Source(
+        "usgpo",
+        ("usgpo-0000.json.gz", "usgpo-0002.json.gz"),
+        "public domain (17 U.S.C. 105)",
+        "common-pile/usgpo_filtered; card warns of possible metadata/license inaccuracies",
+        600_000_000,
+    ),
+    Source(
+        "fineweb_edu",
+        ("fineweb-edu-10BT-000_00000.parquet",),
+        "ODC-By 1.0 (+ Common Crawl terms of use)",
+        "HuggingFaceFW/fineweb-edu sample-10BT",
+        600_000_000,
+    ),
+    Source(
+        "cosmopedia",
+        (
+            "cosmopedia-stories-00000.parquet",
+            "cosmopedia-stories-00001.parquet",
+            "cosmopedia-wikihow-00000.parquet",
+        ),
+        "Apache-2.0",
+        "HuggingFaceTB/cosmopedia (synthetic, Mixtral-8x7B-Instruct)",
+        400_000_000,
+    ),
+    Source(
+        "simplewiki",
+        ("simplewiki-20231101.parquet",),
+        "CC BY-SA 3.0 / GFDL (attribution: Wikipedia contributors)",
+        "wikimedia/wikipedia 20231101.simple",
+        300_000_000,
+    ),
+    Source(
+        "pydocs",
+        ("python-3.12-docs-text.tar.bz2",),
+        "PSF License v2 (examples PSF-2.0 / 0BSD)",
+        "docs.python.org 3.12 text archive",
+        50_000_000,
+    ),
 )
 
 
@@ -136,9 +236,9 @@ def _read(src: Source, raw: Path) -> Iterator[tuple[str, str]]:
             with tarfile.open(path, "r:bz2") as tar:
                 for m in tar.getmembers():
                     if m.isfile() and m.name.endswith(".txt"):
-                        fh = tar.extractfile(m)
-                        if fh is not None:
-                            yield f"{fname}:{m.name}", fh.read().decode("utf-8", "replace")
+                        member = tar.extractfile(m)
+                        if member is not None:
+                            yield f"{fname}:{m.name}", member.read().decode("utf-8", "replace")
         else:
             raise ValueError(fname)
 
@@ -189,14 +289,20 @@ _B = _rng.integers(0, _MASK, 64, dtype=np.uint64)
 def minhash(text: str) -> np.ndarray:
     words = _WORD.findall(text.lower())
     shingles = {" ".join(words[i : i + 5]) for i in range(max(1, len(words) - 4))}
-    h = np.array([int.from_bytes(hashlib.blake2b(s.encode(), digest_size=8).digest(), "little") & _MASK for s in shingles], dtype=np.uint64)
+    h = np.array(
+        [
+            int.from_bytes(hashlib.blake2b(s.encode(), digest_size=8).digest(), "little") & _MASK
+            for s in shingles
+        ],
+        dtype=np.uint64,
+    )
     return ((h[:, None] * _A[None, :] + _B[None, :]) % np.uint64(_MASK)).min(axis=0)
 
 
 class NearDup:
     def __init__(self, bands: int = 16, rows: int = 4) -> None:
         self.bands, self.rows = bands, rows
-        self.buckets: list[dict[bytes, int]] = [dict() for _ in range(bands)]
+        self.buckets: list[dict[bytes, int]] = [{} for _ in range(bands)]
         self.sigs: list[np.ndarray] = []
 
     def seen(self, sig: np.ndarray, threshold: float = 0.8) -> bool:
@@ -227,13 +333,20 @@ def build(root: Path, sources: tuple[Source, ...] = SOURCES) -> dict[str, Any]:
     out.mkdir(parents=True, exist_ok=True)
     exact: set[bytes] = set()
     near = NearDup()
-    manifest: dict[str, Any] = {"version": VERSION, "lexicon_sha256": lexicon_hash(), "created": time.strftime("%Y-%m-%dT%H:%M:%S"), "sources": {}}
-    downloads = (raw / "manifest_downloads.txt").read_text() if (raw / "manifest_downloads.txt").exists() else ""
+    manifest: dict[str, Any] = {
+        "version": VERSION,
+        "lexicon_sha256": lexicon_hash(),
+        "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "sources": {},
+    }
+    downloads = (
+        (raw / "manifest_downloads.txt").read_text() if (raw / "manifest_downloads.txt").exists() else ""
+    )
     for src in sources:
         stats: Counter[str] = Counter()
-        written = Counter()
-        files = {s: open(out / f"{src.name}.{s}.txt", "wb") for s in ("train", "dev", "test")}
-        dialect = Counter()
+        written: Counter[str] = Counter()
+        files = {s: (out / f"{src.name}.{s}.txt").open("wb") for s in ("train", "dev", "test")}
+        dialect: Counter[str] = Counter()
         for doc_id, text in _read(src, raw):
             stats["read"] += 1
             text = normalize(text)
@@ -266,7 +379,10 @@ def build(root: Path, sources: tuple[Source, ...] = SOURCES) -> dict[str, Any]:
             f.close()
         manifest["sources"][src.name] = {
             "files": {
-                fn: next((line for line in downloads.splitlines() if line.split(" ")[3:4] == [fn]), "missing from download manifest")
+                fn: next(
+                    (line for line in downloads.splitlines() if line.split(" ")[3:4] == [fn]),
+                    "missing from download manifest",
+                )
                 for fn in src.files
             },
             "license": src.license,
@@ -274,7 +390,10 @@ def build(root: Path, sources: tuple[Source, ...] = SOURCES) -> dict[str, Any]:
             "counts": dict(stats),
             "bytes": dict(written),
             "dialect_hits_kept": dict(dialect),
-            "output_sha256": {s: hashlib.sha256((out / f"{src.name}.{s}.txt").read_bytes()).hexdigest() for s in ("train", "dev", "test")},
+            "output_sha256": {
+                s: hashlib.sha256((out / f"{src.name}.{s}.txt").read_bytes()).hexdigest()
+                for s in ("train", "dev", "test")
+            },
         }
         print(src.name, dict(stats), dict(written), flush=True)
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1))
@@ -284,13 +403,13 @@ def build(root: Path, sources: tuple[Source, ...] = SOURCES) -> dict[str, Any]:
 def contamination(corpus_dir: Path, texts: list[str], n: int = 13) -> dict[str, Any]:
     """Documents in the train shards that share a word ``n``-gram with any of ``texts``."""
 
-    grams = set()
+    grams: set[str] = set()
     for t in texts:
         w = t.lower().split()
         grams.update(" ".join(w[i : i + n]) for i in range(len(w) - n + 1))
-    hits = Counter()
+    hits: Counter[str] = Counter()
     for f in sorted(corpus_dir.glob("*.train.txt")):
-        with open(f, "rb") as fh:
+        with f.open("rb") as fh:
             for doc in io.BytesIO(fh.read()).read().split(b"\x00"):
                 w = doc.decode("utf-8", "replace").lower().split()
                 if any(" ".join(w[i : i + n]) in grams for i in range(len(w) - n + 1)):

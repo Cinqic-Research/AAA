@@ -31,7 +31,8 @@ class Adopted:
     """A job started by an earlier runner (its lock names a live PID): counted and polled, not restarted."""
 
     def __init__(self, pid: int) -> None:
-        self.pid, self.returncode = pid, None
+        self.pid = pid
+        self.returncode: int | None = None
 
     def poll(self) -> int | None:
         try:
@@ -48,7 +49,9 @@ def main() -> int:
     ap.add_argument("--cpu", type=int, default=2)
     ap.add_argument("--gpu", type=int, default=1)
     ap.add_argument("--budget", default="9G")
-    ap.add_argument("--vram", default="5000M", help="GPU memory budget; a job's 'vram' field (default 1G for gpu jobs)")
+    ap.add_argument(
+        "--vram", default="5000M", help="GPU memory budget; a job's 'vram' field (default 1G for gpu jobs)"
+    )
     args = ap.parse_args()
     running: dict[str, tuple[subprocess.Popen[bytes], dict]] = {}
     started: set[str] = set()
@@ -70,7 +73,9 @@ def main() -> int:
 
     def refresh() -> list[dict]:
         jobs = json.loads(Path(args.queue).read_text())
-        return [j for j in jobs if j["name"] not in started and not Path(j["output"]).exists() and not locked(j)]
+        return [
+            j for j in jobs if j["name"] not in started and not Path(j["output"]).exists() and not locked(j)
+        ]
 
     for job in json.loads(Path(args.queue).read_text()):
         if not Path(job["output"]).exists() and locked(job):
@@ -89,7 +94,11 @@ def main() -> int:
         for job in list(pending):
             kind = job.get("kind", "cpu")
             n_kind = sum(1 for _, j in running.values() if j.get("kind", "cpu") == kind)
-            if n_kind >= (args.gpu if kind == "gpu" else args.cpu) or used + _bytes(job["mem"]) > budget or vused + vram(job) > vbudget:
+            if (
+                n_kind >= (args.gpu if kind == "gpu" else args.cpu)
+                or used + _bytes(job["mem"]) > budget
+                or vused + vram(job) > vbudget
+            ):
                 continue
             if not all(Path(p).exists() for p in job.get("needs", [])):
                 continue
@@ -104,7 +113,9 @@ def main() -> int:
             pending.remove(job)
             print(time.strftime("%H:%M:%S"), "start", job["name"], flush=True)
         time.sleep(20)
-        pending = [j for j in pending if j["name"] not in started] + [j for j in refresh() if j["name"] not in {p["name"] for p in pending}]
+        pending = [j for j in pending if j["name"] not in started] + [
+            j for j in refresh() if j["name"] not in {p["name"] for p in pending}
+        ]
     print("QUEUE_DONE", flush=True)
     return 0
 

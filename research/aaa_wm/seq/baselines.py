@@ -1,3 +1,4 @@
+# ruff: noqa: ARG002, ARG005 - agent interface methods keep the shared signature
 """Non-learned agents and planning ceilings for ``aaa.python.seq.v0``.
 
 Every agent acts only on a :class:`~.env.SeqView`. Ceilings are labelled as such:

@@ -40,7 +40,7 @@ import time
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 
@@ -204,7 +204,7 @@ class CachedToolEnvironment(ToolEnvironment):
     logging are unchanged, and a missing entry falls back to the real tool.
     """
 
-    cache: dict[str, list[list[bool]]] = {}
+    cache: ClassVar[dict[str, list[list[bool]]]] = {}
 
     def run_visible_tests(self, view: Any) -> tuple[tuple[bool, ...], ...]:
         from research.aaa_python.episode import BoundaryError
@@ -215,6 +215,7 @@ class CachedToolEnvironment(ToolEnvironment):
             raise BoundaryError("the tool may be used only before the action is committed")
         hit = self.cache.get(_tool_key(view))
         if hit is None:
+            assert view is not None
             return super().run_visible_tests(view)
         self._log("tool")
         return tuple(tuple(bool(b) for b in row) for row in hit)

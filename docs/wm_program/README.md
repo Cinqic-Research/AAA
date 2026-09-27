@@ -1,7 +1,8 @@
 # World-model and language program (`research/aaa_wm`)
 
-Started 2026-09-26 from `main` at `dbee13c`. Branch: `opus/world-model-program`. Status:
-**development**. No confirmation has been observed, and nothing here is promoted.
+Started 2026-09-26 from `main` at `dbee13c`. Branch: `opus/world-model-program`. Status: **two
+confirmations observed; independent review of the world-model result done.** Nothing is merged or
+promoted into the canonical line without owner review. Start with [handoff.md](handoff.md).
 
 ## Question
 
@@ -19,6 +20,15 @@ from-scratch American-English language model integrate usefully through explicit
 | [opaque_benchmark_design.md](opaque_benchmark_design.md) | `aaa.python.opaque.v0`: debugging code that calls an opaque library |
 | [opaque_tune_decisions.md](opaque_tune_decisions.md) | tune-stage results and the selection of the candidate and controls |
 | [compute.md](compute.md) | measured compute and memory, the 2026-09-26 freeze incident and its fix |
+| [opaque_evaluate_stage.md](opaque_evaluate_stage.md), [opaque_attack.md](opaque_attack.md), [opaque_adaptation_dev.md](opaque_adaptation_dev.md) | development evaluate stage, attack pool (used once), adaptation/retention/plasticity |
+| [jepa_result.md](jepa_result.md) | J-4 action-conditioned JEPA: no decision gain; collapse diagnostics behave as designed |
+| [opaque_confirmation.md](opaque_confirmation.md) | **world-model confirmation: 11/11 contracts PROMOTE, claim narrowed after review** |
+| [independent_review_opaque.md](independent_review_opaque.md) | independent adversarial review of that confirmation |
+| [language_track_design.md](language_track_design.md) | American-English corpus, tokenizer decision, size ladder, adapters v1/v2 (pre-registered) |
+| [language_factorial_dev.md](language_factorial_dev.md) | AAA x WM x LM factorial (development) |
+| [language_confirmation.md](language_confirmation.md) | **language confirmation: L2 PROMOTE; L1, F1, F2 INCONCLUSIVE; integration success not declared** |
+| [mutation_results.json](mutation_results.json) | 12/12 deliberate boundary breaks caught |
+| [handoff.md](handoff.md) | what is and is not established; next steps |
 | `state.json` | machine-readable program state |
 
 The literature and red-team notes are kept in the workspace (`/media/cinqic/Cinqic
