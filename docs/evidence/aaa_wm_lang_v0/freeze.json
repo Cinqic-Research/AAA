@@ -1,0 +1,161 @@
+{
+ "schema": "aaa.wm.lang.freeze.v1",
+ "created": "2026-09-27T10:25:24",
+ "source_fingerprint": "2eff343468eaea799f0601adc2928c5d24921b685c6eb24528d3d4753515d36e",
+ "source_files": [
+  "research/aaa_wm/lang/__init__.py",
+  "research/aaa_wm/lang/adapter.py",
+  "research/aaa_wm/lang/confirm.py",
+  "research/aaa_wm/lang/experiment.py",
+  "research/aaa_wm/lang/factorial.py",
+  "research/aaa_wm/lang/reports.py",
+  "research/aaa_wm/lang/rules.py",
+  "research/aaa_wm/opaque/__init__.py",
+  "research/aaa_wm/opaque/agents.py",
+  "research/aaa_wm/opaque/attacks.py",
+  "research/aaa_wm/opaque/confirm.py",
+  "research/aaa_wm/opaque/data.py",
+  "research/aaa_wm/opaque/data/aaa_python_opaque_v0.json",
+  "research/aaa_wm/opaque/env.py",
+  "research/aaa_wm/opaque/experiment.py",
+  "research/aaa_wm/opaque/freeze.py",
+  "research/aaa_wm/opaque/generator.py",
+  "research/aaa_wm/opaque/jepa.py",
+  "research/aaa_wm/opaque/learned.py",
+  "research/aaa_wm/opaque/library.py",
+  "research/aaa_wm/opaque/models.py",
+  "research/aaa_wm/opaque/program.py",
+  "research/aaa_wm/opaque/sandbox_check.py",
+  "research/aaa_wm/opaque/structured.py",
+  "research/aaa_wm/opaque/summarize.py",
+  "research/aaa_wm/opaque/tokens.py",
+  "research/aaa_wm/opaque/write_freeze.py",
+  "research/aaa_wm/lm/model.py",
+  "aaa/promotion/contract.py",
+  "aaa/promotion/primary.py",
+  "aaa/promotion/independent.py",
+  "aaa/promotion/adjudicate.py"
+ ],
+ "artifacts_sha256": {
+  "adapter_s100": "e110289b1670030e3955e3d775e0958a81e9020a374da045a3c4a6b1f7bf03be",
+  "adapter_random_s100": "643133f93611d0368ac0551be63acd900755025bbce3d2b88cb889c8c25ccabd",
+  "table_s100": "aa610a0389ef5db7a490e9ba030250bd956a31e98be78d35a391ca753ebe9b03",
+  "policy_aux_s100": "d210b1b51f1c32ab0c886a0fa3fc9c3491089199505615fa642332635eb515e2",
+  "adapter_s101": "1cc3cde221f7bb0439bfd312e3ebabb4183d7b2a5ed4117a6424a6f020ec2106",
+  "adapter_random_s101": "59ee1a9fd9c436338da298027b31d6e61e31737eb222af495f56555dde9f6dcb",
+  "table_s101": "5d3e7a7b865bd41e6701339762342ccf4c3423f961beb246ffd3b629edebaa5b",
+  "policy_aux_s101": "6260ee0b04e932708553f73b9ce692f04f4ddfa7abd90f2bbf29301e141b46c6",
+  "adapter_s102": "f49c21e1f828e4319a6365863f070eddc27c810633f2d9744e48fdf5f4d5dd1e",
+  "adapter_random_s102": "0cf08aa4103b0af82fff216c08ff8b2950cb5d8346ffb078168a349fa0173be5",
+  "table_s102": "09a6d7a67ad693cca59a4f53382dffa57f062920770c585f967741c7ecb790fa",
+  "policy_aux_s102": "39f78a6b982d7b9382c461c648d4f76893a2b29b498233affafa4213e015daaa",
+  "bpe8192": "09eb9a6762936a19a00941f76cd18b27311f2de3b9f6d1bc2c928618ff1b1c8f"
+ },
+ "design": {
+  "identities": "opaque.v0 confirmation indices [4000, 6000); earlier splits and the spent [0, 4000) excluded",
+  "statements": "held-out phrasing families only (research/aaa_wm/lang/reports.py)",
+  "initializations": [
+   100,
+   101,
+   102
+  ],
+  "pairing": "adapter seed s, WM-S table seed s, policy_aux seed s",
+  "language_model": "bpe8192_d256_l4_s0_n6100 (R1, selected on development by the pre-registered rule)",
+  "runs_budget": 2,
+  "steps_budget": 8
+ },
+ "arms": [
+  [
+   "wms:online",
+   "lm"
+  ],
+  [
+   "wms:online",
+   "rules"
+  ],
+  [
+   "wms:online",
+   "lm_random"
+  ],
+  [
+   "wms:online",
+   "gold"
+  ],
+  [
+   "policy_aux:plan",
+   "lm"
+  ],
+  [
+   "policy_aux:plan",
+   "rules"
+  ]
+ ],
+ "contracts": [
+  {
+   "name": "F1_full_system_over_policy_with_LM",
+   "reference": "policy_aux:plan@lm",
+   "challenger": "wms:online@lm",
+   "initializations": [
+    100,
+    101,
+    102
+   ],
+   "threshold": 0.9,
+   "seed": 20260927,
+   "criterion": {
+    "rule": "superior"
+   },
+   "groups": "all"
+  },
+  {
+   "name": "F2_full_system_over_policy_with_rules",
+   "reference": "policy_aux:plan@rules",
+   "challenger": "wms:online@lm",
+   "initializations": [
+    100,
+    101,
+    102
+   ],
+   "threshold": 0.9,
+   "seed": 20260927,
+   "criterion": {
+    "rule": "superior"
+   },
+   "groups": "all"
+  },
+  {
+   "name": "L1_pretraining_end_to_end",
+   "reference": "wms:online@lm_random",
+   "challenger": "wms:online@lm",
+   "initializations": [
+    100,
+    101,
+    102
+   ],
+   "threshold": 0.9,
+   "seed": 20260927,
+   "criterion": {
+    "rule": "superior"
+   },
+   "groups": "all"
+  },
+  {
+   "name": "L2_language_model_over_rules",
+   "reference": "wms:online@rules",
+   "challenger": "wms:online@lm",
+   "initializations": [
+    100,
+    101,
+    102
+   ],
+   "threshold": 0.95,
+   "seed": 20260927,
+   "criterion": {
+    "rule": "superior"
+   },
+   "groups": "all"
+  }
+ ],
+ "success_rule": "LANGUAGE_INTEGRATION_SUCCESS (scoped) requires L1 and L2 PROMOTE; FULL_SYSTEM_SUCCESS (option A, full system superior to the pairwise systems measured) additionally requires F1 and F2 PROMOTE; agreeing implementations; independent review",
+ "thresholds_rationale": "fixed from development effect sizes before any identity in [4000, 6000) existed; error-ratio bars: 10% fewer errors (F1, F2, L1), 5% (L2)"
+}
