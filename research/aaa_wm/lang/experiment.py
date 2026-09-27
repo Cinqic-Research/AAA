@@ -79,10 +79,30 @@ def adapter_cmd(a: argparse.Namespace) -> int:
     dev = dev_tasks(a.role)
     eval_items = items_for(dev, "heldout")
     indist_items = items_for(dev[:300], "train")
-    res: dict[str, Any] = {"lm": a.lm, "random_twin": a.random_twin, "steps": a.steps, "seed": a.seed}
+    res: dict[str, Any] = {"lm": a.lm, "random_twin": a.random_twin, "steps": a.steps, "seed": a.seed, "protocol": "v2" if a.select else "v1"}
     lm = load_lm(Path(a.lm), a.random_twin, a.seed)
     codec = codec_for(lm)
-    res["finetune"] = AD.finetune(lm, codec, train_items, steps=a.steps, seed=a.seed)
+    if a.select:  # adapter v2: choose the fine-tuning length on the *selection* phrasing family only
+        import copy
+
+        select_items = items_for(dev, "select")
+        gold_sel = [[tuple(g) for g in it["gold"]] for it in select_items]
+        best: dict[str, Any] = {"score": -1.0}
+        scores: dict[int, float] = {}
+
+        def on_ck(step: int) -> None:
+            ext_s = AD.extract(lm, codec, [it["text"] for it in select_items])
+            sc = float(np.mean([e == g for e, g in zip(ext_s, gold_sel, strict=True)]))
+            scores[step] = sc
+            if sc > best["score"]:  # ties keep the earlier (fewer-step) checkpoint
+                best.update(score=sc, step=step, state=copy.deepcopy(lm.state_dict()))
+
+        res["finetune"] = AD.finetune(lm, codec, train_items, steps=a.steps, seed=a.seed, checkpoints=(250, 500, 1000, 2000, 3000), on_checkpoint=on_ck)
+        lm.load_state_dict(best["state"])
+        res["selection_scores"] = scores
+        res["chosen_steps"] = best["step"]
+    else:
+        res["finetune"] = AD.finetune(lm, codec, train_items, steps=a.steps, seed=a.seed)
     t0 = time.time()
     ext = AD.extract(lm, codec, [it["text"] for it in eval_items])
     res["heldout_exact"] = float(np.mean([e == [tuple(g) for g in it["gold"]] for e, it in zip(ext, eval_items, strict=True)]))
@@ -92,7 +112,7 @@ def adapter_cmd(a: argparse.Namespace) -> int:
     res["rules_heldout_exact"] = float(np.mean([rules.extract(it["text"]) == [tuple(g) for g in it["gold"]] for it in eval_items]))
     res["extract_seconds"] = time.time() - t0
     res["extractions"] = {it["task_id"]: e for it, e in zip(eval_items, ext, strict=True)}
-    name = f"adapter_{Path(a.lm).stem}{'_random' if a.random_twin else ''}_s{a.seed}_n{a.steps}"
+    name = f"adapter_{Path(a.lm).stem}{'_random' if a.random_twin else ''}_s{a.seed}_n{a.steps}{'_v2' if a.select else ''}"
     from ..lm.model import save
 
     save(lm, root() / "lm" / "adapters" / f"{name}.pt", {k: v for k, v in res.items() if k != "extractions"})
@@ -181,6 +201,7 @@ def main() -> int:
     ad.add_argument("--seed", type=int, default=0)
     ad.add_argument("--train-tasks", type=int, default=6000)
     ad.add_argument("--role", default="tune", choices=list(ROLE))
+    ad.add_argument("--select", action="store_true", help="adapter v2: choose fine-tuning length on the selection family")
     pl = sub.add_parser("play")
     pl.add_argument("--channel", required=True, help="none | rules | gold | <adapter eval json>")
     pl.add_argument("--agents", required=True)

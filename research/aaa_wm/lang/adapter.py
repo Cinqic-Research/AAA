@@ -70,7 +70,7 @@ def examples(codec: Codec, items: Sequence[dict[str, Any]], context: int) -> lis
     return out
 
 
-def finetune(model: Any, codec: Codec, train_items: Sequence[dict[str, Any]], *, steps: int, batch: int = 32, lr: float = 5e-4, seed: int = 0, device: str = "cuda") -> dict[str, Any]:
+def finetune(model: Any, codec: Codec, train_items: Sequence[dict[str, Any]], *, steps: int, batch: int = 32, lr: float = 5e-4, seed: int = 0, device: str = "cuda", checkpoints: Sequence[int] = (), on_checkpoint: Any = None) -> dict[str, Any]:
     import torch
 
     ex = examples(codec, train_items, model.config.context)
@@ -104,6 +104,10 @@ def finetune(model: Any, codec: Codec, train_items: Sequence[dict[str, Any]], *,
         sched.step()
         if step % 200 == 0 or step == steps - 1:
             curve.append((step, float(loss.item())))
+        if on_checkpoint is not None and (step + 1) in checkpoints:
+            model.eval()
+            on_checkpoint(step + 1)
+            model.train()
     model.eval()
     return {"curve": curve, "seconds": time.time() - t0, "examples": len(ex)}
 
