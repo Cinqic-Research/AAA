@@ -36,7 +36,7 @@ def root() -> Path:
 
 
 def tok_dir(kind: str, vocab: int) -> Path:
-    return root() / "tokens" / (f"bytes" if kind == "bytes" else f"bpe{vocab}")
+    return root() / "tokens" / ("bytes" if kind == "bytes" else f"bpe{vocab}")
 
 
 def _bpe_path(vocab: int) -> Path:
