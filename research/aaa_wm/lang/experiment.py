@@ -181,7 +181,9 @@ def play_cmd(a: argparse.Namespace) -> int:
             for i, (t, prop) in enumerate(zip(tasks, proposals, strict=True)):
                 if inner is None or ("online" in name and i % 40 == 0):
                     inner = make_agent(name, seed, 20000, prior, device)
-                fb = OA.ToolSearch(lambda v, e: prior.score(e), "tool_prior") if name.split(":")[0] in ("policy", "policy_aux") else None
+                # no parse -> no tests: every decision system falls back to prior-ordered search verified
+                # by real runs (the declared no-language behavior), never to planning against empty tests
+                fb = OA.ToolSearch(lambda v, e: prior.score(e), "tool_prior")
                 outs.append(play(LanguageAgent(inner, [tuple(x) for x in prop] if prop else None, fb), t, i))
             per[str(seed)] = {"bits": "".join("1" if o.success else "0" for o in outs)}
             print(name, a.channel, seed, round(float(np.mean([o.success for o in outs])), 3), flush=True)
