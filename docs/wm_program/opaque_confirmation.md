@@ -49,30 +49,54 @@ The metric is the geometric mean over slices of the per-cell Jeffreys-smoothed e
 
 The post-run audit (`confirm.audit`) recomputed every stored verdict from the bits and found no disagreements.
 
-## What this licenses, and what it does not
+## What this licenses, and what it does not (narrowed after the independent review)
 
-Licensed (subject to independent review), within `aaa.python.opaque.v0`: at a budget of two real
-test runs, an AAA agent that plans with **WM-S** makes roughly half the errors of the following:
+The [independent adversarial review](independent_review_opaque.md) recomputed every ratio with its
+own code (exact match) and found no invalidating issue and no leakage. It found five
+scope-narrowing issues, all accepted. The claim therefore reads:
 
-- the strongest learned model-free agent, even inside the same planner;
-- the strongest non-learned shortcut;
-- the same agent without its learned library model;
-- a black-box neural world model.
+**Licensed, within `aaa.python.opaque.v0`, at a budget of two real test runs.** An AAA agent that plans
+with WM-S makes **about half the errors** (C1 error ratio 0.481 [0.377, 0.600]; 0.32 to 0.71 depending on
+the library-table seed) of:
 
-WM-S is an exact interpreter of the visible Python plus a tabular model of the opaque library,
-learned from real observations and updated online. It is not worse on any slice. Updating the
-library model online improves on the frozen model (C4).
+- **the one learned model-free architecture trained here** (a ~1M-parameter transformer, 20k steps),
+  run inside a planner with the same verifier and budgets (beam 8 on second edits);
+- the strongest non-learned shortcut found, grammar legality (0.516). The gain persists on tasks
+  the shortcut fails (0.488);
+- the same agent without a library learned in training (0.532), and without any library knowledge
+  (0.452);
+- a black-box neural world model (0.502).
 
-Not licensed:
+WM-S is an exact interpreter of the visible Python plus a tabular model of an opaque library,
+**abduced from real observations of the same fixed six-function library that four of the five
+test slices use**. The per-slice non-inferiority contracts pass, but they are **weak**: they are
+checked against `policy_aux:plan` only, with a 1.0 bar that the observed ratios (at most 0.70) clear
+easily. WM-S is weakest on the one slice where the library changes (`library_B`, 0.695).
+
+**Online updating (C4) is fragile.** The pre-declared contract passes (0.873 [0.838, 0.932]), but the
+benefit mostly fills gaps in an incomplete training table, mostly within the episode. It is about
+zero for the most complete table (seed 100), and a seed-level t(4) interval reaches 0.975, above the
+0.95 threshold. The claim is "online updating helps when the learned table is incomplete", not a
+general adaptation claim.
+
+**Not licensed:**
 
 - that a *generic* neural world model helps (the black-box WM loses, and so does JEPA);
 - that WM-S learned Python (the interpreter is hand-written knowledge);
-- transfer beyond this generated benchmark family;
-- freedom from forgetting (adaptation to a changed library costs -0.067 on the old library in development);
-- that compute is matched (WM-S uses about 0.3-0.4 CPU seconds per episode against about 0.02-0.3 s for the
-  neural arms; the matched resource is real test runs).
+- that the model-free reference is strong or scaled;
+- transfer beyond this generated benchmark family, or beyond a library shared by training and test;
+- freedom from forgetting (adapting to a changed library costs -0.067 on the old one in development);
+- that compute is matched (WM-S uses about 0.3-0.4 CPU seconds per episode; the matched resource is
+  real test runs).
 
-The result also reflects a benchmark flaw found by the red team: the grammar shortcut. It is included
-as the C3 reference rather than repaired.
+**Design shortfalls recorded, not repaired.**
 
-Independent adversarial review is pending. Until it has tried to falsify this, no success is declared.
+- There were 5 initializations and 20 streams per slice. The design brief called for 10-20 and at least 30.
+- The thresholds were fixed after part of the evaluate-stage results existed (before any
+  confirmation data). They were not derived from a minimum-detectable-effect calculation.
+- The freeze was pushed remotely only about 4 h into the run, and `draft("confirmation")` is not
+  guarded by the admission. Every log and timestamp is consistent with a single run, but that cannot
+  be proven.
+- The declared CPU limit per episode was not checked during the run.
+
+A successor phase should fix all of these prospectively. The spent confirmation identities are never reused.
