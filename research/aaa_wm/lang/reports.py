@@ -71,11 +71,21 @@ CLAUSES: dict[str, list[str]] = {
         "we need f({x}) to equal {e}",
     ],
 }
+# "select": a third disjoint family, used ONLY to choose fine-tuning length (adapter v2); never for evaluation.
+CLAUSES["select"] = [
+    "when f is handed {x}, it ought to produce {e}",
+    "the output for {x} is meant to be {e}",
+    "f({x}) was {g} when it needed to be {e}",
+    "given the value {x}, the correct return is {e}",
+    "calling f on {x} must yield {e}",
+    "for input {x}, we expect an answer of {e}",
+]
 OPENERS = {
     "train": ["Please fix f.", "Bug report:", "The function f is broken.", "Spec for f:", "Task: repair f so that it behaves correctly."],
     "heldout": ["Heads up: f has a bug.", "Here is what f is supposed to do.", "Could you take a look at f?", "Issue:"],
+    "select": ["Problem with f:", "Note:", "The tests for f say the following."],
 }
-JOINERS = {"train": ["; ", ". Also, ", ", and "], "heldout": [". In addition, ", "; moreover, ", ". Finally, "]}
+JOINERS = {"train": ["; ", ". Also, ", ", and "], "heldout": [". In addition, ", "; moreover, ", ". Finally, "], "select": [". Next, ", "; then ", ". Plus, "]}
 
 
 def _num(s: Stream, v: int) -> str:

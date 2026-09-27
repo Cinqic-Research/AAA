@@ -134,3 +134,23 @@ extraction over R1.
 - The comparison of pretrained against random twin is repeated at both rungs.
 
 The v1 numbers above are retained as they are.
+
+## Adapter v2: pre-registered protocol (written 2026-09-27, before any v2 run)
+
+v1 fine-tuned for a fixed 3,000 steps and over-fitted the training phrasings. v2 changes only
+how the fine-tuning length is chosen. Everything else is as in v1.
+
+- **Selection family.** Six new clause templates, with their own openers and joiners
+  (`reports.CLAUSES["select"]`). They are disjoint from the train and held-out families and are
+  written in the same register. Selection statements come from the development *tune* tasks (the
+  held-out evaluation also uses tune tasks, with held-out phrasings; the two never share phrasing).
+- **Length choice.** Checkpoints at 250, 500, 1,000, 2,000 and 3,000 fine-tuning steps. The choice is
+  the checkpoint with the best exact extraction on the selection family, with ties going to fewer
+  steps. The held-out family is scored only at the chosen checkpoint.
+- **Arms.** {R1, R2} x {pretrained, random twin} x seeds {0, 1, 2}: 12 runs, the same optimizer,
+  learning rate and batch as v1.
+- **Decision rules (development).**
+  - Pretraining is *supported* at a rung if the pretrained mean held-out exact extraction exceeds the
+    random-twin mean by at least 0.05, with all three paired seed differences positive.
+  - R3 stays unjustified unless R2 beats R1 by at least 0.05 (pretrained means, all three seeds).
+  - The better supported rung becomes the language channel for the end-to-end factorial.
