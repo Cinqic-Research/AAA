@@ -154,3 +154,22 @@ how the fine-tuning length is chosen. Everything else is as in v1.
     random-twin mean by at least 0.05, with all three paired seed differences positive.
   - R3 stays unjustified unless R2 beats R1 by at least 0.05 (pretrained means, all three seeds).
   - The better supported rung becomes the language channel for the end-to-end factorial.
+
+## Adapter v2 results (development tune tasks, held-out phrasings, exact extraction of all three tests)
+
+| LM | Pretrained (seeds 0, 1, 2) | Mean | Random twin (seeds 0, 1, 2) | Mean | Difference |
+|---|---|---:|---|---:|---:|
+| R1 (5.2M) | 0.257, 0.313, 0.284 | **0.285** | 0.033, 0.051, 0.016 | 0.033 | +0.251, all seeds positive |
+| R2 (13.8M) | 0.296, 0.329, 0.201 | **0.275** | 0.074, 0.048, 0.010 | 0.044 | +0.231, all seeds positive |
+| rules (hand-written) | - | 0.130 | - | - | - |
+
+Chosen fine-tuning lengths (selection family only): R1 1000/250/3000 steps; R2 500/500/1000;
+random twins mostly 1000-3000.
+
+Pre-registered rules applied:
+
+- **Pretraining is supported at both rungs.** The v1 R2 anomaly (0.102 against 0.114) was an
+  over-fitting artifact of the fixed 3,000-step fine-tune, and the selection family removes it.
+- **R3 stays unjustified.** R2 does not beat R1 (0.275 against 0.285).
+- **The language channel for the factorial is R1** (the better supported rung, and the smaller one).
+  The adapter seed *s* pairs with WM-S table seed *s*.
