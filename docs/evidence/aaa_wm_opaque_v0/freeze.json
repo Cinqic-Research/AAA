@@ -1,0 +1,479 @@
+{
+ "schema": "aaa.wm.opaque.freeze.v1",
+ "protocol": "aaa.python.opaque.v0",
+ "source_fingerprint": "6f3be7d1878b5f21e15ec35af2e709eedee6d9b475315307a6a86af856e2eb42",
+ "source_files": {
+  "research/aaa_wm/opaque/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "research/aaa_wm/opaque/agents.py": "1de7e1141c6997e6ef64300e9890cf5e1075b9de12d14f5047f86356bb28b2ba",
+  "research/aaa_wm/opaque/attacks.py": "1c5fac8bc8a2275015e17f3a5bbb32b8d10c126ea85dcdb6a5f281e90c285f65",
+  "research/aaa_wm/opaque/confirm.py": "aa08ce25be2686b22a3d8be9fc3a4f2f2121cf8552500e90f9863c0b7286d94e",
+  "research/aaa_wm/opaque/data.py": "15a5ced47855ac88618854e8be7dd69232b6c8e217c9a2c857b5b71dff8588a2",
+  "research/aaa_wm/opaque/data/aaa_python_opaque_v0.json": "3bc1c38972255fbbe85ee321c2f3f88a0f2633ab442d943a86e198fc57b5090b",
+  "research/aaa_wm/opaque/env.py": "132b9bf4d5e7515f55c599ddde82dc6ba2bf4bc867a050c5284ceab3181a42fc",
+  "research/aaa_wm/opaque/experiment.py": "1ed50c5a473755aa3662b8ef83784d3ca7d0f6f37c5232a4d0d00faf6a56911f",
+  "research/aaa_wm/opaque/freeze.py": "2abb464e513b0a4a7e4f02915f6d5faa8b6dbbe74db91f8d7564d9d6a5958d6f",
+  "research/aaa_wm/opaque/generator.py": "81b1e3fbe3b467698c45467c7b381969b971856a1b9716693d6e07e6f2b7a870",
+  "research/aaa_wm/opaque/jepa.py": "d12ff23ae0b187671a0ae73329f78a3a5c8ca2ea76c63f4147a6a83f80b696c9",
+  "research/aaa_wm/opaque/learned.py": "33071e1a56bfc8fb49964ffac3c48ed1e6ac8d319e251e5b631ae6948be4c55e",
+  "research/aaa_wm/opaque/library.py": "12d771308cf885401e91afcff1b2ddd82a1f2a71d61975a173cd88bd39c5a166",
+  "research/aaa_wm/opaque/models.py": "2eb67ce24766a6c85a8dd764fb6e99950fac3247b04d3370dcb984d0bfb0bdcf",
+  "research/aaa_wm/opaque/program.py": "7e5895f129e6573404198be3aae3c3821ac947ae33ce3740014c06184940da1c",
+  "research/aaa_wm/opaque/sandbox_check.py": "b091cd56312371828cfa9f31d2f1a73cab27834f44f7e4e30e3d59bdeec929e3",
+  "research/aaa_wm/opaque/structured.py": "fb28b78c2e9c76cb138d0d2569a774b271444df4254e3cf5a02087d21c1c013a",
+  "research/aaa_wm/opaque/summarize.py": "5fd51275392263f22fcb747459a076983cfe96f0fbe4aefa91844e88dc98357e",
+  "research/aaa_wm/opaque/tokens.py": "ba2dabb62d29d2b237933fd3b5d37ee65977aa4c117bf3a94023de5ef7eb5bda",
+  "research/aaa_wm/opaque/write_freeze.py": "4b1390e23880626b67192fd3ca9779049b73ad17d77eea509731d4181e1eb982",
+  "research/aaa_python/subset.py": "98149d1fa09215a5a6357ee25a8bd7f6599128365a6e8667841fe643604f116a",
+  "research/aaa_python/rng.py": "7c2cdd2529a310038e4fd8c69851535303311b61128e448875f26136ee2d6f3b",
+  "research/aaa_python/oracle.py": "a298899cfe0860915f6ed9153fc4c376213c4c5eb673f00c98bb8f6903c29e2c",
+  "research/aaa_python/_sandbox_child.py": "5fe581c5b3d03d222f266a38ab50aadc6ded92436c9731eff25ff398ede7ea15",
+  "research/aaa_python_v1/spec.py": "32d9d2f1a08ce393dd07b8dfd8915559afa962931871a8d6c4dd317b2703989b",
+  "research/aaa_python_v1/data/aaa_python_v1.json": "30fed6e1472fc65e5a5795c1d92a38d547c98ecb3ca322fbc3446ebb44ecaf57",
+  "aaa/promotion/contract.py": "3b4b402559335e0600a91a55d1cc160cc8c903053e42e2b7ddc0d34de6c9eeb9",
+  "aaa/promotion/primary.py": "2f2f2efabefbf61a4a1b57ec01037bfbed580d0e4838f8d125ed70975c551b09",
+  "aaa/promotion/independent.py": "1bc08e9db7dd9efffb7147973bc7a90f529cb6c53b740c9f90a5355e3f7d7ec6",
+  "aaa/promotion/adjudicate.py": "5362b25db209c8a882c0942f50d053bd7061832fdaee632452e6673b933d4c61"
+ },
+ "spec_sha256": "3bc1c38972255fbbe85ee321c2f3f88a0f2633ab442d943a86e198fc57b5090b",
+ "artifacts_sha256": {
+  "table_s100_p200000.json": "aa610a0389ef5db7a490e9ba030250bd956a31e98be78d35a391ca753ebe9b03",
+  "policy_aux_s100_n20000.pt": "d210b1b51f1c32ab0c886a0fa3fc9c3491089199505615fa642332635eb515e2",
+  "wm_s100_n20000.pt": "385d2a74bdd0281a6d7368148c7a0739025a8daf819b0a72fb0cec714b51f7a4",
+  "table_s101_p200000.json": "5d3e7a7b865bd41e6701339762342ccf4c3423f961beb246ffd3b629edebaa5b",
+  "policy_aux_s101_n20000.pt": "6260ee0b04e932708553f73b9ce692f04f4ddfa7abd90f2bbf29301e141b46c6",
+  "wm_s101_n20000.pt": "f954a27caa508d32f22033e98aed7f1ef4e7460e674badb0b03493399b7bd2bb",
+  "table_s102_p200000.json": "09a6d7a67ad693cca59a4f53382dffa57f062920770c585f967741c7ecb790fa",
+  "policy_aux_s102_n20000.pt": "39f78a6b982d7b9382c461c648d4f76893a2b29b498233affafa4213e015daaa",
+  "wm_s102_n20000.pt": "1b5094ce36625bc72b898cab7d869353735bc9e906c5695ac7372096a5653eb8",
+  "table_s103_p200000.json": "be2e50304434d3401c78b5d10480810b125ac1aeabb190a4b1bb081a2b87e224",
+  "policy_aux_s103_n20000.pt": "abc7737688ea85cb9d8a68fb54081ad682efa27aedc0cb23764fdaff5dea91e4",
+  "wm_s103_n20000.pt": "26831d30bdb422b9673a65c33744b891f7f641f7d3eec268a8caf42cb30d9064",
+  "table_s104_p200000.json": "6aaf1faa7c85555cf91c9050fe96f9adff4621ca0c2658c3a54f97dae6d405aa",
+  "policy_aux_s104_n20000.pt": "2853c40bc3f3fd7685cce672396f4379bf769d6e41d95702c9c4cadcd442a231",
+  "wm_s104_n20000.pt": "2f7357e6a0687261507cd552869ce4db098538e663095c77196c2e23c8b348ad"
+ },
+ "design": {
+  "tasks": 4000,
+  "stream_length": 40,
+  "slices": [
+   "in_distribution",
+   "two_fault",
+   "novel_literals",
+   "novel_grammar",
+   "library_B"
+  ],
+  "streams_per_slice": 20,
+  "initializations": [
+   100,
+   101,
+   102,
+   103,
+   104
+  ],
+  "runs_budget": 2,
+  "steps_budget": 8,
+  "online_stream_reset": true,
+  "confirmation_split": "confirmation indices [0, 4000); programs of pilot/train/development/attack excluded",
+  "artifacts": "WM-S tables and neural checkpoints at the confirmation initializations were produced from the train split before this freeze; hashes above; confirm refuses mismatches"
+ },
+ "arms": [
+  {
+   "name": "wms:online",
+   "role": "candidate",
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ]
+  },
+  {
+   "name": "policy_aux",
+   "role": "learned model-free reference (tool search)",
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "train_steps": 20000
+  },
+  {
+   "name": "policy_aux:plan",
+   "role": "learned model-free reference inside the WM-S planner (controller-matched)",
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "train_steps": 20000
+  },
+  {
+   "name": "wms:online+empty",
+   "role": "causal control: online learning, no training-learned library",
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ]
+  },
+  {
+   "name": "wms:empty",
+   "role": "causal control: interpreter only, no library knowledge",
+   "initializations": [
+    0
+   ]
+  },
+  {
+   "name": "wms",
+   "role": "adaptation control: frozen library model",
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ]
+  },
+  {
+   "name": "wm:d1",
+   "role": "black-box neural world model (tune-selected depth 1)",
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "train_steps": 20000
+  },
+  {
+   "name": "tells",
+   "role": "strongest non-learned baseline (grammar shortcut, red team)",
+   "initializations": [
+    0
+   ]
+  },
+  {
+   "name": "tool_gap",
+   "role": "non-learned tool search",
+   "initializations": [
+    0
+   ]
+  },
+  {
+   "name": "ceiling",
+   "role": "true-library planner (not a baseline)",
+   "initializations": [
+    0
+   ]
+  }
+ ],
+ "contracts": [
+  {
+   "name": "C1_wm_over_learned_reference",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "policy_aux:plan",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": "every slice, design crossed, series = the slice's 20 streams",
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "superior",
+    "rule": "superior",
+    "threshold": 0.75
+   },
+   "threshold": 0.75,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "C2a_training_learned_library_is_causal",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "wms:online+empty",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": "every slice, design crossed, series = the slice's 20 streams",
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "superior",
+    "rule": "superior",
+    "threshold": 0.8
+   },
+   "threshold": 0.8,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "C2b_library_model_is_causal",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "wms:empty",
+   "challenger": "wms:online",
+   "reference_deterministic": true,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": "every slice, design crossed, series = the slice's 20 streams",
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "superior",
+    "rule": "superior",
+    "threshold": 0.75
+   },
+   "threshold": 0.75,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "C3_wm_over_best_nonlearned",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "tells",
+   "challenger": "wms:online",
+   "reference_deterministic": true,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": "every slice, design crossed, series = the slice's 20 streams",
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "superior",
+    "rule": "superior",
+    "threshold": 0.75
+   },
+   "threshold": 0.75,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "C4_online_adaptation",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "wms",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": "every slice, design crossed, series = the slice's 20 streams",
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "superior",
+    "rule": "superior",
+    "threshold": 0.95
+   },
+   "threshold": 0.95,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "C5_structured_over_blackbox_wm",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "wm:d1",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": "every slice, design crossed, series = the slice's 20 streams",
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "superior",
+    "rule": "superior",
+    "threshold": 0.75
+   },
+   "threshold": 0.75,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "N_in_distribution_noninferior",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "policy_aux:plan",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": [
+    "in_distribution"
+   ],
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "noninferior",
+    "rule": "noninferior",
+    "threshold": 1.0
+   },
+   "threshold": 1.0,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "N_two_fault_noninferior",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "policy_aux:plan",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": [
+    "two_fault"
+   ],
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "noninferior",
+    "rule": "noninferior",
+    "threshold": 1.0
+   },
+   "threshold": 1.0,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "N_novel_literals_noninferior",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "policy_aux:plan",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": [
+    "novel_literals"
+   ],
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "noninferior",
+    "rule": "noninferior",
+    "threshold": 1.0
+   },
+   "threshold": 1.0,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "N_novel_grammar_noninferior",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "policy_aux:plan",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": [
+    "novel_grammar"
+   ],
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "noninferior",
+    "rule": "noninferior",
+    "threshold": 1.0
+   },
+   "threshold": 1.0,
+   "seed": 20260927,
+   "draws": 20000
+  },
+  {
+   "name": "N_library_B_noninferior",
+   "contract_id": "aaa.promotion.crossed.v1",
+   "reference": "policy_aux:plan",
+   "challenger": "wms:online",
+   "reference_deterministic": false,
+   "initializations": [
+    100,
+    101,
+    102,
+    103,
+    104
+   ],
+   "groups": [
+    "library_B"
+   ],
+   "metric": "Jeffreys-smoothed per-cell error (errors + 0.5) / (40 + 1)",
+   "criterion": {
+    "name": "noninferior",
+    "rule": "noninferior",
+    "threshold": 1.0
+   },
+   "threshold": 1.0,
+   "seed": 20260927,
+   "draws": 20000
+  }
+ ],
+ "gatekeeping": [
+  "C1",
+  "C2a",
+  "C2b",
+  "C3",
+  "N_*",
+  "C5",
+  "C4"
+ ],
+ "hypotheses": {
+  "H-OP1": "WM-S online improves end-to-end success over the strongest learned non-world-model reference (C1)",
+  "H-OP1-causal": "the training-learned library model (C2a) and library knowledge at all (C2b) are causally necessary",
+  "H-OP1-nonlearned": "the gain exceeds the strongest non-learned shortcut at the same run budget (C3)",
+  "H-OP1-noregression": "WM-S is not worse than the reference on any slice (N_*)",
+  "H-OP2": "WM-S beats the black-box neural world model (C5)",
+  "H-OP3": "online adaptation of the library model improves over the frozen model (C4)",
+  "success_rule": "WORLD_MODEL_SUCCESS (this phase, scoped claim) requires C1, C2a, C2b, C3 and every N_* to PROMOTE with agreeing implementations, attack results that do not explain the gain, and independent review; C4 and C5 scope the claim",
+  "claim_scope": "an exact interpreter of visible Python plus a learned tabular model of an opaque library, used by a verified depth-2 planner, versus learned model-free and non-learned agents with the same two real runs"
+ },
+ "resource_budget": {
+  "cpu_seconds_per_episode_wms_max": 2.0,
+  "real_runs_per_episode": 2,
+  "ram_cap_per_job_gb": 6
+ },
+ "written_before_confirmation": true
+}
