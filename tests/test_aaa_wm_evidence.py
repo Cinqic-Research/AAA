@@ -36,6 +36,16 @@ class EvidenceAudit(unittest.TestCase):
             "ratio differs",
         )
 
+    def test_altered_interval_with_same_verdict_fails(self) -> None:
+        def change_lower(doc: dict) -> None:
+            doc["adjudications"]["L2_language_model_over_rules"]["interval"][0] = 0.5
+
+        self.check_mutation(
+            "language",
+            change_lower,
+            "interval differs",
+        )
+
     def test_missing_initialization_fails(self) -> None:
         self.check_mutation("language", lambda d: d["results"]["wms:online@lm"].pop("102"), "initialization")
 

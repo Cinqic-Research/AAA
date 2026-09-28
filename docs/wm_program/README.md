@@ -24,7 +24,7 @@ from-scratch American-English language model integrate usefully through explicit
 | [jepa_result.md](jepa_result.md) | J-4 action-conditioned JEPA: no decision gain; collapse diagnostics behave as designed |
 | [opaque_confirmation.md](opaque_confirmation.md) | **world-model confirmation: 11/11 contracts PROMOTE, claim narrowed after review** |
 | [independent_review_opaque.md](independent_review_opaque.md) | independent adversarial review of that confirmation |
-| [pr30_independent_review.md](pr30_independent_review.md) | Codex GPT-6 AI review of the PR, repaired gates and remaining merge blockers |
+| [pr30_independent_review.md](pr30_independent_review.md) | Codex GPT-6 AI review of the PR, repaired gates, scoped findings and final gate status |
 | [language_track_design.md](language_track_design.md) | American-English corpus, tokenizer decision, size ladder, adapters v1/v2 (pre-registered) |
 | [language_factorial_dev.md](language_factorial_dev.md) | AAA x WM x LM factorial (development) |
 | [language_confirmation.md](language_confirmation.md) | **language confirmation: L2 PROMOTE; L1, F1, F2 INCONCLUSIVE; integration success not declared** |

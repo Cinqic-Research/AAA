@@ -91,13 +91,14 @@ general adaptation claim.
 
 **Design shortfalls recorded, not repaired.**
 
-The prospective benchmark design described a nearby-repair exclusion rule,
-but the frozen `generator.accept` does no such neighborhood search. Its wording
-also conflicts with counting alternate domain-equivalent repairs as successes.
-On an independent 40-task pilot probe, 5 tasks had a one-edit candidate that
-passed every visible test while failing domain equivalence. This does not
-change the confirmation success bits, which score the full domain. It does
-rule out interpreting a visible-test pass as a unique correct repair. See
+The prospective benchmark design described a nearby-repair clause, but the
+frozen `generator.accept` does no neighborhood search. The clause excludes
+other domain-equivalent fixes while exempting the true fix "and its
+equivalents," so its intended additional constraint is ambiguous. On an
+independent 40-task pilot probe, 5 tasks had a one-edit candidate that passed
+every visible test while failing domain equivalence. These examples do not
+violate the clause as written. The confirmation scores the full domain, and a
+visible-test pass cannot be treated as a correct repair. See
 [AAA-217](../issue_ledger.md) and the [PR review](pr30_independent_review.md).
 
 - There were 5 initializations and 20 streams per slice. The design brief called for 10-20 and at least 30.

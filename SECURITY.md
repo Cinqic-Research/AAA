@@ -52,6 +52,9 @@ Realistic concerns are correspondingly narrow:
   local API stubs, but executes generated programs in the research process.
   Its bounds and validation are for deterministic generated programs and
   candidate edits, not a sandbox for hostile Python or untrusted learner code.
+  Its cached fast validator also misclassifies some caller-supplied numeric
+  string literals (`AAA-220`); the generated confirmation grammar emits no
+  string literals.
 - **Path handling.** The legacy v1 runner's output-root boundary is covered by
   `tests/test_legacy_v1.py::test_a_run_writes_nothing_outside_the_requested_output_root`.
   That test does not establish the same property for every later runner.

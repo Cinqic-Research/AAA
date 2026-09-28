@@ -366,11 +366,14 @@ evidence, so they are characterizations rather than confirmed claims.
   pushed remotely about four hours after the run started. The language freeze
   omits some transitive source helpers from its fingerprint, although its
   recorded clean provenance commit pins the source used for that run. The
-  benchmark design's nearby-repair exclusion is not implemented as written;
-  visible-test passing need not imply domain success. These gaps and their
-  evidence scope are documented in the [AI review](wm_program/pr30_independent_review.md).
+  benchmark design's nearby-repair clause is ambiguous and no neighborhood
+  property is enforced; visible-test passing need not imply domain success.
+  Their evidence scope is documented in the
+  [AI review](wm_program/pr30_independent_review.md).
 - **Corpus provenance.** The repository retains post-run download and corpus
-  manifest snapshots, and a post-run 13-word overlap audit of the exact 2,000
-  confirmation reports found no matches in the local training corpus. There
-  was no recorded pre-run contamination gate. Corpus bytes and trained
+  manifest snapshots, and a post-run 13-word overlap audit of 2,000
+  deterministically reconstructed confirmation reports found no matches in
+  the local training corpus. An expanded post-run normalization and held-out
+  template-fragment scan also found no matches in the five training shards.
+  There was no recorded pre-run contamination gate. Corpus bytes and trained
   checkpoints are not included in the repository.

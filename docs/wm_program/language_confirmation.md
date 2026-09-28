@@ -18,10 +18,16 @@ code path and found no shared 13-word sequence in a training-corpus document.
 The confirmation did not retain report hashes for a byte-for-byte comparison.
 This narrows contamination risk but does not retroactively create a
 pre-confirmation gate.
+An [expanded post-run scan](../evidence/aaa_wm_lang_v0/contamination_extended_post_run.json)
+also found zero 13-token matches after punctuation and numeric normalization,
+and zero documents containing any of six static held-out template fragments
+across the five training shards. It has the same post-run and report-hash
+limitations.
 The language admission fingerprint omits transitive source helpers including
 `lm/train.py`'s tokenizer-path resolver and `aaa_python/rng.py`. The recorded
-run used clean commit `a8c088d`, and the reviewed source files match that
-commit; the omission leaves the admission API incomplete for future use.
+run used clean commit `a8c088d`; the resolver's `_bpe_path` and `bpe_hash`
+ASTs still match that commit, and the other relevant omitted helpers are
+unchanged. The omission leaves the admission API incomplete for future use.
 
 - **Design.** 2,000 fresh `opaque.v0` tasks. Every statement used held-out phrasings. Initializations 100-102
   pair the adapter, the WM-S table and the policy seed. The language model is R1 (5.2M parameters, from

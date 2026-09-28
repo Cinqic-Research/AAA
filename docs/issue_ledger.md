@@ -2582,24 +2582,30 @@ confirmation result.
 - **Repair** `tools/check_aaa_wm_evidence.py` validates the declared task,
   slice, arm and initialization grids, strict JSON, run counts and hashes; it
   recomputes every ratio, group ratio, interval and verdict from the retained
-  bits. A separate arithmetic path checks each geometric point ratio. Six
-  mutation regressions cover silent numerical and structural corruption. Both
+  bits. A separate arithmetic path checks each geometric point ratio, and a
+  third bootstrap with a distinct random stream checks both stored intervals
+  against the raw bits within the declared Monte Carlo width. Seven mutation
+  regressions cover silent numerical and structural corruption. Both
   retained confirmations pass without replaying spent identities.
 
 ### AAA-213 — Direct confirmation drafting bypassed admission
-- **Severity** high · **Status** open for a prospective successor.
+- **Severity** medium for this reviewed run · **Status** open for a prospective successor.
 - **Reproduction** `generator.draft("confirmation", 0, 0)` returned normally
   without any admission. The mutation suite's M3 only tests `build`, so its
   label overstates the generation surface it protects.
 - **Evidence impact** The recorded world and language runs use the committed
   freeze commits with clean-tree provenance; this bypass alone is not evidence
   that their identities were generated early. The API cannot be described as
-  fail-closed. `opaque.v0` source is frozen, and those identities are spent.
+  fail-closed. The actual confirmation entry points checked admission. The
+  world freeze lacked a remote pre-run anchor, so an unseen earlier local
+  draft cannot be disproved; this is an explicitly retained provenance limit,
+  not an observed violation. `opaque.v0` source is frozen, and those identities
+  are spent.
 - **Next protocol** Guard every generation entry point before fresh identities
   exist; test the actual confirmation path and anchor the freeze remotely first.
 
 ### AAA-214 — Language admission omits transitive execution dependencies
-- **Severity** high · **Status** open for a prospective successor.
+- **Severity** medium for this reviewed run · **Status** open for a prospective successor.
 - **Reproduction** `lang.experiment.codec_for` imports `_bpe_path` from
   `research/aaa_wm/lm/train.py`, and `lang.reports`/the opaque generator import
   `research/aaa_python/rng.py`. Neither is in the language freeze's source
@@ -2607,8 +2613,13 @@ confirmation result.
   commit changing such a helper could retain the recorded fingerprint.
 - **Evidence impact** At the provenance commit `a8c088d`, the running tree was
   recorded clean, and every listed frozen source file still matches it. The
-  omission weakens admission for future use, not proof that the observed run
-  used altered code. The current review does not retrofit the spent freeze.
+  omitted `lm/train.py` later changed in training and formatting paths, but
+  the ASTs of `_bpe_path` and `bpe_hash`, the helpers imported by confirmation,
+  are identical to `a8c088d`. The other relevant omitted helpers are unchanged.
+  The exact clean commit and locked environment pin the observed run; the
+  omission weakens the admission API for future use but does not show that
+  this run used altered confirmation behavior. The current review does not
+  retrofit the spent freeze.
 - **Next protocol** Derive and verify a complete transitive source closure,
   dependency lock, specification and artifact set before fresh identities.
 
@@ -2631,19 +2642,24 @@ confirmation result.
   environment and added a dedicated locked neural CI job. Locally, 64 pinned
   packages match; the Torch tests run (one GPU-only skip on CPU).
 
-### AAA-217 — The opaque benchmark's stated nearby-repair rule is absent
-- **Severity** high · **Status** open; claim narrowed.
-- **Reproduction** The design says it excludes certain visible-test-equivalent
-  programs within `k` edits, but `opaque.generator.accept` does no
-  neighborhood search. The design's wording also conflicts with its promise
-  to count alternate domain-equivalent fixes as successes. On 5 of 40 allowed
-  pilot tasks, a one-edit program passed all three visible tests and failed
-  domain equivalence.
-- **Evidence impact** This does not change stored success bits or compare arms
-  on different tasks. It prevents a claim that the declared nearby-repair
-  rule was enforced or that visible-test passing uniquely identifies success.
-  The frozen generator remains untouched. A successor must state an
-  unambiguous acceptance rule, then enforce and measure it before confirmation.
+### AAA-217 — The opaque design's nearby-repair clause is ambiguous
+- **Severity** medium · **Status** documented; prospective clarification open.
+- **Reproduction** The design says a task excludes other programs within `k`
+  edits that are both visible-test-equivalent and domain-equivalent to the
+  reference, except the true fix and its equivalents. Since domain-equivalent
+  programs are successful fixes by the declared scoring rule, this exception
+  makes the clause either tautological or in need of a more precise definition
+  of "true fix." `opaque.generator.accept` does not search a neighborhood.
+  On 5 of 40 allowed pilot tasks, a one-edit program passed all three visible
+  tests and failed domain equivalence. Those examples do **not** violate the
+  literal nearby clause, which requires domain equivalence too.
+- **Evidence impact** The executable acceptance rule is narrower than the
+  design prose, and no neighborhood uniqueness property is established. The
+  examples show that visible-test passing is not sufficient for full-domain
+  success, which is scored correctly at submit. This does not change stored
+  success bits or compare arms on different tasks. A successor should specify
+  a non-tautological acceptance rule, if one is needed, then measure it before
+  fresh confirmation.
 
 ### AAA-218 — Corpus provenance was local-only and contamination was not gated
 - **Severity** medium · **Status** partially repaired; post-run overlap checked.
@@ -2655,10 +2671,14 @@ confirmation result.
   with protected hashes. Deterministically reconstructed the 2,000 confirmation
   reports from the pinned code path without agent evaluation; the run retained
   no report hashes for direct byte comparison. Scanned the local training
-  corpus against those reconstructed reports: zero
-  documents shared a 13-word sequence. The report-text SHA-256 and both
-  manifest hashes are retained in `contamination_post_run.json`, alongside a
-  repeatable checker. This is a post-run audit, not a pre-run gate, and the
+  corpus against those reconstructed reports: zero documents shared a literal
+  13-word sequence. A second pass removed punctuation, collapsed numeric
+  spellings and digits, and found zero 13-token matches and zero documents
+  containing any of six static held-out template fragments across five
+  training shards. The report-text SHA-256, both manifest hashes and both
+  results are retained under `docs/evidence/aaa_wm_lang_v0/`, alongside a
+  repeatable checker and a synthetic numeric-variant regression. This is a
+  post-run audit, not a pre-run gate, and the
   corpus and trained checkpoints remain external. A successor must make the
   contamination check a recorded gate before evaluation.
 
@@ -2680,3 +2700,21 @@ confirmation result.
   and in-process opaque execution accurately. A successor should use safe
   tensor-only loading and non-object cache serialization, and enforce artifact
   provenance at each public load entry point before accepting untrusted files.
+
+### AAA-220 — Opaque fast validator can misclassify numeric string literals
+- **Severity** medium · **Status** documented; prospective repair open.
+- **Reproduction** `opaque.program.valid` uses a regular expression to replace
+  numeric text with `0` before caching the subset verdict. The substitution
+  also changes digits inside string literals. For
+  `src = 'def f(p):\n    return "' + '49 '*6 + '"\n'`, the full v1 subset
+  validator rejects the 18-character string, while `valid(src, api_names)`
+  returns `True`. The `range`-literal bound of 50 means the fast path applies to
+  these small numeric tokens.
+- **Evidence impact** The confirmation generator emits arithmetic programs
+  without string literals, and permitted candidate edits change its existing
+  tokens. This reproduces a generic `valid`/`run` boundary defect, not an
+  observed confirmation input or result discrepancy. It reinforces that the
+  in-process executor is for trusted generated programs only.
+- **Next protocol** A successor should tokenize numeric literals by AST node
+  rather than regex text substitution, or use the full subset validator, and
+  add differential tests on arbitrary legal and illegal source text.

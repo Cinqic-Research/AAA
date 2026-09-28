@@ -51,6 +51,20 @@ PYTHON_PATHS = (
 
 
 def purpose(path: str) -> str:
+    if path.startswith("research/aaa_wm/seq/"):
+        return "rejected sequential-benchmark prototype, retained for provenance"
+    if path.startswith("research/aaa_wm/opaque/"):
+        return "frozen opaque world-model benchmark, agents or confirmation source"
+    if path.startswith("research/aaa_wm/lang/"):
+        return "frozen language confirmation and adapter source"
+    if path == "research/aaa_wm/lm/model.py":
+        return "frozen language-model architecture and checkpoint source"
+    if path.startswith("research/aaa_wm/lm/"):
+        return "language corpus, tokenizer, model or training source"
+    if path.startswith("research/aaa_wm/"):
+        return "world-model research diagnostic or controlled job tooling"
+    if path.startswith("docs/evidence/aaa_wm_"):
+        return "retained world-model or language freeze, confirmation and audit evidence"
     if path.startswith("research/aaa_python_v1/"):
         return "frozen aaa.python.v1 implementation or packaged protocol data"
     if path.startswith("docs/evidence/aaa_python_v1/"):
@@ -99,6 +113,15 @@ def purpose(path: str) -> str:
 
 
 def category(path: str) -> str:
+    if path.startswith("research/aaa_wm/seq/"):
+        return "rejected prototype"
+    if (
+        path.startswith(("research/aaa_wm/opaque/", "research/aaa_wm/lang/"))
+        or path == "research/aaa_wm/lm/model.py"
+    ):
+        return "frozen source"
+    if path.startswith("docs/evidence/aaa_wm_"):
+        return "retained evidence"
     if path in {
         "docs/evidence/phase_closure_validation.json",
         "docs/aaa_python_development_report.md",
@@ -245,6 +268,8 @@ def findings(path: str) -> str:
 
 
 def inherited_findings(path: str) -> str:
+    if path.startswith(("research/aaa_wm/", "docs/evidence/aaa_wm_", "docs/wm_program/")):
+        return "PR #30 world-model and language program; AAA-210 through AAA-220 audit scope"
     if path.startswith(
         (
             "research/aaa_python_v1/",

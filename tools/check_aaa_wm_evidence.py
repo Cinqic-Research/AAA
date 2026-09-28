@@ -74,6 +74,49 @@ def independent_point(results: dict[str, Any], slices: list[str], contract: dict
     return math.exp(sum(logs) / len(logs))
 
 
+def independent_interval(
+    results: dict[str, Any], slices: list[str], contract: dict[str, Any]
+) -> tuple[float, float]:
+    """Third crossed bootstrap directly from correctness bits, with a distinct RNG stream."""
+
+    import numpy as np
+
+    names = sorted(contract["groups"]) if isinstance(contract.get("groups"), list) else sorted(set(slices))
+    seeds = [str(s) for s in contract["initializations"]]
+    if len(seeds) < 2:
+        raise ValueError("crossed interval needs multiple initializations")
+    draws = 20000
+    rng = np.random.default_rng([contract["seed"], 0xA11D17])
+    rows = rng.integers(0, len(seeds), size=(draws, len(seeds)))
+    logs = np.zeros(draws)
+    for group in names:
+        positions = [i for i, label in enumerate(slices) if label == group]
+        streams = [positions[i : i + 40] for i in range(0, len(positions), 40)]
+        cells = {}
+        for arm in (contract["reference"], contract["challenger"]):
+            by_seed = results[arm]
+            cells[arm] = np.asarray(
+                [
+                    [
+                        (
+                            40
+                            - sum(by_seed.get(seed, by_seed.get("0"))["bits"][i] == "1" for i in stream)
+                            + 0.5
+                        )
+                        / 41
+                        for stream in streams
+                    ]
+                    for seed in seeds
+                ]
+            )
+        cols = rng.integers(0, len(streams), size=(draws, len(streams)))
+        ref = cells[contract["reference"]][rows[:, :, None], cols[:, None, :]].mean(axis=(1, 2))
+        cha = cells[contract["challenger"]][rows[:, :, None], cols[:, None, :]].mean(axis=(1, 2))
+        logs += np.log(cha / ref)
+    ratios = np.exp(logs / len(names))
+    return float(np.quantile(ratios, 0.025)), float(np.quantile(ratios, 0.975))
+
+
 def verify(
     kind: str,
     start: int,
@@ -138,6 +181,7 @@ def verify(
         problems.append("stored adjudication names differ from the freeze")
     if problems:
         return problems
+    assert isinstance(slices, list)
 
     import numpy as np
 
@@ -146,17 +190,17 @@ def verify(
         for a, per in results.items()
     }
     for name, c in contracts.items():
-        seeds = [str(s) for s in c["initializations"]]
+        ordered_seeds = [str(s) for s in c["initializations"]]
         ref = c["reference"]
         if c.get("reference_deterministic"):
-            local_ref = {s: arms[ref].get(s, arms[ref]["0"]) for s in seeds}
+            local_ref = {s: arms[ref].get(s, arms[ref]["0"]) for s in ordered_seeds}
         else:
             local_ref = arms[ref]
         local = {ref: local_ref, c["challenger"]: arms[c["challenger"]]}
         fresh = adjudicate_ratio(
             local,
             slices,
-            seeds,
+            ordered_seeds,
             ref,
             c["challenger"],
             c["threshold"],
@@ -192,6 +236,13 @@ def verify(
                 tolerance = 0.05 * max(expected[1] - expected[0], 0.0)
                 if any(not _close(x, y, width=tolerance) for x, y in zip(actual, expected, strict=True)):
                     problems.append(f"{name}: {key} differs")
+        third = independent_interval(results, slices, c)
+        for key in ("interval", "independent_interval"):
+            stored_interval = stored.get(key)
+            if isinstance(stored_interval, list) and len(stored_interval) == 2:
+                width = 0.05 * max(stored_interval[1] - stored_interval[0], 0.0)
+                if any(not _close(a, b, width=width) for a, b in zip(stored_interval, third, strict=True)):
+                    problems.append(f"{name}: {key} differs from third bootstrap")
     return problems
 
 
