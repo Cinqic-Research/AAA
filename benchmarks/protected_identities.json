@@ -99,6 +99,7 @@
     "docs/evidence/aaa_python_v1/stage_tool.json": "7fd0528b55c1e3ea1ac7afc1c8f1679942732459411469a0009918131e982f45",
     "docs/evidence/aaa_python_v1/superseded/stage_encoders_censored.json": "0ce46e9eee3902be8f49c6548ebc54624a044cd2494e8f9833911001d1c90f13",
     "docs/evidence/aaa_wm_lang_v0/confirmation.json": "4fa2cc497bd24219f6769cd8cd6bec0f8eeded3a7c1a092d70b940ed9bfdc312",
+    "docs/evidence/aaa_wm_lang_v0/contamination_post_run.json": "d188da67e1cd91485e173c89feaf0012d77087bc8803e8cb700fdd81dcf54ce8",
     "docs/evidence/aaa_wm_lang_v0/corpus_manifest_snapshot.json": "988a73fdfe4ac8d1ce1ea8cfddd3bb20e6ab3c64160af7a806998ab344dd1132",
     "docs/evidence/aaa_wm_lang_v0/freeze.json": "8995eafa3b3dc289d1bd2ce5f105b76a9d7aad90a131e85bd52542145279e966",
     "docs/evidence/aaa_wm_lang_v0/raw_download_manifest_snapshot.txt": "baedb62e4b57e4422218772b132780a53bef419e466a5596d0ec122bf5e39dad",

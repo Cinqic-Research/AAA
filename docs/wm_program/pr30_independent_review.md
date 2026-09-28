@@ -24,6 +24,11 @@ all listed source files are unchanged since their respective provenance
 commits. The four earlier scientific identity values and 493 prior protected
 file hashes are unchanged.
 
+GitHub Actions recorded a push of the world-model freeze commit `f994d91` at
+2026-09-27 04:45 UTC, about four hours after the logged confirmation start.
+The language freeze commit `a8c088d` was pushed before its logged run. The
+world-model freeze therefore lacked a remote pre-run anchor.
+
 ## Results independently checked
 
 - The world-model evidence contains 4,000 distinct ordered task identities,
@@ -32,10 +37,18 @@ file hashes are unchanged.
   agrees with a fresh computation within the contract's Monte Carlo tolerance;
   the geometric points also match a separate direct calculation from the
   correctness bits. C1 is 0.481 and all 11 stored contracts promote.
+  Deterministic reconstruction matches all 4,000 retained task SHA-256 values.
+  The actual cached development and attack programs have no hash overlap with
+  either confirmation phase. One reference source repeats within the world
+  confirmation at indices 2180 and 3663, in different slices and library
+  conditions; those remain distinct tasks.
 - The language evidence contains 2,000 disjoint subsequent identities and
   complete declared grids. The same checks reproduce L2 `PROMOTE` at 0.772,
   while L1, F1 and F2 are `INCONCLUSIVE`. Neither
   `LANGUAGE_INTEGRATION_SUCCESS` nor `FULL_SYSTEM_SUCCESS` is established.
+  The stored channel-extraction percentages are summaries without per-task
+  extraction bits, so they were not independently recomputed from retained
+  primitives.
 - WM-S learned a table of six opaque unary functions from program-level
   observations. Visible Python semantics and exhaustive depth-two planning
   were hand-written. The main comparison matches the number of real `RUN`
@@ -52,12 +65,18 @@ The local 15 world-model and 13 language learned-artifact files match their
 freeze SHA-256 values. All eight local raw corpus downloads and all 15
 processed corpus shards match the HDD manifests. The manifest copies added
 to this review are post-run provenance snapshots; they do not retrospectively
-anchor the downloads or guarantee their continued public availability.
+anchor the downloads or guarantee their continued public availability. A
+separate capped post-run audit deterministically reconstructed all 2,000
+held-out report texts from the pinned code path
+(SHA-256 `b092f0d6`) and found zero training documents sharing a 13-word
+sequence with those reconstructed texts. The confirmation did not retain
+report hashes for a direct byte-for-byte comparison. The audit result and
+checker are retained; this was not a pre-run admission check.
 
 ## Findings, repairs, and evidence impact
 
 The reproducible findings, severity, root cause and repair for AAA-210 through
-AAA-218 are in the [issue ledger](../issue_ledger.md). AAA-210, AAA-211,
+AAA-219 are in the [issue ledger](../issue_ledger.md). AAA-210, AAA-211,
 AAA-212 and AAA-215 have focused repairs outside frozen source. AAA-216 has a
 new neural CI job whose live result is required before any approval. The
 package wheel now contains both research specifications, and an unrelated
@@ -69,16 +88,23 @@ transitive runtime helpers, including the tokenizer path resolver and RNG
 (AAA-214). The benchmark's promised exclusion of visible-pass/domain-fail
 nearby programs is absent and its design wording is ambiguous; 5 of 40
 allowed pilot tasks have a visible-pass/domain-fail one-edit alternative
-(AAA-217). No retained run of the corpus contamination check on
-the actual evaluated reports was found (AAA-218). The frozen source and spent
+(AAA-217). The corpus contamination check was not a recorded pre-run gate,
+though a post-run exact-text check now passes (AAA-218). The frozen source and spent
 identities cannot be silently rewritten to repair these historical facts.
 The confirmation provenance does not show that AAA-213 or AAA-214 was
 exploited; the result is evidence about the recorded exact commits, with
 weaker admission assurances than the design text claimed.
 
+The opaque interpreter executes validated generated programs in-process; it
+is not a hostile-code sandbox. The WM and LM checkpoint loaders and opaque
+data cache use pickle-capable deserialization. Their generic entry points
+must receive trusted files, while the confirmation entry points verify
+declared artifact hashes before loading. The current security policy now
+states those boundaries (AAA-219).
+
 ## Verification record
 
-- `tools/check_protected_identities.py`: 499 hashes, unchanged historical
+- `tools/check_protected_identities.py`: 500 hashes, unchanged historical
   fingerprints, pass after the new files were staged.
 - `tools/check_aaa_wm_evidence.py`: world and language retained evidence pass.
   Six post-freeze audit mutations are rejected.
@@ -88,6 +114,11 @@ weaker admission assurances than the design text claimed.
   `build`, so it does not cover direct `draft` access.
 - CPU research tests: 31 pass with seven optional-dependency skips. Torch
   research tests: 38 run, one GPU-only skip on this CPU test path.
+- Actual hashed seed-100 policy and black-box WM checkpoints load and account
+  for 985,221 and 985,092 trainable parameters; WM inference returned a
+  three-test probability vector. The pretrained and random-twin LM adapters
+  both load with 5,245,184 parameters, the pinned BPE tokenizer resolves,
+  and both produced finite forward logits on a non-confirmation prompt.
 - Full local suite: 974 tests in 539 seconds, two failures from the new
   provenance files being unstaged when that run began; all other tests passed
   or skipped. After staging, the 15 affected protected/evidence/job tests pass.
@@ -99,8 +130,8 @@ weaker admission assurances than the design text claimed.
 ## Verdict
 
 **CHANGES_REQUIRED.** I cannot approve or merge this PR under the requested
-gate while AAA-213, AAA-214, AAA-217 and the unverified contamination boundary
-remain open, and until the new locked neural CI and full suite complete on the
+gate while AAA-213, AAA-214 and AAA-217 remain open, the corpus check lacks a
+pre-run record, and until the new locked neural CI and full suite complete on the
 exact repaired head. The scoped numeric results above remain reproducible as
 stored; this verdict concerns the stronger admission and benchmark-validity
 assurances required for the merge.

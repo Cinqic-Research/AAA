@@ -361,3 +361,16 @@ evidence, so they are characterizations rather than confirmed claims.
   claimed ([language confirmation](wm_program/language_confirmation.md)). The statements are
   templated paraphrases, not open-ended English.
 - **Compute.** Compute is not matched across arms (the matched resource is real test runs).
+- **Confirmation admission and task design.** The opaque generator's direct
+  `draft("confirmation")` path does not require admission. Its freeze was
+  pushed remotely about four hours after the run started. The language freeze
+  omits some transitive source helpers from its fingerprint, although its
+  recorded clean provenance commit pins the source used for that run. The
+  benchmark design's nearby-repair exclusion is not implemented as written;
+  visible-test passing need not imply domain success. These gaps and their
+  evidence scope are documented in the [AI review](wm_program/pr30_independent_review.md).
+- **Corpus provenance.** The repository retains post-run download and corpus
+  manifest snapshots, and a post-run 13-word overlap audit of the exact 2,000
+  confirmation reports found no matches in the local training corpus. There
+  was no recorded pre-run contamination gate. Corpus bytes and trained
+  checkpoints are not included in the repository.

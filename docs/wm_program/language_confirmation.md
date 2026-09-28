@@ -12,6 +12,16 @@ HDD **after** confirmation and are labeled as provenance snapshots, not as
 pre-run remote anchors. Their raw-file hashes matched all eight local
 downloads at review time. Rebuilding the corpus still requires those external
 downloads; the repository does not include the corpus or trained checkpoints.
+The [post-run contamination audit](../evidence/aaa_wm_lang_v0/contamination_post_run.json)
+deterministically reconstructed all 2,000 held-out reports from the pinned
+code path and found no shared 13-word sequence in a training-corpus document.
+The confirmation did not retain report hashes for a byte-for-byte comparison.
+This narrows contamination risk but does not retroactively create a
+pre-confirmation gate.
+The language admission fingerprint omits transitive source helpers including
+`lm/train.py`'s tokenizer-path resolver and `aaa_python/rng.py`. The recorded
+run used clean commit `a8c088d`, and the reviewed source files match that
+commit; the omission leaves the admission API incomplete for future use.
 
 - **Design.** 2,000 fresh `opaque.v0` tasks. Every statement used held-out phrasings. Initializations 100-102
   pair the adapter, the WM-S table and the policy seed. The language model is R1 (5.2M parameters, from

@@ -1,0 +1,12 @@
+{
+  "corpus_manifest_sha256": "988a73fdfe4ac8d1ce1ea8cfddd3bb20e6ab3c64160af7a806998ab344dd1132",
+  "language_freeze_commit": "a8c088dc250961ce15f49be3f9761814bff2ada6",
+  "overlap": {
+    "contaminated_train_docs": {},
+    "eval_texts": 2000,
+    "n": 13
+  },
+  "raw_download_manifest_sha256": "baedb62e4b57e4422218772b132780a53bef419e466a5596d0ec122bf5e39dad",
+  "reports_sha256": "b092f0d6328b2c04517c53e00e85e5a01534ce54a90b96f7a1d9b7a436c7cfa2",
+  "status": "POST_RUN_AUDIT; not a pre-confirmation contamination gate"
+}

@@ -2646,12 +2646,37 @@ confirmation result.
   unambiguous acceptance rule, then enforce and measure it before confirmation.
 
 ### AAA-218 — Corpus provenance was local-only and contamination was not gated
-- **Severity** medium · **Status** partially repaired; contamination unverified.
+- **Severity** medium · **Status** partially repaired; post-run overlap checked.
 - **Reproduction** Raw download and processed-corpus manifests lived only on
   the HDD; `corpus.contamination` has a unit test but no recorded run on the
   actual evaluation language. All eight raw download bytes and all 15
   processed shards matched their local manifests at review time.
 - **Repair** Retained the two manifest files as explicitly post-run snapshots
-  with protected hashes. They do not establish pre-run remote anchoring or an
-  actual held-out-text contamination pass. A successor must make that check a
-  recorded gate before evaluation.
+  with protected hashes. Deterministically reconstructed the 2,000 confirmation
+  reports from the pinned code path without agent evaluation; the run retained
+  no report hashes for direct byte comparison. Scanned the local training
+  corpus against those reconstructed reports: zero
+  documents shared a 13-word sequence. The report-text SHA-256 and both
+  manifest hashes are retained in `contamination_post_run.json`, alongside a
+  repeatable checker. This is a post-run audit, not a pre-run gate, and the
+  corpus and trained checkpoints remain external. A successor must make the
+  contamination check a recorded gate before evaluation.
+
+### AAA-219 — New research artifact loaders use pickle without local trust enforcement
+- **Severity** medium · **Status** documented; prospective repair open.
+- **Reproduction** `opaque.models.load` and `lm.model.load` call
+  `torch.load(weights_only=False)` before checking schema or tensor shapes;
+  `opaque.data._load` reads a cached object array with
+  `numpy.load(allow_pickle=True)`. A caller passing an untrusted file can
+  execute code during deserialization. The previous `SECURITY.md` statement
+  that no pickle was used became inaccurate with this research path.
+- **Evidence impact** The recorded confirmations hash-check their declared
+  artifacts before loading checkpoints. The review also matched local
+  artifacts against the freezes. This supports the trusted confirmation path,
+  but the generic loaders have no built-in hash or provenance check. The
+  training cache remains caller-controlled. No hostile-file exposure was
+  found in the confirmed run.
+- **Repair** `SECURITY.md` now states the project-controlled artifact boundary
+  and in-process opaque execution accurately. A successor should use safe
+  tensor-only loading and non-object cache serialization, and enforce artifact
+  provenance at each public load entry point before accepting untrusted files.
