@@ -1,6 +1,7 @@
 # Current research direction: Coding, beginning with Python
 
-Decision date: 2026-09-23. Updated 2026-09-25 for the `aaa.python.v1` result.
+Decision date: 2026-09-23. Updated 2026-09-27 for the scoped world-model and
+language experiments following `aaa.python.v1`.
 This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
 charter, whose principles still apply, and outside the `aaa.1k.v2`
 protocol. It claims no capability.
@@ -116,17 +117,24 @@ independent recomputation, and the shared promotion contract
 where a real shared abstraction exists. A generic loop framework will be
 extracted only when a second domain actually needs the same code.
 
-## Future directions, recorded and not started
+## World-model and language work now underway
 
-- **English / natural language.** AAA may later learn English as an
-  additional capability supporting communication, instruction following,
-  explanation, knowledge exchange, reasoning interfaces and interaction with
-  people. It is **not** a current objective. No English training, general text
-  corpus or conversational behavior is introduced, and the first Python phase
-  requires no English competence. Choices that would make a later expansion
-  impossible are avoided where that costs nothing; for example, the byte-level
-  representation can represent any text. Evidence from the Python work decides
-  when expansion is justified.
+The [world-model program](wm_program/README.md) studies generated Python
+debugging with an opaque six-function library. Its structured candidate uses a
+hand-written interpreter for visible Python plus a learned table for the
+library. Within `aaa.python.opaque.v0`, the world-model comparison passes its
+declared contracts, with strong seed and transfer limitations. A separately
+trained American-English language model was tested through a structured
+adapter on templated reports. Its comparison with hand-written rules passes,
+while the pretraining and full-system contracts remain inconclusive. Neither
+experiment establishes general Python or English competence.
+
+## Other future directions
+
+- **Broader English / natural language.** The current templated extraction
+  study does not establish communication, instruction following, open-ended
+  conversation, or general understanding. Those remain possible future
+  research directions requiring their own evidence.
 - **Other programming languages** can follow when Python work gives a reason.
 
 ## Self-inspection boundary

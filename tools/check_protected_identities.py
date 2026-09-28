@@ -143,8 +143,8 @@ def compare(expected: dict[str, Any], live: dict[str, Any]) -> list[str]:
             problems.append(f"protected file no longer tracked: {name}")
         elif observed != digest:
             problems.append(f"protected file changed: {name}")
-    # A newly tracked evidence file is allowed (new phases add evidence); an
-    # expected one that disappears or changes is not.
+    for name in sorted(set(live["files"]) - set(expected["files"])):
+        problems.append(f"tracked evidence or historical file lacks a protected hash: {name}")
     return problems
 
 

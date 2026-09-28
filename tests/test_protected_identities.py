@@ -58,6 +58,11 @@ class ProtectedIdentityTests(unittest.TestCase):
         del live["files"]["results/final/summary.json"]
         self.assertTrue(any("no longer tracked" in p for p in tool.compare(self.expected, live)))
 
+    def test_new_evidence_needs_a_protected_hash(self) -> None:
+        live = copy.deepcopy(self.live)
+        live["files"]["docs/evidence/new_phase/confirmation.json"] = "0" * 64
+        self.assertTrue(any("lacks a protected hash" in p for p in tool.compare(self.expected, live)))
+
     def test_a_moved_fingerprint_is_reported(self) -> None:
         live = copy.deepcopy(self.live)
         live["identities"]["aaa_1k_v1_phase_fingerprint"] = "e9e65b0c"

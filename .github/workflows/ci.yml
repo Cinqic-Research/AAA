@@ -62,6 +62,9 @@ jobs:
       - name: Protected historical identities and evidence bytes
         run: python tools/check_protected_identities.py
 
+      - name: Recompute retained world-model and language decisions
+        run: python tools/check_aaa_wm_evidence.py
+
       # ---- Current phase: aaa.python.v0 and the promotion successor -------
       - name: Promotion contract successor (AAA-180)
         run: |
@@ -206,6 +209,28 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
+  neural:
+    name: Locked neural path
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MPLBACKEND: Agg
+      PIP_NO_CACHE_DIR: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install the pinned Torch and language environment
+        run: |
+          python -m pip install -r requirements-torch-lock.txt --extra-index-url https://download.pytorch.org/whl/cu126
+          python -m pip install -e . --no-deps
+          python tools/check_lock.py --lock requirements-torch-lock.txt
+      - name: Execute CPU neural, language, and evidence tests
+        run: |
+          python -c "import torch, tokenizers, pyarrow; print(torch.__version__, tokenizers.__version__, pyarrow.__version__)"
+          python -m unittest tests.test_aaa_wm_models tests.test_aaa_wm_opaque tests.test_aaa_wm_lm tests.test_aaa_wm_evidence tests.test_aaa_wm_jobs -q
+
   # Every Python version advertised in pyproject.toml classifiers. Do not add a
   # version here without adding the classifier, or the reverse.
   versions:
@@ -291,6 +316,13 @@ jobs:
           python -m research.aaa_python recompute \
             --evidence "${RUNNER_TEMP}/elsewhere/py/dev.json" \
             --records "${RUNNER_TEMP}/elsewhere/py/records.jsonl.gz"
+          python -c "
+          from research.aaa_wm.opaque import generator as opaque
+          from research.aaa_wm.seq import generator as sequential
+          assert opaque.load_spec()['protocol'] == 'aaa.python.opaque.v0'
+          assert sequential.load_spec()['protocol'] == 'aaa.python.seq.v0'
+          print('installed world-model specifications load')
+          "
 
       - name: Retain fresh-install failure evidence
         if: always()

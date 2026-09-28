@@ -59,6 +59,8 @@ include = ["aaa*", "research*"]
 "research.aaa_python" = ["data/*.json"]
 # aaa.python.v1: the successor protocol specification.
 "research.aaa_python_v1" = ["data/*.json"]
+"research.aaa_wm.opaque" = ["data/*.json"]
+"research.aaa_wm.seq" = ["data/*.json"]
 
 [tool.ruff]
 line-length = 110

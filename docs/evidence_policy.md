@@ -280,7 +280,9 @@ manifest.
 ## Protected historical identities
 
 `benchmarks/protected_identities.json` records the dot-era identities and the
-SHA-256 of 493 retained files, including the new Python evidence.
+SHA-256 of 499 retained files, including both world-model and language
+confirmation freezes, their evidence, and post-run corpus provenance snapshots.
 `python tools/check_protected_identities.py`
-fails on any change. New evidence may be added; retained evidence may not
-change.
+fails on any changed or unregistered retained evidence. New evidence must be
+registered with its initial hash before the check passes; existing hashes may
+not be rewritten to conceal drift.

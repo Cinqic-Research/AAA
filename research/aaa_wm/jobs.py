@@ -43,6 +43,12 @@ class Adopted:
             return 0
 
 
+def completed_successfully(proc: subprocess.Popen[bytes] | Adopted, job: dict) -> bool:
+    """An adopted process has no exit status, so require its declared output."""
+
+    return Path(job["output"]).is_file() and (isinstance(proc, Adopted) or proc.returncode == 0)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("queue")
@@ -55,6 +61,7 @@ def main() -> int:
     args = ap.parse_args()
     running: dict[str, tuple[subprocess.Popen[bytes], dict]] = {}
     started: set[str] = set()
+    failed: list[str] = []
     budget = _bytes(args.budget)
     vbudget = _bytes(args.vram)
 
@@ -88,6 +95,8 @@ def main() -> int:
             if proc.poll() is not None:
                 print(time.strftime("%H:%M:%S"), "done", name, "exit", proc.returncode, flush=True)
                 Path(job["output"] + ".lock").unlink(missing_ok=True)
+                if not completed_successfully(proc, job):
+                    failed.append(name)
                 del running[name]
         used = sum(_bytes(j["mem"]) for _, j in running.values())
         vused = sum(vram(j) for _, j in running.values())
@@ -116,6 +125,9 @@ def main() -> int:
         pending = [j for j in pending if j["name"] not in started] + [
             j for j in refresh() if j["name"] not in {p["name"] for p in pending}
         ]
+    if failed:
+        print("QUEUE_FAILED", ",".join(failed), flush=True)
+        return 1
     print("QUEUE_DONE", flush=True)
     return 0
 

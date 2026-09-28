@@ -122,8 +122,10 @@ python tools/check_promotion_successor.py
 ## Where AAA goes next, and what it will not assume
 
 The [research direction](docs/research_direction.md) lays out a 24-rung Python
-capability ladder whose rungs must be earned in order. English and natural
-language are a recorded *future* direction, not a current objective. Other
+capability ladder whose rungs must be earned in order. The world-model and
+American-English experiments have begun, within the narrow generated tasks
+described in the [program handoff](docs/wm_program/handoff.md). Language
+integration and full-system superiority remain inconclusive. Other
 programming languages can follow once Python gives a reason. About **105M
 parameters** is a revisable long-term planning goal for AAA 1, not a target,
 minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says
@@ -180,7 +182,7 @@ The machine and the revisable model-size planning goal are recorded in
 
 | Document | What it covers |
 |---|---|
-| [Current research direction](docs/research_direction.md) | Python-first coding scope, the 24-rung capability ladder, English as a future direction, causal evaluation and self-improvement boundaries |
+| [Current research direction](docs/research_direction.md) | Python-first coding scope, the 24-rung capability ladder, scoped world-model and language work, causal evaluation and self-improvement boundaries |
 | [`aaa.python.v1` research brief](docs/aaa_python_v1_research_brief.md) | the pre-scale question, hypotheses, declared rules and amendments |
 | [`aaa.python.v1` protocol](docs/aaa_python_v1_protocol.md) and [architecture](docs/aaa_python_v1_architecture.md) | the successor exam, encoders, learner family and exact accounting |
 | [`aaa.python.v1` development report](docs/aaa_python_v1_development_report.md) | every stage and the confirmation, generated from retained evidence |

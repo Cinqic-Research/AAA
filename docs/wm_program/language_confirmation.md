@@ -6,6 +6,13 @@ identity in `[4000, 6000)` existed. Evidence: `docs/evidence/aaa_wm_lang_v0/conf
 provenance `a8c088d`, clean tree, run time 3 h 25 min, 3.6 GB peak. The post-run audit recomputes
 every verdict from the bits with no disagreement.
 
+The raw-download and processed-corpus manifests are now retained as
+`docs/evidence/aaa_wm_lang_v0/*_snapshot.*`. They were copied from the local
+HDD **after** confirmation and are labeled as provenance snapshots, not as
+pre-run remote anchors. Their raw-file hashes matched all eight local
+downloads at review time. Rebuilding the corpus still requires those external
+downloads; the repository does not include the corpus or trained checkpoints.
+
 - **Design.** 2,000 fresh `opaque.v0` tasks. Every statement used held-out phrasings. Initializations 100-102
   pair the adapter, the WM-S table and the policy seed. The language model is R1 (5.2M parameters, from
   scratch), with the v2 adapter.

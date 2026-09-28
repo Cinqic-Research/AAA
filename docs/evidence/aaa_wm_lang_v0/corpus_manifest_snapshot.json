@@ -1,0 +1,171 @@
+{
+ "version": "aaa.wm.lm.corpus.v1",
+ "lexicon_sha256": "8d157f7d097740e24f778df41570be2b0f662e2b8711c3c84e5763dbb6d4265a",
+ "created": "2026-09-26T09:54:40",
+ "sources": {
+  "usgpo": {
+   "files": {
+    "usgpo-0000.json.gz": "2026-09-26T09:39:32-04:00 4b99b5043d40e205e578b26e0827f86541bd86f4f11bd04868f61e4259fe4c20 760402814 usgpo-0000.json.gz https://huggingface.co/datasets/common-pile/usgpo_filtered/resolve/main/usgpo-0000.json.gz",
+    "usgpo-0002.json.gz": "2026-09-26T09:40:11-04:00 9f08dacf82536bf326f4250850592999acb456bedc9f2507f5fe117fb1f24b49 498658522 usgpo-0002.json.gz https://huggingface.co/datasets/common-pile/usgpo_filtered/resolve/main/usgpo-0002.json.gz"
+   },
+   "license": "public domain (17 U.S.C. 105)",
+   "note": "common-pile/usgpo_filtered; card warns of possible metadata/license inaccuracies",
+   "counts": {
+    "read": 121998,
+    "kept_train": 85176,
+    "not_prose": 6488,
+    "not_english": 2269,
+    "kept_test": 1076,
+    "kept_dev": 1079,
+    "near_duplicate": 5255,
+    "british_spelling": 299,
+    "short": 310,
+    "over_budget": 20046
+   },
+   "bytes": {
+    "train": 600012203,
+    "test": 7447247,
+    "dev": 7739854
+   },
+   "dialect_hits_kept": {
+    "us_hits": 301714,
+    "uk_hits": 4228
+   },
+   "output_sha256": {
+    "train": "efb98c7d6d2449ba74bde11f3de662aec5a06dfb1c96d490c6b7223814c17902",
+    "dev": "775563360a4fb0a11b103f018023eed695442da6f8bd4f92ae40d19401c9fe8c",
+    "test": "661f4b89e1233ddb2c83d21f5e690e2e489ed5b744bdc597963edbaf4816759f"
+   }
+  },
+  "fineweb_edu": {
+   "files": {
+    "fineweb-edu-10BT-000_00000.parquet": "2026-09-26T09:44:00-04:00 b1ba7b2ce4cb5ea6ef42dca40263eabb85f37700d01693a68e9b30a31d78e871 2152819114 fineweb-edu-10BT-000_00000.parquet https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/main/sample/10BT/000_00000.parquet"
+   },
+   "license": "ODC-By 1.0 (+ Common Crawl terms of use)",
+   "note": "HuggingFaceFW/fineweb-edu sample-10BT",
+   "counts": {
+    "read": 188165,
+    "kept_train": 147803,
+    "british_spelling": 16418,
+    "kept_dev": 1747,
+    "not_english": 287,
+    "kept_test": 1770,
+    "exact_duplicate": 49,
+    "near_duplicate": 70,
+    "not_prose": 13,
+    "over_budget": 20008
+   },
+   "bytes": {
+    "train": 600004488,
+    "dev": 6826374,
+    "test": 7487266
+   },
+   "dialect_hits_kept": {
+    "us_hits": 314071,
+    "uk_hits": 23959
+   },
+   "output_sha256": {
+    "train": "fd7a2550fb4e0a6772f35c1708c6dc0aaa7a9679c9fc83858b373cba2a51cbd6",
+    "dev": "0c2fcd0c07e7f5cbbd7ee0860de1e40026367edd483df3040e19f1f0b58220cc",
+    "test": "c15fbfa16e891ecb059ec87bb5227faa4e2bff80b5dd45fc592f9b0aff8c72dd"
+   }
+  },
+  "cosmopedia": {
+   "files": {
+    "cosmopedia-stories-00000.parquet": "2026-09-26T09:40:32-04:00 c0c658bbe65657c4e03f4dd593e224ecf763c0a64a6dbe468b3cc3deacfc7a3c 276785609 cosmopedia-stories-00000.parquet https://huggingface.co/datasets/HuggingFaceTB/cosmopedia/resolve/main/data/stories/train-00000-of-00043.parquet",
+    "cosmopedia-stories-00001.parquet": "2026-09-26T09:40:54-04:00 78e79f4de9300ce7b00e305665d065719a6688a263bf92d6d2e3256bdd4e98cf 276955951 cosmopedia-stories-00001.parquet https://huggingface.co/datasets/HuggingFaceTB/cosmopedia/resolve/main/data/stories/train-00001-of-00043.parquet",
+    "cosmopedia-wikihow-00000.parquet": "2026-09-26T09:41:14-04:00 409f601f1c8eb559ca1173816eb48f2b6f6a6ab3e562a7111e78a6229ca7e152 250990566 cosmopedia-wikihow-00000.parquet https://huggingface.co/datasets/HuggingFaceTB/cosmopedia/resolve/main/data/wikihow/train-00000-of-00002.parquet"
+   },
+   "license": "Apache-2.0",
+   "note": "HuggingFaceTB/cosmopedia (synthetic, Mixtral-8x7B-Instruct)",
+   "counts": {
+    "read": 171057,
+    "kept_train": 147029,
+    "kept_test": 1762,
+    "kept_dev": 1695,
+    "british_spelling": 457,
+    "not_english": 91,
+    "not_prose": 11,
+    "over_budget": 20012
+   },
+   "bytes": {
+    "train": 400002014,
+    "test": 4816435,
+    "dev": 4612634
+   },
+   "dialect_hits_kept": {
+    "us_hits": 306926,
+    "uk_hits": 6334
+   },
+   "output_sha256": {
+    "train": "9959603e23dee0f12b07b99bada7ba37a5a2c2365fdcaf51b20c4791abaaabb8",
+    "dev": "cc78617013845e66643dc76d98da7186db804eabee11201939d0bf84e223e966",
+    "test": "0716a953f1b11110e8e20e4cccf28aca24dc6103157bba6ffbf3df153b16d02c"
+   }
+  },
+  "simplewiki": {
+   "files": {
+    "simplewiki-20231101.parquet": "2026-09-26T09:38:34-04:00 31bded16768a47c286becd292079122f5d7d4397a17b87d4250a00ccd581e6f0 156885218 simplewiki-20231101.parquet https://huggingface.co/datasets/wikimedia/wikipedia/resolve/main/20231101.simple/train-00000-of-00001.parquet"
+   },
+   "license": "CC BY-SA 3.0 / GFDL (attribution: Wikipedia contributors)",
+   "note": "wikimedia/wikipedia 20231101.simple",
+   "counts": {
+    "read": 241787,
+    "kept_train": 171232,
+    "british_spelling": 5568,
+    "kept_test": 1883,
+    "short": 45756,
+    "kept_dev": 1801,
+    "not_prose": 4481,
+    "not_english": 10047,
+    "near_duplicate": 1017,
+    "exact_duplicate": 2
+   },
+   "bytes": {
+    "train": 188416472,
+    "test": 2051816,
+    "dev": 1933920
+   },
+   "dialect_hits_kept": {
+    "us_hits": 62710,
+    "uk_hits": 14936
+   },
+   "output_sha256": {
+    "train": "95059360ec7b71f17ccd63aa4b6a1a48c88fec7854869ad500ecac1a5e86ebcc",
+    "dev": "cbc01b7af6d0c34be0431c92eb8e7cb0979d481d5fd4a3caa6089e7dc48fd2b0",
+    "test": "36a612656623b672e59db7378b03c06b85a4344659b9475133525b6973d202be"
+   }
+  },
+  "pydocs": {
+   "files": {
+    "python-3.12-docs-text.tar.bz2": "2026-09-26T09:38:21-04:00 cd78af2eff4fd736466f1911cfb38c4730a0f5e9dc5c5bf3fec6386c2706465f 2913868 python-3.12-docs-text.tar.bz2 https://docs.python.org/3.12/archives/python-3.12-docs-text.tar.bz2"
+   },
+   "license": "PSF License v2 (examples PSF-2.0 / 0BSD)",
+   "note": "docs.python.org 3.12 text archive",
+   "counts": {
+    "read": 501,
+    "kept_train": 410,
+    "british_spelling": 17,
+    "not_english": 28,
+    "kept_dev": 5,
+    "kept_test": 4,
+    "not_prose": 35,
+    "short": 2
+   },
+   "bytes": {
+    "train": 4576207,
+    "dev": 73640,
+    "test": 64474
+   },
+   "dialect_hits_kept": {
+    "us_hits": 972,
+    "uk_hits": 70
+   },
+   "output_sha256": {
+    "train": "d8667820481f3fe7d299dd6b3426e57718c1a00bb4e4d3f4498f4597b7c57140",
+    "dev": "71978a1a52b9d8d9692555190931eb56b2bf66dfaf9cd623b783885dad429bf2",
+    "test": "0b8e0295d9a7e29419b34c09b16dcf176beb8ce09dac3ae4562cd88871b1ee9e"
+   }
+  }
+ }
+}

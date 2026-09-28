@@ -2547,3 +2547,111 @@ shortcut. No scientific generator or analysis source changed after the
 - **Repair** Current contribution scope and evidence policy now describe v1,
   its committed freeze, retained evidence, post-freeze decision audit, and
   protected-file count. Historical v0 evidence and boundaries remain explicit.
+
+## PR #30 world-model and language review (2026-09-27)
+
+The following findings were reproduced against PR #30 at
+`f5b3c5a584e0e73a7a01f6f9d1d385e907548a73`. The reviewer was Codex GPT-6
+(AI). Repairs below do not alter either frozen confirmation source or retained
+confirmation result.
+
+### AAA-210 — New confirmation evidence had no protected hashes
+- **Severity** high · **Status** repaired.
+- **Reproduction** The protected manifest held 493 files and omitted both new
+  freeze manifests and both confirmation documents. Changing one of those
+  tracked files would not trigger the protected identity check.
+- **Repair** Added their original SHA-256 hashes and the two post-run corpus
+  provenance snapshots. The checker now rejects newly tracked evidence with no
+  recorded hash. All 493 earlier hashes and four earlier identity values stayed
+  byte-for-byte unchanged. The final manifest covers 499 files.
+
+### AAA-211 — The wheel omitted both new benchmark specifications
+- **Severity** high · **Status** repaired.
+- **Reproduction** A wheel from the original PR contained neither
+  `aaa_python_opaque_v0.json` nor `aaa_python_seq_v0.json`, so installed
+  generators could not load their specifications.
+- **Repair** Added both data directories to package data and a clean-wheel
+  import/specification smoke check to CI. A wheel installed outside the checkout
+  now loads both specifications.
+
+### AAA-212 — Confirmation audit compared verdicts but ignored numeric drift
+- **Severity** high · **Status** repaired by a post-freeze gate.
+- **Reproduction** `opaque.confirm.audit` compared only each stored verdict;
+  it accepted a changed stored ratio when `PROMOTE` was unchanged. The language
+  confirmation had no analogous complete audit command.
+- **Repair** `tools/check_aaa_wm_evidence.py` validates the declared task,
+  slice, arm and initialization grids, strict JSON, run counts and hashes; it
+  recomputes every ratio, group ratio, interval and verdict from the retained
+  bits. A separate arithmetic path checks each geometric point ratio. Six
+  mutation regressions cover silent numerical and structural corruption. Both
+  retained confirmations pass without replaying spent identities.
+
+### AAA-213 — Direct confirmation drafting bypassed admission
+- **Severity** high · **Status** open for a prospective successor.
+- **Reproduction** `generator.draft("confirmation", 0, 0)` returned normally
+  without any admission. The mutation suite's M3 only tests `build`, so its
+  label overstates the generation surface it protects.
+- **Evidence impact** The recorded world and language runs use the committed
+  freeze commits with clean-tree provenance; this bypass alone is not evidence
+  that their identities were generated early. The API cannot be described as
+  fail-closed. `opaque.v0` source is frozen, and those identities are spent.
+- **Next protocol** Guard every generation entry point before fresh identities
+  exist; test the actual confirmation path and anchor the freeze remotely first.
+
+### AAA-214 — Language admission omits transitive execution dependencies
+- **Severity** high · **Status** open for a prospective successor.
+- **Reproduction** `lang.experiment.codec_for` imports `_bpe_path` from
+  `research/aaa_wm/lm/train.py`, and `lang.reports`/the opaque generator import
+  `research/aaa_python/rng.py`. Neither is in the language freeze's source
+  list; several other opaque transitive dependencies are absent too. A clean
+  commit changing such a helper could retain the recorded fingerprint.
+- **Evidence impact** At the provenance commit `a8c088d`, the running tree was
+  recorded clean, and every listed frozen source file still matches it. The
+  omission weakens admission for future use, not proof that the observed run
+  used altered code. The current review does not retrofit the spent freeze.
+- **Next protocol** Derive and verify a complete transitive source closure,
+  dependency lock, specification and artifact set before fresh identities.
+
+### AAA-215 — Resumed jobs could report success after a missing output
+- **Severity** medium · **Status** repaired.
+- **Reproduction** When an adopted PID disappeared without writing its output,
+  `Adopted.poll()` returned 0 and `started` suppressed requeue; the loop then
+  printed `QUEUE_DONE`. A completed launched job with no output was similarly
+  unrecognized.
+- **Repair** The runner now requires its declared output and reports
+  `QUEUE_FAILED` with nonzero exit status when absent or when a launched
+  process exits nonzero. A regression checks the adopted-job completion rule.
+
+### AAA-216 — CI skipped the neural code and the Torch lock omitted LM dependencies
+- **Severity** high · **Status** repaired in CI configuration; live run pending.
+- **Reproduction** The CPU CI lock excludes Torch, and its optional neural
+  tests skip. The Torch lock omitted `tokenizers`, `pyarrow` and their installed
+  transitive dependencies, despite corpus/tokenizer code importing them.
+- **Repair** Pinned the 13 missing distributions matching the local Torch
+  environment and added a dedicated locked neural CI job. Locally, 64 pinned
+  packages match; the Torch tests run (one GPU-only skip on CPU).
+
+### AAA-217 — The opaque benchmark's stated nearby-repair rule is absent
+- **Severity** high · **Status** open; claim narrowed.
+- **Reproduction** The design says it excludes certain visible-test-equivalent
+  programs within `k` edits, but `opaque.generator.accept` does no
+  neighborhood search. The design's wording also conflicts with its promise
+  to count alternate domain-equivalent fixes as successes. On 5 of 40 allowed
+  pilot tasks, a one-edit program passed all three visible tests and failed
+  domain equivalence.
+- **Evidence impact** This does not change stored success bits or compare arms
+  on different tasks. It prevents a claim that the declared nearby-repair
+  rule was enforced or that visible-test passing uniquely identifies success.
+  The frozen generator remains untouched. A successor must state an
+  unambiguous acceptance rule, then enforce and measure it before confirmation.
+
+### AAA-218 — Corpus provenance was local-only and contamination was not gated
+- **Severity** medium · **Status** partially repaired; contamination unverified.
+- **Reproduction** Raw download and processed-corpus manifests lived only on
+  the HDD; `corpus.contamination` has a unit test but no recorded run on the
+  actual evaluation language. All eight raw download bytes and all 15
+  processed shards matched their local manifests at review time.
+- **Repair** Retained the two manifest files as explicitly post-run snapshots
+  with protected hashes. They do not establish pre-run remote anchoring or an
+  actual held-out-text contamination pass. A successor must make that check a
+  recorded gate before evaluation.
