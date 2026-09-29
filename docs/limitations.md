@@ -341,3 +341,47 @@ evidence, so they are characterizations rather than confirmed claims.
   parameters, but its static def-use and line features encode human
   knowledge of Python; the matched-capacity comparison controls parameters,
   not prior knowledge.
+
+## World-model and language program (`research/aaa_wm`, added 2026-09-27)
+
+- **What the world-model claim covers.** It is confirmed and independently reviewed, but narrow: within the
+  generated `opaque.v0` benchmark, with two real test runs, an exact interpreter of visible Python plus a
+  *learned tabular model* of a fixed six-function library halves AAA's errors against the comparators
+  tested ([confirmation](wm_program/opaque_confirmation.md)).
+- **Where it is weak.**
+  - It depends strongly on the library-table seed.
+  - The online-update benefit is fragile.
+  - The model-free reference is one small network.
+  - It is weakest when the library changes, and adapting forgets the old library.
+- **What did not work.** Generic learned world models (a black-box transformer WM, and a JEPA auxiliary)
+  did not earn a place.
+- **Language.** The retained report records an L2 statistic of 0.772
+  `[0.622, 0.918]` as `PROMOTE`, but independent review reproduced a channel
+  leak: `RUN` forwarded result values and pass labels computed against the true
+  tests when the language proposal differed. The numerical result is
+  preserved; its attribution to the LM-versus-rules comparison is **not
+  verified**, and the intended language integration and full-system claims are
+  not established. The statements are templated paraphrases, not open-ended
+  English. See the [review erratum](wm_program/pr30_independent_review.md) and
+  the [historical result report](wm_program/language_confirmation.md).
+- **Compute.** Compute is not matched across arms (the matched resource is real test runs).
+- **Confirmation admission and task design.** The opaque generator's direct
+  `draft("confirmation")` path does not require admission. Its freeze was
+  pushed remotely about four hours after the run started. The language freeze
+  omits some transitive source helpers from its fingerprint, although its
+  recorded clean provenance commit pins the source used for that run. The
+  benchmark design's nearby-repair clause is ambiguous and no neighborhood
+  property is enforced; visible-test passing need not imply domain success.
+  The frozen opaque view also exposes a deterministic task position; a
+  development-only probe recovered that task's reference and faults through
+  the generator. Built-in agents do not read the field, and no stored-result
+  use was found. A successor should keep position in evaluator-owned state.
+  Their evidence scope is documented in the
+  [AI review](wm_program/pr30_independent_review.md).
+- **Corpus provenance.** The repository retains post-run download and corpus
+  manifest snapshots, and a post-run 13-word overlap audit of 2,000
+  deterministically reconstructed confirmation reports found no matches in
+  the local training corpus. An expanded post-run normalization and held-out
+  template-fragment scan also found no matches in the five training shards.
+  There was no recorded pre-run contamination gate. Corpus bytes and trained
+  checkpoints are not included in the repository.

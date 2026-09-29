@@ -2547,3 +2547,248 @@ shortcut. No scientific generator or analysis source changed after the
 - **Repair** Current contribution scope and evidence policy now describe v1,
   its committed freeze, retained evidence, post-freeze decision audit, and
   protected-file count. Historical v0 evidence and boundaries remain explicit.
+
+## PR #30 world-model and language review (2026-09-27)
+
+The following findings were reproduced against PR #30 at
+`f5b3c5a584e0e73a7a01f6f9d1d385e907548a73`. The reviewer was Codex GPT-6
+(AI). Repairs below do not alter either frozen confirmation source or retained
+confirmation result.
+
+### AAA-210 — New confirmation evidence had no protected hashes
+- **Severity** high · **Status** repaired.
+- **Reproduction** The protected manifest held 493 files and omitted both new
+  freeze manifests and both confirmation documents. Changing one of those
+  tracked files would not trigger the protected identity check.
+- **Repair** Added their original SHA-256 hashes and the two post-run corpus
+  provenance snapshots. The checker now rejects newly tracked evidence with no
+  recorded hash. All 493 earlier hashes and four earlier identity values stayed
+  byte-for-byte unchanged. The final manifest covers 499 files.
+- **Count history** These totals reflect successive checkpoints, not a
+  rewritten historical set: 493 in the original candidate, 499 at commit
+  `d9ab30c`, 500 at `e50c714`, and 501 at `e427d53` after further retained
+  review artifacts were added. The current candidate's protected-identity
+  check reports 501; the 499 count above is the AAA-210 checkpoint.
+
+### AAA-211 — The wheel omitted both new benchmark specifications
+- **Severity** high · **Status** repaired.
+- **Reproduction** A wheel from the original PR contained neither
+  `aaa_python_opaque_v0.json` nor `aaa_python_seq_v0.json`, so installed
+  generators could not load their specifications.
+- **Repair** Added both data directories to package data and a clean-wheel
+  import/specification smoke check to CI. A wheel installed outside the checkout
+  now loads both specifications.
+
+### AAA-212 — Confirmation audit compared verdicts but ignored numeric drift
+- **Severity** high · **Status** repaired by a post-freeze gate.
+- **Reproduction** `opaque.confirm.audit` compared only each stored verdict;
+  it accepted a changed stored ratio when `PROMOTE` was unchanged. The language
+  confirmation had no analogous complete audit command.
+- **Repair** `tools/check_aaa_wm_evidence.py` validates the declared task,
+  slice, arm and initialization grids, strict JSON, run counts and hashes; it
+  recomputes every ratio, group ratio, interval and verdict from the retained
+  bits. A separate arithmetic path checks each geometric point ratio, and a
+  third bootstrap with a distinct random stream checks both stored intervals
+  against the raw bits within the declared Monte Carlo width. Seven mutation
+  regressions cover silent numerical and structural corruption. Both
+  retained confirmations pass without replaying spent identities.
+
+### AAA-213 — Direct confirmation drafting bypassed admission
+- **Severity** medium for this reviewed run · **Status** open for a prospective successor.
+- **Reproduction** `generator.draft("confirmation", 0, 0)` returned normally
+  without any admission. The mutation suite's M3 only tests `build`, so its
+  label overstates the generation surface it protects.
+- **Evidence impact** The recorded world and language runs use the committed
+  freeze commits with clean-tree provenance; this bypass alone is not evidence
+  that their identities were generated early. The API cannot be described as
+  fail-closed. The actual confirmation entry points checked admission. The
+  world freeze lacked a remote pre-run anchor, so an unseen earlier local
+  draft cannot be disproved; this is an explicitly retained provenance limit,
+  not an observed violation. `opaque.v0` source is frozen, and those identities
+  are spent.
+- **Next protocol** Guard every generation entry point before fresh identities
+  exist; test the actual confirmation path and anchor the freeze remotely first.
+
+### AAA-214 — Language admission omits transitive execution dependencies
+- **Severity** medium for this reviewed run · **Status** open for a prospective successor.
+- **Reproduction** `lang.experiment.codec_for` imports `_bpe_path` from
+  `research/aaa_wm/lm/train.py`, and `lang.reports`/the opaque generator import
+  `research/aaa_python/rng.py`. Neither is in the language freeze's source
+  list; several other opaque transitive dependencies are absent too. A clean
+  commit changing such a helper could retain the recorded fingerprint.
+- **Evidence impact** At the provenance commit `a8c088d`, the running tree was
+  recorded clean, and every listed frozen source file still matches it. The
+  omitted `lm/train.py` later changed in training and formatting paths, but
+  the ASTs of `_bpe_path` and `bpe_hash`, the helpers imported by confirmation,
+  are identical to `a8c088d`. The other relevant omitted helpers are unchanged.
+  The exact clean commit and locked environment pin the observed run; the
+  omission weakens the admission API for future use but does not show that
+  this run used altered confirmation behavior. The current review does not
+  retrofit the spent freeze.
+- **Next protocol** Derive and verify a complete transitive source closure,
+  dependency lock, specification and artifact set before fresh identities.
+
+### AAA-215 — Resumed jobs could report success after a missing output
+- **Severity** medium · **Status** repaired on 2026-09-29.
+- **Reproduction** The original fix only checked output existence. A later
+  independent race audit found that two queue runners could both observe an
+  absent PID lock before either created it. A stale partial output could then
+  be mistaken for completion, and an adopted process that exited nonzero could
+  be treated as successful. A failed producer could also leave a partial file
+  that a dependent job consumed because `needs` checked only path existence.
+  Root review found one further resume race: a verified producer completion
+  observed at launch time was not added to the in-memory success set, leaving
+  its dependent waiting even though the output and status were valid.
+- **Repair** A runner now acquires an exclusive `flock` on the persistent
+  output lock before launch and passes that descriptor through `capped.sh`.
+  The wrapper writes an atomic completion record containing the job hash, run
+  id, exit code and output digest. Existing output counts as complete only if
+  the record matches the current job and the output digest still matches.
+  Incomplete and failed outputs/status records are archived before retry;
+  queue-owned `needs` paths are released only after verified producer success,
+  and producer failures mark dependent jobs failed. Legacy live PID-only locks
+  are waited on and fail closed when their process exits without a success
+  record.
+- **Regression** `tests/test_aaa_wm_jobs.py` covers competing launchers,
+  inherited lock lifetime, live legacy PID locks, stale/partial output,
+  adopted missing and nonzero status, changed output digests, failed producer
+  dependencies, and a late verified producer completion releasing its
+  dependent.
+
+### AAA-216 — CI skipped the neural code and the Torch lock omitted LM dependencies
+- **Severity** high · **Status** repaired in CI configuration; live run pending.
+- **Reproduction** The CPU CI lock excludes Torch, and its optional neural
+  tests skip. The Torch lock omitted `tokenizers`, `pyarrow` and their installed
+  transitive dependencies, despite corpus/tokenizer code importing them.
+- **Repair** Pinned the 13 missing distributions matching the local Torch
+  environment and added a dedicated locked neural CI job. The local Torch lock
+  matches all 64 pinned packages; the focused CPU neural path runs 50 tests
+  with one skip because the committed freeze manifest already exists. Both
+  freeze admissions were checked directly. Exact-head GitHub results remain a
+  merge gate.
+
+### AAA-217 — The opaque design's nearby-repair clause is ambiguous
+- **Severity** medium · **Status** documented; prospective clarification open.
+- **Reproduction** The design says a task excludes other programs within `k`
+  edits that are both visible-test-equivalent and domain-equivalent to the
+  reference, except the true fix and its equivalents. Since domain-equivalent
+  programs are successful fixes by the declared scoring rule, this exception
+  makes the clause either tautological or in need of a more precise definition
+  of "true fix." `opaque.generator.accept` does not search a neighborhood.
+  On 5 of 40 allowed pilot tasks, a one-edit program passed all three visible
+  tests and failed domain equivalence. Those examples do **not** violate the
+  literal nearby clause, which requires domain equivalence too.
+- **Evidence impact** The executable acceptance rule is narrower than the
+  design prose, and no neighborhood uniqueness property is established. The
+  examples show that visible-test passing is not sufficient for full-domain
+  success, which is scored correctly at submit. This does not change stored
+  success bits or compare arms on different tasks. A successor should specify
+  a non-tautological acceptance rule, if one is needed, then measure it before
+  fresh confirmation.
+
+### AAA-218 — Corpus provenance was local-only and contamination was not gated
+- **Severity** medium · **Status** partially repaired; post-run overlap checked.
+- **Reproduction** Raw download and processed-corpus manifests lived only on
+  the HDD; `corpus.contamination` has a unit test but no recorded run on the
+  actual evaluation language. All eight raw download bytes and all 15
+  processed shards matched their local manifests at review time.
+- **Repair** Retained the two manifest files as explicitly post-run snapshots
+  with protected hashes. Deterministically reconstructed the 2,000 confirmation
+  reports from the pinned code path without agent evaluation; the run retained
+  no report hashes for direct byte comparison. Scanned the local training
+  corpus against those reconstructed reports: zero documents shared a literal
+  13-word sequence. A second pass removed punctuation, collapsed numeric
+  spellings and digits, and found zero 13-token matches and zero documents
+  containing any of six static held-out template fragments across five
+  training shards. The report-text SHA-256, both manifest hashes and both
+  results are retained under `docs/evidence/aaa_wm_lang_v0/`, alongside a
+  repeatable checker and a synthetic numeric-variant regression. This is a
+  post-run audit, not a pre-run gate, and the
+  corpus and trained checkpoints remain external. A successor must make the
+  contamination check a recorded gate before evaluation.
+
+### AAA-219 — New research artifact loaders use pickle without local trust enforcement
+- **Severity** medium · **Status** documented; prospective repair open.
+- **Reproduction** `opaque.models.load` and `lm.model.load` call
+  `torch.load(weights_only=False)` before checking schema or tensor shapes;
+  `opaque.data._load` reads a cached object array with
+  `numpy.load(allow_pickle=True)`. A caller passing an untrusted file can
+  execute code during deserialization. The previous `SECURITY.md` statement
+  that no pickle was used became inaccurate with this research path.
+- **Evidence impact** The recorded confirmations hash-check their declared
+  artifacts before loading checkpoints. The review also matched local
+  artifacts against the freezes. This supports the trusted confirmation path,
+  but the generic loaders have no built-in hash or provenance check. The
+  training cache remains caller-controlled. No hostile-file exposure was
+  found in the confirmed run.
+- **Repair** `SECURITY.md` now states the project-controlled artifact boundary
+  and in-process opaque execution accurately. A successor should use safe
+  tensor-only loading and non-object cache serialization, and enforce artifact
+  provenance at each public load entry point before accepting untrusted files.
+
+### AAA-220 — Opaque fast validator can misclassify numeric string literals
+- **Severity** medium · **Status** documented; prospective repair open.
+- **Reproduction** `opaque.program.valid` uses a regular expression to replace
+  numeric text with `0` before caching the subset verdict. The substitution
+  also changes digits inside string literals. For
+  `src = 'def f(p):\n    return "' + '49 '*6 + '"\n'`, the full v1 subset
+  validator rejects the 18-character string, while `valid(src, api_names)`
+  returns `True`. The `range`-literal bound of 50 means the fast path applies to
+  these small numeric tokens.
+- **Evidence impact** The confirmation generator emits arithmetic programs
+  without string literals, and permitted candidate edits change its existing
+  tokens. This reproduces a generic `valid`/`run` boundary defect, not an
+  observed confirmation input or result discrepancy. It reinforces that the
+  in-process executor is for trusted generated programs only.
+- **Next protocol** A successor should tokenize numeric literals by AST node
+  rather than regex text substitution, or use the full subset validator, and
+  add differential tests on arbitrary legal and illegal source text.
+
+### AAA-221 — Language-conditioned RUN feedback crossed the proposal boundary
+- **Severity** high for language-effect claims · **Status** reproduced; spent
+  evidence preserved; prospective protocol required.
+- **Reproduction** On one deterministic development task (no scoring and no
+  confirmation identities), a probe supplied a same-length proposal with
+  different inputs. `LanguageAgent` gave that proposal to the wrapped agent,
+  then forwarded the raw `RunObservation` from `OpaqueEnv`. The observation
+  contained three results and pass labels calculated on the true task tests,
+  not on the proposed inputs. In the confirmation path, the structured learner
+  associates raw result values with proposal inputs, and the planner reads the
+  raw pass labels. The relevant environment, wrapper, learner and planner
+  sources are unchanged from language provenance commit `a8c088d`.
+- **Evidence impact** The stored 2,000 language outcome bits and their
+  numerical L2 `PROMOTE` calculation remain intact and recomputable, but they
+  do not verify the preregistered language-channel comparison. The same
+  feedback path means the stored L1, F1 and F2 calculations do not establish
+  their intended causal comparisons either. This is a protocol defect, not
+  evidence that the retained values were edited. Language integration and
+  full-system success are not established. The identities `[4000, 6000)` are
+  spent and must not be replayed.
+- **Next protocol** In a prospective language benchmark, make `RUN` evaluate
+  only the agent-supplied proposal or return an observation that is scoped to
+  those inputs and contains no evaluator pass labels. Add an adversarial
+  same-length-but-wrong proposal test that checks both learner and planner
+  observations. Freeze the complete execution source first, then use fresh
+  identities.
+
+### AAA-222 — Opaque agent view exposes deterministic task position
+- **Severity** medium for protocol isolation · **Status** reproduced on a
+  development task; no stored-result use found; prospective interface repair.
+- **Reproduction** `OpaqueEnv.view()` places its `position` argument in the
+  agent-visible `View.task_ref`. The slice is a deterministic function of
+  position, cycling every 40 tasks. On one development identity, a probe read
+  `task_ref` and the visible buggy source, iterated the public deterministic
+  development generator, and recovered the task's exact reference, faults and
+  visible tests before acting. This used no confirmation task or score.
+- **Evidence impact** The field exposes a hidden regime and enables a custom
+  in-process agent with the generator available to reconstruct a development
+  task. The built-in agents do not read `task_ref`, and no evidence shows that
+  they used it in the retained results. This is an interface-isolation defect,
+  not proof that the stored opaque bits changed. The field and its
+  deterministic generator are inside frozen confirmation source, so this
+  review does not remove it retrospectively.
+- **Next protocol** Omit task position from every agent-visible view and keep
+  it in evaluator-owned state. Add a development-only adversarial test proving
+  that an agent cannot recover the task split, reference or faults from its
+  view. Freeze the complete generator and environment source before any new
+  confirmation identities.

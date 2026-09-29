@@ -59,12 +59,21 @@ include = ["aaa*", "research*"]
 "research.aaa_python" = ["data/*.json"]
 # aaa.python.v1: the successor protocol specification.
 "research.aaa_python_v1" = ["data/*.json"]
+"research.aaa_wm.opaque" = ["data/*.json"]
+"research.aaa_wm.seq" = ["data/*.json"]
 
 [tool.ruff]
 line-length = 110
 target-version = "py310"
 # Retained diagnostic scripts are evidence, kept byte for byte as they ran.
-extend-exclude = ["results", "docs/evidence/aaa_python_v1/diagnostics"]
+extend-exclude = [
+    "results",
+    "docs/evidence/aaa_python_v1/diagnostics",
+    # Source fingerprinted by the opaque.v0 and lang.v0 confirmation freezes; kept byte for byte as confirmed.
+    "research/aaa_wm/opaque",
+    "research/aaa_wm/lang",
+    "research/aaa_wm/lm/model.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF", "ARG", "PTH"]
@@ -86,6 +95,8 @@ ignore = [
 # stubs under that version too, and NumPy's stubs use 3.12 syntax. Language
 # level support is verified by running the suite on the CI version matrix.
 files = ["aaa", "research"]
+# Source fingerprinted by the opaque.v0 and lang.v0 confirmation freezes, kept byte for byte as confirmed.
+exclude = ["research/aaa_wm/opaque/", "research/aaa_wm/lang/", "research/aaa_wm/lm/model\\.py"]
 warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
@@ -95,8 +106,13 @@ disallow_untyped_defs = false
 # Untyped third-party stubs are not worth carpeting the project in ignores
 # for; everything AAA itself defines is checked.
 [[tool.mypy.overrides]]
-module = ["matplotlib.*", "psutil.*", "cupy", "cupy.*"]
+module = ["matplotlib.*", "psutil.*", "cupy", "cupy.*", "torch", "torch.*", "tokenizers", "tokenizers.*", "pyarrow", "pyarrow.*"]
 ignore_missing_imports = true
+
+# Confirmed evidence source (opaque.v0 and lang.v0 freezes), kept byte for byte; see docs/wm_program.
+[[tool.mypy.overrides]]
+module = ["research.aaa_wm.opaque.*", "research.aaa_wm.lang.*", "research.aaa_wm.lm.model"]
+ignore_errors = true
 
 [tool.coverage.run]
 source = ["aaa", "research"]

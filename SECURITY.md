@@ -34,12 +34,27 @@ Realistic concerns are correspondingly narrow:
   hardened sandbox for hostile code: it relies on POSIX resource limits, has
   no network or filesystem namespace isolation, and must not be used to run
   untrusted programs. Learners run in-process and are trusted research code.
-- **Checkpoint or specification files.** These are project-controlled JSON,
-  not a format for hostile input. The Python specification validator checks
-  its top-level shape, phase identity, split order and selected limits; it
-  does not currently range-check every numerical setting. Checkpoints are
-  bound to their plan, specification and concrete training pool before resume.
-  No `pickle` or dynamic import of file content is used.
+- **Checkpoint or specification files.** The earlier Python phase uses
+  project-controlled JSON. Its specification validator checks top-level shape,
+  phase identity, split order and selected limits; it does not range-check
+  every numerical setting. Those checkpoints are bound to their plan,
+  specification and training pool before resume. The new world-model and
+  language paths also load PyTorch checkpoints with `weights_only=False`, and
+  the opaque training-data cache loads an object array with
+  `numpy.load(allow_pickle=True)`. These formats can execute code while
+  loading. Only load project-controlled artifacts from a trusted path; the
+  frozen confirmation verifies artifact hashes before using its checkpoints.
+  A file's schema, tensor shapes or model fingerprint is checked after
+  deserialization and cannot make an untrusted file safe to load. The research
+  loader APIs themselves do not enforce a hash or trust boundary.
+- **Opaque program execution.** The new opaque interpreter validates against
+  the bounded `aaa.python.v1` subset and supplies only restricted builtins and
+  local API stubs, but executes generated programs in the research process.
+  Its bounds and validation are for deterministic generated programs and
+  candidate edits, not a sandbox for hostile Python or untrusted learner code.
+  Its cached fast validator also misclassifies some caller-supplied numeric
+  string literals (`AAA-220`); the generated confirmation grammar emits no
+  string literals.
 - **Path handling.** The legacy v1 runner's output-root boundary is covered by
   `tests/test_legacy_v1.py::test_a_run_writes_nothing_outside_the_requested_output_root`.
   That test does not establish the same property for every later runner.
