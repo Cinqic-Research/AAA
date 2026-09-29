@@ -69,6 +69,12 @@ All times are local (EDT, UTC-4). Where a boundary is inferred rather than logge
 | 14:05 | PR #30 marked ready for review. | GitHub (18:05 UTC) |
 | 14:43 | All 12 CI checks green on `46dd747`. | GitHub Actions (18:43 UTC) |
 
+**Later review note (2026-09-29):** These rows preserve what the confirmation
+summary reported at the time. The independent review reproduced true-test
+`RUN` feedback crossing the language proposal boundary; the stored L2
+statistic remains, but language-effect attribution is not verified. See
+AAA-221 in the [issue ledger](../issue_ledger.md#aaa-221--language-conditioned-run-feedback-crossed-the-proposal-boundary).
+
 ## Where the time went (approximate)
 
 | Category | Approx. wall clock | Notes |

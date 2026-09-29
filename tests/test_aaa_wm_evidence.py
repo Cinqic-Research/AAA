@@ -61,6 +61,13 @@ class EvidenceAudit(unittest.TestCase):
     def test_task_order_fails(self) -> None:
         self.check_mutation("language", lambda d: d["tasks"].reverse(), "task identities")
 
+    def test_opaque_task_hash_mutation_fails(self) -> None:
+        self.check_mutation(
+            "opaque",
+            lambda d: d["task_sha256"].__setitem__(0, "0" * 64),
+            "task hashes differ from deterministic reconstruction",
+        )
+
     def test_changed_threshold_fails(self) -> None:
         self.check_mutation(
             "language",

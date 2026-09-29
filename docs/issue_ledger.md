@@ -2564,6 +2564,11 @@ confirmation result.
   provenance snapshots. The checker now rejects newly tracked evidence with no
   recorded hash. All 493 earlier hashes and four earlier identity values stayed
   byte-for-byte unchanged. The final manifest covers 499 files.
+- **Count history** These totals reflect successive checkpoints, not a
+  rewritten historical set: 493 in the original candidate, 499 at commit
+  `d9ab30c`, 500 at `e50c714`, and 501 at `e427d53` after further retained
+  review artifacts were added. The current candidate's protected-identity
+  check reports 501; the 499 count above is the AAA-210 checkpoint.
 
 ### AAA-211 — The wheel omitted both new benchmark specifications
 - **Severity** high · **Status** repaired.
@@ -2624,14 +2629,31 @@ confirmation result.
   dependency lock, specification and artifact set before fresh identities.
 
 ### AAA-215 — Resumed jobs could report success after a missing output
-- **Severity** medium · **Status** repaired.
-- **Reproduction** When an adopted PID disappeared without writing its output,
-  `Adopted.poll()` returned 0 and `started` suppressed requeue; the loop then
-  printed `QUEUE_DONE`. A completed launched job with no output was similarly
-  unrecognized.
-- **Repair** The runner now requires its declared output and reports
-  `QUEUE_FAILED` with nonzero exit status when absent or when a launched
-  process exits nonzero. A regression checks the adopted-job completion rule.
+- **Severity** medium · **Status** repaired on 2026-09-29.
+- **Reproduction** The original fix only checked output existence. A later
+  independent race audit found that two queue runners could both observe an
+  absent PID lock before either created it. A stale partial output could then
+  be mistaken for completion, and an adopted process that exited nonzero could
+  be treated as successful. A failed producer could also leave a partial file
+  that a dependent job consumed because `needs` checked only path existence.
+  Root review found one further resume race: a verified producer completion
+  observed at launch time was not added to the in-memory success set, leaving
+  its dependent waiting even though the output and status were valid.
+- **Repair** A runner now acquires an exclusive `flock` on the persistent
+  output lock before launch and passes that descriptor through `capped.sh`.
+  The wrapper writes an atomic completion record containing the job hash, run
+  id, exit code and output digest. Existing output counts as complete only if
+  the record matches the current job and the output digest still matches.
+  Incomplete and failed outputs/status records are archived before retry;
+  queue-owned `needs` paths are released only after verified producer success,
+  and producer failures mark dependent jobs failed. Legacy live PID-only locks
+  are waited on and fail closed when their process exits without a success
+  record.
+- **Regression** `tests/test_aaa_wm_jobs.py` covers competing launchers,
+  inherited lock lifetime, live legacy PID locks, stale/partial output,
+  adopted missing and nonzero status, changed output digests, failed producer
+  dependencies, and a late verified producer completion releasing its
+  dependent.
 
 ### AAA-216 — CI skipped the neural code and the Torch lock omitted LM dependencies
 - **Severity** high · **Status** repaired in CI configuration; live run pending.
@@ -2639,8 +2661,11 @@ confirmation result.
   tests skip. The Torch lock omitted `tokenizers`, `pyarrow` and their installed
   transitive dependencies, despite corpus/tokenizer code importing them.
 - **Repair** Pinned the 13 missing distributions matching the local Torch
-  environment and added a dedicated locked neural CI job. Locally, 64 pinned
-  packages match; the Torch tests run (one GPU-only skip on CPU).
+  environment and added a dedicated locked neural CI job. The local Torch lock
+  matches all 64 pinned packages; the focused CPU neural path runs 50 tests
+  with one skip because the committed freeze manifest already exists. Both
+  freeze admissions were checked directly. Exact-head GitHub results remain a
+  merge gate.
 
 ### AAA-217 — The opaque design's nearby-repair clause is ambiguous
 - **Severity** medium · **Status** documented; prospective clarification open.
@@ -2718,3 +2743,52 @@ confirmation result.
 - **Next protocol** A successor should tokenize numeric literals by AST node
   rather than regex text substitution, or use the full subset validator, and
   add differential tests on arbitrary legal and illegal source text.
+
+### AAA-221 — Language-conditioned RUN feedback crossed the proposal boundary
+- **Severity** high for language-effect claims · **Status** reproduced; spent
+  evidence preserved; prospective protocol required.
+- **Reproduction** On one deterministic development task (no scoring and no
+  confirmation identities), a probe supplied a same-length proposal with
+  different inputs. `LanguageAgent` gave that proposal to the wrapped agent,
+  then forwarded the raw `RunObservation` from `OpaqueEnv`. The observation
+  contained three results and pass labels calculated on the true task tests,
+  not on the proposed inputs. In the confirmation path, the structured learner
+  associates raw result values with proposal inputs, and the planner reads the
+  raw pass labels. The relevant environment, wrapper, learner and planner
+  sources are unchanged from language provenance commit `a8c088d`.
+- **Evidence impact** The stored 2,000 language outcome bits and their
+  numerical L2 `PROMOTE` calculation remain intact and recomputable, but they
+  do not verify the preregistered language-channel comparison. The same
+  feedback path means the stored L1, F1 and F2 calculations do not establish
+  their intended causal comparisons either. This is a protocol defect, not
+  evidence that the retained values were edited. Language integration and
+  full-system success are not established. The identities `[4000, 6000)` are
+  spent and must not be replayed.
+- **Next protocol** In a prospective language benchmark, make `RUN` evaluate
+  only the agent-supplied proposal or return an observation that is scoped to
+  those inputs and contains no evaluator pass labels. Add an adversarial
+  same-length-but-wrong proposal test that checks both learner and planner
+  observations. Freeze the complete execution source first, then use fresh
+  identities.
+
+### AAA-222 — Opaque agent view exposes deterministic task position
+- **Severity** medium for protocol isolation · **Status** reproduced on a
+  development task; no stored-result use found; prospective interface repair.
+- **Reproduction** `OpaqueEnv.view()` places its `position` argument in the
+  agent-visible `View.task_ref`. The slice is a deterministic function of
+  position, cycling every 40 tasks. On one development identity, a probe read
+  `task_ref` and the visible buggy source, iterated the public deterministic
+  development generator, and recovered the task's exact reference, faults and
+  visible tests before acting. This used no confirmation task or score.
+- **Evidence impact** The field exposes a hidden regime and enables a custom
+  in-process agent with the generator available to reconstruct a development
+  task. The built-in agents do not read `task_ref`, and no evidence shows that
+  they used it in the retained results. This is an interface-isolation defect,
+  not proof that the stored opaque bits changed. The field and its
+  deterministic generator are inside frozen confirmation source, so this
+  review does not remove it retrospectively.
+- **Next protocol** Omit task position from every agent-visible view and keep
+  it in evaluator-owned state. Add a development-only adversarial test proving
+  that an agent cannot recover the task split, reference or faults from its
+  view. Freeze the complete generator and environment source before any new
+  confirmation identities.

@@ -254,6 +254,30 @@ REVIEW_2026_09_24 = {
     "tools/write_audit_inventory.py": "independent review inventory semantics",
 }
 
+REVIEW_2026_09_29 = {
+    ".github/workflows/ci.yml": "AAA-212 retained task-hash check; AAA-214 frozen-source check",
+    "README.md": "AAA-221 language attribution; AAA-222 task-position leak",
+    "docs/issue_ledger.md": "AAA-215 runner race/status repair; AAA-221; AAA-222",
+    "docs/limitations.md": "AAA-221 language attribution; AAA-222 task-position leak",
+    "docs/research_direction.md": "AAA-221 language attribution; AAA-222 task-position leak",
+    "docs/wm_program/README.md": "AAA-221 historical language result qualification",
+    "docs/wm_program/compute.md": "AAA-215 runner lock and completion semantics",
+    "docs/wm_program/handoff.md": "AAA-221 language attribution; AAA-222 task-position leak",
+    "docs/wm_program/language_factorial_dev.md": "AAA-221 language RUN feedback boundary",
+    "docs/wm_program/pr30_independent_review.md": "2026-09-29 supplemental independent audit",
+    "docs/wm_program/state.json": "2026-09-29 review state; AAA-221 and AAA-222",
+    "docs/wm_program/timeline.md": "AAA-221 language attribution erratum",
+    "research/aaa_wm/capped.sh": "AAA-215 atomic completion status",
+    "research/aaa_wm/jobs.py": "AAA-215 exclusive launch lock and fail-closed completion",
+    "tests/test_aaa_wm_evidence.py": "AAA-212 retained task-hash reconstruction regression",
+    "tests/test_aaa_wm_jobs.py": "AAA-215 lock, status and failed-dependency regressions",
+    "tests/test_aaa_wm_source_fingerprints.py": "AAA-214 frozen-source drift regressions",
+    "tools/check_aaa_wm_evidence.py": "AAA-212 deterministic retained task-hash reconstruction",
+    "tools/check_aaa_wm_source_fingerprints.py": "AAA-214 frozen-source CI gate",
+    "tools/write_audit_inventory.py": "2026-09-29 PR #30 supplemental audit classification",
+}
+"""Paths reviewed or changed in the 2026-09-29 PR #30 follow-up audit."""
+
 
 def findings(path: str) -> str:
     notes = [
@@ -262,6 +286,7 @@ def findings(path: str) -> str:
         REVIEW_2026_09_23.get(path),
         TRANSITION_2026_09_23.get(path),
         REVIEW_2026_09_24.get(path),
+        REVIEW_2026_09_29.get(path),
     ]
     relevant = [note for note in notes if note and note != "none"]
     return "; ".join(relevant) if relevant else "none"
@@ -269,7 +294,7 @@ def findings(path: str) -> str:
 
 def inherited_findings(path: str) -> str:
     if path.startswith(("research/aaa_wm/", "docs/evidence/aaa_wm_", "docs/wm_program/")):
-        return "PR #30 world-model and language program; AAA-210 through AAA-220 audit scope"
+        return "PR #30 world-model and language program; AAA-210 through AAA-222 audit scope"
     if path.startswith(
         (
             "research/aaa_python_v1/",

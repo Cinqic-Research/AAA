@@ -1,5 +1,13 @@
 # AAA x world model x language model: factorial (development)
 
+> **2026-09-29 review erratum:** The decision-system comparisons below used a
+> `RUN` path that can pass true-test results and pass labels to the learner and
+> planner when the language proposal differs but has the same test count. They
+> remain recorded development results, but do not validate the intended
+> language-channel effect. Adapter-only extraction measurements are separate.
+> See [the independent review](pr30_independent_review.md#codex-gpt-6-independent-review-of-pr-30)
+> and AAA-221 in the [issue ledger](../issue_ledger.md#aaa-221--language-conditioned-run-feedback-crossed-the-proposal-boundary).
+
 Status: **development**, `development` tune tasks (1,000) with statements in the **held-out** phrasing
 families. Three seeds: adapter seed *s* is paired with WM-S table seed *s* and neural policy seed *s*.
 Language channel: the R1 adapter v2 (5.2M parameters, from scratch, selection-family fine-tuning).

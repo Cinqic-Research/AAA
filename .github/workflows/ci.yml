@@ -62,6 +62,9 @@ jobs:
       - name: Protected historical identities and evidence bytes
         run: python tools/check_protected_identities.py
 
+      - name: Verify frozen world-model and language source fingerprints
+        run: python tools/check_aaa_wm_source_fingerprints.py
+
       - name: Recompute retained world-model and language decisions
         run: python tools/check_aaa_wm_evidence.py
 

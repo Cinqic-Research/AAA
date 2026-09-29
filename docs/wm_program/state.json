@@ -1,10 +1,10 @@
 {
  "schema": "aaa.wm_program.state.v1",
- "updated": "2026-09-27",
+ "updated": "2026-09-29",
  "canonical": {
   "repo": "Cinqic-Research/AAA",
-  "main_sha": "dbee13c",
-  "open_prs": []
+  "review_base_main_sha": "dbee13c",
+  "reviewed_pr": 30
  },
  "working_branch": "opus/world-model-program",
  "workspace": "/media/cinqic/Cinqic Storage/AAA/wm (repo/, venv/, data/ = AAA_DATA_ROOT, logs/, notes/)",
@@ -17,7 +17,7 @@
    "aaa.python.v0 (spec/golden)",
    "aaa.python.v1 f1eb9617 (freeze a73765b, confirmation SPENT)"
   ],
-  "protected_files": 493,
+  "protected_files": 501,
   "do_not_modify": [
    "research/aaa_python/**",
    "research/aaa_python_v1/**",
@@ -29,7 +29,7 @@
   ]
  },
  "reference_model": "aaa.python.v1 4k@e2 (4,158 trainable; e2 encoder, one-hot output, pointer localize, bandit repair scorer); evidence-supported next experimental reference, NOT promoted",
- "ledger_next_id": "AAA-210 (grep docs/issue_ledger.md before assigning)",
+ "ledger_next_id": "AAA-223 (grep docs/issue_ledger.md before assigning)",
  "open_hypotheses": [
   "H-OP1: on opaque.v0, a learned consequence model + verified planner beats the model-free policy, value-search and policy_aux at matched params/data (development first)",
   "H-OP2: depth-2 planning with the learned WM beats depth-1 on two_fault",
@@ -94,15 +94,15 @@
  "best_dev_result": null,
  "confirmation_status": {
   "opaque.v0 world model": "OBSERVED ONCE (freeze f994d91, evidence 14eaf5d): 11/11 crossed.v1 PROMOTE; independent review: survives, narrowed; identities confirmation[0,4000) SPENT",
-  "aaa.wm.lang.v0": "OBSERVED ONCE (freeze a8c088d, evidence f0a7982): L2 PROMOTE; L1, F1, F2 INCONCLUSIVE; LANGUAGE_INTEGRATION_SUCCESS and FULL_SYSTEM_SUCCESS NOT declared; identities confirmation[4000,6000) SPENT"
+  "aaa.wm.lang.v0": "OBSERVED ONCE (freeze a8c088d, evidence f0a7982): stored L2 statistic 0.772 [0.622,0.918] recomputes as PROMOTE, but independent review reproduced RUN result/pass feedback from true tests crossing the language proposal boundary; language-effect attribution NOT VERIFIED; L1/F1/F2 intended causal comparisons likewise NOT VERIFIED; LANGUAGE_INTEGRATION_SUCCESS and FULL_SYSTEM_SUCCESS NOT established; identities confirmation[4000,6000) SPENT"
  },
  "blockers": [],
  "next_actions": [
-  "owner review of PR #30",
   "opaque.v1 successor benchmark (grammar-confined mutations, >=10 inits, >=30 streams/slice, guarded draft)",
+  "opaque successor hides task position from every agent view and tests task-reference reconstruction attacks",
   "versioned library model (forgetting)",
   "stronger model-free reference",
-  "richer paraphrase data for the language adapter; language confirmation with >=10 inits"
+  "repair language RUN feedback scoping in a prospective successor, then use fresh identities and >=10 inits"
  ],
  "candidate_architectures": [
   "WM-S online (selected candidate)",
@@ -115,6 +115,11 @@
   "train dataset": "6000 train tasks, shared behavior dataset (AAA_DATA_ROOT/opaque)"
  },
  "unresolved_review_findings": [
-  "see docs/wm_program/independent_review_opaque.md issues 6-8 (minor): remote anchoring of freeze, unguarded draft(), CPU budget unverified"
+  "AAA-213: direct confirmation drafting is not admission-guarded; fresh protocol fix required",
+  "AAA-214: language freeze omits transitive helpers; complete source closure required",
+  "AAA-217 and AAA-218: benchmark neighborhood rule and pre-run contamination gate remain prospective",
+  "AAA-219 and AAA-220: trusted-artifact loader and fast-validator issues remain prospective",
+  "AAA-221: language RUN true-test feedback crosses the proposal boundary; language causal results NOT VERIFIED",
+  "AAA-222: View.task_ref exposes deterministic task position; frozen interface requires successor repair"
  ]
 }

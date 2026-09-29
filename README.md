@@ -124,9 +124,13 @@ python tools/check_promotion_successor.py
 The [research direction](docs/research_direction.md) lays out a 24-rung Python
 capability ladder whose rungs must be earned in order. The world-model and
 American-English experiments have begun, within the narrow generated tasks
-described in the [program handoff](docs/wm_program/handoff.md). Language
-integration and full-system superiority remain inconclusive. Other
-programming languages can follow once Python gives a reason. About **105M
+described in the [program handoff](docs/wm_program/handoff.md). A later
+independent review found that the retained language confirmation exposed true
+test-run feedback when the language channel proposed different tests. The
+stored numerical L2 result is preserved, but its language-channel attribution
+is **not verified**; language integration and full-system superiority are not
+established. See the [review erratum](docs/wm_program/pr30_independent_review.md).
+Other programming languages can follow once Python gives a reason. About **105M
 parameters** is a revisable long-term planning goal for AAA 1, not a target,
 minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says
 when added capacity has earned its cost.

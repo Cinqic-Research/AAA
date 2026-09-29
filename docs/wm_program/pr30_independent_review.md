@@ -1,5 +1,34 @@
 # Codex GPT-6 independent review of PR #30
 
+> **2026-09-29 follow-up erratum:** The historical review below predates a
+> reproduced language-channel defect. In a non-scored development probe, a
+> same-length but different proposal reached the wrapped agent, while its
+> `RUN` observation contained result values and pass labels computed from the
+> true tests. The language learner and planner receive those raw values. The
+> retained language bits and L2 statistic still recompute, but the language
+> comparison's causal attribution is **NOT VERIFIED**; L1, F1 and F2 do not
+> establish their intended causal comparisons. The `opaque.v0` world-model
+> confirmation does not use this wrapper and remains a separate claim. No
+> spent identity or frozen source was changed or rerun. Details and successor
+> requirements are in [AAA-221](../issue_ledger.md#aaa-221--language-conditioned-run-feedback-crossed-the-proposal-boundary).
+> Protected-file counts are chronological checkpoints: 493 at the original
+> candidate, 499 at `d9ab30c`, 500 at `e50c714`, and 501 at `e427d53`; the
+> current protected-identity gate covers 501 files.
+> The audit also reproduced a prospective opaque-interface leak: a development
+> agent can use `View.task_ref` with the deterministic generator and visible
+> buggy source to recover that development task's hidden reference and faults.
+> Built-in agents do not read the field; no retained-result use was found. See
+> AAA-222; the frozen view is not changed here.
+> This follow-up also used three bounded audits (science, CI/docs, and
+> engineering/security), followed by root-agent reproduction and review. The
+> 2026-09-27 audit below did not use subagents.
+> Final local verification on the follow-up tree passed the full 992-test CPU
+> suite (8 declared skips) and the locked 50-test Torch path (1 declared
+> skip), along with Ruff, mypy, both environment-lock checks, protected
+> identities, source fingerprints and retained-evidence recomputation. The
+> exact pushed-head GitHub checks remain pending until that head exists.
+> The exact final PR head and gate are recorded in the final PR review comment.
+
 Date: 2026-09-27. Reviewer: Codex GPT-6 (AI, not an independent human
 reviewer). Repository: `Cinqic-Research/AAA`. Base at review start:
 `dbee13c7aa624d738dc2d21dbf2cc8078274db94`. Original candidate:
@@ -14,8 +43,9 @@ the PR's 76-file diff in related groups, reviewed the program's handoff,
 designs, limitations, retained evidence and earlier independent review, and
 tested the suspected failure paths against source and retained primitives.
 This was a systematic repository audit, not a claim to have manually read
-every generated evidence record. No subagents were used. The original review
-is a source of hypotheses; its conclusions were not taken as authority.
+every generated evidence record. No subagents were used for that dated audit.
+The original review is a source of hypotheses; its conclusions were not taken
+as authority.
 
 I used the dedicated HDD worktree and existing CPU and Torch environments.
 Neither confirmation was rerun. Both spent confirmation documents were parsed
@@ -124,14 +154,15 @@ confirmation programs contain no strings (AAA-220).
   historical Monash disagreement and rejected successors.
 - World-model mutation harness: 12/12 deliberate breaks caught. M3 tests
   `build`, so it does not cover direct `draft` access.
-- CPU research tests: 31 pass with seven optional-dependency skips. Torch
-  research tests: 38 run, one GPU-only skip on this CPU test path.
+- CPU research tests: 31 pass with seven optional-dependency skips. The final
+  focused Torch-path suite runs 40 tests with one skip because the committed
+  freeze manifest already exists. Both admissions pass when checked directly.
 - Actual hashed seed-100 policy and black-box WM checkpoints load and account
   for 985,221 and 985,092 trainable parameters; WM inference returned a
   three-test probability vector. The pretrained and random-twin LM adapters
   both load with 5,245,184 parameters, the pinned BPE tokenizer resolves,
   and both produced finite forward logits on a non-confirmation prompt.
-- Full local suite on the committed provenance files: 974 tests in 381
+- Full local suite on the final reviewed tree: 976 tests in 381
   seconds, `OK` with eight declared skips. The historical AAA-1K T1 gate
   printed `FAIL` as retained negative scientific evidence; the test suite
   passed. A new full-suite CI run at the final PR head is still required.

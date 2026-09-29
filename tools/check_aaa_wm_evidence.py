@@ -7,23 +7,66 @@ stored primitive grid and recomputes every numeric decision field from its bits.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
 import sys
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from research.aaa_wm.opaque import generator as opaque_generator  # noqa: E402
 from research.aaa_wm.opaque.summarize import adjudicate_ratio  # noqa: E402
 
+SPENT_OPAQUE_CONFIRMATION_COUNT = 4000
 CASES = (
-    ("opaque", 0, 4000, "docs/evidence/aaa_wm_opaque_v0"),
+    ("opaque", 0, SPENT_OPAQUE_CONFIRMATION_COUNT, "docs/evidence/aaa_wm_opaque_v0"),
     ("language", 4000, 2000, "docs/evidence/aaa_wm_lang_v0"),
 )
 GROUPS = ("in_distribution", "two_fault", "novel_literals", "novel_grammar", "library_B")
+
+
+@lru_cache(maxsize=1)
+def reconstruct_opaque_task_hashes() -> tuple[str, ...]:
+    """Rebuild only the already-spent opaque confirmation task records.
+
+    This deterministic audit reconstructs only the already-spent indices
+    [0, 4000) to compare them with retained hashes. It does not call the
+    confirmation runner, load a learned artifact, or execute an arm.
+    """
+
+    earlier = (
+        opaque_generator.pool("pilot")
+        + opaque_generator.pool("train")
+        + opaque_generator.pool("development")
+        + opaque_generator.pool("attack")
+    )
+    excluded = {
+        opaque_generator.program_hash(program) for task in earlier for program in (task.reference, task.buggy)
+    }
+    hashes: list[str] = []
+    for index in range(SPENT_OPAQUE_CONFIRMATION_COUNT):
+        for attempt in range(500):
+            task = opaque_generator.draft("confirmation", index, attempt)
+            if task is None:
+                continue
+            pair = {
+                opaque_generator.program_hash(task.reference),
+                opaque_generator.program_hash(task.buggy),
+            }
+            if pair & excluded:
+                continue
+            hashes.append(
+                hashlib.sha256(json.dumps(task.to_json(), sort_keys=True, default=str).encode()).hexdigest()
+            )
+            break
+        else:
+            raise RuntimeError(f"could not reconstruct spent confirmation task {index}")
+    return tuple(hashes)
 
 
 def strict_load(path: Path) -> dict[str, Any]:
@@ -182,6 +225,15 @@ def verify(
     if problems:
         return problems
     assert isinstance(slices, list)
+
+    if kind == "opaque":
+        try:
+            reconstructed_hashes = reconstruct_opaque_task_hashes()
+        except (KeyError, OSError, RuntimeError, ValueError) as exc:
+            problems.append(f"could not reconstruct opaque task hashes: {exc}")
+        else:
+            if hashes != list(reconstructed_hashes):
+                problems.append("opaque task hashes differ from deterministic reconstruction")
 
     import numpy as np
 

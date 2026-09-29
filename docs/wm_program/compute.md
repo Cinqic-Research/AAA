@@ -29,8 +29,13 @@ and the kernel's global OOM policy protects experiments over the desktop.
   A job that exceeds its cap is killed alone, inside its own scope. This was verified several
   times the same day, and the desktop was never affected.
 - [`research/aaa_wm/jobs.py`](../../research/aaa_wm/jobs.py) schedules queues. It enforces a total
-  cap budget (9.5 GB), CPU/GPU concurrency limits, prerequisites and lock files. It adopts live
-  jobs after a restart, so a restart never duplicates work.
+  cap budget (9.5 GB), CPU/GPU concurrency limits and prerequisites. It acquires an exclusive
+  `flock` on each persistent output lock before launch and passes that lock through
+  [`capped.sh`](../../research/aaa_wm/capped.sh). The wrapper records the job hash, run id, command
+  exit code and output digest in an atomic status file. A restart adopts a running job through that
+  lock and reuses its output only after the matching zero-exit status and digest verify. Stale or
+  failed output is archived; a failed queue producer does not release dependent jobs to consume its
+  partial file. Legacy PID-only locks are waited on and cannot establish success.
 - In-process caches are bounded. Measured peaks set the caps:
 
 | Job | Measured peak RSS | Cap |

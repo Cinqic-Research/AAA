@@ -355,11 +355,15 @@ evidence, so they are characterizations rather than confirmed claims.
   - It is weakest when the library changes, and adapting forgets the old library.
 - **What did not work.** Generic learned world models (a black-box transformer WM, and a JEPA auxiliary)
   did not earn a place.
-- **Language.** The from-scratch American-English LM (5.2M parameters) beats hand-written rules at
-  extracting tests from held-out phrasings. Pretraining and full-system superiority are
-  **inconclusive** on fresh confirmation, so language-integration and full-system success are not
-  claimed ([language confirmation](wm_program/language_confirmation.md)). The statements are
-  templated paraphrases, not open-ended English.
+- **Language.** The retained report records an L2 statistic of 0.772
+  `[0.622, 0.918]` as `PROMOTE`, but independent review reproduced a channel
+  leak: `RUN` forwarded result values and pass labels computed against the true
+  tests when the language proposal differed. The numerical result is
+  preserved; its attribution to the LM-versus-rules comparison is **not
+  verified**, and the intended language integration and full-system claims are
+  not established. The statements are templated paraphrases, not open-ended
+  English. See the [review erratum](wm_program/pr30_independent_review.md) and
+  the [historical result report](wm_program/language_confirmation.md).
 - **Compute.** Compute is not matched across arms (the matched resource is real test runs).
 - **Confirmation admission and task design.** The opaque generator's direct
   `draft("confirmation")` path does not require admission. Its freeze was
@@ -368,6 +372,10 @@ evidence, so they are characterizations rather than confirmed claims.
   recorded clean provenance commit pins the source used for that run. The
   benchmark design's nearby-repair clause is ambiguous and no neighborhood
   property is enforced; visible-test passing need not imply domain success.
+  The frozen opaque view also exposes a deterministic task position; a
+  development-only probe recovered that task's reference and faults through
+  the generator. Built-in agents do not read the field, and no stored-result
+  use was found. A successor should keep position in evaluator-owned state.
   Their evidence scope is documented in the
   [AI review](wm_program/pr30_independent_review.md).
 - **Corpus provenance.** The repository retains post-run download and corpus
