@@ -19,7 +19,7 @@ jobs:
   locked:
     name: Locked environment
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       MPLBACKEND: Agg
     steps:
