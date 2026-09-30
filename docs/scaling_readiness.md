@@ -24,7 +24,7 @@ brief](aaa_python_v1_research_brief.md)):
 | Adaptation, retention, plasticity | development diagnostics only: 4K adapts at least as well as 10K; the post-hoc comparison finds 10K *worse* than 4K at learning a conflicting mapping (fresh-learner gap -0.122) |
 | Compute | not a constraint (CPU, minutes per stage) and not evidence |
 | Independent recomputation | every stage and the confirmation recount their measured primitives; a post-freeze decision audit additionally checks the stored Holm, capacity and contract verdicts against those primitives |
-| Independent review | **not yet**: the implementer's self-review is not independent |
+| Independent review | done: an independent AI review of PR #29 (Codex GPT-6, not a human review) approved the exact head on 2026-09-26 ([record](pr29_independent_review_2026-09-25.md)); it supports ~4K as the next experimental reference in this family and promotes no model |
 
 The pre-registered requirement for `SCALE_JUSTIFIED` (freeze hypothesis
 `scale_justified_requires`) was C2 **and** C3 `PROMOTE`; C3 did not. The
@@ -33,8 +33,8 @@ confirmation evidence, with the smaller size preferred.
 
 **What this licenses.** A ~4K member of the v1 family (`e2` encoder, one-hot
 output, pointer localization, 4,158 trainable parameters) is the evidence-
-supported candidate for the next experimental reference, subject to
-independent review. Nothing is promoted by this document, and no Python
+supported candidate for the next experimental reference; the PR #29
+independent review agreed within this tested family. Nothing is promoted by this document, and no Python
 capability beyond the measured families is claimed; strong simple rules still
 beat every learner on syntax and outcome, and the visible-test tool alone
 solves 95% of repair.

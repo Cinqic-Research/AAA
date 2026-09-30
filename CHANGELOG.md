@@ -1,5 +1,29 @@
 # Research history
 
+## Component terminology and language-component direction (2026-09-30)
+
+Current planning names AAA's components: the Erudition Model (autonomous
+learning and adaptation), a World Model, a language component and a later
+Decision Model. The language component is intended to be Juniper LM 1 once it
+is qualified; it is not integrated, and the `aaa.wm.lang.v0` model is retained
+as evidence rather than as the long-term language system. Scaling readiness
+now records the completed PR #29 review. No evidence, frozen document or
+scientific identity changed ([research direction](docs/research_direction.md)).
+
+## World-model and language program (2026-09-26 to 2026-09-29, PR #30)
+
+`research/aaa_wm/` tested whether a world model gives AAA a causal decision
+advantage. In `aaa.python.opaque.v0`, planning with WM-S (an exact interpreter
+of the visible Python plus a learned library table) passed all 11 declared
+`crossed.v1` contracts on fresh tasks, with seed-dependence and transfer limits
+recorded. Generic learned world models, including an action-conditioned JEPA
+auxiliary, did not earn a place. A 5.2M-parameter American-English language
+model was tested through an adapter; independent review found that true
+test-run feedback crossed the language-channel boundary, so the stored L2
+result is preserved and its language attribution is **not verified**
+([handoff](docs/wm_program/handoff.md),
+[review erratum](docs/wm_program/pr30_independent_review.md)).
+
 ## `aaa.python.v1`: the evidence-gated 1K-to-10K pre-scale phase (2026-09-24/25)
 
 A successor Python phase asked whether ~10K trainable parameters (10,046;

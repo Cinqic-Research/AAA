@@ -1,6 +1,6 @@
 # The dot-era benchmark and evidence archive
 
-From 2026-09-09 to 2026-09-23, AAA's research centred on one moving dot on a
+From 2026-09-09 to 2026-09-23, AAA's research centered on one moving dot on a
 line. That work is **not obsolete**. It is where AAA built its scientific
 machinery: gates that can say no, causal boundaries, crossed designs, frozen
 identities, independent recomputation, retained failures and the improvement
@@ -12,7 +12,7 @@ loop. Its evidence stays in place, byte for byte, as:
 - **methodological case studies**, including the defects found in them;
 - **proof that AAA reports negative and inconclusive results.**
 
-It stopped being the centre of current research on 2026-09-23. AAA's active
+It stopped being the center of current research on 2026-09-23. AAA's active
 specialization is now [Coding, beginning with Python](research_direction.md).
 Nothing was moved, renamed or regenerated to make that transition look clean.
 

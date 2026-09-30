@@ -5,7 +5,11 @@ AAA is a research program asking whether an artificial system can
 knowledge, detect when that knowledge is inadequate, and improve its future
 behavior**, measured tightly enough that the answer can be *no*.
 
-- **AAA** is the research program.
+- **AAA** is the research program and the system it studies. It is not one
+  model. Its planned components are the **Erudition Model** (autonomous
+  learning and adaptation), a **World Model** (environment state and
+  prediction), a language component, and a later **Decision Model**
+  ([components](docs/research_direction.md#components)).
 - **Juniper** is the persistent artificial agent that successful AAA research is
   ultimately meant to produce. Nothing in this repository is Juniper yet.
 - **Autonomy** is the long-term objective. Today, "autonomous" means only that
@@ -41,8 +45,9 @@ freeze with `aaa.promotion.crossed.v1`:
   a distribution switch at least as well as 10K and 10K learning a
   conflicting mapping markedly worse than 4K; those are not confirmation endpoints.
 - **Verdict: `SCALE_NOT_JUSTIFIED` for ~10K**; ~4K is the evidence-supported
-  candidate for the next reference, pending independent review
-  ([scaling readiness](docs/scaling_readiness.md),
+  candidate for the next experimental reference in this tested family, as the
+  [PR #29 independent review](docs/pr29_independent_review_2026-09-25.md)
+  agreed ([scaling readiness](docs/scaling_readiness.md),
   [development report](docs/aaa_python_v1_development_report.md),
   [handoff](docs/aaa_python_v1_handoff.md)).
 - Simple fitted rules still match or beat every learner on syntax and
@@ -130,6 +135,12 @@ test-run feedback when the language channel proposed different tests. The
 stored numerical L2 result is preserved, but its language-channel attribution
 is **not verified**; language integration and full-system superiority are not
 established. See the [review erratum](docs/wm_program/pr30_independent_review.md).
+That small language model is retained as evidence; it is not AAA's intended
+long-term language component. [Juniper LM 1](https://github.com/Cinqic-Research/Juniper-LM-1)
+is intended to fill that role once it has its own evidence-supported
+integration. It is not integrated today, and no Juniper LM 1 checkpoint exists
+yet. A Decision Model is planned after the model and language work matures;
+none is implemented.
 Other programming languages can follow once Python gives a reason. About **105M
 parameters** is a revisable long-term planning goal for AAA 1, not a target,
 minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says
@@ -532,7 +543,7 @@ result, and this repository is built to report that rather than to avoid it.
 ### Historical evidence
 
 [`results/final/`](results/final/) is the v1 snapshot, preserved unchanged. Its
-result was unfavourable — the original learner did not convincingly improve,
+result was unfavorable — the original learner did not convincingly improve,
 generalized poorly, and lost to constant motion — and that is exactly why it is
 kept.
 

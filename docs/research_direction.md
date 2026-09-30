@@ -1,7 +1,8 @@
 # Current research direction: Coding, beginning with Python
 
 Decision date: 2026-09-23. Updated 2026-09-27 for the scoped world-model and
-language experiments following `aaa.python.v1`.
+language experiments following `aaa.python.v1`, and 2026-09-30 for component
+terminology and the language-component direction.
 This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
 charter, whose principles still apply, and outside the `aaa.1k.v2`
 protocol. It claims no capability.
@@ -14,6 +15,25 @@ protocol. It claims no capability.
   primary experimental domain.
 - **The moving dot** is a historical and continuing benchmark family
   ([archive](dot_benchmark_archive.md)), not AAA's purpose.
+
+## Components
+
+Current terminology, adopted 2026-09-30. AAA is the program and the system; it
+is not one model. The components are planning names, not claims that any of
+them exist as finished systems.
+
+| Component | Role | Status |
+|---|---|---|
+| **Erudition Model** | autonomous learning and adaptation | research: Champion 1 and the `aaa.python.v0`/`v1` learners are experiments toward it; a ~4K learner is the evidence-supported next experimental reference in the tested Python family |
+| **World Model** | environment state and prediction | scoped result: WM-S in `aaa.python.opaque.v0` only ([handoff](wm_program/handoff.md)) |
+| **Language component** | natural-language input and output | intended to be [Juniper LM 1](https://github.com/Cinqic-Research/Juniper-LM-1) once it is qualified; not integrated |
+| **Decision Model** | decision-making and coordination across components | planned for after the model and language work matures; not started |
+
+Earlier phase documents call their learners "AAA models" or "the AAA model".
+Those names are kept where the evidence was recorded. In current planning,
+the learning component is the Erudition Model.
+
+## Scope
 
 Coding is the capability domain. Autonomous adaptation remains the research
 problem. The question is whether a system can acquire, retain, apply, test,
@@ -134,12 +154,30 @@ comparison's causal attribution is **not verified**. Pretraining and
 full-system success are not established. Neither experiment establishes
 general Python or English competence. See the [independent review erratum](wm_program/pr30_independent_review.md).
 
+## Language component direction
+
+The 5.2M-parameter American-English model and its adapter (`aaa.wm.lang.v0`)
+are retained research evidence. They are not the intended long-term language
+component, and the retained language result stays **not verified**.
+
+The intended language component is Juniper LM 1, Cinqic's separate GPT-2 124M
+modernization study, whose current direction is conversational-first. It has no
+trained checkpoint yet. Integration will be considered only when Juniper LM 1
+has evidence of its own and an integration experiment is designed under the
+same causal rules as the rest of AAA, including a repaired language-channel
+boundary. Nothing here claims that integration exists or will succeed.
+
+The templated extraction study does not establish communication, instruction
+following, open-ended conversation, or general understanding.
+
+## Decision Model
+
+A separate Decision Model is planned once the Erudition, World and language
+components are mature enough to coordinate. It has no design, code or evidence
+yet, and this document does not commit to an architecture.
+
 ## Other future directions
 
-- **Broader English / natural language.** The current templated extraction
-  study does not establish communication, instruction following, open-ended
-  conversation, or general understanding. Those remain possible future
-  research directions requiring their own evidence.
 - **Other programming languages** can follow when Python work gives a reason.
 
 ## Self-inspection boundary
