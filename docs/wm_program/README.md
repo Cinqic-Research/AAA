@@ -4,6 +4,9 @@ Started 2026-09-26 from `main` at `dbee13c`. Branch: `opus/world-model-program`.
 confirmations observed; independent review of the world-model result done.** Nothing is merged or
 promoted into the canonical line without owner review. Start with [handoff.md](handoff.md).
 
+The language model built here is retained evidence, not AAA's intended long-term language
+component; see the [research direction](../research_direction.md#language-component-direction).
+
 ## Question
 
 Can a world model give AAA a measurable, causal, generalizable decision advantage over the
