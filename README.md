@@ -138,9 +138,11 @@ established. See the [review erratum](docs/wm_program/pr30_independent_review.md
 That small language model is retained as evidence; it is not AAA's intended
 long-term language component. [Juniper LM 1](https://github.com/Cinqic-Research/Juniper-LM-1)
 is intended to fill that role once it has its own evidence-supported
-integration. It is not integrated today, and no Juniper LM 1 checkpoint exists
-yet. A Decision Model is planned after the model and language work matures;
-none is implemented.
+integration. It is not integrated today. The existing stock GPT-2 checkpoint
+and working copy remain the baseline; no Juniper-trained checkpoint has been
+produced or released. A cross-component Decision Model is planned after the
+model and language work matures. Its design has not started; this is separate
+from WM-S's scoped hand-written planner/interpreter.
 Other programming languages can follow once Python gives a reason. About **105M
 parameters** is a revisable long-term planning goal for AAA 1, not a target,
 minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says

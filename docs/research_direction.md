@@ -162,19 +162,23 @@ component, and the retained language result stays **not verified**.
 
 The intended language component is Juniper LM 1, Cinqic's separate GPT-2 124M
 modernization study, whose current direction is conversational-first. It has no
-trained checkpoint yet. Integration will be considered only when Juniper LM 1
-has evidence of its own and an integration experiment is designed under the
-same causal rules as the rest of AAA, including a repaired language-channel
-boundary. Nothing here claims that integration exists or will succeed.
+trained Juniper checkpoint: its stock GPT-2 checkpoint and working copy remain
+the baseline, and no Juniper-trained checkpoint has been produced or released.
+Integration will be considered only when Juniper LM 1 has evidence of its own
+and an integration experiment is designed under the same causal rules as the
+rest of AAA, including a repaired language-channel boundary. Nothing here
+claims that integration exists or will succeed.
 
 The templated extraction study does not establish communication, instruction
 following, open-ended conversation, or general understanding.
 
 ## Decision Model
 
-A separate Decision Model is planned once the Erudition, World and language
-components are mature enough to coordinate. It has no design, code or evidence
-yet, and this document does not commit to an architecture.
+A cross-component Decision Model is planned once the Erudition, World and
+language components are mature enough to coordinate. Its design has not
+started, and this document does not commit to an architecture. It is separate
+from WM-S's scoped hand-written planner/interpreter; naming the future
+component does not rename or replace that existing work.
 
 ## Other future directions
 
