@@ -6,10 +6,10 @@ knowledge, detect when that knowledge is inadequate, and improve its future
 behavior**, measured tightly enough that the answer can be *no*.
 
 - **AAA** is the research program and the system it studies. It is not one
-  model. Its planned components are the **Erudition Model** (autonomous
-  learning and adaptation), a **World Model** (environment state and
-  prediction), a language component, and a later **Decision Model**
-  ([components](docs/research_direction.md#components)).
+  model. For Juniper 1 its planned components are the **Erudition Model**
+  (autonomous learning and adaptation), a **World Model** (environment state
+  and prediction), and a **Language Model** (language and reasoning
+  interaction) ([components](docs/research_direction.md#components)).
 - **Juniper** is the persistent artificial agent that successful AAA research is
   ultimately meant to produce. Nothing in this repository is Juniper yet.
 - **Autonomy** is the long-term objective. Today, "autonomous" means only that
@@ -136,13 +136,12 @@ stored numerical L2 result is preserved, but its language-channel attribution
 is **not verified**; language integration and full-system superiority are not
 established. See the [review erratum](docs/wm_program/pr30_independent_review.md).
 That small language model is retained as evidence; it is not AAA's intended
-long-term language component. [Juniper LM 1](https://github.com/Cinqic-Research/Juniper-LM-1)
-is intended to fill that role once it has its own evidence-supported
-integration. It is not integrated today. The existing stock GPT-2 checkpoint
-and working copy remain the baseline; no Juniper-trained checkpoint has been
-produced or released. A cross-component Decision Model is planned after the
-model and language work matures. Its design has not started; this is separate
-from WM-S's scoped hand-written planner/interpreter.
+long-term language component. Juniper 1's Language Model is OpenAI's
+unmodified gpt-oss-20b, selected by the
+[Juniper LM 1.1](https://github.com/Cinqic-Research/Juniper-LM-1.1)
+qualification and wrapped by the Juniper application. AAA does not integrate
+it; an AAA integration would need its own experiment under AAA's causal rules.
+With language supplied by that model, AAA's research focuses on autonomy.
 Other programming languages can follow once Python gives a reason. About **105M
 parameters** is a revisable long-term planning goal for AAA 1, not a target,
 minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says

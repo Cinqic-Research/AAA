@@ -1,5 +1,15 @@
 # Research history
 
+## Juniper 1 components (2026-10-02)
+
+Juniper 1's planned components are now the Erudition Model, the World Model
+and a Language Model. The Language Model is OpenAI's unmodified gpt-oss-20b,
+selected by the Juniper LM 1.1 qualification and wrapped by the Juniper
+application; AAA does not integrate it. The earlier Decision Model plan was
+dropped. Juniper LM 1 continues as a separate research study. Only current
+planning documents changed; no evidence, frozen document or scientific identity
+changed ([research direction](docs/research_direction.md)).
+
 ## Component terminology and language-component direction (2026-09-30)
 
 Current planning names AAA's components: the Erudition Model (autonomous

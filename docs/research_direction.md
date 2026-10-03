@@ -1,8 +1,9 @@
 # Current research direction: Coding, beginning with Python
 
 Decision date: 2026-09-23. Updated 2026-09-27 for the scoped world-model and
-language experiments following `aaa.python.v1`, and 2026-09-30 for component
-terminology and the language-component direction.
+language experiments following `aaa.python.v1`, 2026-09-30 for component
+terminology and the language-component direction, and 2026-10-02 for the
+Juniper 1 components.
 This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
 charter, whose principles still apply, and outside the `aaa.1k.v2`
 protocol. It claims no capability.
@@ -18,16 +19,18 @@ protocol. It claims no capability.
 
 ## Components
 
-Current terminology, adopted 2026-09-30. AAA is the program and the system; it
-is not one model. The components are planning names, not claims that any of
+Current terminology, adopted 2026-09-30 and simplified for Juniper 1 on
+2026-10-02. AAA is the program and the system; it is not one model. The components are planning names, not claims that any of
 them exist as finished systems.
 
 | Component | Role | Status |
 |---|---|---|
 | **Erudition Model** | autonomous learning and adaptation | research: Champion 1 and the `aaa.python.v0`/`v1` learners are experiments toward it; a ~4K learner is the evidence-supported next experimental reference in the tested Python family |
 | **World Model** | environment state and prediction | scoped result: WM-S in `aaa.python.opaque.v0` only ([handoff](wm_program/handoff.md)) |
-| **Language component** | natural-language input and output | intended to be [Juniper LM 1](https://github.com/Cinqic-Research/Juniper-LM-1) once it is qualified; not integrated |
-| **Decision Model** | decision-making and coordination across components | planned for after the model and language work matures; not started |
+| **Language Model** | language and reasoning interaction | OpenAI gpt-oss-20b, selected by [Juniper LM 1.1](https://github.com/Cinqic-Research/Juniper-LM-1.1); used by the Juniper application, not integrated into AAA |
+
+Juniper 1 has no Decision Model. An earlier plan for a cross-component
+Decision Model was dropped on 2026-10-02.
 
 Earlier phase documents call their learners "AAA models" or "the AAA model".
 Those names are kept where the evidence was recorded. In current planning,
@@ -160,25 +163,20 @@ The 5.2M-parameter American-English model and its adapter (`aaa.wm.lang.v0`)
 are retained research evidence. They are not the intended long-term language
 component, and the retained language result stays **not verified**.
 
-The intended language component is Juniper LM 1, Cinqic's separate GPT-2 124M
-modernization study, whose current direction is conversational-first. It has no
-trained Juniper checkpoint: its stock GPT-2 checkpoint and working copy remain
-the baseline, and no Juniper-trained checkpoint has been produced or released.
-Integration will be considered only when Juniper LM 1 has evidence of its own
-and an integration experiment is designed under the same causal rules as the
-rest of AAA, including a repaired language-channel boundary. Nothing here
-claims that integration exists or will succeed.
+Juniper 1's Language Model is OpenAI's unmodified gpt-oss-20b. The
+[Juniper LM 1.1](https://github.com/Cinqic-Research/Juniper-LM-1.1)
+qualification selected it on evidence, and the Juniper application wraps it
+with its own constitution, tool, memory and privacy controls. AAA therefore
+does not need to learn English or general coding from scratch; its research
+focuses on autonomy. [Juniper LM 1](https://github.com/Cinqic-Research/Juniper-LM-1),
+the GPT-2 124M modernization study, continues as a separate research record.
+No AAA integration of either model exists. One would need an integration
+experiment designed under the same causal rules as the rest of AAA, including
+a repaired language-channel boundary. Nothing here claims that integration
+exists or will succeed.
 
 The templated extraction study does not establish communication, instruction
 following, open-ended conversation, or general understanding.
-
-## Decision Model
-
-A cross-component Decision Model is planned once the Erudition, World and
-language components are mature enough to coordinate. Its design has not
-started, and this document does not commit to an architecture. It is separate
-from WM-S's scoped hand-written planner/interpreter; naming the future
-component does not rename or replace that existing work.
 
 ## Other future directions
 
