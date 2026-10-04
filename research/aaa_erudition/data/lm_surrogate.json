@@ -1,0 +1,38 @@
+{
+  "rates": {
+    "alias_note_follow": 0.9615,
+    "alias_unknown_abstain": 0.9615,
+    "arithmetic_slip": 0.0385,
+    "confidence_abstain": [
+      -0.41827,
+      0.28095
+    ],
+    "confidence_act": [
+      -0.00034,
+      0.00016
+    ],
+    "consult_follow": 0.9,
+    "decoy_abstain": 0.9615,
+    "dynamics_note_use": 0.8077,
+    "extract_correct": 0.9286,
+    "extract_spurious": 0.1429,
+    "invalid": 0.0046,
+    "name_misread": 0.0385,
+    "observation_infer": 0.0385,
+    "revision_abstain": 0.6667,
+    "revision_follow": 0.8,
+    "unreachable_abstain": 0.9714
+  },
+  "schema": "aaa.erudition.lm_surrogate.v1",
+  "source": [
+    {
+      "file": "characterization.json",
+      "sha256": "acf0af3c4e32c98f0f9accfbd6fc6190b8656aded37e9968d3238773cdfaa0ab"
+    },
+    {
+      "file": "characterization_consult.json",
+      "sha256": "9ab23e3c7352ea98b546c448462dbfa627e92076371c9e56679f4379587d6565"
+    }
+  ],
+  "unmeasured_defaults": []
+}
