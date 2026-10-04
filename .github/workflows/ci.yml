@@ -68,7 +68,13 @@ jobs:
       - name: Recompute retained world-model and language decisions
         run: python tools/check_aaa_wm_evidence.py
 
-      # ---- Current phase: aaa.python.v0 and the promotion successor -------
+      # ---- Current phase: aaa.erudition.v0 (Juniper 1 adaptation) ----------
+      - name: aaa.erudition.v0 failure injection and retained evidence
+        run: |
+          python tools/check_aaa_erudition_mutations.py
+          python tools/check_aaa_erudition_evidence.py
+
+      # ---- Historical Python phases and the crossed.v1 promotion successor --
       - name: Promotion contract successor (AAA-180)
         run: |
           python -m aaa.promotion selftest
@@ -233,6 +239,8 @@ jobs:
         run: |
           python -c "import torch, tokenizers, pyarrow; print(torch.__version__, tokenizers.__version__, pyarrow.__version__)"
           python -m unittest tests.test_aaa_wm_models tests.test_aaa_wm_opaque tests.test_aaa_wm_lm tests.test_aaa_wm_evidence tests.test_aaa_wm_jobs -q
+          python -m unittest tests.test_aaa_erudition_model -q
+          python -m research.aaa_erudition.wm_diagnostic --trials 2 > /dev/null
 
   # Every Python version advertised in pyproject.toml classifiers. Do not add a
   # version here without adding the classifier, or the reverse.
