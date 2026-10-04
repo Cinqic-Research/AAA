@@ -1,5 +1,36 @@
 # Research history
 
+## Accurate Autonomous Adaptation for Juniper 1: `aaa.erudition.v0` (2026-10-04)
+
+The owner reset AAA's active research direction. AAA means Accurate
+Autonomous Adaptation. Its active work is now the Juniper 1 Erudition Model,
+which decides whether, when, where and how Juniper 1's Language Model
+(gpt-oss-20b, immutable) and World Model adapt, evaluates each change, and
+keeps or rolls it back. Python learning is no longer the active direction.
+The moving dot, AAA-1K and Champion 0/1, `aaa.1k.v2`, `aaa.python.v0`/`v1`,
+their capacity conclusions and the Python capability ladder are historical
+evidence, unchanged and still reproducible. The approximate 105M planning
+goal is retired; the Erudition Model starts at at least 1M trainable
+parameters (owner constraint).
+
+New, in `research/aaa_erudition/`:
+- typed, versioned component contracts;
+- a content-addressed state store with provenance and rollback;
+- the ToolShift environment (dynamics and language drift, recurrence,
+  glitches, outages, corrupted and instruction-bearing feedback);
+- a context-library Bayesian World Model;
+- a hash-pinned GPT-OSS backend with record/replay;
+- a Language Model note adapter;
+- the adaptation lifecycle and gate;
+- a 1,259,700-parameter Erudition Model trained from scratch on
+  counterfactual returns in simulation;
+- accurate-adaptation metrics and independent recomputation;
+- a new promotion contract, `aaa.promotion.paired.v1`;
+- freeze-gated confirmation admission and failure injection.
+
+No historical evidence or fingerprinted file changed. Results are in the
+[Juniper 1 development report](docs/juniper1/development_report.md).
+
 ## Juniper 1 components (2026-10-02)
 
 Juniper 1's planned components are now the Erudition Model, the World Model

@@ -3,6 +3,42 @@
 Stated plainly, because a benchmark that cannot say what it does not show is
 not measuring much.
 
+## Current phase: `aaa.erudition.v0` (Juniper 1 adaptation)
+
+- **One synthetic environment.** Every claim is about ToolShift: a four-tank
+  workspace, two tools, templated requests and feedback. It was built to
+  separate language deficiencies from dynamics deficiencies and to force joint
+  adaptation; it is not Juniper's real tool surface, and nothing here shows
+  transfer to it.
+- **The World Model's basis is task-shaped.** Affine effects per operation;
+  the capped "novel" variants lie outside it and are learned only
+  approximately (with uncertainty reported). It cannot learn an operation
+  nobody executes, and GPT-OSS's correct abstentions starve it of exactly
+  that evidence after some shifts. This is measured and is a property of
+  the coupled system.
+- **The Language Model adapter is a note memory.** Its scope rule is the
+  phrase occurring in the request; there is no trained scope classifier. The
+  base model's weights are never trained, by design.
+- **The Erudition Model is trained in simulation.** Its Language Model is a
+  surrogate fitted to 216 real-model situations on training identities
+  (rates smoothed with a uniform prior). The real model's behaviour outside
+  those situations is not represented. Real-model development and
+  confirmation measure the transfer; they do not remove the gap.
+- **Small real-model samples.** About four seconds per model call limits
+  confirmation to about a dozen streams per arm. Percentile intervals at that
+  size can under-cover.
+- **Answers are deterministic per prompt.** Each request is seeded from its
+  content and cached, so sampling variability across seeds is outside the
+  estimand.
+- **No online self-update of the Erudition Model.** Its weights are frozen
+  during runs; its 64-step evidence window is its only within-stream memory.
+- **Corrupted feedback that is internally consistent can poison an alias
+  note.** Two agreeing corrections are enough. The `poisoned` metric
+  measures how often; the gate and canary limit how long.
+- **No product integration.** Juniper-App is unchanged. Workspace adaptation
+  state would be user data in a product and would need Juniper-App's privacy
+  and deletion controls first.
+
 ## Historical first Python phase: `aaa.python.v0`
 
 - **No Python capability is demonstrated.** On retained development evidence

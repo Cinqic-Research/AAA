@@ -1,29 +1,55 @@
 # AAA — Accurate Autonomous Adaptation
 
-AAA is a research program asking whether an artificial system can
-**autonomously learn, predict, reason from feedback, adapt, retain useful
-knowledge, detect when that knowledge is inadequate, and improve its future
-behavior**, measured tightly enough that the answer can be *no*.
+AAA means **Accurate Autonomous Adaptation**. It is Cinqic's research program
+on systems that detect when their own behaviour or knowledge is inadequate,
+determine what must change, learn from real evidence, verify that a change
+helped, keep useful improvements without destructive interference, and roll
+back harmful ones. Every claim is measured tightly enough that the answer can
+be *no*.
 
-- **AAA** is the research program and the system it studies. It is not one
-  model. For Juniper 1 its planned components are the **Erudition Model**
-  (autonomous learning and adaptation), a **World Model** (environment state
-  and prediction), and a **Language Model** (language and reasoning
-  interaction) ([components](docs/research_direction.md#components)).
-- **Juniper** is the persistent artificial agent that successful AAA research is
-  ultimately meant to produce. Nothing in this repository is Juniper yet.
-- **Autonomy** is the long-term objective. Today, "autonomous" means only that
-  the observe / predict / score / update loop runs unattended after launch.
-- **Coding, beginning with Python**, is AAA's first deliberate specialization
-  and its current primary research domain
-  ([research direction](docs/research_direction.md)).
+- **Juniper 1** has three model components and no Decision Model:
+  - a **Language Model**: Juniper LM 1.1, OpenAI's gpt-oss-20b, immutable;
+  - a **World Model**: environment state, consequences, uncertainty;
+  - the **Erudition Model**: whether, when, where and how the other two
+    adapt.
+
+  AAA's active work is the Erudition Model and the adaptation system around
+  it ([research direction](docs/research_direction.md)).
+- **Juniper** is the persistent artificial agent this research serves. Nothing
+  in this repository is a Juniper product feature.
+- **Autonomy** here means that after launch the system decides on its own
+  whether, which and how to adapt, under rules frozen in advance. Merging code,
+  releases and deployment stay externally reviewed.
 
 AAA makes no claim to general intelligence, understanding, consciousness or
-independent goal formation. It is not a code-completion model, a chatbot, a
-benchmark leaderboard entry or a Transformer project by default, and model
-size is not treated as progress.
+independent goal formation. The Erudition Model is not a language model,
+code model or chatbot, and model size is not treated as progress.
 
-## Current phase: `aaa.python.v1`, the evidence-gated pre-scale phase
+## Current research: `aaa.erudition.v0`, Juniper 1 adaptation
+
+The active research line is [`aaa.erudition.v0`](docs/juniper1/README.md):
+- the Juniper 1 Erudition Model, a 1,259,700-parameter transformer trained
+  from scratch;
+- a context-library World Model;
+- an immutable gpt-oss-20b Language Model, adapted only through a separate,
+  versioned note adapter;
+- a host-side adaptation lifecycle with an evaluation gate, provenance and
+  rollback;
+- a synthetic tool environment, ToolShift, whose dynamics and language drift.
+
+Development is under way. Results are recorded only in the
+[development report](docs/juniper1/development_report.md).
+
+## Historical research
+
+Everything from here to the dot-era archive is historical. It is kept exactly
+as recorded and remains reproducible; none of it is evidence for the current
+architecture. The moving dot, AAA-1K and Champion 0/1, `aaa.1k.v2`,
+`aaa.python.v0` and `aaa.python.v1`, with their 1K/4K/10K capacity
+conclusions, and the Python capability ladder were earlier Erudition research
+lines. WM-S and the 5.2M language model were scoped experiments.
+
+### Historical: `aaa.python.v1`, the evidence-gated pre-scale phase (2026-09-24/25)
 
 [`research/aaa_python_v1/`](research/aaa_python_v1/) asks whether about ten
 times Champion 1's trainable capacity (10,046 against 994 parameters) solves a
@@ -53,7 +79,7 @@ freeze with `aaa.promotion.crossed.v1`:
 - Simple fitted rules still match or beat every learner on syntax and
   outcome, and the visible-test tool alone solves 95% of repair.
 
-## The first Python phase: `aaa.python.v0`
+### Historical: the first Python phase, `aaa.python.v0` (2026-09-23)
 
 [`research/aaa_python/`](research/aaa_python/) is the smallest credible
 foundation for asking:
@@ -109,7 +135,7 @@ python -m research.aaa_python recompute --evidence docs/evidence/aaa_python_v0/d
 python tools/write_aaa_python_report.py --check
 ```
 
-## Promotion decisions: `aaa.promotion.crossed.v1`
+### Promotion contract `aaa.promotion.crossed.v1`
 
 Before any future phase can promote a candidate, its decision path must be
 correct. [`aaa/promotion/`](aaa/promotion/) is the prospective successor to the
@@ -124,28 +150,16 @@ python -m aaa.promotion selftest
 python tools/check_promotion_successor.py
 ```
 
-## Where AAA goes next, and what it will not assume
+### World-model and language experiments (2026-09-26 to 2026-09-29)
 
-The [research direction](docs/research_direction.md) lays out a 24-rung Python
-capability ladder whose rungs must be earned in order. The world-model and
-American-English experiments have begun, within the narrow generated tasks
-described in the [program handoff](docs/wm_program/handoff.md). A later
-independent review found that the retained language confirmation exposed true
-test-run feedback when the language channel proposed different tests. The
-stored numerical L2 result is preserved, but its language-channel attribution
-is **not verified**; language integration and full-system superiority are not
-established. See the [review erratum](docs/wm_program/pr30_independent_review.md).
-That small language model is retained as evidence; it is not AAA's intended
-long-term language component. Juniper 1's Language Model is OpenAI's
-unmodified gpt-oss-20b, selected by the
-[Juniper LM 1.1](https://github.com/Cinqic-Research/Juniper-LM-1.1)
-qualification and wrapped by the Juniper application. AAA does not integrate
-it; an AAA integration would need its own experiment under AAA's causal rules.
-With language supplied by that model, AAA's research focuses on autonomy.
-Other programming languages can follow once Python gives a reason. About **105M
-parameters** is a revisable long-term planning goal for AAA 1, not a target,
-minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says
-when added capacity has earned its cost.
+The world-model and American-English experiments ran within the narrow
+generated tasks described in the [program handoff](docs/wm_program/handoff.md).
+A later independent review found that the retained language confirmation
+exposed true test-run feedback when the language channel proposed different
+tests. The stored numerical L2 result is preserved, but its language-channel
+attribution is **not verified**; language integration and full-system
+superiority are not established. See the
+[review erratum](docs/wm_program/pr30_independent_review.md).
 
 ## Install
 
