@@ -27,7 +27,7 @@ them exist as finished systems.
 |---|---|---|
 | **Erudition Model** | autonomous learning and adaptation | research: Champion 1 and the `aaa.python.v0`/`v1` learners are experiments toward it; a ~4K learner is the evidence-supported next experimental reference in the tested Python family |
 | **World Model** | environment state and prediction | scoped result: WM-S in `aaa.python.opaque.v0` only ([handoff](wm_program/handoff.md)) |
-| **Language Model** | language and reasoning interaction | OpenAI gpt-oss-20b, selected by [Juniper LM 1.1](https://github.com/Cinqic-Research/Juniper-LM-1.1); used by the Juniper application, not integrated into AAA |
+| **Language Model** | language and reasoning interaction | OpenAI gpt-oss-20b, selected by the Juniper LM 1.1 qualification; used by the Juniper application, not integrated into AAA |
 
 Juniper 1 has no Decision Model. An earlier plan for a cross-component
 Decision Model was dropped on 2026-10-02.
@@ -163,14 +163,14 @@ The 5.2M-parameter American-English model and its adapter (`aaa.wm.lang.v0`)
 are retained research evidence. They are not the intended long-term language
 component, and the retained language result stays **not verified**.
 
-Juniper 1's Language Model is OpenAI's unmodified gpt-oss-20b. The
-[Juniper LM 1.1](https://github.com/Cinqic-Research/Juniper-LM-1.1)
-qualification selected it on evidence, and the Juniper application wraps it
-with its own constitution, tool, memory and privacy controls. AAA therefore
+Juniper 1's Language Model is OpenAI's unmodified gpt-oss-20b. The Juniper LM
+1.1 qualification selected it on evidence, and the Juniper application wraps
+it with its own constitution, tool, memory and privacy controls. AAA therefore
 does not need to learn English or general coding from scratch; its research
-focuses on autonomy. [Juniper LM 1](https://github.com/Cinqic-Research/Juniper-LM-1),
-the GPT-2 124M modernization study, continues as a separate research record.
-No AAA integration of either model exists. One would need an integration
+focuses on autonomy. Juniper LM 1, the GPT-2 124M modernization study, was
+retired on 2026-10-04 and remains historical research. Its frozen
+JuniperBench-Code v1.2 provenance remains valid. No AAA integration of either
+model exists. One would need an integration
 experiment designed under the same causal rules as the rest of AAA, including
 a repaired language-channel boundary. Nothing here claims that integration
 exists or will succeed.

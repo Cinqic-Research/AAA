@@ -137,9 +137,8 @@ is **not verified**; language integration and full-system superiority are not
 established. See the [review erratum](docs/wm_program/pr30_independent_review.md).
 That small language model is retained as evidence; it is not AAA's intended
 long-term language component. Juniper 1's Language Model is OpenAI's
-unmodified gpt-oss-20b, selected by the
-[Juniper LM 1.1](https://github.com/Cinqic-Research/Juniper-LM-1.1)
-qualification and wrapped by the Juniper application. AAA does not integrate
+unmodified gpt-oss-20b, selected by the Juniper LM 1.1 qualification and
+wrapped by the Juniper application. AAA does not integrate
 it; an AAA integration would need its own experiment under AAA's causal rules.
 With language supplied by that model, AAA's research focuses on autonomy.
 Other programming languages can follow once Python gives a reason. About **105M
