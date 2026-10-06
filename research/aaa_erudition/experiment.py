@@ -102,6 +102,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--conditions", default="frozen,lm_only,wm_only,joint")
     parser.add_argument("--controller", default="heuristic")
     parser.add_argument("--model", type=Path)
+    parser.add_argument("--resume", action="store_true", help="skip runs whose result file already exists")
     parser.add_argument("--backend", choices=("llama", "replay", "scripted", "surrogate"), default="llama")
     parser.add_argument("--url", default="http://127.0.0.1:18741")
     parser.add_argument("--key", type=Path)
@@ -155,6 +156,9 @@ def main(argv: list[str] | None = None) -> int:
             if condition not in CONDITIONS:
                 raise SystemExit(f"unknown condition {condition!r}")
             controller = controller_for("never" if condition == "frozen" else args.controller, args.model)
+            name = f"{args.split}-{index:05d}-{condition}-{controller.name}"
+            if args.resume and (args.out / f"{name}.json.gz").exists():
+                continue
             summary = run_one(args.split, index, condition, controller, backend, args.out, admitted=admitted)
             scores = summary["scores"]
             calls = getattr(backend, "calls", 0)
