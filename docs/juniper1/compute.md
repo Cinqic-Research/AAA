@@ -35,6 +35,46 @@ allowed. This is the coexistence result for FLOWBOX: inference of all three
 components fits together; Erudition training alongside the resident model
 works but slows it about threefold.
 
+## Runtime rebuild (2026-10-05)
+
+Between sessions, the qualification's CUDA build of llama.cpp and the shared
+conda-forge CUDA 12.9 toolchain were removed from the HDD as part of a
+storage clean-up outside this work. The runtime was rebuilt in this workspace:
+- the same recipe (micromamba 2.9.0; conda-forge `cuda-version=12.9 cuda-nvcc
+  cuda-cudart-dev libcublas-dev cmake ninja`; system GCC 13.3 as host
+  compiler; `-DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=75`);
+- built from the untouched source checkout at commit `748d4225`.
+
+The rebuilt server reports `b11270-748d4225b`. Its binary SHA-256 begins
+`a6a5af5c`; the exact package list is retained beside the toolchain.
+
+On 30 recorded development requests re-sent live, generated token sequences
+differed (sampling at temperature 1 is not reproducible from a seed across
+processes). The parsed action was identical to the recorded runtime's on
+30/30, and identical on two identical live requests on 30/30. Every
+retained run replays from its call cache, so this affects only new calls.
+Each run manifest records the server's own build report.
+
+## Two machine failures, and the scheduling rule they produced
+
+FLOWBOX went down twice on 2026-10-04, at about 07:53 and 12:34. Both times
+the GPT-OSS server was resident while heavy work ran beside it: first a
+six-worker simulation, then GPU training on about 160k examples. The journal
+records no out-of-memory kill, which is consistent with a thrashing freeze:
+the model's memory-mapped 12 GB file is evicted and re-read from the HDD.
+Interrupted outputs were trimmed to their last complete record and resumed;
+the byte-reproducibility of resumed simulation data was verified on sample
+streams.
+
+From then on:
+- real-model phases ran with only the light experiment runner beside the
+  server;
+- simulation and training ran with the server stopped.
+
+Training without the server was also about twice as fast (about 45 s per
+epoch for the 1.26M model, against about 90 s), and the larger models no
+longer ran out of GPU memory.
+
 ## Erudition Model
 
 | Item | Value |

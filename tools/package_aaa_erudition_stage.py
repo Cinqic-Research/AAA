@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+"""Regenerate a stage's runs by replay at the current commit and write them as retained evidence.
+
+Run from a clean checkout. Every run is re-executed against the recorded
+Language Model exchanges (``--backend replay``: a missing exchange is an
+error, never a new model call), so the retained runs carry exactly this
+commit's code identity. Writes ``runs/``, the compressed exchange record,
+``evaluation.json`` and ``manifest.json`` under
+``docs/evidence/aaa_erudition_v0/<stage>/``.
+
+    python tools/package_aaa_erudition_stage.py development --cache <calls.jsonl> \\
+        --plan "0,1,2,3,4,5:frozen,joint,lm_only,wm_only:heuristic" ...
+"""
+
+from __future__ import annotations
+
+import argparse
+import gzip
+import hashlib
+import json
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE = ROOT / "docs/evidence/aaa_erudition_v0"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("stage", choices=("development", "attack"))
+    parser.add_argument("--cache", type=Path, required=True)
+    parser.add_argument("--plan", action="append", required=True, help="indices:conditions:controller")
+    parser.add_argument("--model", type=Path, default=EVIDENCE / "model/erudition.pt")
+    args = parser.parse_args()
+    if subprocess.run(["git", "-C", str(ROOT), "diff", "--quiet", "HEAD"], check=False).returncode != 0:
+        print("refusing: the tree has uncommitted changes", file=sys.stderr)
+        return 2
+    target = EVIDENCE / args.stage
+    if target.exists():
+        print(f"refusing: {target} exists", file=sys.stderr)
+        return 2
+    head = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "runs"
+        for plan in args.plan:
+            indices, conditions, controller = plan.split(":")
+            command = [
+                sys.executable,
+                "-m",
+                "research.aaa_erudition.experiment",
+                "--split",
+                args.stage,
+                "--indices",
+                indices,
+                "--conditions",
+                conditions,
+                "--controller",
+                controller,
+                "--backend",
+                "replay",
+                "--cache",
+                str(args.cache),
+                "--out",
+                str(out),
+            ]
+            if controller == "erudition":
+                command += ["--model", str(args.model)]
+            subprocess.run(command, cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
+        runs = target / "runs"
+        runs.mkdir(parents=True)
+        for path in sorted(out.glob("*.json.gz")):
+            shutil.copy2(path, runs / path.name)
+        calls = args.cache.read_bytes()
+        (target / "calls.jsonl.gz").write_bytes(gzip.compress(calls, compresslevel=9, mtime=0))
+        evaluation = target / "evaluation.json"
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "research.aaa_erudition.evaluate",
+                *map(str, sorted(runs.glob("*.json.gz"))),
+                "--output",
+                str(evaluation),
+            ],
+            cwd=ROOT,
+            check=True,
+            stdout=subprocess.DEVNULL,
+        )
+    manifest = {
+        "schema": "aaa.erudition.stage_manifest.v1",
+        "stage": args.stage,
+        "commit": head,
+        "regenerated_by": "replay of the recorded exchanges; no model call",
+        "plans": args.plan,
+        "model_sha256": hashlib.sha256(args.model.read_bytes()).hexdigest(),
+        "calls_sha256": hashlib.sha256(calls).hexdigest(),
+        "calls": sum(1 for line in calls.splitlines() if line.strip()),
+    }
+    (target / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", "utf-8")
+    print(f"packaged {args.stage} at {head[:12]}: {len(list(runs.glob('*.json.gz')))} runs")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
