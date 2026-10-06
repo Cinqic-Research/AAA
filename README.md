@@ -37,8 +37,29 @@ The active research line is [`aaa.erudition.v0`](docs/juniper1/README.md):
   rollback;
 - a synthetic tool environment, ToolShift, whose dynamics and language drift.
 
-Development is under way. Results are recorded only in the
-[development report](docs/juniper1/development_report.md).
+Result, confirmed live on gpt-oss-20b over 12 fresh streams under a committed
+freeze (`aaa.promotion.paired.v1`, [development report](docs/juniper1/development_report.md)):
+
+- **The Erudition Model's adaptation reduces task failure: `PROMOTE`.**
+  Adapting both components, it cut failure from 0.615 to 0.365 against never
+  adapting (paired difference −0.250 [−0.369, −0.133]). Failure on tasks no
+  shift touched rose by at most 0.005 against a margin of 0.05.
+- **Joint over World Model-only: `PROMOTE`.** World Model adaptation alone
+  barely helps on this model; its gains appear only when its learned dynamics
+  reach the Language Model.
+- **Joint over Language Model-only: `INCONCLUSIVE`** (0.365 against 0.367).
+  Joint adaptation clearly helps on dynamics shifts. It lost those gains on
+  two streams: on one it misread a language shift as a World Model problem,
+  and on the other it accepted a consistent lie.
+- **Learned control against the auditable rule set: `INCONCLUSIVE`.**
+  Neither arm made a false adaptation. On failure and poisoning, twelve
+  streams cannot show the learned controller is no worse than the rules; the
+  point estimates slightly favour the rules. The learned controller used
+  about half the rules' gate and extraction calls.
+
+These results hold for one synthetic tool environment, ToolShift. Nothing here
+shows transfer to Juniper's real tools, and Juniper-App is unchanged
+([limitations](docs/limitations.md#current-phase-aaaeruditionv0-juniper-1-adaptation)).
 
 ## Historical research
 

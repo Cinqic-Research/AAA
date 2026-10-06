@@ -34,7 +34,11 @@ model. Juniper-App's host authority over tools, memory, secrets and its
 constitution is unchanged; no learned component can alter it.
 
 The active research line is [`aaa.erudition.v0`](juniper1/README.md). Its
-documents are:
+first confirmation (2026-10-06, live on gpt-oss-20b) promoted the Erudition
+Model's joint adaptation over never adapting (failure 0.615 → 0.365) and over
+World Model-only adaptation. It left two questions inconclusive: whether joint
+adaptation beats Language Model-only adaptation, and whether learned control
+is no worse than rules. Its documents are:
 - [architecture](juniper1/architecture.md);
 - [decisions](juniper1/decisions.md);
 - [literature](juniper1/literature.md);

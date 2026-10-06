@@ -40,3 +40,6 @@ attempt 1 of aaa.erudition.v0 confirmation started 2026-10-05T23:39 EDT under fr
 2026-10-06T02:50:14-04:00 lines=2286 sha256=b6f1470749109b015d11ee285f47ac09a27e42c2ec670e0ed4be71522c42327f runs=31
 2026-10-06T02:55:14-04:00 lines=2369 sha256=ebd3147cac41052288d76266bf426e3d3c856dfe909c85f9ce5b44590a1a75ab runs=32
 ```
+
+Attempt 1 finished at 2026-10-06T05:12 EDT with all 60 declared runs and 4,304 recorded exchanges (cache SHA-256 `f3291d38…8e91`). The complete log, with the attempt note and the final line, is retained as [`attempt_log.txt`](../evidence/aaa_erudition_v0/confirmation/attempt_log.txt) beside the runs; this note is no longer updated. Results: [development report, section 7](development_report.md#7-confirmation-real-model-frozen-protocol).
+

@@ -20,6 +20,18 @@ Juniper 1 has three model components and no Decision Model:
 Host software (validation, execution, the gate, the state store, monitoring
 and rollback) is not a model and cannot be changed by the models.
 
+## Result
+
+Confirmed on gpt-oss-20b over 12 fresh streams under the freeze committed at
+`a750677` ([development report, section 7](development_report.md#7-confirmation-real-model-frozen-protocol)):
+
+| Frozen contract | Verdict |
+|---|---|
+| The Erudition Model, adapting both components, beats never adapting without damaging untouched tasks | `PROMOTE`: failure 0.615 → 0.365 |
+| Joint adaptation beats World Model-only adaptation | `PROMOTE` |
+| Joint adaptation beats Language Model-only adaptation | `INCONCLUSIVE` |
+| The learned controller is no worse than the auditable rules on failure, poisoning and false adaptation | `INCONCLUSIVE` |
+
 ## Documents
 
 | Document | What it covers |
@@ -54,7 +66,8 @@ current work.
 
 ```bash
 python -m unittest tests.test_aaa_erudition tests.test_aaa_erudition_promotion
-python -m research.aaa_erudition.recompute docs/evidence/aaa_erudition_v0/runs/*/*.json.gz
+python -m research.aaa_erudition.recompute docs/evidence/aaa_erudition_v0/development/records/*.json.gz
+python tools/check_aaa_erudition_evidence.py --replay              # every stage, confirmation included; needs torch
 python -m research.aaa_erudition.wm_diagnostic --trials 20      # needs requirements-torch-lock.txt
 python -m unittest tests.test_aaa_erudition_model                 # needs requirements-torch-lock.txt
 ```

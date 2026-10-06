@@ -23,9 +23,34 @@ merged and nothing is promoted by this document.
     admission.
 - **Evidence.** [`docs/evidence/aaa_erudition_v0/`](../evidence/aaa_erudition_v0/)
   holds the characterization, the World Model diagnostic, the sweep, the
-  selected model, development, attack, the freeze, and confirmation once
-  executed. The report generated from it is the
-  [development report](development_report.md).
+  selected model, development, attack, the freeze and the confirmation. The
+  report generated from it is the [development report](development_report.md).
+
+## Confirmation outcome
+
+Attempt 1 ran live on gpt-oss-20b on 2026-10-05/06:
+- 12 fresh streams × 5 frozen arms (60 runs, 4,304 model exchanges);
+- the code frozen at `a750677`;
+- no interruption, and no other attempt.
+
+Two independent implementations adjudicated the four frozen contracts, and
+they agree:
+
+| Contract | Verdict | Paired difference [95%] |
+|---|---|---|
+| `erudition_improves_juniper` | `PROMOTE` | failure −0.250 [−0.369, −0.133]; retention +0.002 [0.000, 0.005], margin 0.05 |
+| `joint_over_world_model_only` | `PROMOTE` | failure −0.235 [−0.357, −0.117] |
+| `joint_over_language_model_only` | `INCONCLUSIVE` | failure −0.001 [−0.094, 0.096] |
+| `learned_control_versus_rules` | `INCONCLUSIVE` | failure +0.017 [−0.052, 0.101], margin 0.03; poisoned +0.019 [−0.062, 0.121], margin 0.02; false adaptation 0 |
+
+The confirmation contradicted two development readings:
+- that joint adaptation beats either single component;
+- that learned control resists poisoning better than the rules.
+
+The per-stream record shows the causes. On stream 02, the controller treated
+a language shift as a World Model problem until step 98. On stream 05, it
+accepted a consistent lie. These are recorded in the report (§7) and in
+[limitations](../limitations.md). Fixing either needs a successor identity.
 
 ## Reproduce
 
@@ -35,7 +60,7 @@ From a checkout on a machine with the locked environments:
 python -m unittest tests.test_aaa_erudition tests.test_aaa_erudition_promotion
 python -m unittest tests.test_aaa_erudition_model            # torch environment
 python tools/check_aaa_erudition_mutations.py                # every injected break must be caught
-python tools/check_aaa_erudition_evidence.py                 # re-executes every retained run
+python tools/check_aaa_erudition_evidence.py --replay        # re-executes and byte-replays every retained run
 python tools/write_aaa_erudition_report.py --check
 python tools/check_protected_identities.py
 python -m research.aaa_erudition.recompute docs/evidence/aaa_erudition_v0/development/records/*.json.gz
@@ -85,10 +110,17 @@ model's metadata.
    - The freeze commit must precede every confirmation file.
    - The evidence checker verifies this ordering and that every declared run
      exists, and it adjudicates from the freeze's own contracts.
-6. **The joint-shift family.** It was built to need both components, yet no
+6. **The confirmation.**
+   - Check that `attempt_log.txt` is consistent with the commit history of
+     `confirmation_progress.md`, which was pushed periodically during the run.
+   - Check that the 60 runs replay from `calls.jsonl.gz`.
+   - Check that the verdicts recompute from the freeze.
+   - The checker's file-history rule was changed after the confirmation was
+     committed (report §8, item 10). Check that the change does not weaken it.
+7. **The joint-shift family.** It was built to need both components, yet no
    controller recovers much there. Is the environment too slow, or the
    mechanisms too weak? The report says which evidence exists.
-7. **Scale.** The one-million-parameter model is not shown to need its size
+8. **Scale.** The one-million-parameter model is not shown to need its size
    on this environment.
 
 ## Self-review (implementer, not independent)
@@ -103,6 +135,8 @@ model's metadata.
   - The confirmation contracts were committed before any real-model
     Erudition run.
   - Confirmation streams were generated only under the freeze.
+  - No code, threshold or narrative claim was tuned after the confirmation;
+    the exploratory tables are labelled post hoc.
 - **Future information across the causal boundary?** A test traps every read
   of the hidden label outside the scorer and the environment itself.
   Features, prompts and gate decisions are built from observed records only.
@@ -129,9 +163,13 @@ model's metadata.
     `poisoned`.
 - **Base weights untouched?** Yes. The GGUF is read-only, its hash matches,
   and adapters are bound to that hash.
-- **LM and WM adaptation proven, and separable?** Yes, by the single-component
-  arms against frozen on the real model (development, and confirmation once
-  executed).
+- **LM and WM adaptation proven, and separable?** Only partly.
+  - Language Model adaptation alone clearly reduces failure on the real model.
+  - World Model adaptation alone barely does: the post-hoc confirmation
+    interval reaches zero.
+  - World Model learning pays off through the joint arm on dynamics shifts,
+    but that is exploratory, and the frozen joint-over-Language Model
+    contract is `INCONCLUSIVE`.
 - **Joint comparison fair?** The same streams and the same host rules; the
   menu is the only factor.
 - **Regressions hidden by aggregates?** Retention, per-family failure,

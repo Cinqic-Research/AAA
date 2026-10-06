@@ -31,6 +31,21 @@ New, in `research/aaa_erudition/`:
 No historical evidence or fingerprinted file changed. Results are in the
 [Juniper 1 development report](docs/juniper1/development_report.md).
 
+Confirmation (2026-10-06): 12 fresh streams × 5 frozen arms, run live
+against gpt-oss-20b by the code frozen at `a750677`. All four frozen contracts
+were adjudicated by two independent bootstrap implementations, which agreed.
+
+| Contract | Verdict |
+|---|---|
+| `erudition_improves_juniper` | `PROMOTE` (failure 0.615 → 0.365; retention within margin) |
+| `joint_over_world_model_only` | `PROMOTE` |
+| `joint_over_language_model_only` | `INCONCLUSIVE` |
+| `learned_control_versus_rules` | `INCONCLUSIVE` |
+
+Confirmation contradicted two development readings: that joint adaptation
+beats either single component, and that learned control resists poisoning
+better than the rules. Both are recorded, not tuned against.
+
 ## Juniper 1 components (2026-10-02)
 
 Juniper 1's planned components are now the Erudition Model, the World Model

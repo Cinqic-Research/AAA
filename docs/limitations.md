@@ -52,7 +52,18 @@ not measuring much.
     always-adapt, because the gate rather than the controller sets it.
   - Development retention failure was about 0.003 against a margin of 0.05.
 
-  These criteria pass without saying much.
+  Both passed in confirmation, and their passing says little.
+- **`misattribution` counts only accepted changes.** It was zero in every
+  confirmation arm. On one confirmation stream, the controller sent about 60
+  steps of requests to the wrong component, but the gate rejected them or a
+  cooldown refused them, so the metric did not count them. Misdirected effort
+  is visible only in the per-stream record and in `missed_adaptation`.
+- **No-op and misdirected requests consume cooldowns.** This delayed repair
+  on confirmation stream 02. A fix changes the frozen lifecycle or the
+  controller, and therefore needs a successor identity.
+- **The joint arm's advantage on dynamics shifts is exploratory.** The
+  frozen joint-over-Language Model contract was `INCONCLUSIVE`. The
+  per-family gains were read after the verdicts.
 - **Twelve streams is a small sample.** The percentile bootstrap under-covers
   there. The two implementations must agree on status, so a bound near a
   threshold gives `DISAGREEMENT`, which fails closed.

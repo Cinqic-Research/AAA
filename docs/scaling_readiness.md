@@ -9,7 +9,11 @@ development capacity sweep on ToolShift (simulation, 36 streams):
 - a 4.98M transformer was no better;
 - seed variance exceeded the differences between architectures.
 
-The floor, not the evidence, sets the size on this environment. Growth
+Confirmation on the real model (2026-10-06) promoted this 1.26M controller's
+joint adaptation over never adapting. It did not show that the learned
+controller is no worse than the auditable rule set, and nothing tested
+whether a smaller controller would confirm equally. The floor, not the
+evidence, sets the size on this environment. Growth
 beyond it needs an environment and a measured deficiency that smaller
 controllers cannot meet ([decisions](juniper1/decisions.md), D-4;
 [development report](juniper1/development_report.md)). The approximate 105M
