@@ -27,7 +27,7 @@ records involve no user and are kept for exact replay and audit.
 | JuniperBench and other held-out evaluation suites | Never used for training. No JuniperBench claim is made. |
 | AAA historical evidence (dot era, `aaa.python.v0`/`v1`, `aaa.wm.*`) | Informs methodology only (causal boundary, freezes, recomputation). It is not training data and no earlier result is reinterpreted. |
 | Earlier AAA weights (Champion 0/1, Python learners, WM-S tables, the 5.2M language model) | Forbidden as initialization; the Erudition Model is trained from scratch. |
-| Juniper Reference 4B, Juniper LM 1 (GPT-2 124M) | Not components of Juniper 1. |
+| Juniper LM 1 (GPT-2 124M study, retired 2026-10-04) and other retired Cinqic model research | Not components of Juniper 1; no weights or outputs used. |
 | Juniper-App user memories, conversations, credentials | Not read and not trained on. Erudition training memory and Juniper user memory are separate concepts ([architecture](architecture.md#memory-ownership)). |
 | Other HDD contents (GPT-2 experiments, model caches, signing material, recovery codes) | Unrelated and, in places, private. Nothing on the HDD outside this work's data root was read for training or uploaded anywhere. |
 

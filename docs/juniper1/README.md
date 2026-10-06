@@ -60,5 +60,5 @@ python -m unittest tests.test_aaa_erudition_model                 # needs requir
 ```
 
 Running the real model needs the qualified GGUF and llama.cpp runtime of
-[Juniper LM 1.1](https://github.com/Cinqic-Research/Juniper-LM-1.1). The
+the Juniper LM 1.1 qualification (a private repository). The
 exact commands are in the [handoff](handoff.md).
