@@ -184,6 +184,33 @@ def check_confirmation(problems: list[str]) -> None:
             problems.append(f"confirmation: {name} recomputes to {decision['verdict']}")
 
 
+def _differences(committed: Any, regenerated: Any, path: str = "") -> list[str]:
+    """Where two run documents differ, as JSON paths with both values (first few only)."""
+
+    if type(committed) is not type(regenerated):
+        return [f"{path or '/'}: {committed!r:.80} != {regenerated!r:.80}"]
+    if isinstance(committed, dict):
+        out: list[str] = []
+        for key in sorted(set(committed) | set(regenerated)):
+            if key not in committed or key not in regenerated:
+                out.append(f"{path}/{key}: present in only one")
+            else:
+                out += _differences(committed[key], regenerated[key], f"{path}/{key}")
+            if len(out) >= 3:
+                break
+        return out
+    if isinstance(committed, list):
+        if len(committed) != len(regenerated):
+            return [f"{path}: length {len(committed)} != {len(regenerated)}"]
+        out = []
+        for index, (a, b) in enumerate(zip(committed, regenerated, strict=True)):
+            out += _differences(a, b, f"{path}[{index}]")
+            if len(out) >= 3:
+                break
+        return out
+    return [] if committed == regenerated else [f"{path}: {committed!r:.80} != {regenerated!r:.80}"]
+
+
 def replay_stage(stage: Path, problems: list[str]) -> None:
     """Re-execute every committed run from the stage's recorded exchanges; require identical bytes."""
 
@@ -215,7 +242,10 @@ def replay_stage(stage: Path, problems: list[str]) -> None:
                 continue
             regenerated.pop("wall_seconds", None)
             if canonical_json(regenerated) != canonical_json(committed):
-                problems.append(f"replay {path.name}: the regenerated run differs from the committed one")
+                where = "; ".join(_differences(committed, json.loads(canonical_json(regenerated))))
+                problems.append(
+                    f"replay {path.name}: the regenerated run differs from the committed one ({where})"
+                )
         print(f"{stage.name}: replayed {len(list((stage / 'records').glob('*.json.gz')))} runs")
 
 
