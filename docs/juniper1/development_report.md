@@ -78,9 +78,9 @@ Six development streams, one per family, on the real gpt-oss-20b with the frozen
 What it shows:
 
 - **Adaptation transfers to the real model.** Joint adaptation by the Erudition Model more than halves task failure against never adapting, with no measurable damage to tasks no shift touched.
-- **Both components matter, through different families.** Language Model adaptation alone repairs the language families and cannot repair a dynamics shift on this model (the characterization predicted it: GPT-OSS does not infer tool behaviour from raw observations). World Model adaptation alone repairs dynamics shifts through the revision and consultation turns and nothing else. Joint adaptation covers both, and beats either single-component arm.
+- **Both components matter, through different families.** Language Model adaptation alone repairs the language families and cannot repair a dynamics shift on this model (the characterization predicted it: GPT-OSS does not infer tool behaviour from raw observations). World Model adaptation alone repairs dynamics shifts through the revision and consultation turns and nothing else. Joint adaptation covers both, and beats either single-component arm on these six streams. Confirmation did not reproduce the advantage over Language Model-only adaptation (section 7).
 - **The joint-shift family is hard for every controller.** When aliases and dynamics change together, the Language Model abstains until aliases are learned, so the World Model receives no executed calls to learn from; that sequential dependency does not finish inside the shift window before the original world returns. Neither the Erudition Model nor the rules recover much there. Joint adaptation in this family is necessary but, at this timescale, not sufficient.
-- **Learned control versus rules.** On failure the Erudition Model is close to the rule set (slightly worse here, inside six-stream noise). In the joint arm on these development streams it held no wrong alias note where the rules did. It was not immune: in the LM-only arm it was poisoned on a similar share of steps, and on the attack streams in about two-thirds of the rules' share (section 6). It spent well under half the rules' gate and extraction calls.
+- **Learned control versus rules.** On failure the Erudition Model is close to the rule set (slightly worse here, inside six-stream noise). In the joint arm on these development streams it held no wrong alias note where the rules did. It was not immune: in the LM-only arm it was poisoned on a similar share of steps, and on the attack streams in about two-thirds of the rules' share (section 6). It spent well under half the rules' gate and extraction calls. On fresh confirmation streams, one accepted lie reversed the poisoning comparison (section 7).
 - **A visible controller weakness.** The Erudition Model issues many requests that do nothing (rollbacks with nothing to roll back, recalls with one stored context). They cost no model calls, but a no-op joint recall starts a cooldown that can delay a useful request, and they show that its action values are poorly separated where waiting and a no-op are equivalent in training.
 
 | Arm | Streams | failure | shifted | retention | false adapt. | misattrib. | missed | unresolved | poisoned | unhelpful | Accepted | Rejected | Rollbacks | Gate+extract calls/stream |
@@ -122,9 +122,108 @@ Failure by family:
 | noise_only | 0.096 | 0.096 | 0.096 |
 | poisoned_shift | 0.775 | 0.221 | 0.200 |
 
-## Confirmation
+## 7. Confirmation (real model, frozen protocol)
 
-Not executed.
+Twelve fresh confirmation streams (two per family), five frozen arms each, run live against gpt-oss-20b by the code frozen at `a750677`. The confirmation identities were generated only under that freeze, and the runs were copied into the repository unchanged. Each run is re-executed by `recompute` and replayed byte-for-byte from the recorded exchanges in CI. Both implementations of `aaa.promotion.paired.v1` (20,000-draw paired percentile bootstrap over streams) agree on every verdict. The table shows the primary implementation's intervals.
+
+The verdicts, as adjudicated from the freeze's own contracts:
+
+- **`erudition_improves_juniper`: PROMOTE.**
+  - The Erudition Model adapting both components cut task failure from 0.615 to 0.365 (paired difference −0.250, interval entirely below zero).
+  - Retention failure rose by at most 0.005 against a margin of 0.05.
+  - This is the phase's main confirmed claim: on this environment and this model, learned control of autonomous adaptation substantially reduces failure without measurable damage to untouched tasks.
+- **`joint_over_world_model_only`: PROMOTE.** Joint adaptation beat World Model adaptation alone by 0.235.
+- **`joint_over_language_model_only`: INCONCLUSIVE.**
+  - Joint and Language Model-only adaptation have the same mean failure (0.365 and 0.367), with an interval of about ±0.095.
+  - Joint adaptation is not shown to add anything over Language Model adaptation.
+- **`learned_control_versus_rules`: INCONCLUSIVE.**
+  - False adaptation passes: zero in both arms.
+  - Failure and poisoning do not pass. Their point estimates slightly favour the rules (+0.017 and +0.019), and their upper bounds (0.101 and 0.121) exceed the frozen margins (0.03 and 0.02).
+  - Twelve streams cannot show noninferiority at those margins.
+
+What the per-stream record shows:
+
+- **The World Model's value appears only jointly.**
+  - Alone, World Model adaptation barely moves failure. In the post-hoc comparison below, its interval reaches zero.
+  - The reason is the one the characterization predicted: the model rarely acts when the manual makes a target look unreachable, so an improved World Model alone has little to act on.
+  - With both components, the World Model's learned dynamics reach the Language Model as notes. On both dynamics-shift streams, joint adaptation is clearly better than either single-component arm (0.550 and 0.733, against 0.825/0.883 and 0.792/0.908).
+  - "`joint_over_world_model_only`" therefore mostly measures the Language Model's contribution. The joint arm's dynamics-stream gains are exploratory evidence of a real joint effect, not a confirmed one.
+- **Joint adaptation gave its dynamics gains back on two streams.**
+  - **Stream 02 (language shift): 0.558, against 0.158 for Language Model-only.** The controller read a language shift as a World Model problem:
+    - from step 51 it requested World Model-derived notes 36 times;
+    - 11 of those requests reached the gate and were rejected, and the other 25 were refused by cooldown;
+    - recall and new-context requests consumed further cooldowns;
+    - it asked for the alias that fixed the stream only at step 98.
+  - **Stream 05 (poisoned shift): 0.350, against 0.200.** The joint arm accepted an alias note planted by consistent lying feedback and held a wrong note for 57% of post-warm steps. This one stream accounts for all of the joint arm's poisoning (0.047), so the development-stage poisoning advantage over the rules did not replicate.
+- **The rule set misses less and costs more.**
+  - The rules left fewer deficiencies unrepaired (missed 0.375, against 0.542).
+  - They also had more retention failure (0.019, against 0.005).
+  - They spent about twice the gate and extraction calls (160.5 per stream, against 81.6).
+- **The `misattribution` metric did not see stream 02.** It is zero in every arm because it counts accepted changes to the wrong component. Misdirected requests that the gate rejected, or that a cooldown refused, are not counted, although on stream 02 they cost about 60 steps of repair.
+
+These results replace the development-stage reading where they disagree. A successor identity would need to address, at least:
+
+- no-op and misdirected requests consuming cooldowns;
+- a `misattribution` metric that counts rejected and refused requests;
+- more confirmation streams for the noninferiority contracts.
+
+None of these can be changed under this freeze.
+
+| Contract | Criterion | Point | 95% interval | Status | Verdict |
+|---|---|---|---|---|---|
+| erudition_improves_juniper | failure | -0.250 | [-0.369, -0.133] | PASS | PROMOTE |
+| erudition_improves_juniper | retention | 0.002 | [0.000, 0.005] | PASS | PROMOTE |
+| joint_over_language_model_only | failure | -0.001 | [-0.094, 0.096] | INCONCLUSIVE | INCONCLUSIVE |
+| joint_over_world_model_only | failure | -0.235 | [-0.357, -0.117] | PASS | PROMOTE |
+| learned_control_versus_rules | failure | 0.017 | [-0.052, 0.101] | INCONCLUSIVE | INCONCLUSIVE |
+| learned_control_versus_rules | poisoned | 0.019 | [-0.062, 0.121] | INCONCLUSIVE | INCONCLUSIVE |
+| learned_control_versus_rules | false_adaptation | 0.000 | [0.000, 0.000] | PASS | INCONCLUSIVE |
+
+| Arm | Streams | failure | shifted | retention | false adapt. | misattrib. | missed | unresolved | poisoned | unhelpful | Accepted | Rejected | Rollbacks | Gate+extract calls/stream |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `frozen/never` | 12 | 0.615 | 0.841 | 0.003 | 0.000 | 0.000 | 0.833 | 0.833 | 0.000 | 0.000 | 0 | 0 | 0 | 0.0 |
+| `joint/erudition` | 12 | 0.365 | 0.514 | 0.005 | 0.000 | 0.000 | 0.542 | 0.750 | 0.047 | 0.525 | 27 | 220 | 5 | 81.6 |
+| `joint/heuristic` | 12 | 0.348 | 0.483 | 0.019 | 0.000 | 0.000 | 0.375 | 0.667 | 0.028 | 0.597 | 24 | 105 | 2 | 160.5 |
+| `lm_only/erudition` | 12 | 0.367 | 0.515 | 0.003 | 0.000 | 0.000 | 0.417 | 0.667 | 0.006 | 0.500 | 20 | 98 | 4 | 61.7 |
+| `wm_only/erudition` | 12 | 0.601 | 0.823 | 0.003 | 0.000 | 0.000 | 0.833 | 0.833 | 0.000 | 0.167 | 7 | 32 | 6 | 0.0 |
+
+Failure by family:
+
+| Family | `frozen/never` | `joint/erudition` | `joint/heuristic` | `lm_only/erudition` | `wm_only/erudition` |
+|---|---|---|---|---|---|
+| dynamics_shift | 0.896 | 0.642 | 0.750 | 0.896 | 0.808 |
+| gradual_language | 0.654 | 0.338 | 0.367 | 0.404 | 0.654 |
+| joint_shift | 0.463 | 0.467 | 0.496 | 0.458 | 0.463 |
+| language_shift | 0.871 | 0.367 | 0.154 | 0.146 | 0.871 |
+| noise_only | 0.104 | 0.104 | 0.104 | 0.104 | 0.104 |
+| poisoned_shift | 0.704 | 0.275 | 0.217 | 0.192 | 0.704 |
+
+Failure by stream (poisoned share where non-zero):
+
+| Stream | Family | `frozen/never` | `joint/erudition` | `joint/heuristic` | `lm_only/erudition` | `wm_only/erudition` |
+|---|---|---|---|---|---|---|
+| 00000 | joint_shift | 0.450 | 0.458 | 0.525 | 0.442 | 0.450 |
+| 00001 | dynamics_shift | 0.883 | 0.550 | 0.758 | 0.883 | 0.825 |
+| 00002 | language_shift | 0.892 | 0.558 | 0.167 | 0.158 | 0.892 |
+| 00003 | gradual_language | 0.608 | 0.350 | 0.317 | 0.350 | 0.608 |
+| 00004 | noise_only | 0.100 | 0.100 | 0.100 | 0.100 | 0.100 |
+| 00005 | poisoned_shift | 0.800 | 0.350 (poisoned 0.567) | 0.217 (poisoned 0.083) | 0.200 (poisoned 0.067) | 0.800 |
+| 00006 | joint_shift | 0.475 | 0.475 | 0.467 | 0.475 | 0.475 |
+| 00007 | dynamics_shift | 0.908 | 0.733 | 0.742 | 0.908 | 0.792 |
+| 00008 | language_shift | 0.850 | 0.175 | 0.142 | 0.133 | 0.850 |
+| 00009 | gradual_language | 0.700 | 0.325 | 0.417 | 0.458 | 0.700 |
+| 00010 | noise_only | 0.108 | 0.108 | 0.108 | 0.108 | 0.108 |
+| 00011 | poisoned_shift | 0.608 | 0.200 | 0.217 (poisoned 0.250) | 0.183 | 0.608 |
+
+Post-hoc comparisons on the same twelve streams, chosen after the frozen verdicts were seen. They use the same paired bootstrap with their own seed. They decide nothing and are not confirmed claims; they show where the frozen verdicts came from.
+
+| Challenger minus reference | Metric | Paired mean difference | 95% interval |
+|---|---|---|---|
+| `lm_only/erudition` minus `frozen/never` | failure | -0.249 | [-0.417, -0.096] |
+| `wm_only/erudition` minus `frozen/never` | failure | -0.015 | [-0.039, 0.000] |
+| `joint/heuristic` minus `frozen/never` | failure | -0.267 | [-0.426, -0.119] |
+| `joint/erudition` minus `joint/heuristic` | missed_adaptation | 0.167 | [0.000, 0.375] |
+| `joint/erudition` minus `joint/heuristic` | retention_failure | -0.014 | [-0.047, 0.005] |
 
 ## 8. Failures, defects and what they taught
 
@@ -152,3 +251,12 @@ Every item below happened in this phase and is kept on record. Superseded output
 6. **The machine went down twice** while heavy simulation or training ran beside the resident model. Phases are now strictly separated; interrupted outputs were trimmed and resumed, with byte-reproducibility verified.
 7. **The runtime build disappeared** in an outside storage clean-up and was rebuilt from the same commit and recipe; its parsed actions matched the recorded runtime on 30/30 probes. Cached responses were also compacted after it emerged that alternative-token data made each call about 50 KB.
 8. **The learned controller issues no-op requests** (rollbacks with nothing to roll back, recalls with one context), and **no controller recovers much in the joint-shift family** (section 5). Both are reported as limitations, not tuned away after development.
+9. **Confirmation contradicted two development readings.**
+   - Development suggested that joint adaptation beats either single component. On fresh streams, joint is indistinguishable from Language Model-only.
+   - Development suggested that learned control resists poisoning better than the rules. On fresh streams, one accepted lie reversed that.
+   - Both are reported as found. Neither was tuned against, because the confirmation code is frozen.
+10. **The evidence checker misread a confirmation file as modified.**
+    - It followed renames with `git log --follow`.
+    - Git's copy detection attributed the new attempt log to the progress note it mirrors, which is 56% similar.
+    - The checker now requires each confirmation file to have exactly one commit at its own path, and that commit must be an addition after the freeze.
+    - A tampered file is still caught; this was verified in a throwaway worktree.

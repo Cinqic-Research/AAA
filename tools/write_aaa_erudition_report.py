@@ -104,6 +104,60 @@ def decision_table(decisions: dict[str, Any], frozen: list[str]) -> str:
     return "\n".join(rows)
 
 
+# Post-hoc comparisons on the confirmation streams. They were chosen after the
+# frozen verdicts were seen, decide nothing, and are reported only to locate
+# where the frozen comparisons came from.
+EXPLORATORY = (
+    ("lm_only/erudition", "frozen/never", "failure"),
+    ("wm_only/erudition", "frozen/never", "failure"),
+    ("joint/heuristic", "frozen/never", "failure"),
+    ("joint/erudition", "joint/heuristic", "missed_adaptation"),
+    ("joint/erudition", "joint/heuristic", "retention_failure"),
+)
+
+
+def exploratory_table(rows: list[dict[str, Any]]) -> str:
+    sys.path.insert(0, str(ROOT))
+    from research.aaa_erudition.evaluate import primitives
+    from research.aaa_erudition.promotion import Contract, Criterion, primary
+
+    streams = tuple(sorted({r["stream"] for r in rows}))
+    evidence = primitives(rows)
+    table = [
+        "| Challenger minus reference | Metric | Paired mean difference | 95% interval |",
+        "|---|---|---|---|",
+    ]
+    for challenger, reference, metric in EXPLORATORY:
+        criterion = Criterion(metric, metric, challenger, reference, "superior", 0.0)
+        result = primary(Contract("exploratory", streams, (criterion,), 20261008), evidence)["criteria"][0]
+        table.append(
+            f"| `{challenger}` minus `{reference}` | {metric} | {result['point']:.3f} | "
+            f"[{result['lower']:.3f}, {result['upper']:.3f}] |"
+        )
+    return "\n".join(table)
+
+
+def stream_table(rows: list[dict[str, Any]], arms: list[str]) -> str:
+    by_stream: dict[str, dict[str, Any]] = {}
+    for r in rows:
+        by_stream.setdefault(r["stream"], {})[r["arm"]] = r
+    table = [
+        "| Stream | Family | " + " | ".join(f"`{a}`" for a in arms) + " |",
+        "|---|---|" + "---|" * len(arms),
+    ]
+    for stream, arms_here in sorted(by_stream.items()):
+        family = next(iter(arms_here.values()))["family"]
+        cells = []
+        for arm in arms:
+            r = arms_here.get(arm)
+            cell = "—" if r is None else f"{r['failure']:.3f}"
+            if r is not None and r["poisoned"]:
+                cell += f" (poisoned {r['poisoned']:.3f})"
+            cells.append(cell)
+        table.append(f"| {stream.rsplit('/', 1)[-1]} | {family} | " + " | ".join(cells) + " |")
+    return "\n".join(table)
+
+
 def render() -> str:
     narrative = _load(NARRATIVE)
     parts = [narrative["intro"]]
@@ -206,6 +260,12 @@ def render() -> str:
             + arm_table(evaluation["descriptive"])
             + "\n\nFailure by family:\n\n"
             + family_table(evaluation["descriptive"], arms)
+            + "\n\nFailure by stream (poisoned share where non-zero):\n\n"
+            + stream_table(evaluation["streams"], arms)
+            + "\n\n"
+            + narrative["confirmation_exploratory"]
+            + "\n\n"
+            + exploratory_table(evaluation["streams"])
         )
     else:
         parts.append("## Confirmation\n\nNot executed.")
