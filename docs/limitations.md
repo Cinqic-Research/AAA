@@ -24,6 +24,25 @@ not measuring much.
   (rates smoothed with a uniform prior). The real model's behaviour outside
   those situations is not represented. Real-model development and
   confirmation measure the transfer; they do not remove the gap.
+- **The training surrogate receives hidden feasibility information.** The
+  simulator registers the true entity for each request. When a request uses
+  an unrecognized name, the surrogate branches on whether that entity exists;
+  after World Model consultation it always abstains for a real but unknown
+  entity, while a nonexistent decoy follows a separate fitted rate. This
+  changes simulated proposals, histories and counterfactual Q targets. The
+  true label is not an Erudition inference feature, and the frozen live
+  confirmation used the real Language Model, so this does not change those
+  recorded outcomes. It does limit the sim-to-real training claim: v0 was not
+  trained on label-blind trajectories. A label-blind model needs a successor
+  identity and new evidence.
+- **The selected architecture did not follow its written tie rule.** The
+  1.2597M transformer and 1.020692M GRU differ by 0.0098, inside the 0.01
+  tie band that selects the smaller GRU. The transformer confirmation remains
+  evidence about that fixed transformer, not evidence that the selection rule
+  selected it. The rule's pre-result existence is supported by an off-Git
+  note timestamp, not Git-backed preregistration. The owner's 1M floor sets
+  the lower scale bound; the evidence does not show that 1M or 1.2597M is
+  necessary.
 - **Small real-model samples.** About four seconds per model call limits
   confirmation to about a dozen streams per arm. Percentile intervals at that
   size can under-cover.
@@ -33,8 +52,13 @@ not measuring much.
 - **No online self-update of the Erudition Model.** Its weights are frozen
   during runs; its 64-step evidence window is its only within-stream memory.
 - **Corrupted feedback that is internally consistent can poison an alias
-  note.** Two agreeing corrections are enough. The `poisoned` metric
-  measures how often; the gate and canary limit how long.
+  note.** Two agreeing corrections are enough. The alias replay target is
+  derived from the same extracted corrections used to create the candidate,
+  so consistent false corrections can self-certify. The canary also requires
+  both satisfaction and numeric consistency to decline; a wrong-target action
+  can still reach the requested number. On confirmation stream 05, the wrong
+  alias remained for 57% of post-warm steps. The frozen poisoning comparison
+  is `INCONCLUSIVE`; these mechanisms are not general poisoning defenses.
 - **Confirmation is authenticated by process, not by cryptography.**
   - At temperature 1, re-running the model gives different text, so a
     confirmation cannot be regenerated, only replayed from its recorded
@@ -63,6 +87,25 @@ not measuring much.
 - **Admission pins the source fingerprint and the Erudition weights, not the
   served model.** The GGUF hash, the served chat template and the rebuilt
   binary are recorded, not enforced; the server reports only its build tag.
+  The research request also differs from the Juniper-App request defaults
+  (`reasoning_effort=low`, `max_tokens=1024`, plus research log-probability and
+  seed fields), so this was not an end-to-end reproduction of App inference.
+- **The live runner's loopback check is unsafe.** It matches the URL by string
+  prefix. A crafted userinfo URL can pass that check with a remote hostname,
+  after which the runner sends its bearer key to that host. The committed
+  confirmation used the default loopback URL and remains evidence about that
+  recorded run, but this code must not be merged as a safe runner. Correcting
+  fingerprinted source requires a successor identity; the frozen v0 evidence
+  must remain unchanged.
+- **Confirmation manifests disclose local paths.** They record the absolute
+  `--key` and model paths and the server-reported model path. The retained
+  files contain path text, not key or token contents. Future manifests should
+  redact these paths; the committed v0 evidence is preserved as recorded.
+- **The auxiliary diagnosis target is generated after the controller
+  decision.** It is paired with the just-recorded features and shares the
+  transformer's trunk with the Q head. Diagnosis is not used to choose actions,
+  but this post-decision target may shape shared weights. Diagnosis accuracy
+  does not establish pre-decision diagnosis quality.
 - **Two confirmation criteria can barely fail.**
   - `false_adaptation` was zero for every arm in development, including
     always-adapt, because the gate rather than the controller sets it.

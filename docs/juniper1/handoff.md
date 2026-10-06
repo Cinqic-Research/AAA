@@ -2,8 +2,12 @@
 
 Branch `opus/juniper1-erudition` of Cinqic-Research/AAA, starting from `main`
 at `2628a0d`. Freeze `a750677` was pushed before any confirmation identity
-existed. This is the implementer's handoff for independent review; nothing is
-merged and nothing is promoted by this document.
+existed. This handoff records the independent review disposition: **changes
+required; not approved or merged**. The fixed-transformer confirmation is
+preserved as v0 evidence. The surrogate training path and the runner's
+security boundary require successor work before the branch can be treated as
+safe, label-blind research code. The architecture-selection deviation also
+means the transformer is not the model selected by the written rule.
 
 ## What exists
 
@@ -89,13 +93,18 @@ model's metadata.
 ## Where to attack first
 
 1. **Sim-to-real.** The Erudition Model was trained against a surrogate.
-   Compare the development report's simulated and real tables. One
-   correctness leak through the surrogate's confidence was found and
-   removed before training (failure record, item 3); check that no other
-   surrogate behaviour depends on hidden truth beyond `register`'s tank.
+   Review found that `register_truth()` passes the true entity into the
+   surrogate, whose unknown-name branch distinguishes a feasible entity from
+   a nonexistent decoy. This changes simulated proposals and Q targets. The
+   live confirmation used the real Language Model, so its measured outcomes
+   remain results for the frozen transformer; the training trajectories are
+   not label-blind. Removing this dependency requires retraining and a
+   successor identity.
 2. **The gate.**
-   - The alias gate is in-sample by design: it cannot tell a true correction
-     from a consistent lie, and the defences are agreement and the canary.
+   - The alias gate is in-sample: its target comes from the same corrections
+     that produce the candidate, so consistent false corrections can
+     self-certify. The canary misses some wrong-target actions that still
+     produce the requested numeric result.
    - The dynamics gate uses an estimator from recent observations that is
      shared by all arms. Check that it gives no arm information the others
      lack.
@@ -135,17 +144,25 @@ model's metadata.
   - The confirmation contracts were committed before any real-model
     Erudition run.
   - Confirmation streams were generated only under the freeze.
-  - No code, threshold or narrative claim was tuned after the confirmation;
-    the exploratory tables are labelled post hoc.
-- **Future information across the causal boundary?** A test traps every read
-  of the hidden label outside the scorer and the environment itself.
-  Features, prompts and gate decisions are built from observed records only.
+  - No scientific code or threshold was tuned after the confirmation. Later
+    documentation edits record independent audit findings without changing
+    the retained evidence or verdicts; exploratory tables remain labelled
+    post hoc.
+- **Future information across the causal boundary?** Runtime controller
+  features, prompts and gate decisions are built from observed records. The
+  training simulator is an exception: the surrogate receives the true entity
+  and changes its proposal behavior based on feasibility, which shapes its
+  histories and Q targets. The controller input tensor does not include that
+  label, but v0 training was not label-blind; a successor is needed to remove
+  this dependency.
 - **Faked autonomy?**
   - After launch, every adaptation, rejection and rollback was decided by the
     controller and the frozen gate; no human chose examples, candidates or
     components.
-  - Humans designed the rules and the environment, and fixed the selection
-    rule before the sweep.
+  - Humans designed the rules and environment. A selection rule was reported
+    in an off-Git working note with a pre-sweep file timestamp, but its
+    existence is not Git-backed; the chosen transformer also violated its
+    tie clause.
 - **Faked scale?** No dead parameters (tested). The evidence does not show
   the size is needed, and that is stated.
 - **A Decision Model under another name?** No. The gate and canary are fixed
@@ -159,10 +176,13 @@ model's metadata.
 - **Poisoning.**
   - Notes are typed and template-rendered.
   - In the attack stage, no injected text reached any adapter state.
-  - Consistent lies can still plant a wrong alias; this is measured as
-    `poisoned`.
-- **Base weights untouched?** Yes. The GGUF is read-only, its hash matches,
-  and adapters are bound to that hash.
+  - Consistent lies can self-certify through the alias replay gate. Stream 05
+    retained a wrong alias for 57% of post-warm steps; the learned-versus-rules
+    poisoning result is inconclusive.
+- **Base weights untouched?** Adapters are bound to the expected artifact
+  hash, and the runtime manifests record the model path and build. However,
+  the live runner does not verify the loaded GGUF or served template
+  fail-closed; that runtime identity is a recorded limitation.
 - **LM and WM adaptation proven, and separable?** Only partly.
   - Language Model adaptation alone clearly reduces failure on the real model.
   - World Model adaptation alone barely does: the post-hoc confirmation
@@ -186,3 +206,40 @@ model's metadata.
   - Windows and macOS were not run.
   - The CI neural job runs a 2-trial World Model diagnostic, not the full one.
   - Live real-model runs cannot run in CI.
+
+## Independent review disposition
+
+- **BLOCKER — bearer-key disclosure.** `LlamaServer` checks the URL with a
+  string prefix. A userinfo URL can pass while parsing to a remote hostname;
+  `runtime()` then attaches the bearer key to the request. A no-network probe
+  reproduced this with a dummy token. The recorded confirmation omitted
+  `--url` and used the default loopback URL, so this does not show that the
+  committed confirmation sent a key to a remote host. The runner still needs
+  parsed-host validation and a regression test before approval.
+- **HIGH — label-aware training simulation.** As described above, hidden
+  feasibility changes surrogate proposals and Q targets. The frozen live
+  outcomes remain measurements of this transformer; label-blind training
+  requires retraining under a successor identity.
+- **HIGH — architecture selection.** The declared 0.01 tie rule selects the
+  smaller 1.020692M GRU, not the confirmed 1.2597M transformer. The
+  transformer's confirmation remains evidence about that artifact, not a
+  compliant architecture-selection result. The off-Git note timestamp does
+  not establish Git-backed preregistration.
+- **MEDIUM — poisoned aliases and canaries.** The alias gate can self-certify
+  a consistent false correction; the canary's numeric-consistency condition
+  can miss a wrong-target action. The frozen poisoning comparison remains
+  `INCONCLUSIVE`.
+- **MEDIUM — diagnosis timing.** The diagnosis target is generated after the
+  adaptation decision but paired with the just-recorded features; it shares
+  the Q head's trunk. It is not an inference input but can shape trained Q
+  weights, and does not support a pre-decision diagnosis claim.
+- **LOW/MEDIUM — state-store recovery.** Missing `heads.json` with extant
+  lineage can discard the active head rather than fail closed. The normal
+  interrupted-commit path and the run-store usage did not exercise this case.
+- **Identity and decision.** Freeze `a750677` has its declared parent and one
+  committed version. All 66 confirmation files were added once afterward;
+  the 60 declared runs and 4,304 cache exchanges replay and recompute. The
+  four statistical verdicts independently reproduce. No frozen file or
+  scientific source was changed by this review. AAA #34 is not approved or
+  merged; changing the fingerprinted runner or training path requires a
+  successor identity and appropriately new evidence.

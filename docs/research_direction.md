@@ -13,8 +13,12 @@ that Juniper can:
 - detect deficiencies in its own behaviour or knowledge;
 - determine what needs to change;
 - learn from real feedback and experience;
-- make controlled adaptations and evaluate whether they helped;
-- keep improvements, reject or roll back harmful ones, and continue.
+- request controlled adaptations from a fixed menu;
+- use the host's evaluation and retention results to choose what to request next.
+
+The host validates each request, executes the gate, stores accepted state,
+monitors canaries, and performs retention or rollback. Those responsibilities
+are not learned by the Erudition Model.
 
 Anything unrelated to that goal belongs to another component.
 
@@ -26,19 +30,24 @@ Juniper 1 has three model components and **no Decision Model**:
 |---|---|---|
 | **Language Model** | language, coding, general reasoning interaction, tool calls | Juniper LM 1.1 = OpenAI gpt-oss-20b, selected by the Juniper LM 1.1 qualification; immutable and hash-pinned; adapted only through a separate, versioned adapter |
 | **World Model** | environment state, consequences, uncertainty, adaptation to changed dynamics | `aaa.world.cbl.v0`, a context library of Bayesian dynamics models ([architecture](juniper1/architecture.md)) |
-| **Erudition Model** | whether, when, where and how the Language Model and World Model adapt; evaluation, retention, rollback | `aaa.erudition.model.v0`, a 1,259,700-parameter transformer trained from scratch |
+| **Erudition Model** | chooses whether, when, where and how to request adaptation from a fixed menu | `aaa.erudition.model.v0`, a 1,259,700-parameter transformer trained from scratch |
 
-Host orchestration, validation, permissions, execution, the evaluation gate,
-state storage, resource limits and rollback are infrastructure, not a fourth
-model. Juniper-App's host authority over tools, memory, secrets and its
-constitution is unchanged; no learned component can alter it.
+The host owns orchestration, validation, permissions, execution, the
+evaluation gate, state storage, resource limits, canaries, retention and
+rollback. This is infrastructure, not a fourth model. Juniper-App's host
+authority over tools, memory, secrets and its constitution is unchanged; no
+learned component can alter it.
 
 The active research line is [`aaa.erudition.v0`](juniper1/README.md). Its
 first confirmation (2026-10-06, live on gpt-oss-20b) promoted the Erudition
 Model's joint adaptation over never adapting (failure 0.615 → 0.365) and over
 World Model-only adaptation. It left two questions inconclusive: whether joint
 adaptation beats Language Model-only adaptation, and whether learned control
-is no worse than rules. Its documents are:
+is no worse than rules. Independent review reproduced the retained evidence
+but found a remote-credential URL flaw and a label-aware training-surrogate
+path; the branch is not approved for merge. The measured result remains about
+the frozen transformer, not a label-blind training method or a production
+runner. Its documents are:
 - [architecture](juniper1/architecture.md);
 - [decisions](juniper1/decisions.md);
 - [literature](juniper1/literature.md);
@@ -72,12 +81,20 @@ is no worse than rules. Its documents are:
 
 ## Evaluation rules (unchanged in substance)
 
-A scored action may use only information available before it. Evaluator
-labels, scheduled regimes and hidden dynamics never reach a component; a test
-traps every read of the hidden label outside the scorer. Adaptation is
-measured causally, with identical streams across conditions (common random
-numbers), against never-adapt, single-component, rule-based and always-adapt
-controls. Retention is measured on behaviour that never needed to change.
+A scored runtime action may use only information available before it. The
+runtime Erudition controller receives observed features and its allowed action
+menu; it does not receive the evaluator label. The training simulator has a
+separate label-aware path: it registers each request's true entity with the
+surrogate Language Model. For unrecognized names, the surrogate branches on
+whether that entity exists, changing its act or abstain proposal and therefore
+the simulated histories and counterfactual Q targets. The frozen live
+confirmation used the real Language Model, but the training data are not
+label-blind and the surrogate is not a causal model of real model behavior.
+A label-blind training model and any claim about it require a successor
+identity. Adaptation is measured causally, with identical streams across
+conditions (common random numbers), against never-adapt, single-component,
+rule-based and always-adapt controls. Retention is measured on behaviour that
+never needed to change.
 "Accurate" is measured directly:
 - false adaptation;
 - missed adaptation;

@@ -14,8 +14,9 @@ runs. It informed design and is not a confirmation result.
 
 ## D-1. Erudition controls adaptation; it does not generate parameter updates
 
-- **Problem.** The Erudition Model must decide whether, when, where and how
-  the Language Model and World Model adapt.
+- **Problem.** The Erudition Model must choose whether, when, where and how
+  to request adaptation of the Language Model and World Model from a fixed
+  menu; host code owns candidate evaluation, retention and rollback.
 - **Candidates.**
   - (a) a learned optimizer or hypernetwork that emits parameter deltas;
   - (b) a learned controller that chooses among inspectable mechanisms;

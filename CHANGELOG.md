@@ -4,9 +4,10 @@
 
 The owner reset AAA's active research direction. AAA means Accurate
 Autonomous Adaptation. Its active work is now the Juniper 1 Erudition Model,
-which decides whether, when, where and how Juniper 1's Language Model
-(gpt-oss-20b, immutable) and World Model adapt, evaluates each change, and
-keeps or rolls it back. Python learning is no longer the active direction.
+which chooses whether, when, where and how to request adaptation of Juniper
+1's Language Model (gpt-oss-20b, immutable) and World Model. Host software
+validates requests, evaluates candidates, retains accepted state and performs
+rollback. Python learning is no longer the active direction.
 The moving dot, AAA-1K and Champion 0/1, `aaa.1k.v2`, `aaa.python.v0`/`v1`,
 their capacity conclusions and the Python capability ladder are historical
 evidence, unchanged and still reproducible. The approximate 105M planning
