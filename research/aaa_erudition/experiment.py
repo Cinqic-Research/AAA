@@ -126,6 +126,7 @@ def main(argv: list[str] | None = None) -> int:
             raise SystemExit("confirmation runs must be declared in the freeze")
         admitted = True
     args.out.mkdir(parents=True, exist_ok=True)
+    inner: LlamaServer | None = None
     if args.backend == "scripted":
         backend: Any = ScriptedLM()
     elif args.backend == "surrogate":
@@ -135,7 +136,6 @@ def main(argv: list[str] | None = None) -> int:
     else:
         if args.cache is None:
             raise SystemExit("--cache is required for the llama and replay backends")
-        inner = None
         if args.backend == "llama":
             if args.key is None:
                 raise SystemExit("--key is required for the llama backend")
@@ -148,6 +148,7 @@ def main(argv: list[str] | None = None) -> int:
         "python": sys.version,
         "platform": platform.platform(),
         "profile": load_profile()["profile"]["artifact"],
+        "runtime": inner.runtime() if isinstance(inner, LlamaServer) else None,
         "argv": sys.argv,
     }
     (args.out / "manifest.json").write_bytes(canonical_json(manifest) + b"\n")

@@ -176,6 +176,21 @@ class LlamaServer:
         artifact = load_profile()["profile"]["artifact"]
         self.backend_id = f"llama.cpp:{artifact['id']}:{artifact['sha256'][:16]}"
 
+    def runtime(self) -> dict[str, Any]:
+        """What the server reports about itself: build, model path, context. Recorded per run."""
+
+        http = urllib.request.Request(f"{self.url}/props", headers={"Authorization": f"Bearer {self.key}"})
+        try:
+            with urllib.request.urlopen(http, timeout=60) as response:
+                props: dict[str, Any] = json.load(response)
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, ConnectionError) as error:
+            raise LMUnavailable(f"model runtime did not report its properties: {error}") from error
+        keep = ("build_info", "model_path", "total_slots", "chat_template_caps")
+        out = {k: props[k] for k in keep if k in props}
+        settings = props.get("default_generation_settings", {})
+        out["n_ctx"] = settings.get("n_ctx")
+        return out
+
     def chat(self, request: dict[str, Any]) -> dict[str, Any]:
         data = json.dumps(request).encode("utf-8")
         http = urllib.request.Request(
