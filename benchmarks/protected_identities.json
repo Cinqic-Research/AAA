@@ -141,6 +141,7 @@
     "docs/evidence/aaa_erudition_v0/development/records/development-00005-lm_only-heuristic.json.gz": "2658ab4bf8098fc73414638811190c673e563d2b769ddddb467f281397e1de45",
     "docs/evidence/aaa_erudition_v0/development/records/development-00005-wm_only-erudition.json.gz": "51d1e22034d5ec5050c9e985d0a5dbe4137b7fa4d23e5cf6aafcaa49c457e880",
     "docs/evidence/aaa_erudition_v0/development/records/development-00005-wm_only-heuristic.json.gz": "62a49ee2b8badf473264228d785fe116a75c09588708d67f439bcb1ca41c7131",
+    "docs/evidence/aaa_erudition_v0/freeze.json": "a4a1f3a99f3f5fca5f926def46ed449af8bff03af9f2c619c6ab2159792414fd",
     "docs/evidence/aaa_erudition_v0/model/erudition.json": "039018a5a25f0083d0db2e27ded58534611b232c19d784df559738d61c3bf000",
     "docs/evidence/aaa_erudition_v0/model/erudition.pt": "c263650cb7c1af7dc91b905fff583e62448fe04064bf44f3ec2ebb881430f94f",
     "docs/evidence/aaa_erudition_v0/sweep/gru288_s1.evaluation.json": "890d541098e1e568d927cbef0cf0fb4231bdd97edc98eeef2470debee124bb17",
