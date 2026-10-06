@@ -11,8 +11,8 @@ Always checked:
   - the freeze is byte-identical to the version first committed;
   - the live phase fingerprint equals the frozen one, since a frozen phase's source
     never changes and a change is a successor identity;
-  - every confirmation file was added after the freeze, exactly once, and never
-    modified;
+  - every confirmation file was added at its path after the freeze, exactly
+    once, and never modified;
   - every declared stream and arm is present;
   - the decisions re-adjudicate from the freeze's own contracts.
 
@@ -56,6 +56,27 @@ def _git(*args: str) -> str:
 
 def _commits_touching(path: Path) -> list[str]:
     return _git("log", "--format=%H", "--follow", "--", str(path.relative_to(ROOT))).split()
+
+
+def _history_at(path: Path) -> list[tuple[str, str]]:
+    """Each commit touching exactly this path, with its status; no rename or copy detection.
+
+    Following renames would attribute a file's history to any earlier file it
+    resembles (a cache-hash log resembles the progress note that mirrored it).
+    A file moved into place shows here as an addition at the move.
+    """
+
+    output = _git("log", "--format=%H", "--no-renames", "--name-status", "--", str(path.relative_to(ROOT)))
+    history: list[tuple[str, str]] = []
+    commit = ""
+    for line in output.splitlines():
+        if not line.strip():
+            continue
+        if "\t" in line:
+            history.append((commit, line.split("\t", 1)[0]))
+        else:
+            commit = line.strip()
+    return history
 
 
 def check_surrogate(problems: list[str]) -> None:
@@ -129,14 +150,15 @@ def check_confirmation(problems: list[str]) -> None:
     for path in sorted(stage.rglob("*")):
         if not path.is_file():
             continue
-        commits = _commits_touching(path)
-        if len(commits) != 1:
+        history = _history_at(path)
+        if len(history) != 1 or history[0][1] != "A":
             problems.append(f"{path.name} is uncommitted or was modified after it was added")
             continue
+        added = history[0][0]
         ancestry = subprocess.run(
-            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", freeze_commit, commits[0]], check=False
+            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", freeze_commit, added], check=False
         )
-        if ancestry.returncode != 0 or commits[0] == freeze_commit:
+        if ancestry.returncode != 0 or added == freeze_commit:
             problems.append(f"{path.name} was not added after the freeze commit")
     plan = freeze["confirmation"]
     for run in (stage / "records").glob("*.json.gz"):
