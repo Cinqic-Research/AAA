@@ -19,7 +19,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "docs/evidence/aaa_erudition_v0"
 REPORT = ROOT / "docs/juniper1/development_report.md"
-NARRATIVE = EVIDENCE / "narrative.json"
+NARRATIVE = ROOT / "docs/juniper1/development_report.narrative.json"
 
 METRICS = (
     ("failure", "failure"),
@@ -148,6 +148,8 @@ def render() -> str:
     baselines = None
     for meta_path in sorted(sweep_dir.glob("*.model.json")):
         name = meta_path.name.removesuffix(".model.json")
+        if not (sweep_dir / f"{name}.evaluation.json").exists():
+            continue  # an intermediate continuation policy, not a sweep member
         meta = _load(meta_path)
         evaluation = _load(sweep_dir / f"{name}.evaluation.json")["descriptive"]
         baselines = evaluation

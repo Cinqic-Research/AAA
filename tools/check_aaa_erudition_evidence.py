@@ -66,7 +66,7 @@ def check_model(problems: list[str]) -> None:
 
 
 def check_stage(stage: Path, problems: list[str], *, freeze: Path | None = None) -> list[dict]:
-    runs = sorted((stage / "runs").glob("*.json.gz"))
+    runs = sorted((stage / "records").glob("*.json.gz"))
     if not runs:
         problems.append(f"{stage.name}: no runs")
         return []
@@ -112,7 +112,7 @@ def check_confirmation(problems: list[str]) -> None:
             problems.append(f"{path.name} was not added after the freeze commit")
     freeze = json.loads(freeze_path.read_text("utf-8"))
     plan = freeze["confirmation"]
-    for run in (stage / "runs").glob("*.json.gz"):
+    for run in (stage / "records").glob("*.json.gz"):
         _, index, condition, controller = run.name.removesuffix(".json.gz").split("-", 3)
         if int(index) not in plan["indices"] or f"{condition}/{controller}" not in plan["arms"]:
             problems.append(f"{run.name} is not declared in the freeze")

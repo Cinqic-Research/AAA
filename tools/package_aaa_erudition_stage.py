@@ -4,7 +4,7 @@
 Run from a clean checkout. Every run is re-executed against the recorded
 Language Model exchanges (``--backend replay``: a missing exchange is an
 error, never a new model call), so the retained runs carry exactly this
-commit's code identity. Writes ``runs/``, the compressed exchange record,
+commit's code identity. Writes ``records/``, the compressed exchange record,
 ``evaluation.json`` and ``manifest.json`` under
 ``docs/evidence/aaa_erudition_v0/<stage>/``.
 
@@ -69,7 +69,7 @@ def main() -> int:
             if controller == "erudition":
                 command += ["--model", str(args.model)]
             subprocess.run(command, cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
-        runs = target / "runs"
+        runs = target / "records"
         runs.mkdir(parents=True)
         for path in sorted(out.glob("*.json.gz")):
             shutil.copy2(path, runs / path.name)

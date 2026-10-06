@@ -97,17 +97,43 @@ before it is counted.
 
 ## Decisions
 
-The confirmation contracts, their thresholds and the bootstrap seed are
+The confirmation contracts, their thresholds and the bootstrap seeds are
 recorded in the freeze. They are adjudicated with `aaa.promotion.paired.v1`
-([decisions](decisions.md), D-6) over all confirmation streams: paired
-differences, a 95% percentile bootstrap, intersection-union verdicts, and
-two independent implementations that must agree. They are listed in
-[the freeze section](#confirmation-plan) as declared before confirmation.
+([decisions](decisions.md), D-6) over all twelve declared streams: paired
+differences, a 95% percentile bootstrap with 20,000 draws, intersection-union
+verdicts, and two independent implementations that must agree. A declared run
+that is missing makes the evaluation fail; it is never dropped.
 
 ## Confirmation plan
 
-Declared in the freeze; see the [development report](development_report.md)
-for the development evidence that set it.
+The plan was declared in `tools/write_aaa_erudition_freeze.py` (committed
+before any real-model Erudition run) and recorded in the freeze:
+
+- **Streams.** Confirmation indices 0–11: two per family, generated only
+  after admission.
+- **Arms.** `frozen/never`, `lm_only/erudition`, `wm_only/erudition`,
+  `joint/erudition` and `joint/heuristic`, all on the real gpt-oss-20b
+  (`--backend llama`), with the frozen Erudition weights.
+
+| Contract | Criterion | Challenger vs reference | Kind | Threshold |
+|---|---|---|---|---|
+| `erudition_improves_juniper` | failure | `joint/erudition` vs `frozen/never` | superior | 0.00 |
+| | retention_failure | `joint/erudition` vs `frozen/never` | noninferior | +0.05 |
+| `joint_over_language_model_only` | failure | `joint/erudition` vs `lm_only/erudition` | superior | 0.00 |
+| `joint_over_world_model_only` | failure | `joint/erudition` vs `wm_only/erudition` | superior | 0.00 |
+| `learned_control_versus_rules` | failure | `joint/erudition` vs `joint/heuristic` | noninferior | +0.03 |
+| | poisoned | `joint/erudition` vs `joint/heuristic` | noninferior | +0.02 |
+| | false_adaptation | `joint/erudition` vs `joint/heuristic` | noninferior | +0.005 |
+
+The first three contracts make the milestone claim: the Erudition Model
+improves Juniper 1 by adapting, retains what did not need to change, and
+does better adapting both components than either one alone. The fourth asks
+whether learned control is at least as good as auditable rules. Each verdict
+is reported as computed: `PROMOTE`, `REJECT`, `INCONCLUSIVE`,
+`INSUFFICIENT_EVIDENCE`, `DISAGREEMENT` or `INVALID_EVIDENCE`. A
+superiority test over pooled families is not a synergy test. The interaction
+in the joint-shift family is reported descriptively, with two streams per
+family, and is not a confirmation claim.
 
 ## Known limitations of the design
 

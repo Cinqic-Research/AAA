@@ -73,6 +73,7 @@ jobs:
         run: |
           python tools/check_aaa_erudition_mutations.py
           python tools/check_aaa_erudition_evidence.py
+          python tools/write_aaa_erudition_report.py --check
 
       # ---- Historical Python phases and the crossed.v1 promotion successor --
       - name: Promotion contract successor (AAA-180)
