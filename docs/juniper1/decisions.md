@@ -145,16 +145,29 @@ runs. It informed design and is not a confirmation result.
   - flat window MLP, 1,254,580;
   - transformer, 109,012;
   - transformer, 4,976,980.
-- **Evidence.** The development sweep is recorded in the
-  [development report](development_report.md).
-- **Choice.** The ≥1M owner constraint is met with no padding: every
-  parameter receives gradient (tested), and no layer exists only to add
-  count. Whether capacity beyond the 109K model helps on this environment is
-  reported from the sweep and not assumed. If it does not, the constraint,
-  not the evidence, sets the size.
-- **Falsifier.** The 109K model matches the 1.26M model on validation regret
-  *and* on real-model development. It would then be recorded that the
-  owner's floor, not the task, sets the scale.
+- **Evidence (*development*, simulation, 36 streams; [report](development_report.md) §3).**
+  Joint-arm failure by architecture:
+
+  | Architecture | Parameters | Joint failure |
+  |---|---|---|
+  | Transformer | 1.26M | 0.323 |
+  | GRU | 1.02M | 0.333 |
+  | Transformer | 109K | 0.332 |
+  | Transformer | 4.98M | 0.334 |
+  | Flat MLP | 1.25M | 0.371 |
+
+  Seeds 2 and 3 of the 1.26M transformer gave 0.346 and 0.325. The rule-based
+  controller scored 0.344 on the same streams.
+- **Choice.** The 1.26M transformer, by the rule written before the sweep.
+  The one-million-parameter floor is met without padding: every parameter
+  receives gradient (tested).
+- **What the evidence says about scale.** The 109K transformer is within the
+  declared 0.01 tie band, and the 4.98M transformer is no better. On this
+  environment, therefore, **the owner's floor, not the evidence, sets the
+  size**. The sequence models beat the flat MLP. The gap between
+  architectures is smaller than the gap between seeds.
+- **Falsifier.** A richer environment in which the 109K model falls clearly
+  behind would show that the capacity is needed. Nothing here shows it.
 - **Deferred.** Richer inputs (text embeddings of feedback) that would
   naturally need more capacity. Online self-updating of the Erudition Model,
   deferred because it widens the poisoning surface.
