@@ -234,6 +234,30 @@ class CallCache:
         self.entries[key] = entry
 
 
+def compact_response(response: dict[str, Any]) -> dict[str, Any]:
+    """The part of a model response the system reads, kept for exact replay.
+
+    llama.cpp returns alternative-token probabilities and byte arrays for every
+    generated token (kilobytes per token). Only the message, the finish reason
+    and each emitted token's own log-probability are ever read, so only those
+    are kept. Fresh and replayed calls both pass through here, so their records
+    are identical.
+    """
+
+    out: dict[str, Any] = {k: v for k, v in response.items() if k != "choices"}
+    choices = []
+    for choice in response.get("choices", []):
+        kept = {k: choice[k] for k in ("index", "finish_reason", "message") if k in choice}
+        tokens = (choice.get("logprobs") or {}).get("content")
+        if tokens is not None:
+            kept["logprobs"] = {
+                "content": [{"token": t.get("token"), "logprob": t.get("logprob")} for t in tokens]
+            }
+        choices.append(kept)
+    out["choices"] = choices
+    return out
+
+
 class CachedBackend:
     def __init__(self, cache_: CallCache, inner: Backend | None, backend_id: str | None = None) -> None:
         self.cache = cache_
@@ -251,7 +275,7 @@ class CachedBackend:
             return cached
         if self.inner is None:
             raise ReplayMiss(f"no recorded exchange for request {key[:16]}")
-        response = self.inner.chat(request)
+        response = compact_response(self.inner.chat(request))
         self.calls += 1
         self.seconds += float(response.get("_elapsed_seconds", 0.0))
         self.cache.put(request, response, self.inner.backend_id)

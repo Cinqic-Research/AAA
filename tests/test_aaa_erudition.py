@@ -413,6 +413,44 @@ class LanguageTests(unittest.TestCase):
             with self.assertRaises(lang.ReplayMiss):
                 replay.chat({**request, "seed": 1})
 
+    def test_compaction_keeps_everything_the_system_reads(self) -> None:
+        call = {
+            "id": "c",
+            "type": "function",
+            "function": {
+                "name": "act",
+                "arguments": json.dumps({"op": "fill", "tank": "amber", "n": 4, "expected": 22}),
+            },
+        }
+        heavy = [
+            {
+                "token": "x",
+                "logprob": -0.01 * i,
+                "bytes": [120],
+                "top_logprobs": [{"token": "y", "logprob": -3.0, "bytes": [121]}],
+            }
+            for i in range(40)
+        ]
+        full = {
+            "id": "volatile",
+            "choices": [
+                {
+                    "index": 0,
+                    "finish_reason": "tool_calls",
+                    "message": {"role": "assistant", "content": "", "tool_calls": [call]},
+                    "logprobs": {"content": heavy},
+                }
+            ],
+        }
+        compact = lang.compact_response(full)
+        self.assertLess(len(json.dumps(compact)), len(json.dumps(full)) / 2)
+        a = lang.parse_proposal(full, 0, "b", "s", self.workspace)
+        b = lang.parse_proposal(compact, 0, "b", "s", self.workspace)
+        self.assertEqual(
+            (a.kind, a.op, a.entity, a.amount, a.expected, a.confidence),
+            (b.kind, b.op, b.entity, b.amount, b.expected, b.confidence),
+        )
+
     def test_tampered_call_cache_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "calls.jsonl"
