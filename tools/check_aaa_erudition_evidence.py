@@ -19,8 +19,13 @@ Always checked:
 With ``--replay`` (needs PyTorch for the Erudition controller), every committed
 run is also re-executed from its stage's recorded model exchanges, so the
 model's parsed proposals, the controller's decisions and the gate's verdicts are
-reproduced, not only the environment. The regenerated run must be
-byte-identical to the committed one.
+reproduced, not only the environment. The regenerated run must equal the
+committed one exactly, with one exception: the Erudition Model's float32
+diagnosis probabilities (values under a ``diagnosis`` key) may differ by a
+relative ``DIAGNOSIS_REL_TOLERANCE``, because CPU math kernels round
+differently across processors. Every action, state, identifier, score and
+verdict must still be identical, and the tolerated differences are counted and
+reported.
 
     python tools/check_aaa_erudition_evidence.py [--replay]
 """
@@ -48,6 +53,9 @@ from research.aaa_erudition.identity import fingerprint  # noqa: E402
 EVIDENCE = ROOT / "docs/evidence/aaa_erudition_v0"
 SURROGATE = ROOT / "research/aaa_erudition/data/lm_surrogate.json"
 STAGES = ("development", "attack", "confirmation")
+# Observed cross-CPU drift in the diagnosis probabilities is below 4e-6 relative;
+# float32 epsilon is 1.2e-7.
+DIAGNOSIS_REL_TOLERANCE = 1e-4
 
 
 def _git(*args: str) -> str:
@@ -184,9 +192,22 @@ def check_confirmation(problems: list[str]) -> None:
             problems.append(f"confirmation: {name} recomputes to {decision['verdict']}")
 
 
-def _differences(committed: Any, regenerated: Any, path: str = "") -> list[str]:
-    """Where two run documents differ, as JSON paths with both values (first few only)."""
+def _differences(committed: Any, regenerated: Any, tolerated: list[float], path: str = "") -> list[str]:
+    """Where two run documents differ, as JSON paths with both values (first few only).
 
+    A float under a ``diagnosis`` key that differs by at most a relative
+    ``DIAGNOSIS_REL_TOLERANCE`` is not a difference; its relative size is
+    appended to ``tolerated``.
+    """
+
+    if isinstance(committed, float) and isinstance(regenerated, float) and "/diagnosis/" in path:
+        if committed == regenerated:
+            return []
+        relative = abs(committed - regenerated) / max(abs(committed), abs(regenerated))
+        if relative <= DIAGNOSIS_REL_TOLERANCE:
+            tolerated.append(relative)
+            return []
+        return [f"{path}: {committed!r} != {regenerated!r} (relative {relative:.2e})"]
     if type(committed) is not type(regenerated):
         return [f"{path or '/'}: {committed!r:.80} != {regenerated!r:.80}"]
     if isinstance(committed, dict):
@@ -195,7 +216,7 @@ def _differences(committed: Any, regenerated: Any, path: str = "") -> list[str]:
             if key not in committed or key not in regenerated:
                 out.append(f"{path}/{key}: present in only one")
             else:
-                out += _differences(committed[key], regenerated[key], f"{path}/{key}")
+                out += _differences(committed[key], regenerated[key], tolerated, f"{path}/{key}")
             if len(out) >= 3:
                 break
         return out
@@ -204,7 +225,7 @@ def _differences(committed: Any, regenerated: Any, path: str = "") -> list[str]:
             return [f"{path}: length {len(committed)} != {len(regenerated)}"]
         out = []
         for index, (a, b) in enumerate(zip(committed, regenerated, strict=True)):
-            out += _differences(a, b, f"{path}[{index}]")
+            out += _differences(a, b, tolerated, f"{path}[{index}]")
             if len(out) >= 3:
                 break
         return out
@@ -212,7 +233,7 @@ def _differences(committed: Any, regenerated: Any, path: str = "") -> list[str]:
 
 
 def replay_stage(stage: Path, problems: list[str]) -> None:
-    """Re-execute every committed run from the stage's recorded exchanges; require identical bytes."""
+    """Re-execute every committed run from the stage's recorded exchanges; require identical runs."""
 
     from research.aaa_erudition.experiment import controller_for, run_one
     from research.aaa_erudition.language import CachedBackend, CallCache
@@ -222,6 +243,7 @@ def replay_stage(stage: Path, problems: list[str]) -> None:
         cache_path = Path(tmp) / "calls.jsonl"
         cache_path.write_bytes(gzip.decompress((stage / "calls.jsonl.gz").read_bytes()))
         cache = CallCache(cache_path)
+        tolerated: list[float] = []
         for path in sorted((stage / "records").glob("*.json.gz")):
             committed = json.loads(gzip.decompress(path.read_bytes()))
             split, index, condition, controller_name = path.name.removesuffix(".json.gz").split("-", 3)
@@ -241,12 +263,21 @@ def replay_stage(stage: Path, problems: list[str]) -> None:
                 problems.append(f"replay {path.name}: {error}")
                 continue
             regenerated.pop("wall_seconds", None)
-            if canonical_json(regenerated) != canonical_json(committed):
-                where = "; ".join(_differences(committed, json.loads(canonical_json(regenerated))))
+            if canonical_json(regenerated) == canonical_json(committed):
+                continue
+            where = _differences(committed, json.loads(canonical_json(regenerated)), tolerated)
+            if where:
                 problems.append(
-                    f"replay {path.name}: the regenerated run differs from the committed one ({where})"
+                    f"replay {path.name}: the regenerated run differs from the committed one ({'; '.join(where)})"
                 )
-        print(f"{stage.name}: replayed {len(list((stage / 'records').glob('*.json.gz')))} runs")
+        count = len(list((stage / "records").glob("*.json.gz")))
+        if tolerated:
+            print(
+                f"{stage.name}: replayed {count} runs; {len(tolerated)} diagnosis probabilities differ "
+                f"within tolerance (largest relative {max(tolerated):.2e}), everything else identical"
+            )
+        else:
+            print(f"{stage.name}: replayed {count} runs, byte-identical")
 
 
 def main() -> int:

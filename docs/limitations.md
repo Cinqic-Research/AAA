@@ -44,17 +44,22 @@ not measuring much.
     append-only log of the cache's hash every five minutes during the run,
     the freeze pushed before the run, and the evidence committed once and
     never modified (checked).
-- **Byte-identical replay depends on the numeric kernels.**
-  - States are content-addressed, so a last-bit difference in the World
-    Model's linear algebra would change every state identity.
-  - On 2026-10-06, CI's replay failed for all 116 runs at one commit.
-  - It passed at the next commit, on the same runner image with the same
-    packages, and that commit changed nothing on the replay path.
-  - The suspected cause is AVX-512 kernels on some hosted runners. It is not
-    proven, because the failing jobs did not record their CPU.
-  - CI now holds OpenBLAS and numpy to AVX2-level paths, the paths that
-    produced the evidence, and logs the CPU.
-  - Recomputation from the embedded states does not depend on this.
+- **Replay is exact except for float32 diagnosis probabilities.**
+  - On hosted CI runners with AVX-512 (an AMD EPYC 9V74 and an Intel Xeon
+    8573C), replay first differed for every run.
+  - **The World Model's float64 numerics** changed state identities. CI now
+    holds OpenBLAS and numpy to the AVX2 paths that produced the evidence,
+    and those runs replay byte-for-byte.
+  - **The Erudition Model's float32 diagnosis probabilities** still differ, by
+    up to a few parts per million. They come from MKL, whose path depends on
+    the CPU vendor and cannot be pinned without also changing the original
+    machine's results.
+  - The replay check therefore compares those probabilities within a relative
+    1e-4. Everything else must be identical: every action, decision, state,
+    identifier, score and verdict.
+  - Locally, perturbing MKL's numerics changed only those probabilities, by at
+    most 3.9e-6 relative.
+  - Exact cross-machine equality of the network's raw outputs is not claimed.
 - **Admission pins the source fingerprint and the Erudition weights, not the
   served model.** The GGUF hash, the served chat template and the rebuilt
   binary are recorded, not enforced; the server reports only its build tag.

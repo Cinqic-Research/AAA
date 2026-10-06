@@ -124,7 +124,7 @@ Failure by family:
 
 ## 7. Confirmation (real model, frozen protocol)
 
-Twelve fresh confirmation streams (two per family), five frozen arms each, run live against gpt-oss-20b by the code frozen at `a750677`. The confirmation identities were generated only under that freeze, and the runs were copied into the repository unchanged. Each run is re-executed by `recompute` and replayed byte-for-byte from the recorded exchanges in CI. Both implementations of `aaa.promotion.paired.v1` (20,000-draw paired percentile bootstrap over streams) agree on every verdict. The table shows the primary implementation's intervals.
+Twelve fresh confirmation streams (two per family), five frozen arms each, run live against gpt-oss-20b by the code frozen at `a750677`. The confirmation identities were generated only under that freeze, and the runs were copied into the repository unchanged. Each run is re-executed by `recompute` and replayed from the recorded exchanges in CI. Every action, state and verdict reproduces exactly; the Erudition Model's float32 diagnosis probabilities reproduce within a relative 1e-4 across CPUs ([limitations](../limitations.md)). Both implementations of `aaa.promotion.paired.v1` (20,000-draw paired percentile bootstrap over streams) agree on every verdict. The table shows the primary implementation's intervals.
 
 The verdicts, as adjudicated from the freeze's own contracts:
 

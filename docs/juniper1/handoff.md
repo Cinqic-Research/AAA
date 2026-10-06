@@ -60,7 +60,7 @@ From a checkout on a machine with the locked environments:
 python -m unittest tests.test_aaa_erudition tests.test_aaa_erudition_promotion
 python -m unittest tests.test_aaa_erudition_model            # torch environment
 python tools/check_aaa_erudition_mutations.py                # every injected break must be caught
-python tools/check_aaa_erudition_evidence.py --replay        # re-executes and byte-replays every retained run
+python tools/check_aaa_erudition_evidence.py --replay        # re-executes and replays every retained run (exact, except float32 diagnosis probabilities within 1e-4)
 python tools/write_aaa_erudition_report.py --check
 python tools/check_protected_identities.py
 python -m research.aaa_erudition.recompute docs/evidence/aaa_erudition_v0/development/records/*.json.gz

@@ -226,12 +226,18 @@ jobs:
     env:
       MPLBACKEND: Agg
       PIP_NO_CACHE_DIR: "1"
-      # Byte-identical replay of aaa.erudition.v0 runs needs the numeric kernels
-      # the evidence was produced with (AVX2-level). Hosted runners vary by CPU;
-      # AVX-512 kernels can round differently, which changes every
-      # content-addressed state. These pins hold OpenBLAS and numpy to AVX2 paths.
+      # Replay of aaa.erudition.v0 runs needs the World Model's float64 numerics
+      # exactly as produced (AVX2-level). Hosted runners vary by CPU, and AVX-512
+      # kernels round differently, which would change every content-addressed
+      # state. These pins hold OpenBLAS and numpy to AVX2 paths, and cap Torch's
+      # kernels likewise. MKL's own path differs by CPU vendor and cannot be
+      # pinned, so the Erudition Model's float32 diagnosis probabilities are
+      # compared within a stated tolerance (tools/check_aaa_erudition_evidence.py).
       OPENBLAS_CORETYPE: Haswell
       NPY_DISABLE_CPU_FEATURES: X86_V4 AVX512_ICL AVX512_SPR
+      ATEN_CPU_CAPABILITY: avx2
+      ONEDNN_MAX_CPU_ISA: AVX2
+      MKL_ENABLE_INSTRUCTIONS: AVX2
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
