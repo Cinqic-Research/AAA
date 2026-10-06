@@ -226,6 +226,12 @@ jobs:
     env:
       MPLBACKEND: Agg
       PIP_NO_CACHE_DIR: "1"
+      # Byte-identical replay of aaa.erudition.v0 runs needs the numeric kernels
+      # the evidence was produced with (AVX2-level). Hosted runners vary by CPU;
+      # AVX-512 kernels can round differently, which changes every
+      # content-addressed state. These pins hold OpenBLAS and numpy to AVX2 paths.
+      OPENBLAS_CORETYPE: Haswell
+      NPY_DISABLE_CPU_FEATURES: X86_V4 AVX512_ICL AVX512_SPR
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -242,6 +248,9 @@ jobs:
       - name: Execute CPU neural, language, and evidence tests
         run: |
           python -c "import torch, tokenizers, pyarrow; print(torch.__version__, tokenizers.__version__, pyarrow.__version__)"
+          grep -m1 "model name" /proc/cpuinfo
+          grep -qw avx512f /proc/cpuinfo && echo "cpu: avx512f present" || echo "cpu: no avx512f"
+          python -c "import numpy; numpy.show_runtime()"
           python -m unittest tests.test_aaa_wm_models tests.test_aaa_wm_opaque tests.test_aaa_wm_lm tests.test_aaa_wm_evidence tests.test_aaa_wm_jobs -q
           python -m unittest tests.test_aaa_erudition_model -q
           python -m research.aaa_erudition.wm_diagnostic --trials 2 > /dev/null
