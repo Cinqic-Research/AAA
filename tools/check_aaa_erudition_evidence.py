@@ -133,6 +133,9 @@ def check_confirmation(problems: list[str]) -> None:
     if not freeze_path.exists():
         problems.append("confirmation evidence exists without a freeze")
         return
+    if _git("rev-parse", "--is-shallow-repository").strip() == "true":
+        problems.append("the checkout is shallow; confirmation ordering needs full history (fetch-depth: 0)")
+        return
     freeze_commits = _commits_touching(freeze_path)
     if len(freeze_commits) != 1:
         problems.append("the freeze is uncommitted or was modified after it was first committed")
