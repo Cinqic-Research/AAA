@@ -35,6 +35,40 @@ not measuring much.
 - **Corrupted feedback that is internally consistent can poison an alias
   note.** Two agreeing corrections are enough. The `poisoned` metric
   measures how often; the gate and canary limit how long.
+- **Confirmation is authenticated by process, not by cryptography.**
+  - At temperature 1, re-running the model gives different text, so a
+    confirmation cannot be regenerated, only replayed from its recorded
+    exchanges.
+  - The cache would serve pre-filled entries even in live mode.
+  - The defences are procedural: a newly created cache, an attempt note, an
+    append-only log of the cache's hash every five minutes during the run,
+    the freeze pushed before the run, and the evidence committed once and
+    never modified (checked).
+- **Admission pins the source fingerprint and the Erudition weights, not the
+  served model.** The GGUF hash, the served chat template and the rebuilt
+  binary are recorded, not enforced; the server reports only its build tag.
+- **Two confirmation criteria can barely fail.**
+  - `false_adaptation` was zero for every arm in development, including
+    always-adapt, because the gate rather than the controller sets it.
+  - Development retention failure was about 0.003 against a margin of 0.05.
+
+  These criteria pass without saying much.
+- **Twelve streams is a small sample.** The percentile bootstrap under-covers
+  there. The two implementations must agree on status, so a bound near a
+  threshold gives `DISAGREEMENT`, which fails closed.
+- **Recomputation trusts some stored fields.** It does not re-check:
+  - the step index;
+  - rollback targets beyond their existence;
+  - the gate's verdict (only "ACCEPT" is required of accepted records);
+  - rejected records' components;
+  - call counts.
+
+  With `--replay`, the evidence check regenerates whole runs and does cover
+  these.
+- **A small asymmetry between arms.** The LM-only arm still receives the
+  frozen World Model's revision turns, and that stale model can disagree with
+  learned dynamics. It never happened in development (0 revisions in 720
+  LM-only Erudition steps).
 - **No product integration.** Juniper-App is unchanged. Workspace adaptation
   state would be user data in a product and would need Juniper-App's privacy
   and deletion controls first.

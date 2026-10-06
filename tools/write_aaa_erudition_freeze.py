@@ -125,7 +125,7 @@ def main() -> int:
     if FREEZE.exists():
         print("refusing: the freeze exists and is never rewritten", file=sys.stderr)
         return 2
-    if subprocess.run(["git", "-C", str(ROOT), "diff", "--quiet", "HEAD"], check=False).returncode != 0:
+    if subprocess.check_output(["git", "-C", str(ROOT), "status", "--porcelain"], text=True).strip():
         print("refusing: the tree has uncommitted changes", file=sys.stderr)
         return 2
     meta = json.loads(args.model.with_suffix(".json").read_text("utf-8"))

@@ -136,8 +136,14 @@ model's metadata.
   menu is the only factor.
 - **Regressions hidden by aggregates?** Retention, per-family failure,
   poisoning, false adaptation and cost are reported separately.
-- **Claims supported?** The report contains only computed numbers. The
-  narrative claims are checked against its tables.
+- **Claims supported?** The report's tables are generated from the evidence
+  and checked in CI. Its narrative is not machine-checked. A second
+  independent review corrected two overclaims: contract timing and
+  poisoning.
+- **Selection rule followed?** No. By its own tie clause it selects the
+  1.02M GRU; the transformer was chosen by mistake (D-4, report §4). The
+  rule note predates the sweep only by its file timestamp; it was outside
+  Git.
 - **Missing checks.**
   - Windows and macOS were not run.
   - The CI neural job runs a 2-trial World Model diagnostic, not the full one.

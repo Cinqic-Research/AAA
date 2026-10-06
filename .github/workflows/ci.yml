@@ -242,6 +242,7 @@ jobs:
           python -m unittest tests.test_aaa_wm_models tests.test_aaa_wm_opaque tests.test_aaa_wm_lm tests.test_aaa_wm_evidence tests.test_aaa_wm_jobs -q
           python -m unittest tests.test_aaa_erudition_model -q
           python -m research.aaa_erudition.wm_diagnostic --trials 2 > /dev/null
+          python tools/check_aaa_erudition_evidence.py --replay
 
   # Every Python version advertised in pyproject.toml classifiers. Do not add a
   # version here without adding the classifier, or the reverse.

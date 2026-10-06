@@ -158,9 +158,14 @@ runs. It informed design and is not a confirmation result.
 
   Seeds 2 and 3 of the 1.26M transformer gave 0.346 and 0.325. The rule-based
   controller scored 0.344 on the same streams.
-- **Choice.** The 1.26M transformer, by the rule written before the sweep.
-  The one-million-parameter floor is met without padding: every parameter
+- **Choice.** The 1.26M transformer, which had the lowest failure. The
+  one-million-parameter floor is met without padding: every parameter
   receives gradient (tested).
+- **Recorded deviation.** The stated rule gives ties within 0.01 to the
+  smaller model. That selects the 1.02M GRU (0.3329 against 0.3231, a gap of
+  0.0098), not the transformer. The tie clause was applied only to the 109K
+  model by mistake, and an independent review caught it after confirmation
+  had begun. The confirmed artifact is the transformer.
 - **What the evidence says about scale.** The 109K transformer is within the
   declared 0.01 tie band, and the 4.98M transformer is no better. On this
   environment, therefore, **the owner's floor, not the evidence, sets the

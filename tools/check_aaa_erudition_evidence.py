@@ -1,24 +1,41 @@
 #!/usr/bin/env python3
 """Recompute every retained ``aaa.erudition.v0`` result from its committed primitives.
 
-* the fitted surrogate parameters re-fit exactly from the committed characterization;
-* the committed Erudition weights hash to their recorded digest and parameter count;
-* every committed run re-executes against the environment (``recompute``);
-* every committed evaluation recomputes to the same metrics, and confirmation
-  decisions re-adjudicate from the freeze's own contracts over every declared run;
-* confirmation evidence exists only with a freeze committed *before* it, and
-  only for the streams and arms that freeze declared.
+Always checked:
 
-    python tools/check_aaa_erudition_evidence.py
+* the fitted surrogate parameters re-fit exactly from the committed characterization;
+* the committed Erudition weights hash to their recorded digest;
+* every committed run re-executes against the environment (``recompute``) and every
+  stage's committed metrics recompute;
+* confirmation:
+  - the freeze is byte-identical to the version first committed;
+  - the live phase fingerprint equals the frozen one, since a frozen phase's source
+    never changes and a change is a successor identity;
+  - every confirmation file was added after the freeze, exactly once, and never
+    modified;
+  - every declared stream and arm is present;
+  - the decisions re-adjudicate from the freeze's own contracts.
+
+With ``--replay`` (needs PyTorch for the Erudition controller), every committed
+run is also re-executed from its stage's recorded model exchanges, so the
+model's parsed proposals, the controller's decisions and the gate's verdicts are
+reproduced, not only the environment. The regenerated run must be
+byte-identical to the committed one.
+
+    python tools/check_aaa_erudition_evidence.py [--replay]
 """
 
 from __future__ import annotations
 
+import argparse
+import gzip
 import hashlib
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -26,18 +43,19 @@ sys.path.insert(0, str(ROOT))
 from research.aaa_erudition.characterize import fit_surrogate  # noqa: E402
 from research.aaa_erudition.contracts import canonical_json  # noqa: E402
 from research.aaa_erudition.evaluate import collect, decide, describe  # noqa: E402
+from research.aaa_erudition.identity import fingerprint  # noqa: E402
 
 EVIDENCE = ROOT / "docs/evidence/aaa_erudition_v0"
 SURROGATE = ROOT / "research/aaa_erudition/data/lm_surrogate.json"
+STAGES = ("development", "attack", "confirmation")
 
 
 def _git(*args: str) -> str:
     return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True)
 
 
-def _first_commit(path: Path) -> str | None:
-    out = _git("log", "--diff-filter=A", "--format=%H", "--", str(path.relative_to(ROOT))).split()
-    return out[-1] if out else None
+def _commits_touching(path: Path) -> list[str]:
+    return _git("log", "--format=%H", "--follow", "--", str(path.relative_to(ROOT))).split()
 
 
 def check_surrogate(problems: list[str]) -> None:
@@ -65,10 +83,10 @@ def check_model(problems: list[str]) -> None:
             problems.append(f"{weights.name} is below the 1M trainable-parameter floor")
 
 
-def check_stage(stage: Path, problems: list[str], *, freeze: Path | None = None) -> list[dict]:
+def check_stage(stage: Path, problems: list[str], *, freeze: Path | None = None) -> list[dict[str, Any]]:
     runs = sorted((stage / "records").glob("*.json.gz"))
     if not runs:
-        problems.append(f"{stage.name}: no runs")
+        problems.append(f"{stage.name}: no records")
         return []
     try:
         rows = collect(runs, freeze=freeze)
@@ -94,23 +112,32 @@ def check_confirmation(problems: list[str]) -> None:
     if not freeze_path.exists():
         problems.append("confirmation evidence exists without a freeze")
         return
-    freeze_commit = _first_commit(freeze_path)
-    if freeze_commit is None:
-        problems.append("the freeze is not committed")
+    freeze_commits = _commits_touching(freeze_path)
+    if len(freeze_commits) != 1:
+        problems.append("the freeze is uncommitted or was modified after it was first committed")
         return
+    freeze_commit = freeze_commits[0]
+    relative = str(freeze_path.relative_to(ROOT))
+    if _git("show", f"{freeze_commit}:{relative}").encode() != freeze_path.read_bytes():
+        problems.append("the freeze differs from its committed version")
+        return
+    freeze = json.loads(freeze_path.read_text("utf-8"))
+    if fingerprint()["sha256"] != freeze["fingerprint"]["sha256"]:
+        problems.append(
+            "the phase source differs from the frozen source; a change needs a successor identity"
+        )
     for path in sorted(stage.rglob("*")):
         if not path.is_file():
             continue
-        commit = _first_commit(path)
-        if commit is None:
-            problems.append(f"{path.name} is not committed")
+        commits = _commits_touching(path)
+        if len(commits) != 1:
+            problems.append(f"{path.name} is uncommitted or was modified after it was added")
             continue
         ancestry = subprocess.run(
-            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", freeze_commit, commit], check=False
+            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", freeze_commit, commits[0]], check=False
         )
-        if ancestry.returncode != 0 or commit == freeze_commit:
+        if ancestry.returncode != 0 or commits[0] == freeze_commit:
             problems.append(f"{path.name} was not added after the freeze commit")
-    freeze = json.loads(freeze_path.read_text("utf-8"))
     plan = freeze["confirmation"]
     for run in (stage / "records").glob("*.json.gz"):
         _, index, condition, controller = run.name.removesuffix(".json.gz").split("-", 3)
@@ -125,12 +152,54 @@ def check_confirmation(problems: list[str]) -> None:
         problems.append(f"confirmation: {error}")
         return
     committed = json.loads((stage / "evaluation.json").read_text("utf-8"))
+    if set(committed.get("decisions", {})) != set(decisions):
+        problems.append("confirmation: committed decisions do not cover exactly the frozen contracts")
     for name, decision in decisions.items():
         if committed.get("decisions", {}).get(name, {}).get("verdict") != decision["verdict"]:
             problems.append(f"confirmation: {name} recomputes to {decision['verdict']}")
 
 
+def replay_stage(stage: Path, problems: list[str]) -> None:
+    """Re-execute every committed run from the stage's recorded exchanges; require identical bytes."""
+
+    from research.aaa_erudition.experiment import controller_for, run_one
+    from research.aaa_erudition.language import CachedBackend, CallCache
+
+    model = EVIDENCE / "model/erudition.pt"
+    with tempfile.TemporaryDirectory() as tmp:
+        cache_path = Path(tmp) / "calls.jsonl"
+        cache_path.write_bytes(gzip.decompress((stage / "calls.jsonl.gz").read_bytes()))
+        cache = CallCache(cache_path)
+        for path in sorted((stage / "records").glob("*.json.gz")):
+            committed = json.loads(gzip.decompress(path.read_bytes()))
+            split, index, condition, controller_name = path.name.removesuffix(".json.gz").split("-", 3)
+            backend = CachedBackend(cache, None, backend_id=committed["backend"])
+            out = Path(tmp) / path.name.removesuffix(".json.gz")
+            try:
+                regenerated = run_one(
+                    split,
+                    int(index),
+                    condition,
+                    controller_for(controller_name, model),
+                    backend,
+                    out,
+                    admitted=split == "confirmation",
+                )
+            except Exception as error:  # a replay miss or crash is a finding
+                problems.append(f"replay {path.name}: {error}")
+                continue
+            regenerated.pop("wall_seconds", None)
+            if canonical_json(regenerated) != canonical_json(committed):
+                problems.append(f"replay {path.name}: the regenerated run differs from the committed one")
+        print(f"{stage.name}: replayed {len(list((stage / 'records').glob('*.json.gz')))} runs")
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--replay", action="store_true", help="re-execute every run from its recorded exchanges"
+    )
+    args = parser.parse_args()
     problems: list[str] = []
     if not EVIDENCE.exists():
         print("no aaa.erudition.v0 evidence is committed")
@@ -141,6 +210,10 @@ def main() -> int:
         if (EVIDENCE / name).exists():
             check_stage(EVIDENCE / name, problems)
     check_confirmation(problems)
+    if args.replay and not problems:
+        for name in STAGES:
+            if (EVIDENCE / name).exists():
+                replay_stage(EVIDENCE / name, problems)
     for problem in problems:
         print(f"FAILED: {problem}", file=sys.stderr)
     print("aaa.erudition.v0 evidence:", "FAILED" if problems else "recomputes")

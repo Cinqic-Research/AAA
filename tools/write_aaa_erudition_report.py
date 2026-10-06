@@ -56,6 +56,7 @@ def arm_table(descriptive: dict[str, Any], arms: list[str] | None = None) -> str
     rows = [header, rule]
     for arm in arms or sorted(descriptive):
         if arm not in descriptive:
+            rows.append(f"| `{arm}` | MISSING |" + " |" * (len(METRICS) + 4))
             continue
         e = descriptive[arm]
         calls = e["lm_calls_per_stream"]
@@ -86,8 +87,11 @@ def family_table(descriptive: dict[str, Any], arms: list[str]) -> str:
     return "\n".join(rows)
 
 
-def decision_table(decisions: dict[str, Any]) -> str:
+def decision_table(decisions: dict[str, Any], frozen: list[str]) -> str:
     rows = ["| Contract | Criterion | Point | 95% interval | Status | Verdict |", "|---|---|---|---|---|---|"]
+    for name in frozen:
+        if name not in decisions:
+            rows.append(f"| {name} | — | — | — | — | MISSING |")
     for name, decision in decisions.items():
         primary = decision.get("primary") or {"criteria": []}
         for c in primary["criteria"]:
@@ -195,7 +199,9 @@ def render() -> str:
         parts.append(
             narrative["confirmation"]
             + "\n\n"
-            + decision_table(evaluation["decisions"])
+            + decision_table(
+                evaluation["decisions"], [c["name"] for c in _load(EVIDENCE / "freeze.json")["contracts"]]
+            )
             + "\n\n"
             + arm_table(evaluation["descriptive"])
             + "\n\nFailure by family:\n\n"
