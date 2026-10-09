@@ -229,8 +229,9 @@ runs. It informed design and is not a confirmation result.
 
 - **A Decision Model under another name.** The host's gate and canary are
   fixed software, not learned, and no second learned controller exists.
-- **Erudition learning language or code.** Language belongs to Juniper LM 1.1;
-  the Erudition Model sees 40 numeric evidence features and no text.
+- **Erudition learning language or code.** Language belongs to the separately
+  developed Language Model; this phase uses GPT-OSS-20B as a research backend.
+  The Erudition Model sees 40 numeric evidence features and no text.
 - **Initializing from Champion 1, the Python learners, WM-S or any language
   model.** Forbidden by direction and unnecessary.
 - **Training on JuniperBench, Cinqic History or any user data.** Not used; see

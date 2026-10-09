@@ -7,8 +7,9 @@ helped, keep useful improvements without destructive interference, and roll
 back harmful ones. Every claim is measured tightly enough that the answer can
 be *no*.
 
-- **Juniper 1** has three model components and no Decision Model:
-  - a **Language Model**: Juniper LM 1.1, OpenAI's gpt-oss-20b, immutable;
+- **Juniper 1** plans three model components and no Decision Model:
+  - a **Language Model**: an original Cinqic model under development, not yet
+    integrated into AAA;
   - a **World Model**: environment state, consequences, uncertainty;
   - the **Erudition Model**: whether, when, where and how the other two
     adapt.
@@ -31,8 +32,8 @@ The active research line is [`aaa.erudition.v0`](docs/juniper1/README.md):
 - the Juniper 1 Erudition Model, a 1,259,700-parameter transformer trained
   from scratch;
 - a context-library World Model;
-- an immutable gpt-oss-20b Language Model, adapted only through a separate,
-  versioned note adapter;
+- an immutable gpt-oss-20b research backend, adapted only through a separate,
+  versioned note adapter; this is not Juniper 1's planned native model;
 - a host-side adaptation lifecycle with an evaluation gate, provenance and
   rollback;
 - a synthetic tool environment, ToolShift, whose dynamics and language drift.

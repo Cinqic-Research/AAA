@@ -9,11 +9,14 @@ research question is:
 > without destructive interference, roll back harmful changes, and keep doing
 > so with minimal human intervention?
 
-Juniper 1 has three model components and no Decision Model:
+Juniper 1 plans three model components and no Decision Model. This frozen
+research phase uses GPT-OSS-20B as its Language Model backend; the original
+Juniper 1 foundation model is a separate development effort and has not been
+integrated into AAA:
 
 | Component | What it is here | Adapts through |
 |---|---|---|
-| **Language Model** | Juniper LM 1.1: OpenAI gpt-oss-20b, immutable and hash-pinned | a separate, versioned adapter of learned notes |
+| **Language Model backend in this phase** | OpenAI gpt-oss-20b, immutable and hash-pinned; selected in the historical Juniper LM 1.1 qualification | a separate, versioned adapter of learned notes |
 | **World Model** | `aaa.world.cbl.v0`: a context library of Bayesian dynamics models | new, updated or recalled contexts |
 | **Erudition Model** | `aaa.erudition.model.v0`: a 1,259,700-parameter transformer, trained from scratch | decides whether, when, where and how the other two adapt |
 
