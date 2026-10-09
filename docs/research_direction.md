@@ -3,7 +3,8 @@
 Decision date: 2026-09-23. Updated 2026-09-27 for the scoped world-model and
 language experiments following `aaa.python.v1`, 2026-09-30 for component
 terminology and the language-component direction, and 2026-10-02 for the
-Juniper 1 components.
+Juniper 1 components; revised 2026-10-09 to distinguish retired GPT-OSS
+qualification from current original-model plans.
 This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
 charter, whose principles still apply, and outside the `aaa.1k.v2`
 protocol. It claims no capability.
@@ -27,7 +28,7 @@ them exist as finished systems.
 |---|---|---|
 | **Erudition Model** | autonomous learning and adaptation | research: Champion 1 and the `aaa.python.v0`/`v1` learners are experiments toward it; a ~4K learner is the evidence-supported next experimental reference in the tested Python family |
 | **World Model** | environment state and prediction | scoped result: WM-S in `aaa.python.opaque.v0` only ([handoff](wm_program/handoff.md)) |
-| **Language Model** | language and reasoning interaction | OpenAI gpt-oss-20b, selected by the Juniper LM 1.1 qualification; used by the Juniper application, not integrated into AAA |
+| **Language Model** | language and reasoning interaction | an original Juniper 1 foundation model is in development separately; no native Juniper 1 language model is established as integrated into AAA. The earlier GPT-OSS-20B selection is historical |
 
 Juniper 1 has no Decision Model. An earlier plan for a cross-component
 Decision Model was dropped on 2026-10-02.
@@ -163,17 +164,23 @@ The 5.2M-parameter American-English model and its adapter (`aaa.wm.lang.v0`)
 are retained research evidence. They are not the intended long-term language
 component, and the retained language result stays **not verified**.
 
-Juniper 1's Language Model is OpenAI's unmodified gpt-oss-20b. The Juniper LM
-1.1 qualification selected it on evidence, and the Juniper application wraps
-it with its own constitution, tool, memory and privacy controls. AAA therefore
-does not need to learn English or general coding from scratch; its research
-focuses on autonomy. Juniper LM 1, the GPT-2 124M modernization study, was
-retired on 2026-10-04 and remains historical research. Its frozen
-JuniperBench-Code v1.2 provenance remains valid. No AAA integration of either
-model exists. One would need an integration
-experiment designed under the same causal rules as the rest of AAA, including
-a repaired language-channel boundary. Nothing here claims that integration
-exists or will succeed.
+Juniper 1's planned native Language Model is an original Cinqic foundation
+model, developed in a separate project. It is not yet established as integrated
+into AAA. The separate Juniper LM 1.1 qualification selected OpenAI's unmodified
+gpt-oss-20b on 2026-10-02 for a then-current Juniper language-model direction.
+That qualification was retired on 2026-10-09 without changing its original
+results or removing Juniper App's independent GPT-OSS compatibility. It is
+historical evidence, not the current identity of Juniper 1's native Language
+Model. AAA's autonomy research does not imply that language or general coding
+capability has already been established in the proposed original model.
+
+Juniper LM 1, the GPT-2 124M modernization study, was retired on 2026-10-04
+and remains historical research. Its frozen JuniperBench-Code v1.2 provenance
+remains valid. No integration of these prior language models or of the proposed
+original Juniper 1 language model into AAA is established by this document.
+An integration experiment would need to follow AAA's causal evaluation rules,
+including a repaired language-channel boundary. Nothing here claims an
+integration exists or will succeed.
 
 The templated extraction study does not establish communication, instruction
 following, open-ended conversation, or general understanding.
