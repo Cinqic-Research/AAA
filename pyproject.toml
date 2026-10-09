@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Cinqic" }]
-keywords = ["online-learning", "adaptation", "python", "causal-evaluation", "benchmark", "reproducibility"]
+keywords = ["online-learning", "adaptation", "continual-learning", "world-model", "causal-evaluation", "reproducibility"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
@@ -60,6 +60,8 @@ include = ["aaa*", "research*"]
 # aaa.python.v1: the successor protocol specification.
 "research.aaa_python_v1" = ["data/*.json"]
 "research.aaa_wm.opaque" = ["data/*.json"]
+# aaa.erudition.v0: environment specification, pinned GPT-OSS profile, fitted surrogate rates.
+"research.aaa_erudition" = ["data/*.json"]
 "research.aaa_wm.seq" = ["data/*.json"]
 
 [tool.ruff]

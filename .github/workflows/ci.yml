@@ -68,7 +68,14 @@ jobs:
       - name: Recompute retained world-model and language decisions
         run: python tools/check_aaa_wm_evidence.py
 
-      # ---- Current phase: aaa.python.v0 and the promotion successor -------
+      # ---- Current phase: aaa.erudition.v0 (Juniper 1 adaptation) ----------
+      - name: aaa.erudition.v0 failure injection and retained evidence
+        run: |
+          python tools/check_aaa_erudition_mutations.py
+          python tools/check_aaa_erudition_evidence.py
+          python tools/write_aaa_erudition_report.py --check
+
+      # ---- Historical Python phases and the crossed.v1 promotion successor --
       - name: Promotion contract successor (AAA-180)
         run: |
           python -m aaa.promotion selftest
@@ -219,8 +226,23 @@ jobs:
     env:
       MPLBACKEND: Agg
       PIP_NO_CACHE_DIR: "1"
+      # Replay of aaa.erudition.v0 runs needs the World Model's float64 numerics
+      # exactly as produced (AVX2-level). Hosted runners vary by CPU, and AVX-512
+      # kernels round differently, which would change every content-addressed
+      # state. These pins hold OpenBLAS and numpy to AVX2 paths, and cap Torch's
+      # kernels likewise. MKL's own path differs by CPU vendor and cannot be
+      # pinned, so the Erudition Model's float32 diagnosis probabilities are
+      # compared within a stated tolerance (tools/check_aaa_erudition_evidence.py).
+      OPENBLAS_CORETYPE: Haswell
+      NPY_DISABLE_CPU_FEATURES: X86_V4 AVX512_ICL AVX512_SPR
+      ATEN_CPU_CAPABILITY: avx2
+      ONEDNN_MAX_CPU_ISA: AVX2
+      MKL_ENABLE_INSTRUCTIONS: AVX2
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The evidence check reads the freeze's and the confirmation's commit history.
+          fetch-depth: 0
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
@@ -232,7 +254,13 @@ jobs:
       - name: Execute CPU neural, language, and evidence tests
         run: |
           python -c "import torch, tokenizers, pyarrow; print(torch.__version__, tokenizers.__version__, pyarrow.__version__)"
+          grep -m1 "model name" /proc/cpuinfo
+          grep -qw avx512f /proc/cpuinfo && echo "cpu: avx512f present" || echo "cpu: no avx512f"
+          python -c "import numpy; numpy.show_runtime()"
           python -m unittest tests.test_aaa_wm_models tests.test_aaa_wm_opaque tests.test_aaa_wm_lm tests.test_aaa_wm_evidence tests.test_aaa_wm_jobs -q
+          python -m unittest tests.test_aaa_erudition_model -q
+          python -m research.aaa_erudition.wm_diagnostic --trials 2 > /dev/null
+          python tools/check_aaa_erudition_evidence.py --replay
 
   # Every Python version advertised in pyproject.toml classifiers. Do not add a
   # version here without adding the classifier, or the reverse.

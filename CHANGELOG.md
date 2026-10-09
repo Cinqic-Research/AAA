@@ -1,5 +1,52 @@
 # Research history
 
+## Accurate Autonomous Adaptation for Juniper 1: `aaa.erudition.v0` (2026-10-04)
+
+The owner reset AAA's active research direction. AAA means Accurate
+Autonomous Adaptation. Its active work is now the Juniper 1 Erudition Model,
+which chooses whether, when, where and how to request adaptation of Juniper
+1's Language Model (gpt-oss-20b, immutable) and World Model. Host software
+validates requests, evaluates candidates, retains accepted state and performs
+rollback. Python learning is no longer the active direction.
+The moving dot, AAA-1K and Champion 0/1, `aaa.1k.v2`, `aaa.python.v0`/`v1`,
+their capacity conclusions and the Python capability ladder are historical
+evidence, unchanged and still reproducible. The approximate 105M planning
+goal is retired; the Erudition Model starts at at least 1M trainable
+parameters (owner constraint).
+
+New, in `research/aaa_erudition/`:
+- typed, versioned component contracts;
+- a content-addressed state store with provenance and rollback;
+- the ToolShift environment (dynamics and language drift, recurrence,
+  glitches, outages, corrupted and instruction-bearing feedback);
+- a context-library Bayesian World Model;
+- a hash-pinned GPT-OSS backend with record/replay;
+- a Language Model note adapter;
+- the adaptation lifecycle and gate;
+- a 1,259,700-parameter Erudition Model trained from scratch on
+  counterfactual returns in simulation;
+- accurate-adaptation metrics and independent recomputation;
+- a new promotion contract, `aaa.promotion.paired.v1`;
+- freeze-gated confirmation admission and failure injection.
+
+No historical evidence or fingerprinted file changed. Results are in the
+[Juniper 1 development report](docs/juniper1/development_report.md).
+
+Confirmation (2026-10-06): 12 fresh streams × 5 frozen arms, run live
+against gpt-oss-20b by the code frozen at `a750677`. All four frozen contracts
+were adjudicated by two independent bootstrap implementations, which agreed.
+
+| Contract | Verdict |
+|---|---|
+| `erudition_improves_juniper` | `PROMOTE` (failure 0.615 → 0.365; retention within margin) |
+| `joint_over_world_model_only` | `PROMOTE` |
+| `joint_over_language_model_only` | `INCONCLUSIVE` |
+| `learned_control_versus_rules` | `INCONCLUSIVE` |
+
+Confirmation contradicted two development readings: that joint adaptation
+beats either single component, and that learned control resists poisoning
+better than the rules. Both are recorded, not tuned against.
+
 ## Juniper 1 components (2026-10-02)
 
 Juniper 1's planned components are now the Erudition Model, the World Model

@@ -3,6 +3,146 @@
 Stated plainly, because a benchmark that cannot say what it does not show is
 not measuring much.
 
+## Current phase: `aaa.erudition.v0` (Juniper 1 adaptation)
+
+- **One synthetic environment.** Every claim is about ToolShift: a four-tank
+  workspace, two tools, templated requests and feedback. It was built to
+  separate language deficiencies from dynamics deficiencies and to force joint
+  adaptation; it is not Juniper's real tool surface, and nothing here shows
+  transfer to it.
+- **The World Model's basis is task-shaped.** Affine effects per operation;
+  the capped "novel" variants lie outside it and are learned only
+  approximately (with uncertainty reported). It cannot learn an operation
+  nobody executes, and GPT-OSS's correct abstentions starve it of exactly
+  that evidence after some shifts. This is measured and is a property of
+  the coupled system.
+- **The Language Model adapter is a note memory.** Its scope rule is the
+  phrase occurring in the request; there is no trained scope classifier. The
+  base model's weights are never trained, by design.
+- **The Erudition Model is trained in simulation.** Its Language Model is a
+  surrogate fitted to 216 real-model situations on training identities
+  (rates smoothed with a uniform prior). The real model's behaviour outside
+  those situations is not represented. Real-model development and
+  confirmation measure the transfer; they do not remove the gap.
+- **The training surrogate receives hidden feasibility information.** The
+  simulator registers the true entity for each request. When a request uses
+  an unrecognized name, the surrogate branches on whether that entity exists;
+  after World Model consultation it always abstains for a real but unknown
+  entity, while a nonexistent decoy follows a separate fitted rate. This
+  changes simulated proposals, histories and counterfactual Q targets. The
+  true label is not an Erudition inference feature, and the frozen live
+  confirmation used the real Language Model, so this does not change those
+  recorded outcomes. It does limit the sim-to-real training claim: v0 was not
+  trained on label-blind trajectories. A label-blind model needs a successor
+  identity and new evidence.
+- **The selected architecture did not follow its written tie rule.** The
+  1.2597M transformer and 1.020692M GRU differ by 0.0098, inside the 0.01
+  tie band that selects the smaller GRU. The transformer confirmation remains
+  evidence about that fixed transformer, not evidence that the selection rule
+  selected it. The rule's pre-result existence is supported by an off-Git
+  note timestamp, not Git-backed preregistration. The owner's 1M floor sets
+  the lower scale bound; the evidence does not show that 1M or 1.2597M is
+  necessary.
+- **Small real-model samples.** About four seconds per model call limits
+  confirmation to about a dozen streams per arm. Percentile intervals at that
+  size can under-cover.
+- **Answers are deterministic per prompt.** Each request is seeded from its
+  content and cached, so sampling variability across seeds is outside the
+  estimand.
+- **No online self-update of the Erudition Model.** Its weights are frozen
+  during runs; its 64-step evidence window is its only within-stream memory.
+- **Corrupted feedback that is internally consistent can poison an alias
+  note.** Two agreeing corrections are enough. The alias replay target is
+  derived from the same extracted corrections used to create the candidate,
+  so consistent false corrections can self-certify. The canary also requires
+  both satisfaction and numeric consistency to decline; a wrong-target action
+  can still reach the requested number. On confirmation stream 05, the wrong
+  alias remained for 57% of post-warm steps. The frozen poisoning comparison
+  is `INCONCLUSIVE`; these mechanisms are not general poisoning defenses.
+- **Confirmation is authenticated by process, not by cryptography.**
+  - At temperature 1, re-running the model gives different text, so a
+    confirmation cannot be regenerated, only replayed from its recorded
+    exchanges.
+  - The cache would serve pre-filled entries even in live mode.
+  - The defences are procedural: a newly created cache, an attempt note, an
+    append-only log of the cache's hash every five minutes during the run,
+    the freeze pushed before the run, and the evidence committed once and
+    never modified (checked).
+- **Replay is exact except for float32 diagnosis probabilities.**
+  - On hosted CI runners with AVX-512 (an AMD EPYC 9V74 and an Intel Xeon
+    8573C), replay first differed for every run.
+  - **The World Model's float64 numerics** changed state identities. CI now
+    holds OpenBLAS and numpy to the AVX2 paths that produced the evidence,
+    and those runs replay byte-for-byte.
+  - **The Erudition Model's float32 diagnosis probabilities** still differ, by
+    up to a few parts per million. They come from MKL, whose path depends on
+    the CPU vendor and cannot be pinned without also changing the original
+    machine's results.
+  - The replay check therefore compares those probabilities within a relative
+    1e-4. Everything else must be identical: every action, decision, state,
+    identifier, score and verdict.
+  - Locally, perturbing MKL's numerics changed only those probabilities, by at
+    most 3.9e-6 relative.
+  - Exact cross-machine equality of the network's raw outputs is not claimed.
+- **Admission pins the source fingerprint and the Erudition weights, not the
+  served model.** The GGUF hash, the served chat template and the rebuilt
+  binary are recorded, not enforced; the server reports only its build tag.
+  The research request also differs from the Juniper-App request defaults
+  (`reasoning_effort=low`, `max_tokens=1024`, plus research log-probability and
+  seed fields), so this was not an end-to-end reproduction of App inference.
+- **The live runner's loopback check is unsafe.** It matches the URL by string
+  prefix. A crafted userinfo URL can pass that check with a remote hostname,
+  after which the runner sends its bearer key to that host. The committed
+  confirmation used the default loopback URL and remains evidence about that
+  recorded run, but this code must not be merged as a safe runner. Correcting
+  fingerprinted source requires a successor identity; the frozen v0 evidence
+  must remain unchanged.
+- **Confirmation manifests disclose local paths.** They record the absolute
+  `--key` and model paths and the server-reported model path. The retained
+  files contain path text, not key or token contents. Future manifests should
+  redact these paths; the committed v0 evidence is preserved as recorded.
+- **The auxiliary diagnosis target is generated after the controller
+  decision.** It is paired with the just-recorded features and shares the
+  transformer's trunk with the Q head. Diagnosis is not used to choose actions,
+  but this post-decision target may shape shared weights. Diagnosis accuracy
+  does not establish pre-decision diagnosis quality.
+- **Two confirmation criteria can barely fail.**
+  - `false_adaptation` was zero for every arm in development, including
+    always-adapt, because the gate rather than the controller sets it.
+  - Development retention failure was about 0.003 against a margin of 0.05.
+
+  Both passed in confirmation, and their passing says little.
+- **`misattribution` counts only accepted changes.** It was zero in every
+  confirmation arm. On one confirmation stream, the controller sent about 60
+  steps of requests to the wrong component, but the gate rejected them or a
+  cooldown refused them, so the metric did not count them. Misdirected effort
+  is visible only in the per-stream record and in `missed_adaptation`.
+- **No-op and misdirected requests consume cooldowns.** This delayed repair
+  on confirmation stream 02. A fix changes the frozen lifecycle or the
+  controller, and therefore needs a successor identity.
+- **The joint arm's advantage on dynamics shifts is exploratory.** The
+  frozen joint-over-Language Model contract was `INCONCLUSIVE`. The
+  per-family gains were read after the verdicts.
+- **Twelve streams is a small sample.** The percentile bootstrap under-covers
+  there. The two implementations must agree on status, so a bound near a
+  threshold gives `DISAGREEMENT`, which fails closed.
+- **Recomputation trusts some stored fields.** It does not re-check:
+  - the step index;
+  - rollback targets beyond their existence;
+  - the gate's verdict (only "ACCEPT" is required of accepted records);
+  - rejected records' components;
+  - call counts.
+
+  With `--replay`, the evidence check regenerates whole runs and does cover
+  these.
+- **A small asymmetry between arms.** The LM-only arm still receives the
+  frozen World Model's revision turns, and that stale model can disagree with
+  learned dynamics. It never happened in development (0 revisions in 720
+  LM-only Erudition steps).
+- **No product integration.** Juniper-App is unchanged. Workspace adaptation
+  state would be user data in a product and would need Juniper-App's privacy
+  and deletion controls first.
+
 ## Historical first Python phase: `aaa.python.v0`
 
 - **No Python capability is demonstrated.** On retained development evidence

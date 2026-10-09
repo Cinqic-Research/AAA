@@ -1,0 +1,14 @@
+{
+  "calls": 4304,
+  "calls_sha256": "f3291d38e7e8e01078d156a2032888e8c7291a0865b4419b778dc86f45758e91",
+  "freeze_sha256": "a4a1f3a99f3f5fca5f926def46ed449af8bff03af9f2c619c6ab2159792414fd",
+  "model_sha256": "c263650cb7c1af7dc91b905fff583e62448fe04064bf44f3ec2ebb881430f94f",
+  "packaged_at_commit": "45ad15569a582cce2ca67e230d0bf8cda517e92f",
+  "produced_by": "the frozen code at the freeze commit, live against the real model; copied unchanged",
+  "schema": "aaa.erudition.stage_manifest.v1",
+  "server_manifests": [
+    "manifest_invocation1.json",
+    "manifest_invocation2.json"
+  ],
+  "stage": "confirmation"
+}

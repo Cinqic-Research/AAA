@@ -1,4 +1,123 @@
-# Current research direction: Coding, beginning with Python
+# Current research direction: Accurate Autonomous Adaptation for Juniper 1
+
+Decision date: 2026-10-04 (owner decision); revised 2026-10-09 for the original
+Juniper 1 model direction. This document is current planning guidance. It sits
+outside the frozen `aaa.1k.v1` charter, whose claim
+discipline still applies, and it claims no capability. What has been shown is
+limited to the [Juniper 1 development report](juniper1/development_report.md)
+and any confirmation recorded there.
+
+## What AAA is for
+
+AAA means **Accurate Autonomous Adaptation**. The Erudition Model exists so
+that Juniper can:
+- detect deficiencies in its own behaviour or knowledge;
+- determine what needs to change;
+- learn from real feedback and experience;
+- request controlled adaptations from a fixed menu;
+- use the host's evaluation and retention results to choose what to request next.
+
+The host validates each request, executes the gate, stores accepted state,
+monitors canaries, and performs retention or rollback. Those responsibilities
+are not learned by the Erudition Model.
+
+Anything unrelated to that goal belongs to another component.
+
+## Juniper 1
+
+Juniper 1 has three model components and **no Decision Model**:
+
+| Component | Role | Current form |
+|---|---|---|
+| **Language Model** | language, coding, general reasoning interaction, tool calls | an original Cinqic foundation model is in development separately and is not integrated into AAA. This frozen research phase instead uses immutable GPT-OSS-20B behind a separate, versioned adapter |
+| **World Model** | environment state, consequences, uncertainty, adaptation to changed dynamics | `aaa.world.cbl.v0`, a context library of Bayesian dynamics models ([architecture](juniper1/architecture.md)) |
+| **Erudition Model** | chooses whether, when, where and how to request adaptation from a fixed menu | `aaa.erudition.model.v0`, a 1,259,700-parameter transformer trained from scratch |
+
+The host owns orchestration, validation, permissions, execution, the
+evaluation gate, state storage, resource limits, canaries, retention and
+rollback. This is infrastructure, not a fourth model. Juniper-App's host
+authority over tools, memory, secrets and its constitution is unchanged; no
+learned component can alter it.
+
+The active research line is [`aaa.erudition.v0`](juniper1/README.md). Its
+first confirmation (2026-10-06, live on gpt-oss-20b) promoted the Erudition
+Model's joint adaptation over never adapting (failure 0.615 → 0.365) and over
+World Model-only adaptation. It left two questions inconclusive: whether joint
+adaptation beats Language Model-only adaptation, and whether learned control
+is no worse than rules. Independent review reproduced the retained evidence
+but found a remote-credential URL flaw and a label-aware training-surrogate
+path; the branch is not approved for merge. The measured result remains about
+the frozen transformer, not a label-blind training method or a production
+runner. Its documents are:
+- [architecture](juniper1/architecture.md);
+- [decisions](juniper1/decisions.md);
+- [literature](juniper1/literature.md);
+- [protocol](juniper1/protocol.md);
+- [data](juniper1/data.md).
+
+## What changed on 2026-10-04
+
+- **The active direction.** Python learning is no longer the active Erudition
+  direction. The Language Model owns language and coding; the Erudition Model
+  does not learn English or code.
+- **The Erudition Model is built from scratch.** No weights, heads or
+  task-specific architecture are carried over from Champion 0/1, AAA-1K,
+  `aaa.1k.v2`, `aaa.python.v0`/`v1`, WM-S or any language model. Reusable
+  engineering was reimplemented in a new package.
+- **Scale.** The Erudition Model starts at **at least 1M trainable
+  parameters** (owner constraint) and is not padded to reach it. The earlier
+  1K/4K/10K conclusions belong to a different task family and architecture
+  and do not constrain it. The approximate **105M** AAA 1 planning goal is
+  retired as a current target and kept only as dated history.
+- **What carries forward is the method:**
+  - causal boundaries and post-action feedback;
+  - development, attack and confirmation separation;
+  - reserved, admission-gated confirmation identities;
+  - frozen protocols committed before confirmation;
+  - independent recomputation and structurally independent promotion
+    implementations;
+  - fail-closed evidence and `INSUFFICIENT_EVIDENCE`;
+  - retained failures, rollback, provenance and protected historical
+    identities.
+
+## Evaluation rules (unchanged in substance)
+
+A scored runtime action may use only information available before it. The
+runtime Erudition controller receives observed features and its allowed action
+menu; it does not receive the evaluator label. The training simulator has a
+separate label-aware path: it registers each request's true entity with the
+surrogate Language Model. For unrecognized names, the surrogate branches on
+whether that entity exists, changing its act or abstain proposal and therefore
+the simulated histories and counterfactual Q targets. The frozen live
+confirmation used the real Language Model, but the training data are not
+label-blind and the surrogate is not a causal model of real model behavior.
+A label-blind training model and any claim about it require a successor
+identity. Adaptation is measured causally, with identical streams across
+conditions (common random numbers), against never-adapt, single-component,
+rule-based and always-adapt controls. Retention is measured on behaviour that
+never needed to change.
+"Accurate" is measured directly:
+- false adaptation;
+- missed adaptation;
+- misattribution;
+- unhelpful adaptation;
+- poisoning by corrupted feedback.
+
+A confirmation claim requires the committed freeze and its admission check.
+
+## Self-modification boundary
+
+No learned component may change code, merge, deploy, grant itself tools or
+permissions, rewrite the Juniper constitution, or touch canonical Git history.
+Runtime adaptation is limited to the versioned adapter and World Model state
+held by the host's store, every change of which is reversible. Repository
+changes remain externally reviewed.
+
+## Historical direction: Coding, beginning with Python (2026-09-23 to 2026-10-04)
+
+Everything below is the direction that was current until 2026-10-04, kept as
+it was last written. Its experiments, results and freezes are unchanged and
+remain reproducible. It no longer describes the active work.
 
 Decision date: 2026-09-23. Updated 2026-09-27 for the scoped world-model and
 language experiments following `aaa.python.v1`, 2026-09-30 for component
@@ -18,7 +137,7 @@ protocol. It claims no capability.
 - **The moving dot** is a historical and continuing benchmark family
   ([archive](dot_benchmark_archive.md)), not AAA's purpose.
 
-## Components
+### Components
 
 Current terminology, adopted 2026-09-30 and simplified for Juniper 1 on
 2026-10-02. AAA is the program and the system; it is not one model. The components are planning names, not claims that any of
@@ -37,7 +156,7 @@ Earlier phase documents call their learners "AAA models" or "the AAA model".
 Those names are kept where the evidence was recorded. In current planning,
 the learning component is the Erudition Model.
 
-## Scope
+### Scope
 
 Coding is the capability domain. Autonomous adaptation remains the research
 problem. The question is whether a system can acquire, retain, apply, test,
@@ -47,7 +166,7 @@ repositories and unfamiliar tasks, under causal evaluation. It is not whether
 it can autocomplete code, and it is not a reason to build a chatbot, chase a
 benchmark or scale a Transformer by default.
 
-## Why Python first
+### Why Python first
 
 Python is already the implementation language of most of AAA. CPython supplies
 an exact external ground truth. Execution feedback arrives naturally after an
@@ -56,7 +175,7 @@ licensing ambiguity, contamination and memorized solutions. And Python connects
 to the long-term aim that Juniper can eventually understand software. See the
 [`aaa.python.v0` brief](aaa_python_research_brief.md).
 
-## Capability ladder
+### Capability ladder
 
 Each rung is measured and reported separately. There is no single Python
 score, because one score would hide distinct failures. A rung is earned by
@@ -96,7 +215,7 @@ has the numbers. "Measured" means an instrument exists. It does not mean the cap
 The v0 development result is negative on nearly every rung it measures
 ([report](aaa_python_development_report.md)).
 
-## Evaluation rules
+### Evaluation rules
 
 A scored action may use only information available before it. Hidden tests,
 reference patches, answer keys, evaluator labels, future tool output,
@@ -124,7 +243,7 @@ Representations and architectures are experimental variables. Byte-level,
 lexical, AST and execution-trace inputs are all candidates, and standard
 next-token prediction is one possible design, not a prerequisite.
 
-## The improvement loop, carried into coding
+### The improvement loop, carried into coding
 
 The dot era's most valuable output is the loop: observe, classify, diagnose,
 hypothesize, falsify, intervene minimally, attack, confirm on fresh evidence,
@@ -141,7 +260,7 @@ independent recomputation, and the shared promotion contract
 where a real shared abstraction exists. A generic loop framework will be
 extracted only when a second domain actually needs the same code.
 
-## World-model and language work now underway
+### World-model and language work now underway
 
 The [world-model program](wm_program/README.md) studies generated Python
 debugging with an opaque six-function library. Its structured candidate uses a
@@ -158,7 +277,7 @@ comparison's causal attribution is **not verified**. Pretraining and
 full-system success are not established. Neither experiment establishes
 general Python or English competence. See the [independent review erratum](wm_program/pr30_independent_review.md).
 
-## Language component direction
+### Language component direction
 
 The 5.2M-parameter American-English model and its adapter (`aaa.wm.lang.v0`)
 are retained research evidence. They are not the intended long-term language
@@ -185,11 +304,11 @@ integration exists or will succeed.
 The templated extraction study does not establish communication, instruction
 following, open-ended conversation, or general understanding.
 
-## Other future directions
+### Other future directions
 
 - **Other programming languages** can follow when Python work gives a reason.
 
-## Self-inspection boundary
+### Self-inspection boundary
 
 Python competence may eventually support understanding software in Juniper's
 own research environment. That is a research question, not authority to change
@@ -205,7 +324,7 @@ canonical code. Any self-inspection or self-modification experiment needs:
 Producing a patch does not establish that a model should merge it, and no
 candidate may merge its own code. None of this is implemented.
 
-## Scaling
+### Scaling
 
 [Scaling readiness](scaling_readiness.md) sets the rule: define the task and its
 measured deficiency, establish baselines, build the minimal trainable system,
