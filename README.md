@@ -8,8 +8,11 @@ back harmful ones. Every claim is measured tightly enough that the answer can
 be *no*.
 
 - **Juniper 1** plans three model components and no Decision Model:
-  - a **Language Model**: an original Cinqic model under development, not yet
-    integrated into AAA;
+  - a **Language Model**: an original Cinqic model. Its first base checkpoint
+    is frozen as `juniper1-base-v1` (Juniper-1-Train); it is a base model
+    only, not instruction-tuned, and not integrated into AAA or Juniper App.
+    The earlier gpt-oss-20b selection (Juniper LM 1.1) is historical, and
+    Juniper App's GPT-OSS compatibility is a separate product capability;
   - a **World Model**: environment state, consequences, uncertainty;
   - the **Erudition Model**: whether, when, where and how the other two
     adapt.
@@ -182,6 +185,8 @@ tests. The stored numerical L2 result is preserved, but its language-channel
 attribution is **not verified**; language integration and full-system
 superiority are not established. See the
 [review erratum](docs/wm_program/pr30_independent_review.md).
+That small language model is retained as evidence; it is not AAA's intended
+long-term language component.
 
 ## Install
 
