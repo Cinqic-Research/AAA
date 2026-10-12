@@ -137,9 +137,9 @@ is **not verified**; language integration and full-system superiority are not
 established. See the [review erratum](docs/wm_program/pr30_independent_review.md).
 That small language model is retained as evidence; it is not AAA's intended
 long-term language component. A separate original Juniper 1 base Language Model
-has completed a reported first pretraining epoch. Its checkpoint selection and
-qualification are under independent review, and it is not integrated into AAA
-or Juniper App. The earlier selection of OpenAI's unmodified gpt-oss-20b in
+has completed its first pretraining epoch; its final checkpoint was independently
+selected and frozen as `juniper1-base-v1` (Juniper-1-Train). It is a base model
+only, not instruction-tuned, and it is not integrated into AAA or Juniper App. The earlier selection of OpenAI's unmodified gpt-oss-20b in
 Juniper LM 1.1 is historical qualification work; Juniper App's GPT-OSS
 compatibility is a separate product capability. Any AAA language integration
 would need its own experiment under AAA's causal rules. AAA's research remains
