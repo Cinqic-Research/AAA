@@ -136,11 +136,14 @@ stored numerical L2 result is preserved, but its language-channel attribution
 is **not verified**; language integration and full-system superiority are not
 established. See the [review erratum](docs/wm_program/pr30_independent_review.md).
 That small language model is retained as evidence; it is not AAA's intended
-long-term language component. Juniper 1's Language Model is OpenAI's
-unmodified gpt-oss-20b, selected by the Juniper LM 1.1 qualification and
-wrapped by the Juniper application. AAA does not integrate
-it; an AAA integration would need its own experiment under AAA's causal rules.
-With language supplied by that model, AAA's research focuses on autonomy.
+long-term language component. A separate original Juniper 1 base Language Model
+has completed a reported first pretraining epoch. Its checkpoint selection and
+qualification are under independent review, and it is not integrated into AAA
+or Juniper App. The earlier selection of OpenAI's unmodified gpt-oss-20b in
+Juniper LM 1.1 is historical qualification work; Juniper App's GPT-OSS
+compatibility is a separate product capability. Any AAA language integration
+would need its own experiment under AAA's causal rules. AAA's research remains
+focused on autonomy.
 Other programming languages can follow once Python gives a reason. About **105M
 parameters** is a revisable long-term planning goal for AAA 1, not a target,
 minimum or next step. [Scaling readiness](docs/scaling_readiness.md) says
