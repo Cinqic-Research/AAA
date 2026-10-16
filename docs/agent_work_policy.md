@@ -45,6 +45,29 @@ promotion requires a frozen contract, independent review, exact-head checks,
 and its declared held-out procedure. A green check alone proves only its own
 scope.
 
+## Review roles
+
+From 2026-10-16:
+
+- **Implementer: Claude Opus 5.5.** Builds, tests, and documents changes, and
+  prepares the evidence. It may fix defects, but it never certifies its own
+  work as independently reviewed.
+- **Independent technical reviewer: Claude Fable 5.1,** in a separate session
+  with a fresh context. It reviews the exact head and the primary evidence
+  itself, and may reject work, require changes, or withhold approval. If it
+  authored, repaired, or directed the exact change, it says so and the change
+  stays pending review.
+- **Owner: Markus Gillyard.** Decides direction, funding, releases,
+  irreversible operations, and policy exceptions. A technical approval is not
+  owner authorization.
+
+Both models are Anthropic's, so this is separate-session review, not
+vendor-independent assurance. Reviews by earlier reviewers (GPT-6 Luna, GPT-6
+and GPT-5.6 Sol, Codex) remain historical records. This section does not
+change any review gate.
+
+Scientific promotion still needs the frozen contract, independent review,
+exact-head checks, and declared held-out procedure described above.
 ## Backup and recovery
 
 The canonical [backup policy](backup_policy.md) defines the exact scope and
