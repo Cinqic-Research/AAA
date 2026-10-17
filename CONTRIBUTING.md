@@ -1,10 +1,13 @@
 # Contributing to AAA
 
-AAA is a research program whose whole point is that its measurements can be
-trusted. Its current focus is **Coding, beginning with Python** (`aaa.python.v1`);
-the moving-dot work is retained as evidence and benchmark lineage
-([archive](docs/dot_benchmark_archive.md)). Contributions are welcome; the
-conventions below exist to keep that property.
+AAA (Accurate Autonomous Adaptation) is a research program whose whole point
+is that its measurements can be trusted. Its active work is the Juniper 1
+Erudition Model and the adaptation system around Juniper 1's Language Model
+and World Model ([`aaa.erudition.v0`](docs/juniper1/README.md)). The
+moving-dot, AAA-1K and Python phases are retained as historical evidence and
+benchmark lineage ([archive](docs/dot_benchmark_archive.md),
+[research direction](docs/research_direction.md)). Contributions are welcome;
+the conventions below exist to keep that property.
 
 ## Before you change anything
 
@@ -117,7 +120,20 @@ identity must keep meaning the same program. Changing the learner does not
 change the exam. `tools/check_protected_identities.py` fails if any retained
 dot-era evidence byte or identity moves; adding new evidence is fine.
 
-**`aaa.python.v1` is the current, confirmed experiment, with spent held-out
+**`aaa.erudition.v0` is the active phase.** Its fingerprint
+(`research/aaa_erudition/identity.py`) covers the package, including its
+specification, surrogate parameters and backend profile, its tests, the
+protocol and architecture documents, and both locks. Confirmation streams
+cannot be generated until `identity.admit` accepts a committed, unmodified
+freeze whose fingerprint and Erudition weight digest match the live tree.
+Spent confirmation indices are never reused. A change after the freeze is a
+successor identity, not an edit. Model components never read
+`toolshift.EvaluatorLabel`: only the scorer does, and a test traps any other
+read. Language Model notes are typed records rendered by fixed templates,
+never copied text. `python tools/check_aaa_erudition_mutations.py` must catch
+every deliberate break it injects.
+
+**`aaa.python.v1` is a historical, confirmed experiment, with spent held-out
 identities.** Its phase fingerprint covers the executable v1 package and
 declared protocol and architecture files. The freeze was committed before
 confirmation, and changing a fingerprinted component requires a successor
@@ -165,7 +181,14 @@ python -m aaa.promotion selftest
 python -m research.aaa_python safety
 python -m research.aaa_python leakage
 python -m research.aaa_python golden
+python tools/check_aaa_erudition_mutations.py
+python tools/check_aaa_erudition_evidence.py
 ```
+
+The neural tests (`tests.test_aaa_erudition_model` and the World Model
+diagnostic) need the environment from `requirements-torch-lock.txt`. Real
+Language Model runs need the qualified GGUF and llama.cpp runtime from
+Juniper LM 1.1; see the [Juniper 1 handoff](docs/juniper1/handoff.md).
 
 `unittest` is the project's test framework. Please do not introduce a second
 one. No blanket `# type: ignore`: if the checker objects, the annotation is
@@ -187,15 +210,22 @@ process record separate from scientific experiment evidence.
 
 ## Scope
 
-The active scope is `aaa.python.v1`: the same safe subset, a repaired generated
-exam with five task families, strong baselines, fixed structural encoders,
-and a small learner family explored through about 20K parameters in development,
-with selected 1K/4K/10K comparisons in confirmation. Rungs of the
-[capability ladder](docs/research_direction.md) beyond it are added in order,
-each with baselines that can beat it. Not in scope now: English or natural-language
-training, other programming languages, scraped code corpora, executing
-untrusted code, larger models before a measured deficiency justifies them,
-and any self-modification of AAA's own code.
+The active scope is `aaa.erudition.v0`, which includes:
+- the Erudition Model (at least 1M trainable parameters, trained from
+  scratch, no padding);
+- the context-library World Model;
+- the Language Model adapter (gpt-oss-20b stays immutable);
+- the ToolShift environment and its gate, store, rollback, metrics and
+  `aaa.promotion.paired.v1`.
+
+Not in scope now:
+- training the Erudition Model to produce language or code;
+- weight updates to gpt-oss-20b;
+- a Decision Model or any second learned controller;
+- reading, storing or training on user data;
+- any learned component changing code, permissions or the Juniper
+  constitution;
+- product integration in Juniper-App before evidence and an ADR justify it.
 
 The dot-era phases are frozen. Observation noise lives only in the separately
 versioned `aaa.observation_noise.v1.1` phase; do not fold it into benchmark

@@ -188,33 +188,42 @@ Historical evidence keeps the machine and platform provenance under which it
 was actually produced. Upgrading FLOWBOX does not retroactively change the
 environment that produced an earlier result.
 
-## Current AAA 1 model-size goal
+## Model-size guidance
 
-The current long-term planning goal for **AAA 1** is approximately **105
-million trainable parameters**. This supersedes the earlier owner-selected
-125M FLOWBOX planning ceiling as *current guidance*. The older entry in
-[`CHANGELOG.md`](../CHANGELOG.md) remains a dated record of that decision.
+**Current (2026-10-04).** The Juniper 1 Erudition Model starts at **at least 1
+million trainable parameters**. This is an owner constraint, not a finding.
+Parameters may not be padded to reach it: no dead layers, unused embeddings
+or oversized heads (a test checks that every parameter receives gradient).
+Beyond the floor, size is set by the architecture and by measured evidence;
+the development capacity sweep is reported in the
+[Juniper 1 development report](juniper1/development_report.md).
+`aaa.erudition.model.v0` has 1,259,700 trainable parameters. Its resource
+envelope, including coexistence with the resident GPT-OSS runtime, is in the
+[architecture](juniper1/architecture.md#resource-envelope-on-flowbox) and
+[compute](juniper1/compute.md) records.
 
-105M is a revisable planning target, not a hard ceiling, required final count,
-immediate next step, promotion criterion, or scientific finding. It does not
-show that a particular 105M architecture fits or trains efficiently on
-FLOWBOX. Hardware upgrades and a dedicated model server are plans, not present
-resources.
+**Historical (2026-09-23 to 2026-10-04).** Until 2026-10-04 the long-term
+planning goal for "AAA 1" was approximately **105 million trainable
+parameters**. It superseded the earlier owner-selected 125M FLOWBOX ceiling,
+which [`CHANGELOG.md`](../CHANGELOG.md) keeps as a dated record. The 105M goal
+is retired as a target for the new Erudition Model. The text below is kept as
+it was written.
 
-The repository's existing discipline is unchanged and remains the stronger
-constraint: **complexity must earn its keep** ([charter](aaa_charter.md), claim
-10), and capacity increases go through the rules in
-[`loop_protocol.md`](loop_protocol.md) — *capacity is an experiment, not a
-reward*. A parameter increase requires a persistent measured failure, a
-diagnosis that points specifically at capacity, parameter-neutral remedies
-having failed, and a gain that transfers to fresh held-out evidence.
+> 105M is a revisable planning target, not a hard ceiling, required final count,
+> immediate next step, promotion criterion, or scientific finding. It does not
+> show that a particular 105M architecture fits or trains efficiently on
+> FLOWBOX. Hardware upgrades and a dedicated model server are plans, not present
+> resources.
+>
+> AAA may remain far below 105M. The current Champion 1 has 994 trainable
+> parameters, and the v2 capacity diagnosis on the tested dot/external mixture
+> was `NOT_CAPACITY_LIMITED` through roughly 4K parameters.
 
-AAA may remain far below 105M. The current Champion 1 has 994 trainable
-parameters, and the v2 capacity diagnosis on the tested dot/external mixture
-was `NOT_CAPACITY_LIMITED` through roughly 4K parameters. A new Python coding
-domain may demand a different representation and more capacity, but that must
-be measured. Prefer a smaller model whenever it accomplishes the same research
-objective. The parameter goal is not enforced by any scientific gate.
+The discipline that capacity must earn its keep still applies above the
+floor ([charter](aaa_charter.md), claim 10; [`loop_protocol.md`](loop_protocol.md)).
+Capacity is an experiment, not a reward. The earlier 1K/4K/10K conclusions
+belong to different task families and architectures and do not constrain the
+Erudition Model.
 
 ### Parameter count is not a compute budget
 
@@ -233,8 +242,8 @@ given hardware. Feasibility also depends on at least:
 - CPU versus GPU implementation;
 - inference versus training requirements.
 
-For scale only, 105M float32 parameters occupy about 420 MB (401 MiB). A
-float32 gradient and two Adam moments raise parameter-related storage to about
+For scale only, the historical 105M figure in float32 would occupy about 420 MB (401 MiB). A
+float32 gradient and two Adam moments would raise parameter-related storage to about
 1.68 GB (1.56 GiB), before master weights, activations, recurrent state,
 sequence length, batch size, temporary kernels, data loading, checkpoints and
 display-resident GPU memory. Those omitted terms can dominate 6 GB VRAM.

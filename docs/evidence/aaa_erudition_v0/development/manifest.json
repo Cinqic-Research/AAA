@@ -1,0 +1,14 @@
+{
+  "calls": 2621,
+  "calls_sha256": "ee8e2d6d75593edd9b02f740a469428b47e9df0bd41aaccbc80dfbbd867fc75c",
+  "commit": "6fce742d5312410d966dec1733dfecb7a2e9664b",
+  "model_sha256": "c263650cb7c1af7dc91b905fff583e62448fe04064bf44f3ec2ebb881430f94f",
+  "plans": [
+    "0,1,2,3,4,5:frozen,joint,lm_only,wm_only:heuristic",
+    "0,1,2,3,4,5:lm_only,wm_only,joint:erudition",
+    "1,4:joint:always"
+  ],
+  "regenerated_by": "replay of the recorded exchanges; no model call",
+  "schema": "aaa.erudition.stage_manifest.v1",
+  "stage": "development"
+}

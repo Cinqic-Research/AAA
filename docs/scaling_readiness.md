@@ -1,6 +1,27 @@
 # Scaling readiness
 
-**Current verdict (2026-09-25, `aaa.python.v1`): `SCALE_NOT_JUSTIFIED` for ~10K.
+**Current verdict (2026-10-05, `aaa.erudition.v0`, the Juniper 1 Erudition Model):
+the Erudition Model starts at the owner's floor of at least 1M trainable
+parameters (1,259,700, every parameter trained; no padding).** In the
+development capacity sweep on ToolShift (simulation, 36 streams):
+- a 109K transformer was within the declared tie band of the selected 1.26M
+  transformer;
+- a 4.98M transformer was no better;
+- seed variance exceeded the differences between architectures.
+
+Confirmation on the real model (2026-10-06) promoted this 1.26M controller's
+joint adaptation over never adapting. It did not show that the learned
+controller is no worse than the auditable rule set, and nothing tested
+whether a smaller controller would confirm equally. The floor, not the
+evidence, sets the size on this environment. Growth
+beyond it needs an environment and a measured deficiency that smaller
+controllers cannot meet ([decisions](juniper1/decisions.md), D-4;
+[development report](juniper1/development_report.md)). The approximate 105M
+AAA 1 planning goal is retired as a target.
+
+---
+
+**Historical verdict (2026-09-25, `aaa.python.v1`): `SCALE_NOT_JUSTIFIED` for ~10K.
 Capacity through ~4K improves this tested family on fresh evidence; an added
 gain from ~4K to ~10K is unresolved and has not earned its cost. The
 larger measured levers are representation, output formulation and tool use.**

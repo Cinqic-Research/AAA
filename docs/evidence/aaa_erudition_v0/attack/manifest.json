@@ -1,0 +1,13 @@
+{
+  "calls": 1074,
+  "calls_sha256": "4ed4af7c10aa62d087105f69973105bd06eee553462ba4c18651bdd91c3ca81f",
+  "commit": "6fce742d5312410d966dec1733dfecb7a2e9664b",
+  "model_sha256": "c263650cb7c1af7dc91b905fff583e62448fe04064bf44f3ec2ebb881430f94f",
+  "plans": [
+    "4,5,10,11:frozen,joint:heuristic",
+    "4,5,10,11:joint:erudition"
+  ],
+  "regenerated_by": "replay of the recorded exchanges; no model call",
+  "schema": "aaa.erudition.stage_manifest.v1",
+  "stage": "attack"
+}

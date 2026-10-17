@@ -1,0 +1,147 @@
+{
+  "confirmation": {
+    "arms": [
+      "frozen/never",
+      "lm_only/erudition",
+      "wm_only/erudition",
+      "joint/erudition",
+      "joint/heuristic"
+    ],
+    "backend": "llama",
+    "indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "split": "confirmation"
+  },
+  "contracts": [
+    {
+      "criteria": [
+        {
+          "challenger": "joint/erudition",
+          "kind": "superior",
+          "metric": "failure",
+          "name": "failure",
+          "reference": "frozen/never",
+          "threshold": 0.0
+        },
+        {
+          "challenger": "joint/erudition",
+          "kind": "noninferior",
+          "metric": "retention_failure",
+          "name": "retention",
+          "reference": "frozen/never",
+          "threshold": 0.05
+        }
+      ],
+      "name": "erudition_improves_juniper",
+      "question": "Does the Erudition Model, adapting both components, reduce task failure against never adapting, without damaging tasks no shift touched?",
+      "seed": 20261004
+    },
+    {
+      "criteria": [
+        {
+          "challenger": "joint/erudition",
+          "kind": "superior",
+          "metric": "failure",
+          "name": "failure",
+          "reference": "lm_only/erudition",
+          "threshold": 0.0
+        }
+      ],
+      "name": "joint_over_language_model_only",
+      "question": "Does joint adaptation beat the same Erudition Model restricted to the Language Model?",
+      "seed": 20261005
+    },
+    {
+      "criteria": [
+        {
+          "challenger": "joint/erudition",
+          "kind": "superior",
+          "metric": "failure",
+          "name": "failure",
+          "reference": "wm_only/erudition",
+          "threshold": 0.0
+        }
+      ],
+      "name": "joint_over_world_model_only",
+      "question": "Does joint adaptation beat the same Erudition Model restricted to the World Model?",
+      "seed": 20261006
+    },
+    {
+      "criteria": [
+        {
+          "challenger": "joint/erudition",
+          "kind": "noninferior",
+          "metric": "failure",
+          "name": "failure",
+          "reference": "joint/heuristic",
+          "threshold": 0.03
+        },
+        {
+          "challenger": "joint/erudition",
+          "kind": "noninferior",
+          "metric": "poisoned",
+          "name": "poisoned",
+          "reference": "joint/heuristic",
+          "threshold": 0.02
+        },
+        {
+          "challenger": "joint/erudition",
+          "kind": "noninferior",
+          "metric": "false_adaptation",
+          "name": "false_adaptation",
+          "reference": "joint/heuristic",
+          "threshold": 0.005
+        }
+      ],
+      "name": "learned_control_versus_rules",
+      "question": "Is the learned controller no worse than the auditable rule set on failure, poisoning and false adaptation?",
+      "seed": 20261007
+    }
+  ],
+  "erudition_model": {
+    "margin": 0.01,
+    "path": "docs/evidence/aaa_erudition_v0/model/erudition.pt",
+    "trainable_parameters": 1259700,
+    "weights_sha256": "c263650cb7c1af7dc91b905fff583e62448fe04064bf44f3ec2ebb881430f94f"
+  },
+  "fingerprint": {
+    "files": 31,
+    "protocol": "aaa.erudition.v0",
+    "sha256": "fbb51ce3c4da7d290c2e60caa8f7e00c7fb575009039d310de9b6785a5c5c24f"
+  },
+  "language_model": {
+    "artifact": {
+      "id": "gpt-oss-20b-6cee5e81ee83-mxfp4-moe",
+      "quantization": "MXFP4_MOE",
+      "sha256": "9d7364f02d9952e158ab462629e72401bec844d2243cc3854b271bb35d33d23d",
+      "sizeBytes": 12109566784
+    },
+    "runtime": {
+      "accelerator": "cuda",
+      "commit": "748d4225b9016b17ce4bcfa69fdc2c39f473a965",
+      "engine": "llama.cpp",
+      "tag": "b11270"
+    },
+    "template": {
+      "file": "gpt-oss-harmony.v1.jinja",
+      "servedSha256": "92b7acc090345c2dd1210a2d0c9e08da84c89fa1ed0406bdb83d22ae96a7167c",
+      "sha256": "f9c0f3d3324b708722c56afc83f51b7120f394b59da548ff9bc1c82550628984"
+    }
+  },
+  "parent_commit": "1e666f34638d68c5a866d022d9efb09d9ac9e949",
+  "promotion_contract": "aaa.promotion.paired.v1",
+  "protocol": "aaa.erudition.v0",
+  "schema": "aaa.erudition.freeze.v1"
+}
