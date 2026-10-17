@@ -1,7 +1,7 @@
 # Current research direction: Accurate Autonomous Adaptation for Juniper 1
 
 Decision date: 2026-10-04 (owner decision); revised 2026-10-09 for the original
-Juniper 1 model direction. This document is current planning guidance. It sits
+Juniper 1 model direction, and 2026-10-16 for the release of Juniper 1 Base. This document is current planning guidance. It sits
 outside the frozen `aaa.1k.v1` charter, whose claim
 discipline still applies, and it claims no capability. What has been shown is
 limited to the [Juniper 1 development report](juniper1/development_report.md)
@@ -29,7 +29,7 @@ Juniper 1 has three model components and **no Decision Model**:
 
 | Component | Role | Current form |
 |---|---|---|
-| **Language Model** | language, coding, general reasoning interaction, tool calls | an original Cinqic foundation model is in development separately and is not integrated into AAA. This frozen research phase instead uses immutable GPT-OSS-20B behind a separate, versioned adapter |
+| **Language Model** | language, coding, general reasoning interaction, tool calls | Cinqic's original [Juniper 1 Base](https://github.com/Cinqic-Research/Juniper-1-Base) (`juniper1-base-v1`) was released on 2026-10-16 as a separate project: a base model, not an AAA component and not integrated into AAA, so AAA's language-component question stays open. This frozen research phase instead uses immutable GPT-OSS-20B behind a separate, versioned adapter |
 | **World Model** | environment state, consequences, uncertainty, adaptation to changed dynamics | `aaa.world.cbl.v0`, a context library of Bayesian dynamics models ([architecture](juniper1/architecture.md)) |
 | **Erudition Model** | chooses whether, when, where and how to request adaptation from a fixed menu | `aaa.erudition.model.v0`, a 1,259,700-parameter transformer trained from scratch |
 
@@ -123,7 +123,11 @@ Decision date: 2026-09-23. Updated 2026-09-27 for the scoped world-model and
 language experiments following `aaa.python.v1`, 2026-09-30 for component
 terminology and the language-component direction, and 2026-10-02 for the
 Juniper 1 components; revised 2026-10-09 to distinguish retired GPT-OSS
-qualification from current original-model plans.
+qualification from current original-model plans, and 2026-10-16 to record that
+Cinqic's original Juniper 1 Base model was published and its research closed:
+it is a separate released artifact
+([Cinqic-Research/Juniper-1-Base](https://github.com/Cinqic-Research/Juniper-1-Base)),
+not an AAA component, and AAA's language-component question stays open.
 This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
 charter, whose principles still apply, and outside the `aaa.1k.v2`
 protocol. It claims no capability.

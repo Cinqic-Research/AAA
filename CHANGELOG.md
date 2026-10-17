@@ -1,11 +1,38 @@
 # Research history
 
+## Errata and status (2026-10-16)
+
+Dated corrections to the entries below; no evidence, frozen document or scientific
+identity changed.
+
+- Juniper LM 1 (GPT-2 124M study) was retired on 2026-10-04 and Juniper LM 1.1 (the
+  GPT-OSS-20B qualification) on 2026-10-09; both repositories are archived. The
+  2026-10-02 entry's statements that the Language Model "is OpenAI's unmodified
+  gpt-oss-20b" and that "Juniper LM 1 continues" are historical.
+- Cinqic's original Juniper 1 base model was frozen as `juniper1-base-v1` on
+  2026-10-12 and published on 2026-10-16 as
+  [Juniper 1 Base](https://github.com/Cinqic-Research/Juniper-1-Base) under
+  Apache-2.0; Juniper 1 research and post-training are closed. It is not an AAA
+  component and is not integrated into AAA.
+- The Erudition Model proposal (`aaa.erudition.v0`, PR #34) remains an unmerged
+  research pull request; an independent review on 2026-10-16 recorded it as
+  BLOCKED (a URL/redirect credential flaw in its runtime client, a label-conditioned
+  surrogate, and an architecture-selection tie-rule deviation). The loopback-only
+  transport proposal (PR #36) was reviewed as a transport component only. No result
+  from either is claimed. `main` does not contain the flawed client.
+- Erratum (not edited in place: the file is a protected identity): the link to "#26" in
+  `docs/pre_scale_review_2026-09-23.md` uses the legacy organization name and returns 404;
+  the pull request is https://github.com/Cinqic-Research/AAA/pull/26.
+- Review roles from 2026-10-16: Claude Opus 5.5 implements, Claude Fable 5.1 reviews
+  in a separate session, Markus Gillyard owns decisions (`docs/agent_work_policy.md`).
+
 ## Accurate Autonomous Adaptation for Juniper 1: `aaa.erudition.v0` (2026-10-04)
 
 The owner reset AAA's active research direction. AAA means Accurate
 Autonomous Adaptation. Its active work is now the Juniper 1 Erudition Model,
 which chooses whether, when, where and how to request adaptation of Juniper
-1's Language Model (gpt-oss-20b, immutable) and World Model. Host software
+1's World Model and of a Language Model research backend (gpt-oss-20b,
+immutable; not Juniper 1's planned native model). Host software
 validates requests, evaluates candidates, retains accepted state and performs
 rollback. Python learning is no longer the active direction.
 The moving dot, AAA-1K and Champion 0/1, `aaa.1k.v2`, `aaa.python.v0`/`v1`,

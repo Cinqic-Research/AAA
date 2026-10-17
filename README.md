@@ -8,11 +8,15 @@ back harmful ones. Every claim is measured tightly enough that the answer can
 be *no*.
 
 - **Juniper 1** plans three model components and no Decision Model:
-  - a **Language Model**: an original Cinqic model. Its first base checkpoint
-    is frozen as `juniper1-base-v1` (Juniper-1-Train); it is a base model
-    only, not instruction-tuned, and not integrated into AAA or Juniper App.
-    The earlier gpt-oss-20b selection (Juniper LM 1.1) is historical, and
-    Juniper App's GPT-OSS compatibility is a separate product capability;
+  - a **Language Model** (language and reasoning interaction). Cinqic's
+    original **Juniper 1 Base**
+    ([Cinqic-Research/Juniper-1-Base](https://github.com/Cinqic-Research/Juniper-1-Base)),
+    frozen as `juniper1-base-v1` and released on 2026-10-16, is a separate
+    project: a base model only, not instruction-tuned, not an AAA component
+    and not integrated into AAA or Juniper App; no AAA result applies to it.
+    The earlier gpt-oss-20b selection (Juniper LM 1.1, retired 2026-10-09)
+    is historical, and Juniper App's GPT-OSS compatibility is a separate
+    product capability;
   - a **World Model**: environment state, consequences, uncertainty;
   - the **Erudition Model**: whether, when, where and how the other two
     adapt.
@@ -186,7 +190,16 @@ attribution is **not verified**; language integration and full-system
 superiority are not established. See the
 [review erratum](docs/wm_program/pr30_independent_review.md).
 That small language model is retained as evidence; it is not AAA's intended
-long-term language component.
+long-term language component. A separate original Juniper 1 base Language Model
+completed its first pretraining epoch; its final checkpoint was independently
+selected and frozen as `juniper1-base-v1` and published on 2026-10-16 as
+[Juniper 1 Base](https://github.com/Cinqic-Research/Juniper-1-Base) (Apache-2.0;
+Juniper 1 research is closed). It is a base model only, not instruction-tuned, and
+it is not integrated into AAA or Juniper App. The earlier selection of OpenAI's unmodified gpt-oss-20b in
+Juniper LM 1.1 is historical qualification work; Juniper App's GPT-OSS
+compatibility is a separate product capability. Any AAA language integration
+would need its own experiment under AAA's causal rules. AAA's research remains
+focused on autonomy.
 
 ## Install
 
