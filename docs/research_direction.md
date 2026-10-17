@@ -4,7 +4,11 @@ Decision date: 2026-09-23. Updated 2026-09-27 for the scoped world-model and
 language experiments following `aaa.python.v1`, 2026-09-30 for component
 terminology and the language-component direction, and 2026-10-02 for the
 Juniper 1 components; revised 2026-10-09 to distinguish retired GPT-OSS
-qualification from current original-model plans.
+qualification from current original-model plans, and 2026-10-16 to record that
+Cinqic's original Juniper 1 Base model was published and its research closed:
+it is a separate released artifact
+([Cinqic-Research/Juniper-1-Base](https://github.com/Cinqic-Research/Juniper-1-Base)),
+not an AAA component, and AAA's language-component question stays open.
 This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
 charter, whose principles still apply, and outside the `aaa.1k.v2`
 protocol. It claims no capability.
