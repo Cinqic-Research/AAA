@@ -20,6 +20,9 @@ identity changed.
   surrogate, and an architecture-selection tie-rule deviation). The loopback-only
   transport proposal (PR #36) was reviewed as a transport component only. No result
   from either is claimed. `main` does not contain the flawed client.
+- Erratum (not edited in place: the file is a protected identity): the link to "#26" in
+  `docs/pre_scale_review_2026-09-23.md` uses the legacy organization name and returns 404;
+  the pull request is https://github.com/Cinqic-Research/AAA/pull/26.
 - Review roles from 2026-10-16: Claude Opus 5.5 implements, Claude Fable 5.1 reviews
   in a separate session, Markus Gillyard owns decisions (`docs/agent_work_policy.md`).
 

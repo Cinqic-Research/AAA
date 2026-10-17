@@ -5,7 +5,7 @@
 The remote `main` at review start was
 `8cb752221ee2bbe0ceb8da361ba607426e868a55` (tree
 `ecb77b8f610cf990599399dfe59eb00449b156d0`), with a clean working tree.
-The only open PR was [#26](https://github.com/Cinqic-Research/AAA/pull/26), head
+The only open PR was [#26](https://github.com/Cinqic/AAA/pull/26), head
 `8f43da723fb26bd893edb2bb605d5af2b01a7256`, base `main`. Its two
 documentation commits were checked against the retained v2 results; exact-head
 CPU CI was green, no review threads were open, and it was merged with a merge
