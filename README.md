@@ -14,7 +14,8 @@ behavior**, measured tightly enough that the answer can be *no*.
   ([Cinqic-Research/Juniper-1-Base](https://github.com/Cinqic-Research/Juniper-1-Base))
   is a separate project; it is not an AAA component and no AAA result applies to it.
 - **Juniper** is the persistent artificial agent that successful AAA research is
-  ultimately meant to produce. Nothing in this repository is Juniper yet.
+  ultimately meant to produce. Nothing in this repository is Juniper yet. The
+  name is a research term here; it is not the Juniper app and not Juniper 1 Base.
 - **Autonomy** is the long-term objective. Today, "autonomous" means only that
   the observe / predict / score / update loop runs unattended after launch.
 - **Coding, beginning with Python**, is AAA's first deliberate specialization
@@ -25,6 +26,12 @@ AAA makes no claim to general intelligence, understanding, consciousness or
 independent goal formation. It is not a code-completion model, a chatbot, a
 benchmark leaderboard entry or a Transformer project by default, and model
 size is not treated as progress.
+
+**Status (2026-10-24): paused, not retired.** Cinqic has temporarily paused
+its foundational-model research to prioritize Juniper App and other software.
+No new AAA experiment is authorized during the pause; recorded results and
+open proposals stand as recorded
+([research direction](docs/research_direction.md)).
 
 ## Current phase: `aaa.python.v1`, the evidence-gated pre-scale phase
 
@@ -131,7 +138,7 @@ python tools/check_promotion_successor.py
 
 The [research direction](docs/research_direction.md) lays out a 24-rung Python
 capability ladder whose rungs must be earned in order. The world-model and
-American-English experiments have begun, within the narrow generated tasks
+American-English experiments were run within the narrow generated tasks
 described in the [program handoff](docs/wm_program/handoff.md). A later
 independent review found that the retained language confirmation exposed true
 test-run feedback when the language channel proposed different tests. The
@@ -141,9 +148,9 @@ established. See the [review erratum](docs/wm_program/pr30_independent_review.md
 That small language model is retained as evidence; it is not AAA's intended
 long-term language component. A separate original Juniper 1 base Language Model
 completed its first pretraining epoch; its final checkpoint was independently
-selected and frozen as `juniper1-base-v1` and published on 2026-10-16 as
-[Juniper 1 Base](https://github.com/Cinqic-Research/Juniper-1-Base) (Apache-2.0;
-Juniper 1 research is closed). It is a base model only, not instruction-tuned, and
+selected and frozen as `juniper1-base-v1` and published on 2026-10-17 (US
+Eastern) as [Juniper 1 Base](https://github.com/Cinqic-Research/Juniper-1-Base)
+(Apache-2.0; Juniper 1 research closed on 2026-10-16). It is a base model only, not instruction-tuned, and
 it is not integrated into AAA or Juniper App. The earlier selection of OpenAI's unmodified gpt-oss-20b in
 Juniper LM 1.1 is historical qualification work; Juniper App's GPT-OSS
 compatibility is a separate product capability. Any AAA language integration

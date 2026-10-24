@@ -8,14 +8,25 @@ qualification from current original-model plans, and 2026-10-16 to record that
 Cinqic's original Juniper 1 Base model was published and its research closed:
 it is a separate released artifact
 ([Cinqic-Research/Juniper-1-Base](https://github.com/Cinqic-Research/Juniper-1-Base)),
-not an AAA component, and AAA's language-component question stays open.
-This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
+not an AAA component, and AAA's language-component question stays open;
+revised 2026-10-24 for the research pause and to give that model's
+publication date as 2026-10-17 (US Eastern), after its R&D closed on
+2026-10-16. This is current planning guidance. It sits outside the frozen `aaa.1k.v1`
 charter, whose principles still apply, and outside the `aaa.1k.v2`
 protocol. It claims no capability.
 
+**Execution status (2026-10-24): paused, not retired.** The owner has
+temporarily paused Cinqic's foundational-model research to prioritize Juniper
+App and other software. The scope of that pause for each AAA track has not
+been recorded separately; until it is, no new AAA experiment, confirmation
+generation, benchmark replay or retraining is authorized. Recorded results,
+negative findings, frozen identities and the open proposals (PR #34 and its
+draft successor PR #36, both unmerged) stand as recorded.
+
 - **AAA** (Accurate Autonomous Adaptation) is the research program.
 - **Juniper** is the persistent artificial agent that successful AAA research
-  is intended to produce.
+  is intended to produce. It is a research name: it is not the shipping
+  Juniper app, and it is not the released Juniper 1 Base model.
 - **Autonomy** is the long-term objective.
 - **Python coding** is AAA's first deliberate specialization and its current
   primary experimental domain.
@@ -26,13 +37,14 @@ protocol. It claims no capability.
 
 Current terminology, adopted 2026-09-30 and simplified for Juniper 1 on
 2026-10-02. AAA is the program and the system; it is not one model. The components are planning names, not claims that any of
-them exist as finished systems.
+them exist as finished systems. Here "Juniper 1" names the first planned AAA
+system; it is distinct from the released Juniper 1 Base model.
 
 | Component | Role | Status |
 |---|---|---|
 | **Erudition Model** | autonomous learning and adaptation | research: Champion 1 and the `aaa.python.v0`/`v1` learners are experiments toward it; a ~4K learner is the evidence-supported next experimental reference in the tested Python family |
 | **World Model** | environment state and prediction | scoped result: WM-S in `aaa.python.opaque.v0` only ([handoff](wm_program/handoff.md)) |
-| **Language Model** | language and reasoning interaction | an original Juniper 1 foundation model is in development separately; no native Juniper 1 language model is established as integrated into AAA. The earlier GPT-OSS-20B selection is historical |
+| **Language Model** | language and reasoning interaction | open: no language component is established. Cinqic's original Juniper 1 Base model was developed separately; its R&D closed on 2026-10-16 and it was published on 2026-10-17 (US Eastern). It is not an AAA component, and no AAA result transfers to it. The earlier GPT-OSS-20B selection is historical |
 
 Juniper 1 has no Decision Model. An earlier plan for a cross-component
 Decision Model was dropped on 2026-10-02.
@@ -145,7 +157,7 @@ independent recomputation, and the shared promotion contract
 where a real shared abstraction exists. A generic loop framework will be
 extracted only when a second domain actually needs the same code.
 
-## World-model and language work now underway
+## World-model and language experiments
 
 The [world-model program](wm_program/README.md) studies generated Python
 debugging with an opaque six-function library. Its structured candidate uses a
@@ -168,20 +180,23 @@ The 5.2M-parameter American-English model and its adapter (`aaa.wm.lang.v0`)
 are retained research evidence. They are not the intended long-term language
 component, and the retained language result stays **not verified**.
 
-Juniper 1's planned native Language Model is an original Cinqic foundation
-model, developed in a separate project. It is not yet established as integrated
-into AAA. The separate Juniper LM 1.1 qualification selected OpenAI's unmodified
+Juniper 1's native Language Model was planned as an original Cinqic
+foundation model, developed in a separate project. That project produced
+Juniper 1 Base ([Cinqic-Research/Juniper-1-Base](https://github.com/Cinqic-Research/Juniper-1-Base)): a base text-continuation model with no instruction
+tuning, whose R&D closed on 2026-10-16 and which was published on 2026-10-17
+(US Eastern). It is not integrated into AAA and is not an AAA component;
+whether AAA adopts any language component remains open. The separate Juniper LM 1.1 qualification selected OpenAI's unmodified
 gpt-oss-20b on 2026-10-02 for a then-current Juniper language-model direction.
 That qualification was retired on 2026-10-09 without changing its original
 results or removing Juniper App's independent GPT-OSS compatibility. It is
 historical evidence, not the current identity of Juniper 1's native Language
 Model. AAA's autonomy research does not imply that language or general coding
-capability has already been established in the proposed original model.
+capability has been established in Juniper 1 Base.
 
 Juniper LM 1, the GPT-2 124M modernization study, was retired on 2026-10-04
 and remains historical research. Its frozen JuniperBench-Code v1.2 provenance
-remains valid. No integration of these prior language models or of the proposed
-original Juniper 1 language model into AAA is established by this document.
+remains valid. No integration of these prior language models or of Juniper 1 Base into AAA
+is established by this document.
 An integration experiment would need to follow AAA's causal evaluation rules,
 including a repaired language-channel boundary. Nothing here claims an
 integration exists or will succeed.
