@@ -1,5 +1,23 @@
 # Research history
 
+## Status and errata (2026-10-24)
+
+Dated corrections to the entries below; no evidence, frozen document or scientific
+identity changed.
+
+- AAA research is paused, not retired: the owner has temporarily paused
+  foundational-model research to prioritize Juniper App and other software. No new
+  AAA experiment is authorized during the pause, and recorded results stand.
+- Juniper 1 Base was published on 2026-10-17 (US Eastern), per its
+  [release record](https://github.com/Cinqic-Research/Juniper-1-Base/blob/main/docs/RELEASE_RECORD.md);
+  2026-10-16 is the date of the owner's release authorization and the Juniper 1 R&D
+  closure. The 2026-10-16 entry below gives the publication date as 2026-10-16.
+- PR #34 (`aaa.erudition.v0`) and its draft successor transport PR #36, which targets
+  the #34 branch, remain open and unmerged; neither is an approved `main` integration.
+- Review roles from 2026-10-24: Claude Opus 5.5 implements, GPT-6.1 Sol reviews in a
+  separate session, Markus Gillyard owns decisions (`docs/agent_work_policy.md`). The
+  reviews recorded below keep their original reviewers.
+
 ## Errata and status (2026-10-16)
 
 Dated corrections to the entries below; no evidence, frozen document or scientific
